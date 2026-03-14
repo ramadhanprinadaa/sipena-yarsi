@@ -3,8 +3,7 @@
 @section('title', 'Presensi')
 
 @section('content')
-    <div class="">
-        <h1>Halo Admin</h1>
-    </div>
+    <h1 class="text-2xl font-bold mb-4">Presensi</h1>
+    <p>Selamat datang di halaman presensi. Di sini Anda dapat melihat dan mengelola kehadiran Anda.</p>
 @endsection
 
