@@ -14,18 +14,18 @@
 
 <body class="h-screen overflow-hidden">
 
-<div class="grid grid-cols-12 h-full">
+<div class="flex flex-row h-full">
 
     <!-- Sidebar -->
-    <aside class="col-span-2 bg-cyan-500 h-full">
+    <aside id="sidebar" class="w-64 border-r border-gray-300 h-full transition-all duration-300">
         @include('layouts.sidebar')
     </aside>
 
     <!-- Right Content -->
-    <div class="col-span-10 h-full overflow-y-auto flex flex-col">
+    <div class="flex-1 min-h-screen h-full overflow-y-auto flex flex-col">
 
         <!-- Header -->
-        <header class="h-20 px-4 bg-gray-500 sticky top-0 z-10 shrink-0">
+        <header class="border-b border-gray-300 sticky top-0 z-10 shrink-0 h-16 p-2">
             @include('layouts.navbar')
         </header>
 
@@ -35,7 +35,7 @@
         </main>
 
         <!-- Footer -->
-        <footer class="bg-cyan-600 p-6 shrink-0">
+        <footer class="bg-cyan-200 p-6 shrink-0">
             @include('layouts.footer')
         </footer>
 
