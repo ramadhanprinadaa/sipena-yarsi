@@ -8,11 +8,16 @@
         @yield('title')
     </title>
 
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
 
 <body class="h-screen overflow-hidden">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <div class="flex flex-row h-full">
 
@@ -25,12 +30,12 @@
     <div class="flex-1 min-h-screen h-full overflow-y-auto flex flex-col">
 
         <!-- Header -->
-        <header class="border-b border-gray-300 sticky top-0 z-10 shrink-0 h-16 p-2">
-            @include('layouts.navbar')
+        <header class="border-b border-gray-300 bg-white sticky top-0 z-10 shrink-0 h-16 p-2">
+            @include('layouts.header')
         </header>
 
         <!-- Main Content -->
-        <main class="p-6 bg-gray-100 flex-1">
+        <main class="p-6 bg-gray-100 flex-1 min-h-screen">
             @yield('content')
         </main>
 
