@@ -3,11 +3,13 @@
     {{-- Left Content --}}
     <div class="flex flex-row items-center gap-4">
         {{-- Button Sidebar --}}
-        <div class="flex items-center justify-center bg-cyan-100 rounded-sm w-12 h-12">
-            <a href="" id="sidebarToggle">
-                <img src=" {{ asset('icons/sidebar.png') }} " alt="button sidebar" class="w-6 h-6 object-contain">
-            </a>
-        </div>
+        <button @click="sidebarToggle = !sidebarToggle" 
+                class="flex items-center justify-center bg-cyan-100 rounded-sm w-12 h-12 cursor-pointer">
+
+            <img src=" {{ asset('icons/sidebar.png') }} " 
+                alt="button sidebar" 
+                class="w-6 h-6 object-contain">
+        </button>
 
         {{-- Breadcrumb --}}
         <div class="">

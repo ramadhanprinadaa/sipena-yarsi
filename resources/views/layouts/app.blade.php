@@ -11,6 +11,11 @@
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
 
+    <script defer src="https://unpkg.com/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+
+    <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
@@ -19,10 +24,12 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<div class="flex flex-row h-full">
+<div class="flex flex-row h-full" 
+     x-data="{ sidebarToggle: $persist(true) }"
+    >
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-64 border-r border-gray-300 h-full transition-all duration-300">
+    <aside id="sidebar" :class="sidebarToggle ? 'w-64' : 'w-16'" class="border-r border-gray-300 h-full transition-all duration-300">
         @include('layouts.sidebar')
     </aside>
 
