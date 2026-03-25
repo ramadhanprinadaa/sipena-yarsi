@@ -20,7 +20,7 @@
 
 
     {{-- Right Content --}}
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-4"">
 
         {{-- Notification --}}
         <button class="relative flex items-center justify-center cursor-pointer w-10 h-10 bg-cyan-100 rounded-full hover:bg-cyan-200 transition">
@@ -32,11 +32,26 @@
         </button>
 
         {{-- User Profile --}}
-        <img 
-            src="{{ asset('icons/icon-user-profile.png') }}" 
-            alt="Foto Profile" 
-            class="w-12 h-12 rounded-full object-cover cursor-pointer"
-        >
+        <div class="relative" x-data="{ dropdownOpen: false }">
+
+            <img 
+                src="{{ asset('icons/icon-user-profile.png') }}" 
+                class="w-12 h-12 rounded-full object-cover cursor-pointer"
+                @click="dropdownOpen = !dropdownOpen"
+            >
+
+            <div 
+                x-show="dropdownOpen"
+                x-transition
+                @click.outside="dropdownOpen = false"
+                class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50"
+            >
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil</a>
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Pengaturan</a>
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Keluar</a>
+            </div>
+
+        </div>
 
     </div>
 
