@@ -11,6 +11,8 @@ Route::view('/kepegawaian', 'dashboard.pegawai')->name('kepegawaian');
 Route::view('/lembur', 'dashboard.lembur')->name('lembur');
 Route::view('/cuti', 'dashboard.cuti')->name('cuti');
 
+Route::view('modul/surat-perintah-lembur', 'dashboard.modul.surat-perintah-lembur')->name('modul.surat-perintah-lembur');
+
 // Route::middleware('auth')->group(function () {
 //     Route::view('/dashboard', 'dashboard')->name('dashboard');
 // });

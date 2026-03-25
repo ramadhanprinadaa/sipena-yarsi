@@ -29,7 +29,7 @@
     >
 
     <!-- Sidebar -->
-    <aside id="sidebar" :class="sidebarToggle ? 'w-64' : 'w-16'" class="border-r border-gray-300 h-full transition-all duration-300">
+    <aside id="sidebar" :class="sidebarToggle ? 'w-64' : 'w-24'" class="border-r border-gray-300 h-full transition-all duration-300">
         @include('layouts.sidebar')
     </aside>
 
@@ -42,12 +42,12 @@
         </header>
 
         <!-- Main Content -->
-        <main class="p-6 bg-gray-100 flex-1 min-h-screen">
+        <main class="p-6 bg-gray-100 flex-1 min-h-120">
             @yield('content')
         </main>
 
         <!-- Footer -->
-        <footer class="bg-cyan-200 p-6 shrink-0">
+        <footer class="">
             @include('layouts.footer')
         </footer>
 
