@@ -29,23 +29,27 @@
             </span>
 
             <!-- MENU ITEM -->
-            @foreach([
-                ['route' => 'kepegawaian', 'icon' => 'fa-address-card', 'label' => 'Kepegawaian'],
-                ['route' => 'presensi', 'icon' => 'fa-user-check', 'label' => 'Presensi'],
-                ['route' => 'lembur', 'icon' => 'fa-business-time', 'label' => 'Lembur'],
-                ['route' => 'cuti', 'icon' => 'fa-plane-departure', 'label' => 'Cuti'],
-            ] as $item)
+            @php
+                $menuItems = [
+                    ['route' => 'kepegawaian', 'icon' => 'fa-address-card', 'label' => 'Kepegawaian'],
+                    ['route' => 'presensi', 'icon' => 'fa-user-check', 'label' => 'Presensi'],
+                ];
+                if (Auth::user()->role->name === 'Super Admin'|| Auth::user()->role->name === 'Pegawai Tendik' || Auth::user()->role->name === 'Admin' || Auth::user()->role->name === 'SDM Universitas') {
+                    $menuItems[] = ['route' => 'lembur', 'icon' => 'fa-business-time', 'label' => 'Lembur'];
+                }
+                $menuItems[] = ['route' => 'cuti', 'icon' => 'fa-plane-departure', 'label' => 'Cuti'];
+            @endphp
 
-            <a href="{{ route($item['route']) }}"
-               :class="sidebarToggle ? 'justify-start gap-2' : 'justify-center'"
-               class="flex items-center w-full p-2 rounded-md transition
-               {{ request()->routeIs($item['route']) ? 'bg-cyan-100' : 'hover:bg-cyan-100' }}"
-               data-tippy-content="{{ $item['label'] }}"
-            >
-                <i class="fa-solid {{ $item['icon'] }} w-7 text-xl text-gray-700"></i>
-                <span x-show="sidebarToggle" x-transition>{{ $item['label'] }}</span>
-            </a>
-
+            @foreach($menuItems as $item)
+                <a href="{{ route($item['route']) }}"
+                :class="sidebarToggle ? 'justify-start gap-2' : 'justify-center'"
+                class="flex items-center w-full p-2 rounded-md transition
+                {{ request()->routeIs($item['route']) ? 'bg-cyan-100' : 'hover:bg-cyan-100' }}"
+                data-tippy-content="{{ $item['label'] }}"
+                >
+                    <i class="fa-solid {{ $item['icon'] }} w-7 text-xl text-gray-700"></i>
+                    <span x-show="sidebarToggle" x-transition>{{ $item['label'] }}</span>
+                </a>
             @endforeach
 
             <!-- MODUL -->
@@ -124,20 +128,26 @@
                 <i class="fa-solid fa-user text-gray-600 w-7 text-center text-2xl"></i>
 
                 <div x-show="sidebarToggle" x-transition class="flex flex-col">
-                    <span class="text-sm font-semibold text-gray-700">Hilal Rizqi Akbar</span>
-                    <span class="text-xs text-gray-500">Pegawai Tendik</span>
+                    <span class="text-sm font-semibold text-gray-700">
+                        {{ auth()->user()->username }}
+                    </span>
+                    <span class="text-xs text-gray-500">
+                        {{ auth()->user()->role->name }}
+                    </span>
                 </div>
             </div>
 
-            <a href="/login"
-               :class="sidebarToggle ? 'gap-2 justify-start' : 'justify-center'"
-               class="flex items-center p-2 bg-red-100 hover:bg-red-200 rounded-md transition"
-            >
-                <i class="fa-solid fa-right-from-bracket w-7 text-red-500 text-xl"></i>
-                <span x-show="sidebarToggle" x-transition class="text-red-500">Keluar</span>
-            </a>
-
+            {{-- Logout --}}
+            <form action="{{ route('auth.handle.logout') }}" method="POST">
+                @csrf
+                <button type="submit"
+                    :class="sidebarToggle ? 'gap-2 justify-start' : 'justify-center'"
+                    class="flex items-center p-2 bg-red-100 hover:bg-red-200 rounded-md transition cursor-pointer w-full"
+                >
+                    <i class="fa-solid fa-right-from-bracket w-7 text-red-500 text-xl"></i>
+                    <span x-show="sidebarToggle" x-transition class="text-red-500">Keluar</span>
+                </button>
+            </form>
         </div>
-
     </div>
 </div>

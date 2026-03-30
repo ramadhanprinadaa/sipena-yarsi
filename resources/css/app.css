@@ -6,8 +6,7 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-@layer base {
-    body {
-        font-family: 'Lexend', sans-serif;
-    }
+
+body {
+    font-family: 'Lexend', sans-serif;
 }
