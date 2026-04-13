@@ -1,155 +1,81 @@
-<div class="flex flex-col h-screen">
+<div class="flex flex-col h-full">
 
-    <!-- Logo -->
-    <div 
-        :class="sidebarToggle ? 'justify-start gap-2 px-2' : 'justify-center'"
-        class="flex items-center bg-white p-2 h-16 w-full border-b border-gray-300 cursor-pointer"
-    >
-        <img src="{{ asset('favicon.ico') }}" class="w-10 h-10 object-contain">
+    {{-- Menu --}}
+    <div class="flex flex-col flex-1 overflow-y-auto gap-5">
 
-        <div x-show="sidebarToggle" x-transition class="flex flex-col leading-tight">
-            <span class="text-gray-600 font-bold">SIPENA</span>
-            <span class="text-gray-500 text-xs">
-                Sistem Informasi Pegawai dan Administrasi YARSI
-            </span>
-        </div>
-    </div>
-
-    <!-- Container -->
-    <div class="flex flex-col flex-1 bg-white p-2">
-
-        <!-- MENU -->
-        <div class="space-y-2">
-
-            <!-- LABEL -->
-            <span 
-                :class="sidebarToggle ? 'text-left text-sm px-2' : 'text-center text-xs'"
-                class="block text-gray-600 font-bold uppercase w-full">
+        {{-- Beranda --}}
+        <div class="flex flex-col gap-2 w-full">
+            <span :class="sidebarToggle ? 'text-left text-xs px-2' : 'text-center text-[1.4vh]'" class="block text-gray-600 font-semibold uppercase w-full">
                 Beranda
             </span>
 
-            <!-- MENU ITEM -->
-            @php
-                $menuItems = [
-                    ['route' => 'kepegawaian', 'icon' => 'fa-address-card', 'label' => 'Kepegawaian'],
-                    ['route' => 'presensi', 'icon' => 'fa-user-check', 'label' => 'Presensi'],
-                ];
-                if (Auth::user()->role->name === 'Super Admin'|| Auth::user()->role->name === 'Pegawai Tendik' || Auth::user()->role->name === 'Admin' || Auth::user()->role->name === 'SDM Universitas') {
-                    $menuItems[] = ['route' => 'lembur', 'icon' => 'fa-business-time', 'label' => 'Lembur'];
-                }
-                $menuItems[] = ['route' => 'cuti', 'icon' => 'fa-plane-departure', 'label' => 'Cuti'];
-            @endphp
-
-            @foreach($menuItems as $item)
-                <a href="{{ route($item['route']) }}"
-                :class="sidebarToggle ? 'justify-start gap-2' : 'justify-center'"
-                class="flex items-center w-full p-2 rounded-md transition
-                {{ request()->routeIs($item['route']) ? 'bg-cyan-100' : 'hover:bg-cyan-100' }}"
-                data-tippy-content="{{ $item['label'] }}"
-                >
-                    <i class="fa-solid {{ $item['icon'] }} w-7 text-xl text-gray-700"></i>
-                    <span x-show="sidebarToggle" x-transition>{{ $item['label'] }}</span>
+            {{-- Menu Beranda --}}
+            <div class="flex flex-col space-y-2 w-full">
+                <a href="{{ route('kepegawaian') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('kepegawaian') ? 'bg-pink-200' : ''}}">
+                    <i :class="sidebarToggle ? '' : 'text-lg'" class="fa-solid fa-address-card"></i>
+                    <span :class="sidebarToggle ? 'block' : 'hidden'">Kepegawaian</span>
                 </a>
-            @endforeach
+                <a href="{{ route('presensi') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('presensi') ? 'bg-pink-200' : ''}}">
+                    <i :class="sidebarToggle ? '' : 'text-lg'" class="fa-solid fa-user-check"></i>
+                    <span :class="sidebarToggle ? 'block' : 'hidden'">Presensi</span>
+                </a>
 
-            <!-- MODUL -->
-            @php
-                $isModul = request()->routeIs('modul.*');
-            @endphp
-
-            <div 
-                x-data="{ open: {{ $isModul ? 'true' : 'false' }}, flyout: false }"
-                class="relative flex flex-col w-full"
-            >
-
-                <!-- Parent -->
-                <button 
-                    @click="sidebarToggle ? open = !open : flyout = !flyout"
-                    :class=" [sidebarToggle ? 'justify-start gap-2' : 'justify-center {{ $isModul ? 'bg-cyan-100' : '' }}', open ? '' : '{{ $isModul ? 'bg-cyan-100' : '' }}']"
-                    class="flex items-center w-full p-2 rounded-md hover:bg-cyan-100 transition cursor-pointer"
-                    data-tippy-content="Modul"
-                >
-                    <i class="fa-solid fa-folder w-7 text-xl text-gray-700"></i>
-                    <span x-show="sidebarToggle" x-transition>Modul</span>
-                    <svg 
-                        x-show="sidebarToggle"
-                        :class="open ? 'rotate-0' : '-rotate-90'"
-                        class="w-5 h-5 ml-auto transition-transform duration-200"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none" viewBox="0 0 24 24" stroke="#6B7280"> 
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/>
-                    </svg>
-                </button>
-
-                <!-- Dropdown -->
-                <div 
-                    x-show="open && sidebarToggle"
-                    x-transition
-                    class="ml-9 mt-1 space-y-1"
-                >
-                    <a href="{{ route('modul.surat-perintah-lembur') }}"
-                       class="block px-2 py-1 rounded transition
-                       {{ request()->routeIs('modul.surat-perintah-lembur') ? 'bg-cyan-100' : 'hover:bg-cyan-100' }}">
-                        Surat Perintah Lembur
+                @if (auth()->user()->role->name === 'Super Admin' || auth()->user()->role->name === 'Pegawai Tendik' || auth()->user()->role->name === 'Admin' || auth()->user()->role->name === 'SDM Universitas')
+                    <a href="{{ route('lembur') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('lembur') ? 'bg-pink-200' : ''}}">
+                        <i :class="sidebarToggle ? '' : 'text-lg'" class="fa-solid fa-business-time"></i>
+                        <span :class="sidebarToggle ? 'block' : 'hidden'">Pengajuan Lembur</span>
                     </a>
-                </div>
-
-                <!-- Flyout -->
-                <div 
-                    x-show="flyout && !sidebarToggle"
-                    @click.outside="flyout = false"
-                    x-transition
-                    class="relative left-full top-0 ml-2 w-56 bg-white border border-gray-300 rounded-md shadow-lg p-2 z-50"
-                >
-                    <a href="{{ route('modul.surat-perintah-lembur') }}"
-                       class="block px-2 py-2 rounded transition
-                       {{ request()->routeIs('modul.surat-perintah-lembur') ? 'bg-cyan-100' : 'hover:bg-cyan-100' }}">
-                        Surat Perintah Lembur
-                    </a>
-                </div>
-
+                @endif
+                <a href="{{ route('cuti') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('cuti') ? 'bg-pink-200' : ''}}">
+                    <i :class="sidebarToggle ? '' : 'text-lg'" class="fa-solid fa-plane-departure"></i>
+                    <span :class="sidebarToggle ? 'block' : 'hidden'">Pengajuan Cuti</span>
+                </a>
             </div>
-
         </div>
 
-        <!-- AKUN -->
-        <div class="space-y-2 mt-auto mb-1">
+        {{-- Manajemen (Khusus Admin) --}}
+        @if (auth()->user()->role->name === 'Super Admin' || auth()->user()->role->name === 'Admin' || auth()->user()->role->name === 'SDM Universitas')
+            <div class="flex flex-col gap-2 w-full">
+                <span :class="sidebarToggle ? 'text-left text-xs px-2' : 'text-center text-[1.4vh]'" class="block text-gray-600 font-semibold uppercase w-full">
+                    Manajemen
+                </span>
 
-            <span 
-                :class="sidebarToggle ? 'text-left text-sm px-2' : 'text-center text-xs'"
-                class="block text-gray-600 font-bold uppercase w-full">
-                Akun Saya
-            </span>
-
-            <div 
-                :class="sidebarToggle ? 'gap-2 justify-start' : 'justify-center'"
-                class="flex items-center p-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition cursor-pointer"
-                data-tippy-content="{{ auth()->user()->username }}"
-            >
-                <i class="fa-solid fa-user text-gray-600 w-7 text-center text-2xl"></i>
-
-                <div x-show="sidebarToggle" x-transition class="flex flex-col">
-                    <span class="text-sm font-semibold text-gray-700">
-                        {{ auth()->user()->username }}
-                    </span>
-                    <span class="text-xs text-gray-500">
-                        {{ auth()->user()->role->name }}
-                    </span>
+                {{-- Menu Manajemen --}}
+                <div class="flex flex-col space-y-2 w-full">
+                    <a href="#" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('') ? 'bg-pink-200' : ''}}">
+                        <i :class="sidebarToggle ? '' : 'text-lg'" class="fa-solid fa-users"></i>
+                        <span :class="sidebarToggle ? 'block' : 'hidden'">Pegawai</span>
+                    </a>
                 </div>
             </div>
 
-            {{-- Logout --}}
-            <form action="{{ route('auth.handle.logout') }}" method="POST">
-                @csrf
-                <button type="submit"
-                    :class="sidebarToggle ? 'gap-2 justify-start' : 'justify-center'"
-                    class="flex items-center p-2 bg-red-100 hover:bg-red-200 rounded-md transition cursor-pointer w-full"
-                    data-tippy-content="Keluar"
-                >
-                    <i class="fa-solid fa-right-from-bracket w-7 text-red-500 text-xl"></i>
-                    <span x-show="sidebarToggle" x-transition class="text-red-500">Keluar</span>
-                </button>
-            </form>
-        </div>
+        @endif
     </div>
+
+
+    {{-- Akun / Logout (Tetap di bawah) --}}
+    <div class=" flex flex-col border-t border-gray-500 pt-3 mt-2 w-full gap-2">
+
+        <div :class="sidebarToggle ? 'gap-2 justify-start' : 'justify-center'" class="flex items-center gap-2">
+            <div :class="sidebarToggle ? 'rounded-xl' : 'rounded-md w-full'" class="w-9 h-9 bg-purple-200 text-gray-800 flex items-center justify-center">
+                <i :class="sidebarToggle ? '' : 'text-lg'" class="fa-solid fa-user"></i>
+            </div>
+
+            <div class="flex flex-col" x-show="sidebarToggle" x-transition>
+                <span class="text-sm font-semibold">{{ auth()->user()->username }}</span>
+                <span class="text-xs text-gray-500">{{ auth()->user()->role->name }}</span>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ route('auth.handle.logout') }}">
+            @csrf
+            <button type="submit"
+                    :class="sidebarToggle ? 'gap-2 justify-start' : 'justify-center'" 
+                    class="w-full flex items-center gap-2 p-2 rounded-md text-red-600 bg-red-200/40 hover:bg-red-200/60 transition">
+                <i :class="sidebarToggle ? '' : 'text-lg'" class="fa-solid fa-right-from-bracket"></i>
+                <span x-show="sidebarToggle" x-transition >Keluar</span>
+            </button>
+        </form>
+    </div>
+
 </div>

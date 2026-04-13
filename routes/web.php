@@ -24,6 +24,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.handle.logout');
 });
 
+Route::get('/test', function() {
+    return view('layouts_2.app');
+});
+
 // Test DB
 // Route::get('/test-db', function() {
 //     $users = App\Models\User::all();
