@@ -1,56 +1,130 @@
-    <div class="flex flex-col md:flex-row items-start justify-center gap-10 py-10 border-b border-gray-500/30">
-        
-        <div class="max-w-96">
+<footer class="bg-black text-gray-300">
 
-            <h3 class="text-lg font-semibold text-gray-700">SIPENA</h3>
-            <p class="mt-6 text-sm text-gray-500">
-                Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been.
+    {{-- Main Footer --}}
+    <div class="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
+
+        {{-- Kolom 1: Brand --}}
+        <div class="space-y-4 lg:col-span-4">
+            <div class="flex items-center gap-3">
+                <img src="{{ asset('favicon.ico') }}" class="w-8 h-8">
+                <h3 class="text-lg font-semibold text-white">SIPENA</h3>
+            </div>
+
+            <p class="text-xs text-gray-400 leading-relaxed">
+                Sistem Informasi Pegawai dan Administrasi YARSI
             </p>
-            <div class="flex items-center gap-2 mt-3">
-                <a href="#">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19.167 2.5a9.1 9.1 0 0 1-2.617 1.275 3.733 3.733 0 0 0-6.55 2.5v.833a8.88 8.88 0 0 1-7.5-3.775s-3.333 7.5 4.167 10.833a9.7 9.7 0 0 1-5.834 1.667C8.333 20 17.5 15.833 17.5 6.25q0-.35-.067-.692A6.43 6.43 0 0 0 19.167 2.5" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </a>
-                <a href="#">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7.5 15.833c-4.167 1.25-4.167-2.084-5.833-2.5m11.666 5v-3.225a2.8 2.8 0 0 0-.783-2.175c2.616-.292 5.366-1.283 5.366-5.833a4.53 4.53 0 0 0-1.25-3.125 4.22 4.22 0 0 0-.075-3.142s-.983-.292-3.258 1.233a11.15 11.15 0 0 0-5.833 0C5.225.541 4.242.833 4.242.833a4.22 4.22 0 0 0-.075 3.142 4.53 4.53 0 0 0-1.25 3.15c0 4.516 2.75 5.508 5.366 5.833a2.8 2.8 0 0 0-.783 2.15v3.225" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </a>
-                <a href="#">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M13.333 6.667a5 5 0 0 1 5 5V17.5H15v-5.833a1.667 1.667 0 0 0-3.334 0V17.5H8.333v-5.833a5 5 0 0 1 5-5M5 7.5H1.667v10H5zM3.333 5a1.667 1.667 0 1 0 0-3.333 1.667 1.667 0 0 0 0 3.333" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </a>
+
+            <div class="rounded-lg overflow-hidden border border-gray-700">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.7093913884783!2d106.86753037355352!3d-6.169654160458206!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f506b12dbf71%3A0xc934b14cf25a4d61!2sUniversitas%20YARSI!5e0!3m2!1sid!2sid!4v1774876824722!5m2!1sid!2sid"
+                    class="w-full"
+                    loading="lazy">
+                </iframe>
+            </div>
+
+            <p class="text-xs text-gray-500">
+                Menara Yarsi, Jakarta Pusat 10510
+            </p>
+        </div>
+
+        {{-- Kolom 2: Menu --}}
+        <div class="lg:col-span-2">
+            <h2 class="text-sm font-semibold text-white mb-4">Menu</h2>
+
+            <ul class="space-y-3 text-sm text-gray-400">
+                <li>
+                    <a href="#" class="flex items-center gap-3 hover:text-white transition">
+                        <i class="fa-solid fa-home text-gray-500"></i>
+                        <span>Beranda</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#" class="flex items-center gap-3 hover:text-white transition">
+                        <i class="fa-solid fa-user text-gray-500"></i>
+                        <span>Kepegawaian</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#" class="flex items-center gap-3 hover:text-white transition">
+                        <i class="fa-solid fa-clock text-gray-500"></i>
+                        <span>Presensi</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#" class="flex items-center gap-3 hover:text-white transition">
+                        <i class="fa-solid fa-mug-hot text-gray-500"></i>
+                        <span>Lembur</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#" class="flex items-center gap-3 hover:text-white transition">
+                        <i class="fa-solid fa-calendar-days text-gray-500"></i>
+                        <span>Cuti</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#" class="flex items-center gap-3 hover:text-white transition">
+                        <i class="fa-solid fa-book text-gray-500"></i>
+                        <span>Daftar Modul</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        {{-- Kolom 3: Kontak --}}
+        <div class="lg:col-span-3">
+            <h2 class="text-sm font-semibold text-white mb-4">Hubungi Kami</h2>
+            <ul class="space-y-2 text-sm text-gray-400">
+                <li>
+                    Email:
+                    <a href="mailto:sekretariat.sdm@yarsi.ac.id" class="hover:text-white">
+                        sekretariat.sdm@yarsi.ac.id
+                    </a>
+                </li>
+                <li>
+                    Telepon:
+                    <a href="tel:+621234567890" class="hover:text-white">
+                        +62 123-456-7890
+                    </a>
+                </li>
+            </ul>
+
+            {{-- Social --}}
+            <div class="flex gap-4 mt-4 text-lg text-gray-400">
+                <a href="#" class="hover:text-white"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" class="hover:text-white"><i class="fa-brands fa-twitter"></i></a>
+                <a href="#" class="hover:text-white"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="#" class="hover:text-white"><i class="fa-brands fa-facebook"></i></a>
             </div>
         </div>
 
-        <div class="w-1/2 flex flex-wrap md:flex-nowrap justify-between">
-            <div>
-                <h2 class="font-semibold text-gray-900 mb-5">RESOURCES</h2>
-                <ul class="text-sm text-gray-500 space-y-2 list-none">
-                    <li><a href="#">Documentation</a></li>
-                    <li><a href="#">Tutorials</a></li>
-                    <li><a href="#">Blog</a></li>
-                    <li><a href="#">Community</a></li>
-                </ul>
-            </div>
-            <div>
-                <h2 class="font-semibold text-gray-900 mb-5">COMPANY</h2>
-                <div class="text-sm text-gray-500 space-y-2 list-none">
-                    <li><a href="#">About</a></li>
-                    <li><a href="#">Careers</a></li>
-                    <li><a href="#">Privacy</a></li>
-                    <li><a href="#">Terms</a></li>
-                </div>
-            </div>
+        {{-- Kolom 4: Tim --}}
+        <div class="lg:col-span-3">
+            <h2 class="text-sm font-semibold text-white mb-4">Tim Pengembang</h2>
+            <ul class="space-y-2 text-sm text-gray-400">
+                <li>Hilal Rizqi Akbar</li>
+                <li>Muhammad Ramadhan Prinada</li>
+                <li>Rafly Eryan Azis</li>
+            </ul>
         </div>
 
     </div>
-    <p class="py-2 text-center text-xs md:text-sm text-gray-500">
-        Copyright {{ date('Y') }} © <a href="https://prebuiltui.com">SIPENA</a>. All Right Reserved.
-    </p>
 
-    <p class="py-2 text-center text-xs md:text-sm text-gray-500">
-        Dikembangkan Oleh Tim Ngawi Selatan
-    </p>
+    {{-- Bottom --}}
+    <div class="border-t border-gray-800 py-4">
+        <div class="max-w-7xl mx-auto px-6 text-center text-xs md:text-sm text-gray-500 space-y-1">
+            <p>
+                © {{ date('Y') }} SIPENA YARSI — All Rights Reserved | Version {{ config('app.version') }}
+            </p>
+            <p>
+                Dikembangkan oleh Tim Ngawi Empire
+            </p>
+        </div>
+    </div>
+
+</footer>

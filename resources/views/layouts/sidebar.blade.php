@@ -124,6 +124,7 @@
             <div 
                 :class="sidebarToggle ? 'gap-2 justify-start' : 'justify-center'"
                 class="flex items-center p-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition cursor-pointer"
+                data-tippy-content="{{ auth()->user()->username }}"
             >
                 <i class="fa-solid fa-user text-gray-600 w-7 text-center text-2xl"></i>
 
@@ -143,6 +144,7 @@
                 <button type="submit"
                     :class="sidebarToggle ? 'gap-2 justify-start' : 'justify-center'"
                     class="flex items-center p-2 bg-red-100 hover:bg-red-200 rounded-md transition cursor-pointer w-full"
+                    data-tippy-content="Keluar"
                 >
                     <i class="fa-solid fa-right-from-bracket w-7 text-red-500 text-xl"></i>
                     <span x-show="sidebarToggle" x-transition class="text-red-500">Keluar</span>

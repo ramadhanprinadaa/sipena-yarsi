@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
+use Symfony\Component\Routing\Route as RoutingRoute;
 
 Route::get('/', function () {
     return Auth::check() ? redirect()->route('kepegawaian') : redirect()->route('login');
@@ -22,3 +23,11 @@ Route::middleware('auth')->group(function () {
     Route::view('modul/surat-perintah-lembur', 'dashboard.modul.surat-perintah-lembur')->name('modul.surat-perintah-lembur');
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.handle.logout');
 });
+
+// Test DB
+// Route::get('/test-db', function() {
+//     $users = App\Models\User::all();
+//     $roles = App\Models\Role::find(4)->users()->get();
+    
+//     return $users;
+// });

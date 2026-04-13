@@ -53,7 +53,7 @@
     @enderror
     
     {{-- Form Login --}}
-    <div class="w-full max-w-5xl min-h-[550px] flex flex-col md:flex-row bg-white rounded-3xl shadow-2xl overflow-hidden">
+    <div class="w-full max-w-5xl flex flex-col md:flex-row bg-white rounded-3xl shadow-2xl overflow-hidden">
         {{-- Left Side Image Background --}}
         <div class="hidden md:flex w-1/2 relative bg-cover bg-center"
             style="background-image: url('{{ asset('images/univ-yarsi.png') }}');">
@@ -77,7 +77,8 @@
                     @csrf
                     {{-- Username --}}
                     <div>
-                        <label for="username" class="block text-sm text-gray-600">
+                        <label for="username" 
+                        class="block text-sm text-gray-600">
                             Username / Email
                         </label>
 
@@ -131,13 +132,14 @@
                         </div>
                     </div>
 
+
                     {{-- Remember --}}
-                    <div class="flex w-full items-center justify-between text-sm">
-                        <label class="flex items-center gap-2">
+                    {{-- <div class="flex w-full items-center justify-between text-sm">
+                        <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" class="accent-cyan-600 size-4 cursor-pointer" name="remember">
-                            Ingat Saya
+                            <span class="text-gray-600">Ingat Saya</span>
                         </label>
-                    </div>
+                    </div> --}}
 
                     {{-- Login Button --}}
                     <button type="submit"
