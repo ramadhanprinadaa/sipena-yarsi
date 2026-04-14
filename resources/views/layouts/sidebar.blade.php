@@ -1,7 +1,7 @@
 <div class="flex flex-col h-full">
 
     {{-- Menu --}}
-    <div class="flex flex-col flex-1 overflow-y-auto gap-5">
+    <div class="flex flex-col flex-1 overflow-y-auto gap-5 no-scrollbar">
 
         {{-- Beranda --}}
         <div class="flex flex-col gap-2 w-full">
@@ -10,45 +10,86 @@
             </span>
 
             {{-- Menu Beranda --}}
-            <div class="flex flex-col space-y-2 w-full">
+            <div class="flex flex-col space-y-2 w-full text-sm">
                 <a href="{{ route('kepegawaian') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('kepegawaian') ? 'bg-pink-200' : ''}}">
-                    <i :class="sidebarToggle ? '' : 'text-lg'" class="fa-solid fa-address-card"></i>
+                    <i class="text-lg fa-solid fa-address-card"></i>
                     <span :class="sidebarToggle ? 'block' : 'hidden'">Kepegawaian</span>
                 </a>
                 <a href="{{ route('presensi') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('presensi') ? 'bg-pink-200' : ''}}">
-                    <i :class="sidebarToggle ? '' : 'text-lg'" class="fa-solid fa-user-check"></i>
+                    <i class="text-xl fa-solid fa-clock"></i>
                     <span :class="sidebarToggle ? 'block' : 'hidden'">Presensi</span>
                 </a>
 
-                @if (auth()->user()->role->name === 'Super Admin' || auth()->user()->role->name === 'Pegawai Tendik' || auth()->user()->role->name === 'Admin' || auth()->user()->role->name === 'SDM Universitas')
+                @if (auth()->user()->hasRole([
+                        'Admin',
+                        'SDM Yayasan',
+                        'SDM Universitas',
+                        'Pimpinan',
+                        'Staff',
+                        'Tendik'
+                ]))
                     <a href="{{ route('lembur') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('lembur') ? 'bg-pink-200' : ''}}">
-                        <i :class="sidebarToggle ? '' : 'text-lg'" class="fa-solid fa-business-time"></i>
-                        <span :class="sidebarToggle ? 'block' : 'hidden'">Pengajuan Lembur</span>
+                        <i class="text-lg fa-solid fa-business-time"></i>
+                        <span :class="sidebarToggle ? 'block' : 'hidden'">Lembur</span>
                     </a>
                 @endif
                 <a href="{{ route('cuti') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('cuti') ? 'bg-pink-200' : ''}}">
-                    <i :class="sidebarToggle ? '' : 'text-lg'" class="fa-solid fa-plane-departure"></i>
-                    <span :class="sidebarToggle ? 'block' : 'hidden'">Pengajuan Cuti</span>
+                    <i class="text-lg fa-solid fa-plane-departure"></i>
+                    <span :class="sidebarToggle ? 'block' : 'hidden'">Cuti</span>
+                </a>
+                <a href="{{ route('surat-menyurat') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('surat-menyurat') ? 'bg-pink-200' : ''}}">
+                    <i class="text-xl fa-solid fa-envelope"></i>
+                    <span :class="sidebarToggle ? 'block' : 'hidden'">Surat Menyurat</span>
                 </a>
             </div>
         </div>
 
         {{-- Manajemen (Khusus Admin) --}}
-        @if (auth()->user()->role->name === 'Super Admin' || auth()->user()->role->name === 'Admin' || auth()->user()->role->name === 'SDM Universitas')
-            <div class="flex flex-col gap-2 w-full">
+        @if (auth()->user()->hasRole([
+                'Admin',
+                'SDM Yayasan',
+                'SDM Universitas',
+                'Pimpinan'
+        ]))
+            <div class="flex flex-col gap-2 w-full text-sm">
                 <span :class="sidebarToggle ? 'text-left text-xs px-2' : 'text-center text-[1.4vh]'" class="block text-gray-600 font-semibold uppercase w-full">
                     Manajemen
                 </span>
 
                 {{-- Menu Manajemen --}}
+                @if (auth()->user()->hasRole('Admin'))
+                    <div class="flex flex-col space-y-2 w-full">
+                        <a href="{{ route('manajemen-pengguna') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('manajemen-pengguna') ? 'bg-pink-200' : ''}}">
+                            <i class="text-lg fa-solid fa-address-book"></i>
+                            <span :class="sidebarToggle ? 'block' : 'hidden'">Pengguna</span>
+                        </a>
+                    </div>
+                @endif
                 <div class="flex flex-col space-y-2 w-full">
-                    <a href="#" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('') ? 'bg-pink-200' : ''}}">
-                        <i :class="sidebarToggle ? '' : 'text-lg'" class="fa-solid fa-users"></i>
+                    <a href="{{ route('manajemen-pegawai') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('manajemen-pegawai') ? 'bg-pink-200' : ''}}">
+                        <i class="text-md fa-solid fa-users"></i>
                         <span :class="sidebarToggle ? 'block' : 'hidden'">Pegawai</span>
                     </a>
                 </div>
+                <div class="flex flex-col space-y-2 w-full">
+                    <a href="{{ route('manajemen-presensi') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('manajemen-presensi') ? 'bg-pink-200' : ''}}">
+                        <i class="text-lg fa-solid fa-list-check"></i>
+                        <span :class="sidebarToggle ? 'block' : 'hidden'">Presensi</span>
+                    </a>
+                </div>
+                <div class="flex flex-col space-y-2 w-full">
+                    <a href="{{ route('manajemen-lembur') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('manajemen-lembur') ? 'bg-pink-200' : ''}}">
+                        <i class="text-md fa-solid fa-user-check"></i>
+                        <span :class="sidebarToggle ? 'block' : 'hidden'">Pengajuan Lembur</span>
+                    </a>
+                </div>
+                <div class="flex flex-col space-y-2 w-full">
+                    <a href="{{ route('manajemen-cuti') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('manajemen-cuti') ? 'bg-pink-200' : ''}}">
+                        <i class="text-lg fa-solid fa-calendar-check"></i>
+                        <span :class="sidebarToggle ? 'block' : 'hidden'">Pengajuan Cuti</span>
+                    </a>
+                </div>
             </div>
-
         @endif
     </div>
 
@@ -71,7 +112,7 @@
             @csrf
             <button type="submit"
                     :class="sidebarToggle ? 'gap-2 justify-start' : 'justify-center'" 
-                    class="w-full flex items-center gap-2 p-2 rounded-md text-red-600 bg-red-200/40 hover:bg-red-200/60 transition">
+                    class="w-full flex items-center gap-2 p-2 rounded-md text-red-600 bg-red-200/40 hover:bg-red-200/60 transition cursor-pointer">
                 <i :class="sidebarToggle ? '' : 'text-lg'" class="fa-solid fa-right-from-bracket"></i>
                 <span x-show="sidebarToggle" x-transition >Keluar</span>
             </button>

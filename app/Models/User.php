@@ -18,7 +18,10 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'id_role',
+        'username',
+        'pegawai_id',
+        'pimpinan_id',
+        'role_id',
         'name',
         'email',
         'password',
@@ -32,6 +35,11 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $attributes = [
+        'status' => 'active',
+        'role_id' => 7
     ];
 
     /**
@@ -49,11 +57,17 @@ class User extends Authenticatable
 
     public function role()
     {
-        return $this->belongsTo(Role::class, 'id_role');
+        return $this->belongsTo(Role::class, 'role_id');
     }
 
-    public function hasRole($roleName)
+    public function hasRole($roles)
     {
-        return $this->role && $this->role->nama === $roleName;
+        $this->loadMissing('role');
+        return in_array($this->role?->name, (array) $roles);
+    }
+
+    public function pegawai()
+    {
+        return $this->belongsTo(Pegawai::class, 'pegawai_id');
     }
 }

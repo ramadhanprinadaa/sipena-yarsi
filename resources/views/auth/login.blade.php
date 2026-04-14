@@ -22,7 +22,7 @@
     @stack('styles')
 </head>
 
-<body class="bg-gray-500 min-h-screen flex justify-center items-center">
+<body class="bg-gradient-to-br from-pink-300 to-blue-300 font-lexend min-h-screen flex justify-center items-center">
 
     {{-- Error Message --}}
     @error('login')
@@ -53,7 +53,7 @@
     @enderror
     
     {{-- Form Login --}}
-    <div class="w-full max-w-5xl flex flex-col md:flex-row bg-white rounded-3xl shadow-2xl overflow-hidden">
+    <div class="w-full max-w-5xl flex flex-col md:flex-row bg-white/20 backdrop-blur-xl rounded-xl shadow-2xl overflow-hidden">
         {{-- Left Side Image Background --}}
         <div class="hidden md:flex w-1/2 relative bg-cover bg-center"
             style="background-image: url('{{ asset('images/univ-yarsi.png') }}');">
@@ -65,10 +65,10 @@
         <div class="w-full md:w-1/2 flex items-center justify-center p-10">
             <div class="w-full max-w-sm">
                 {{-- Title --}}
-                <h2 class="text-3xl font-bold text-cyan-700 mb-2 text-center">
+                <h2 class="text-3xl font-bold text-indigo-500 mb-2 text-center font-lexend">
                     SIPENA
                 </h2>
-                <p class="text-gray-600 text-xl mb-8 text-center">
+                <p class="text-gray-700 text-xl mb-8 text-center">
                     Sistem Informasi Pegawai dan Administrasi Universitas YARSI
                 </p>
 
@@ -78,7 +78,7 @@
                     {{-- Username --}}
                     <div>
                         <label for="username" 
-                        class="block text-sm text-gray-600">
+                        class="block text-sm text-gray-700">
                             Username / Email
                         </label>
 
@@ -97,13 +97,13 @@
                             class="w-full mt-1 px-4 py-3 rounded-xl 
                             bg-white/60 backdrop-blur-md
                             border border-gray-300
-                            focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                            focus:outline-none focus:ring-2 focus:ring-indigo-400"
                         >
                     </div>
 
                     {{-- Password --}}
                     <div x-data="{ showPassword: false }">
-                        <label for="password" class="block text-sm text-gray-600">
+                        <label for="password" class="block text-sm text-gray-700">
                             Password
                         </label>
                         @error('password')
@@ -121,7 +121,7 @@
                                 class="w-full mt-1 px-4 py-3 rounded-xl
                                 bg-white/60 backdrop-blur-md
                                 border border-gray-300
-                                focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                                focus:outline-none focus:ring-2 focus:ring-indigo-400">
                             <button 
                                 type="button"
                                 @click="showPassword = !showPassword"
@@ -132,18 +132,9 @@
                         </div>
                     </div>
 
-
-                    {{-- Remember --}}
-                    {{-- <div class="flex w-full items-center justify-between text-sm">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" class="accent-cyan-600 size-4 cursor-pointer" name="remember">
-                            <span class="text-gray-600">Ingat Saya</span>
-                        </label>
-                    </div> --}}
-
                     {{-- Login Button --}}
                     <button type="submit"
-                        class="cursor-pointer w-full py-3 rounded-xl bg-cyan-600 text-white font-semibold hover:bg-cyan-700 transition">
+                        class="cursor-pointer w-full py-3 rounded-xl bg-indigo-400 text-white font-semibold hover:bg-indigo-500 transition">
                         Masuk
                     </button>
                 </form>
@@ -151,7 +142,7 @@
                 {{-- Back to Dashboard --}}
                 <div class="mt-6 text-center">
                     <a href="/dashboard"
-                        class="text-sm text-cyan-600 hover:underline">
+                        class="text-sm text-indigo-400 hover:underline">
                         ← Kembali ke Dashboard
                     </a>
                 </div>

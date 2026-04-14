@@ -14,18 +14,39 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('auth.handle.login');
 });
 
-
 Route::middleware('auth')->group(function () {
-    Route::view('/presensi', 'dashboard.presensi')->name('presensi');
-    Route::view('/kepegawaian', 'dashboard.pegawai')->name('kepegawaian');
-    Route::view('/lembur', 'dashboard.lembur')->name('lembur')->middleware('role:Super Admin,Admin,SDM Universitas,Pegawai Tendik');
-    Route::view('/cuti', 'dashboard.cuti')->name('cuti');
-    Route::view('modul/surat-perintah-lembur', 'dashboard.modul.surat-perintah-lembur')->name('modul.surat-perintah-lembur');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('auth.handle.logout');
+
+    Route::prefix('beranda')->group(function () {
+        Route::view('/presensi', 'dashboard.presensi')->name('presensi');
+        Route::view('/kepegawaian', 'dashboard.pegawai')->name('kepegawaian');
+        Route::view('/lembur', 'dashboard.lembur')->name('lembur')->middleware('role:Admin,SDM Yayasan,SDM Universitas,Staff,Tendik');
+        Route::view('/cuti', 'dashboard.cuti')->name('cuti');
+        Route::view('/surat-menyurat', 'dashboard.surat-menyurat')->name('surat-menyurat');
+        Route::post('/logout', [AuthController::class, 'logout'])->name('auth.handle.logout');
+    });
+
+    Route::prefix('manajemen')->group(function () {
+        Route::middleware('role:Admin')->group(function () {
+            Route::view('pengguna', 'manajemen.pengguna')->name('manajemen-pengguna');
+        });
+        Route::middleware('role:Admin,SDM Yayasan,SDM Universitas,Pimpinan')->group(function () {
+            Route::view('/pegawai', 'manajemen.pegawai')->name('manajemen-pegawai');
+            Route::view('/presensi', 'manajemen.presensi')->name('manajemen-presensi');
+            Route::view('/lembur', 'manajemen.lembur')->name('manajemen-lembur');
+            Route::view('/cuti', 'manajemen.cuti')->name('manajemen-cuti');
+        });
+    });
 });
 
-Route::get('/test', function() {
-    return view('layouts_2.app');
+// Test Error
+Route::get('/test-401', function () {
+    abort(401);
+});
+Route::get('/test-403', function () {
+    abort(403);
+});
+Route::get('/test-500', function () {
+    abort(500);
 });
 
 // Test DB
