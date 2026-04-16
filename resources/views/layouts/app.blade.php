@@ -10,7 +10,6 @@
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
     <script defer src="https://unpkg.com/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
 
     <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
 
@@ -21,6 +20,7 @@
 
     @vite (['resources/css/app.css', 'resources/js/app.js'])
     @stack ('styles')
+    @livewireStyles
 </head>
 
 <body class="bg-gradient-to-br from-blue-300 via-purple-300 to-gray-50" x-data="{ sidebarToggle: $persist(true) }">
@@ -29,7 +29,6 @@
     <header class=" flex items-center fixed top-0 left-0 right-0 z-50 h-18 m-3 p-4 bg-white/70 backdrop-blur-sm shadow-md rounded-xl">
         @include('layouts.header')
     </header>
-
 
     <div class="flex px-4 gap-4">
 
@@ -68,5 +67,7 @@
             </footer>
         </div>
     </div>
+
+    @livewireScripts
 </body>
 </html>

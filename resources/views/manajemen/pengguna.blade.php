@@ -11,6 +11,15 @@
 @endsection
 
 @section('content')
-    <h1 class="text-2xl font-bold mb-4">Manajemen Pengguna</h1>
-    <p>Selamat datang di halaman manajemen pengguna. Di sini Anda dapat melihat dan mengelola informasi pengguna Anda.</p>
+    <div class="flex flex-col h-full min-h-0">
+
+        <div class="flex flex-col mb-2">
+            <h1 class="text-2xl font-bold">Daftar Pengguna</h1>
+            <p class="text-sm text-gray-800">Kelola akun pengguna dan hak akses</p>
+        </div>
+        <div class="flex-1">
+            <livewire:users.index />
+            <livewire:users.add-user />
+        </div>
+    </div>
 @endsection

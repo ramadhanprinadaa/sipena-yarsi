@@ -36,8 +36,7 @@ Route::middleware('auth')->group(function () {
             Route::view('/cuti', 'manajemen.cuti')->name('manajemen-cuti');
         });
     });
-});
-
+});    
 // Test Error
 Route::get('/test-401', function () {
     abort(401);

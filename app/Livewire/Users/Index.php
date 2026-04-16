@@ -1,0 +1,76 @@
+<?php
+
+namespace App\Livewire\Users;
+
+use Livewire\Component;
+use Livewire\WithPagination;
+use App\Models\User;
+use Livewire\Attributes\On;
+
+class Index extends Component
+{
+    use WithPagination;
+
+    protected $paginationTheme = 'tailwind';
+
+    public $search = '';
+    public $selectedRole;
+    public $selectedStatus;
+
+    public $roleColors = [
+        'Admin' => 'bg-red-100 text-red-700',
+        'SDM Yayasan' => 'bg-purple-100 text-purple-700',
+        'SDM Universitas' => 'bg-indigo-100 text-indigo-700',
+        'Pimpinan' => 'bg-amber-100 text-amber-700',
+        'Staff' => 'bg-blue-100 text-blue-700',
+        'Tendik' => 'bg-cyan-100 text-cyan-700',
+        'Dosen' => 'bg-emerald-100 text-emerald-700',
+        'default' => 'bg-gray-100 text-gray-700'
+    ];
+
+        /**
+         * Render the component.
+         *
+         * @return \Illuminate\Contracts\View\View
+         */
+    public function render()
+    {
+        $users = User::with(['role', 'pegawai'])
+            ->oldest()->paginate(4);
+
+        if ($this->selectedRole) {
+            $users->whereHas('role', function ($q) {
+                $q->where('name', $this->selectedRole);
+            });
+        }
+
+        if ($this->selectedStatus) {
+            $users->where('status', $this->selectedStatus);
+        }
+
+        if ($this->search) {
+            $users->where('username', 'like', '%' . $this->search . '%')
+                  ->orWhere('email', 'like', '%' . $this->search . '%')
+                  ->orWhereHas('pegawai', function ($q) {
+                      $q->where('nip', 'like', '%' . $this->search . '%')
+                        ->orWhere('nama', 'like', '%' . $this->search . '%');
+                  });
+        }
+
+        return view('livewire.users.index', [
+            'users' => $users,
+            'roleColors' => $this->roleColors,
+        ]);
+    }
+    #[On('user-created')]
+    public function reload()
+    {
+        $this->resetPage();
+    }
+
+    #[On('user-updated')]
+    public function updated()
+    {
+        $this->resetPage();
+    }
+}
