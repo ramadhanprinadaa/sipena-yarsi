@@ -3,33 +3,34 @@
 namespace App\Livewire\Users;
 
 use Livewire\Component;
+use Livewire\Attributes\Validate;
+use Illuminate\Support\Facades\Hash;
+
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Pegawai;
+
 
 class AddUser extends Component
 {
     public $open = false;
 
-    public $username;
-    public $email;
-    public $password;
+    #[Validate('required|min:8')]
+    public $username = '';
+    #[Validate('required|email|unique:users,email')]
+    public $email = '';
+    #[Validate('required|min:8')]
+    public $password = '';
+    #[Validate('nullable|exists:pegawai,id')]
     public $pegawai_id;
-    public $role_id;
+    #[Validate('required|exists:roles,id')]
+    public $role;
 
     public $pegawaiSearch = '';
     public $pegawaiResults = [];
 
     public $pegawaiList = [];
     public $roleList = [];
-
-    protected $rules = [
-        'username' => 'required|min:3',
-        'email' => 'required|email|unique:users,email',
-        'password' => 'required|min:6',
-        'pegawai_id' => 'nullable|exists:pegawai,id',
-        'role_id' => 'required|exists:roles,id',
-    ];
 
     protected $listeners = [
         'open-add-user' => 'open'
@@ -39,9 +40,15 @@ class AddUser extends Component
     {
         $this->resetForm();
         $this->open = true;
-
         $this->pegawaiList = Pegawai::orderBy('nama')->get();
         $this->roleList = Role::orderBy('id')->get();
+    }
+
+    public function close()
+    {
+        $this->resetForm();
+        $this->resetValidation();
+        $this->open = false;
     }
 
     public function save()
@@ -51,16 +58,19 @@ class AddUser extends Component
         User::create([
             'username' => $this->username,
             'email' => $this->email,
-            'password' => $this->password,
+            'password' => Hash::make($this->password),
             'pegawai_id' => $this->pegawai_id,
-            'role_id' => $this->role_id,
+            'role_id' => $this->role,
             'status' => 'active',
         ]);
 
-        $this->dispatch('user-created');
-
         $this->open = false;
         $this->resetForm();
+        $this->dispatch(
+            'notify',
+            type: 'success',
+            message: 'User berhasil ditambahkan'
+        );
     }
 
     public function resetForm()
@@ -70,7 +80,7 @@ class AddUser extends Component
             'email',
             'password',
             'pegawai_id',
-            'role_id'
+            'role'
         ]);
     }
 

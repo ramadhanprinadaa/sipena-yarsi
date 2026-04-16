@@ -7,7 +7,7 @@
         <div class="flex flex-wrap gap-3">
 
             <div class="relative w-48">
-                <select wire:model.live="selectedRole" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
+                <select wire:model.live="selectedRole" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
                     <option value="">Semua Role</option>
                     <option value="Admin">Admin</option>
                     <option value="SDM Yayasan">SDM Yayasan</option>
@@ -25,7 +25,7 @@
             </div>
 
             <div class="relative w-48">
-                <select wire:model.live="selectedStatus" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
+                <select wire:model.live="selectedStatus" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
                     <option value="">Semua Status</option>
                     <option value="active">Aktif</option>
                     <option value="inactive">Nonaktif</option>
@@ -40,7 +40,7 @@
 
         <div class="flex gap-3">
             <!-- Search -->
-            <div class="flex items-center w-full md:w-72 border border-gray-200 rounded-lg bg-white px-3">
+            <div class="flex items-center w-full md:w-72 border border-gray-200 rounded-md bg-white px-3">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      class="w-5 h-5 text-gray-400"
                      fill="none"
@@ -60,7 +60,7 @@
             </div>
 
             <!-- Add User Button -->
-            <button wire:click="$dispatch('open-add-user')" class="flex items-center px-3 justify-center cursor-pointer bg-indigo-500 hover:bg-indigo-700 text-white text-sm rounded-lg transition">
+            <button wire:click="$dispatch('open-add-user')" class="flex items-center px-3 justify-center cursor-pointer bg-indigo-500 hover:bg-indigo-700 text-white text-sm rounded-md transition">
                 <i class="fa-solid fa-user-plus mr-2"></i> Tambah Pengguna
             </button>
         </div>
@@ -99,7 +99,6 @@
                 </thead>
                 <!-- Body -->
                 <tbody class="divide-y divide-gray-100">
-
                     @foreach ($users as $user)
                     <tr class="hover:bg-gray-50 transition">
                         
