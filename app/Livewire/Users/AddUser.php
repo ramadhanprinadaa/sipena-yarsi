@@ -3,94 +3,166 @@
 namespace App\Livewire\Users;
 
 use Livewire\Component;
-use Livewire\Attributes\Validate;
+use Livewire\Attributes\On;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Pegawai;
 
-
 class AddUser extends Component
 {
     public $open = false;
 
-    #[Validate('required|min:8')]
-    public $username = '';
-    #[Validate('required|email|unique:users,email')]
-    public $email = '';
-    #[Validate('required|min:8')]
-    public $password = '';
-    #[Validate('nullable|exists:pegawai,id')]
-    public $pegawai_id;
-    #[Validate('required|exists:roles,id')]
-    public $role;
+    public $roles = [];
+
+    public $form = [
+        'username'   => '',
+        'email'      => '',
+        'password'   => '',
+        'pegawai_id' => null,
+        'role_id'    => '',
+    ];
 
     public $pegawaiSearch = '';
     public $pegawaiResults = [];
 
-    public $pegawaiList = [];
-    public $roleList = [];
-
-    protected $listeners = [
-        'open-add-user' => 'open'
-    ];
-
+    #[On('open-add-user')]
     public function open()
     {
         $this->resetForm();
+        $this->resetValidation();
+
         $this->open = true;
-        $this->pegawaiList = Pegawai::orderBy('nama')->get();
-        $this->roleList = Role::orderBy('id')->get();
+    }
+
+    public function mount()
+    {
+        $this->roles = Role::query()
+            ->whereKeyNot(1)
+            ->orderBy('id')
+            ->get(['id', 'name']);
     }
 
     public function close()
     {
-        $this->resetForm();
         $this->resetValidation();
+        $this->resetForm();
+
         $this->open = false;
+    }
+
+    protected function rules()
+    {
+        return [
+            'form.username' => [
+                'required',
+                'min:8',
+                'unique:users,username',
+            ],
+
+            'form.email' => [
+                'required',
+                'email',
+                'unique:users,email',
+            ],
+
+            'form.password' => [
+                'required',
+                'min:8',
+            ],
+
+            'form.pegawai_id' => [
+                'nullable',
+                'exists:pegawai,id',
+                Rule::unique('users', 'pegawai_id'),
+            ],
+
+            'form.role_id' => [
+                'required',
+                'exists:roles,id',
+            ],
+        ];
+    }
+
+    protected function messages()
+    {
+        return [
+            'form.username.required' => 'Username wajib diisi.',
+            'form.username.min'      => 'Username minimal 8 karakter.',
+            'form.username.unique'   => 'Username sudah digunakan.',
+
+            'form.email.required' => 'Email wajib diisi.',
+            'form.email.email'    => 'Format email tidak valid.',
+            'form.email.unique'   => 'Email sudah terdaftar.',
+
+            'form.password.required' => 'Password wajib diisi.',
+            'form.password.min'      => 'Password minimal 8 karakter.',
+
+            'form.pegawai_id.unique' => 'Pegawai sudah memiliki akun.',
+
+            'form.role_id.required' => 'Role wajib dipilih.',
+        ];
+    }
+
+    protected function validationAttributes()
+    {
+        return [
+            'form.username'   => 'username',
+            'form.email'      => 'email',
+            'form.password'   => 'password',
+            'form.pegawai_id' => 'pegawai',
+            'form.role_id'    => 'role',
+        ];
+    }
+
+    public function updated($property)
+    {
+        if (str_starts_with($property, 'form.')) {
+            $this->validateOnly($property);
+        }
     }
 
     public function save()
     {
-        $this->validate();
+        $validated = $this->validate()['form'];
 
         User::create([
-            'username' => $this->username,
-            'email' => $this->email,
-            'password' => Hash::make($this->password),
-            'pegawai_id' => $this->pegawai_id,
-            'role_id' => $this->role,
-            'status' => 'active',
+            'username'   => $validated['username'],
+            'email'      => $validated['email'],
+            'password'   => Hash::make($validated['password']),
+            'pegawai_id' => $validated['pegawai_id'],
+            'role_id'    => $validated['role_id'],
+            'status'     => 'active',
         ]);
 
-        $this->open = false;
-        $this->resetForm();
         $this->dispatch(
             'notify',
             type: 'success',
             message: 'User berhasil ditambahkan'
         );
-    }
 
-    public function resetForm()
-    {
-        $this->reset([
-            'username',
-            'email',
-            'password',
-            'pegawai_id',
-            'role'
-        ]);
+        $this->dispatch('refresh-table');
+
+        $this->close();
     }
 
     public function updatedPegawaiSearch()
     {
+        if (blank($this->pegawaiSearch)) {
+            $this->pegawaiResults = [];
+            return;
+        }
+
+        $search = $this->pegawaiSearch;
+
         $this->pegawaiResults = Pegawai::query()
+            ->select('id', 'nama', 'nip')
             ->whereDoesntHave('user')
-            ->where(function ($q) {
-                $q->where('nama', 'like', '%' . $this->pegawaiSearch . '%')
-                    ->orWhere('nip', 'like', '%' . $this->pegawaiSearch . '%');
+            ->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('nip', 'like', "%{$search}%");
             })
             ->limit(10)
             ->get();
@@ -98,12 +170,41 @@ class AddUser extends Component
 
     public function selectPegawai($id)
     {
-        $pegawai = Pegawai::find($id);
+        $pegawai = Pegawai::query()
+            ->select('id', 'nama', 'nip')
+            ->find($id);
 
-        $this->pegawai_id = $pegawai->id;
+        if (!$pegawai) {
+            return;
+        }
+
+        $this->form['pegawai_id'] = $pegawai->id;
         $this->pegawaiSearch = $pegawai->nama . ' - ' . $pegawai->nip;
-
         $this->pegawaiResults = [];
+    }
+
+    public function removePegawai()
+    {
+        $this->form['pegawai_id'] = null;
+        $this->pegawaiSearch = '';
+        $this->pegawaiResults = [];
+    }
+
+    public function resetForm()
+    {
+        $this->reset([
+            'form',
+            'pegawaiSearch',
+            'pegawaiResults',
+        ]);
+
+        $this->form = [
+            'username'   => '',
+            'email'      => '',
+            'password'   => '',
+            'pegawai_id' => null,
+            'role_id'    => '',
+        ];
     }
 
     public function render()

@@ -43,7 +43,7 @@
             {{-- Section --}}
             <div class="flex items-center gap-2 sticky top-24 z-40">
                 {{-- Button Toggle Sidebar --}}
-                <button 
+                <button
                     @click="sidebarToggle = !sidebarToggle"
                     class="p-1 w-8 h-8 rounded-xl bg-white/70 backdrop-blur-xs shadow-md hover:bg-gray-100 transition cursor-pointer">
                     <i class="fa-solid fa-bars"></i>

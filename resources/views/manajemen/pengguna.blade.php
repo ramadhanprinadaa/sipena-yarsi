@@ -41,6 +41,7 @@
         <div class="flex-1">
             <livewire:users.index />
             <livewire:users.add-user />
+            <livewire:users.detail-user />
         </div>
     </div>
 @endsection

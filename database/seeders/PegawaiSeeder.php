@@ -59,5 +59,35 @@ class PegawaiSeeder extends Seeder
             'no_telepon' => '081234567890',
             'status' => 'active'
         ]);
+        Pegawai::create([
+            'nip' => '6789011111',
+            'ktp' => '000000081223349',
+            'npwp' => '111111114321',
+            'nama' => 'Ambasip',
+            'gelar_depan' => 'Prof.',
+            'gelar_belakang' => 'S.Kom',
+            'tanggal_lahir' => '2004-05-15',
+            'tempat_lahir' => 'Jakarta',
+            'tanggal_pensiun' => '2064-05-15',
+            'alamat_ktp' => 'Jl. Sudirman No. 2, Karawang',
+            'alamat_domisili' => 'Jl. Sudirman No. 2, Karawang',
+            'no_telepon' => '081234567890',
+            'status' => 'active'
+        ]);
+        Pegawai::create([
+            'nip' => '235467676868',
+            'ktp' => '000000567890089',
+            'npwp' => '1111143123421',
+            'nama' => 'Ambaring',
+            'gelar_depan' => 'Prof.',
+            'gelar_belakang' => 'S.Kom',
+            'tanggal_lahir' => '2004-05-15',
+            'tempat_lahir' => 'Ngawi',
+            'tanggal_pensiun' => '2064-05-15',
+            'alamat_ktp' => 'Jl. Sudirman No. 2, Karawang',
+            'alamat_domisili' => 'Jl. Sudirman No. 2, Karawang',
+            'no_telepon' => '081234567890',
+            'status' => 'active'
+        ]);
     }
 }

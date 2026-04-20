@@ -3,19 +3,16 @@
     <!-- Filter & Search -->
     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
 
-        <!-- Filter -->
+      <!-- Filter -->
         <div class="flex flex-wrap gap-3">
 
+            {{-- Role --}}
             <div class="relative w-48">
-                <select wire:model.live="selectedRole" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
+              	<select wire:model.live="selectedRole" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
                     <option value="">Semua Role</option>
-                    <option value="Admin">Admin</option>
-                    <option value="SDM Yayasan">SDM Yayasan</option>
-                    <option value="SDM Universitas">SDM Universitas</option>
-                    <option value="Pimpinan">Pimpinan</option>
-                    <option value="Staff">Staff</option>
-                    <option value="Tendik">Tendik</option>
-                    <option value="Dosen">Dosen</option>
+                    @foreach($roles as $role)
+                        <option value="{{ $role->name }}">{{ $role->name }}</option>
+                    @endforeach
                 </select>
                 <svg class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,7 +61,6 @@
                 <i class="fa-solid fa-user-plus mr-2"></i> Tambah Pengguna
             </button>
         </div>
-
     </div>
 
     <!-- Table -->
@@ -74,7 +70,7 @@
                 <!-- Header -->
                 <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider sticky top-0">
                     <tr>
-                        <th 
+                        <th
                             wire:click="sortBy('username')"
                             class="px-4 py-3 text-left font-semibold cursor-pointer select-none"
                         >
@@ -100,8 +96,8 @@
                 <!-- Body -->
                 <tbody class="divide-y divide-gray-100">
                     @foreach ($users as $user)
-                    <tr class="hover:bg-gray-50 transition">
-                        
+                    <tr wire:key="user-{{ $user->id }}" class="hover:bg-gray-50 transition">
+
                         <!-- Username -->
                         <td class="px-4 py-3 font-medium text-gray-700 max-w-40 truncate">
                             {{ $user->username }}
@@ -149,7 +145,7 @@
 
                         <!-- Aksi -->
                         <td class="px-4 py-3">
-                            <button class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition cursor-pointer">
+                            <button wire:click="openDetail({{ $user->id }})" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition cursor-pointer">
                                 Lihat
                             </button>
                         </td>
