@@ -33,7 +33,7 @@
     <div class="flex px-4 gap-4">
 
         {{-- Sidebar --}}
-        <aside :class="sidebarToggle ? 'w-60' : 'w-22'" class="fixed top-24 left-3 bottom-4 bg-white/70 backdrop-blur-sm shadow-md rounded-xl p-4">
+        <aside :class="sidebarToggle ? 'w-60 p-3' : 'w-24 p-2'" class="fixed top-24 z-40 left-3 bottom-4 bg-white/70 backdrop-blur-sm shadow-md rounded-xl">
             @include('layouts.sidebar')
         </aside>
 
@@ -41,7 +41,7 @@
         <div :class="sidebarToggle ? 'ml-64' : 'ml-26'" class="flex-1 flex flex-col gap-4">
 
             {{-- Section --}}
-            <div class="flex items-center gap-2 sticky top-24 z-40">
+            <div class="flex items-center gap-2 sticky top-24 z-30">
                 {{-- Button Toggle Sidebar --}}
                 <button
                     @click="sidebarToggle = !sidebarToggle"

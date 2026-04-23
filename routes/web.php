@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
 use Symfony\Component\Routing\Route as RoutingRoute;
 
 Route::get('/', function () {
@@ -17,6 +18,9 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.handle.logout');
+
+
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
 
     Route::prefix('beranda')->group(function () {
         Route::view('/presensi', 'dashboard.presensi')->name('presensi');
@@ -35,6 +39,14 @@ Route::middleware('auth')->group(function () {
             Route::view('presensi', 'manajemen.presensi')->name('manajemen-presensi');
             Route::view('lembur', 'manajemen.lembur')->name('manajemen-lembur');
             Route::view('cuti', 'manajemen.cuti')->name('manajemen-cuti');
+        });
+    });
+
+    Route::prefix('konfigurasi')->group(function () {
+        Route::middleware('role:Admin')->group(function (){
+            Route::view('unit-kerja', 'config.unit-kerja')->name('konfigurasi-unit-kerja');
+            Route::view('alur-persetujuan', 'config.alur-persetujuan')->name('konfigurasi-alur-persetujuan');
+            Route::view('hari-libur', 'config.hari-libur')->name('konfigurasi-hari-libur');
         });
     });
 });
