@@ -33,6 +33,8 @@ class PegawaiFactory extends Factory
             'alamat_ktp' => $this->faker->address(),
             'alamat_domisili' => $this->faker->address(),
             'no_telepon' => $this->faker->phoneNumber(),
+            'email_yarsi' => $this->faker->email(),
+            'jenis_kelamin' => $this->faker->randomElement(['Laki-laki', 'Perempuan']),
             'status' => 'active',
         ];
     }

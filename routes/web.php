@@ -3,8 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProfileController;
-use Symfony\Component\Routing\Route as RoutingRoute;
 
 Route::get('/', function () {
     return Auth::check() ? redirect()->route('kepegawaian') : redirect()->route('login');
@@ -16,11 +14,9 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-
+    
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.handle.logout');
-
-
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::view('/profile', 'profile-page')->name('profile');
 
     Route::prefix('beranda')->group(function () {
         Route::view('/presensi', 'dashboard.presensi')->name('presensi');

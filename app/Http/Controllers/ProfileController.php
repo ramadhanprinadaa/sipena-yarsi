@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\Pegawai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+
 
 class ProfileController extends Controller
 {
@@ -14,7 +16,7 @@ class ProfileController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
+        $user = User::with('pegawai', 'role')->find(Auth::user()->id);
         return view('profile', compact('user'));
     }
 
@@ -27,4 +29,7 @@ class ProfileController extends Controller
         //
     }
 
+    public function save(){
+        
+    }
 }

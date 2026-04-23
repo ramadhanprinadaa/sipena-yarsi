@@ -40,7 +40,7 @@ class User extends Authenticatable
 
     protected $attributes = [
         'status' => 'active',
-        'role_id' => 7
+        'role_id' => 8
     ];
 
     /**

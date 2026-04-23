@@ -89,7 +89,7 @@
                 x-show="!sidebarToggle && floating === 'beranda'"
                 @mouseleave="floating = null"
                 x-transition
-                class="absolute left-24 top-0 w-56 bg-white shadow-lg rounded-lg p-2"
+                class="absolute left-26 top-0 w-56 bg-white shadow-lg rounded-lg p-2"
             >
                 <a wire:navigate href="{{ route('kepegawaian') }}"
                     class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('kepegawaian') ? 'bg-pink-200' : ''}}">
@@ -197,7 +197,7 @@
                     x-show="floating === 'manajemen' && !sidebarToggle"
                     @mouseleave="floating = null"
                     x-transition
-                    class="absolute left-24 top-12 w-56 bg-white shadow-lg rounded-lg p-2"
+                    class="absolute left-26 top-18 w-56 bg-white shadow-lg rounded-lg p-2"
                 >
                     @if (auth()->user()->hasRole('Admin'))
                         <a wire:navigate href="{{ route('manajemen-pengguna') }}"
@@ -290,7 +290,7 @@
                     x-show="floating === 'konfigurasi' && !sidebarToggle"
                     @mouseleave="floating = null"
                     x-transition
-                    class="absolute left-24 top-26 w-56 bg-white shadow-lg rounded-lg p-2"
+                    class="absolute left-26 top-32 w-56 bg-white shadow-lg rounded-lg p-2"
                 >
 
                     <a wire:navigate href="{{ route('konfigurasi-unit-kerja') }}"

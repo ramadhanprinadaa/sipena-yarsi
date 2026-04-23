@@ -26,6 +26,7 @@ class Index extends Component
         'Admin' => 'bg-red-100 text-red-700',
         'SDM Yayasan' => 'bg-purple-100 text-purple-700',
         'SDM Universitas' => 'bg-indigo-100 text-indigo-700',
+        'Rektor' => 'bg-rose-100 text-rose-700',
         'Pimpinan' => 'bg-amber-100 text-amber-700',
         'Staff' => 'bg-blue-100 text-blue-700',
         'Tendik' => 'bg-cyan-100 text-cyan-700',

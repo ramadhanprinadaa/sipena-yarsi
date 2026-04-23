@@ -18,46 +18,52 @@ class UserSeeder extends Seeder
         $user = [
             [
                 'role_id' => 1,
-                'username' => 'Admin',
+                'username' => 'admin',
                 'email' => 'admin@gmail.com',
                 'password' => Hash::make('password')
             ],
             [
                 'role_id' => 2,
-                'username' => 'SDM_Yayasan',
+                'username' => 'sdm.yayasan',
                 'email' => 'sdmyayasan@gmail.com',
                 'password' => Hash::make('password')
             ],
             [
                 'role_id' => 3,
-                'username' => 'SDM_Universitas',
+                'username' => 'sdmu.universitas',
                 'email' => 'sdmuniversitas@gmail.com',
                 'password' => Hash::make('password')
             ],
             [
                 'role_id' => 4,
                 'pegawai_id' => 1,
-                'username' => 'Ramadhan_Prinada',
+                'username' => 'ramadhanprinada',
                 'email' => 'ramadhanprinada@gmail.com',
                 'password' => Hash::make('password')
             ],
             [
                 'role_id' => 5,
                 'pegawai_id' => 2,
-                'username' => 'Rafly_Eryan',
+                'username' => 'rafly.eryan',
                 'email' => 'raflyeryan@gmail.com',
                 'password' => Hash::make('password')
             ],
             [
                 'role_id' => 6,
-                'username' => 'Hilal_Akbar',
+                'username' => 'hilal.akbar',
                 'email' => 'hilalakbar@gmail.com',
                 'password' => Hash::make('password')
             ],
             [
-                // 'role_id' => 7,
-                'username' => 'Wily_Ahmad',
+                'role_id' => 7,
+                'username' => 'wily.ahmad',
                 'email' => 'wilyahmad@gmail.com',
+                'password' => Hash::make('password')
+            ],
+            [
+                // 'role_id' => 7,
+                'username' => 'arya.kusuma',
+                'email' => 'aryakusuma@gmail.com',
                 'password' => Hash::make('password')
             ],
         ];

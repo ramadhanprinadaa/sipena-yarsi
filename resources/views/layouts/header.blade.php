@@ -112,7 +112,7 @@
                 x-transition
                 class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50"
             >
-                <a href="{{ route('profile') }}"
+                <a wire:navigate href="{{ route('profile') }}"
                 class="flex items-center gap-2 px-3 py-2 text-sm rounded-t-md text-gray-700 hover:bg-gray-100">
                     <i class="fa-solid fa-user"></i>
                     <span>Profil</span>
