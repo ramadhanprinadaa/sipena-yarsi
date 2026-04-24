@@ -66,7 +66,7 @@ class DetailUser extends Component
     public function close()
     {
         $this->resetValidation();
-        $this->reset();
+        $this->resetExcept('roles');
         $this->show = false;
     }
 

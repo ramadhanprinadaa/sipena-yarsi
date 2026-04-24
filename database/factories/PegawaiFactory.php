@@ -32,9 +32,9 @@ class PegawaiFactory extends Factory
             'tanggal_pensiun' => $this->faker->dateTimeBetween('+5 years', '+20 years')->format('Y-m-d'),
             'alamat_ktp' => $this->faker->address(),
             'alamat_domisili' => $this->faker->address(),
-            'no_telepon' => $this->faker->phoneNumber(),
+            'no_telpon' => $this->faker->phoneNumber(),
             'email_yarsi' => $this->faker->email(),
-            'jenis_kelamin' => $this->faker->randomElement(['Laki-laki', 'Perempuan']),
+            'jenis_kelamin' => $this->faker->randomElement(['L', 'P']),
             'status' => 'active',
         ];
     }

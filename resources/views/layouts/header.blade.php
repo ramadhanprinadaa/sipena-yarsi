@@ -99,8 +99,7 @@
 
             <!-- Avatar -->
             <button
-                class="w-10 h-10 flex items-center justify-center
-                    rounded-full cursor-pointer
+                class="w-10 h-10 rounded-full cursor-pointer
                     bg-gradient-to-br from-blue-300 to-pink-200
                     text-gray-700 shadow-sm hover:shadow-md
                     transition"

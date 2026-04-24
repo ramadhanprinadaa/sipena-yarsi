@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('tanggal_pensiun');
             $table->text('alamat_ktp');
             $table->text('alamat_domisili');
-            $table->string('no_telepon');
+            $table->string('no_telpon');
             $table->string('email_yarsi');
             $table->string('jenis_kelamin');
             $table->string('status');
