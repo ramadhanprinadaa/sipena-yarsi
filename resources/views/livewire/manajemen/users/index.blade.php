@@ -8,7 +8,7 @@
 
             {{-- Role --}}
             <div class="relative w-48">
-              	<select wire:model.live="selectedRole" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
+              	<select wire:model.live="selectedRole" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-4 focus:ring-indigo-500 cursor-pointer appearance-none">
                     <option value="">Semua Role</option>
                     @foreach($roles as $role)
                         <option value="{{ $role->name }}">{{ $role->name }}</option>
@@ -22,7 +22,7 @@
             </div>
 
             <div class="relative w-48">
-                <select wire:model.live="selectedStatus" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
+                <select wire:model.live="selectedStatus" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-4 focus:ring-indigo-500 cursor-pointer appearance-none">
                     <option value="">Semua Status</option>
                     <option value="active">Aktif</option>
                     <option value="inactive">Nonaktif</option>
@@ -35,25 +35,18 @@
             </div>
         </div>
 
+
         <div class="flex gap-3">
-            <!-- Search -->
-            <div class="flex items-center w-full md:w-72 border border-gray-200 rounded-md bg-white px-3">
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     class="w-5 h-5 text-gray-400"
-                     fill="none"
-                     viewBox="0 0 24 24"
-                     stroke="currentColor">
-                    <path stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M21 21l-4.35-4.35M16 10a6 6 0 11-12 0 6 6 0 0112 0z"/>
-                </svg>
+            {{-- Search --}}
+            <div class="relative w-72">
+                <div class="absolute inset-y-0 flex items-center ps-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-body" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg>
+                </div>
                 <input
-                    wire:model.live.debounce.300ms="search"
                     type="text"
-                    placeholder="Cari Nama atau NIP..."
-                    class="w-full h-10 px-2 text-sm outline-none"
-                >
+                    class="input-search h-10"
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="Cari Nama atau NIP ...">
             </div>
 
             <!-- Add User Button -->

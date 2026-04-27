@@ -13,24 +13,27 @@
     body {
         font-family: 'Lexend', sans-serif;
     }
+    .font-poppins {
+        font-family: 'Poppins', sans-serif;
+    }
+    .font-lexend {
+        font-family: 'Lexend', sans-serif;
+    }
 }
 
 @layer components {
-    .bg-gradient-primary {
-        background: var(--color-primary);
+    .filter-dropdown {
+        @apply inline-flex items-center justify-between text-body bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-indigo-500 shadow-xs font-medium leading-5 rounded-md text-sm px-3 py-2 focus:outline-none cursor-pointer w-full;
     }
-    .sidebar-item {
-        @apply flex items-start justify-center w-full p-2 rounded-md transition hover:bg-cyan-100;
+    .dropdown-menu {
+        @apply absolute left-0 z-10 w-full bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg mt-2;
     }
-    .sidebar-item.active {
-        @apply bg-gradient-to-r from-blue-300 via-pink-200 to-gray-50;
+    .dropdown-item {
+        @apply inline-flex items-center text-left w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded;
     }
-    .no-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
-    .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+    .input-search {
+        @apply block w-full max-w-96 ps-9 pe-3 py-2 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-md outline-none focus:ring-3 focus:ring-indigo-500 shadow-xs placeholder:text-body;
     }
 }
+
 

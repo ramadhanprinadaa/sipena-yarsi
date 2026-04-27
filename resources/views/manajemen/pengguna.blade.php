@@ -39,9 +39,9 @@
             </div>
         </div>
         <div class="flex-1">
-            <livewire:users.index />
-            <livewire:users.add-user />
-            <livewire:users.detail-user />
+            <livewire:manajemen.users.index />
+            <livewire:manajemen.users.add-user />
+            <livewire:manajemen.users.detail-user />
         </div>
     </div>
 @endsection

@@ -21,4 +21,9 @@ class Pegawai extends Model
     {
         return $this->hasOne(User::class, 'pegawai_id');
     }
+
+    public function unitKerja()
+    {
+        return $this->belongsTo(UnitKerja::class, 'unit_kerja_id');
+    }
 }

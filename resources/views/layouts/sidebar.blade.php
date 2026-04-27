@@ -64,11 +64,15 @@
                     <span>Presensi</span>
                 </a>
 
-                <a wire:navigate href="{{ route('lembur') }}"
-                    class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('lembur') ? 'bg-pink-200' : ''}}">
-                    <i class="fa-solid fa-business-time"></i>
-                    <span>Lembur</span>
-                </a>
+                @if (auth()->user()->hasRole([
+                    'Admin', 'SDM Yayasan', 'SDM Universitas', 'Rektor', 'Pimpinan', 'Staff', 'Tendik'
+                ]))
+                    <a wire:navigate href="{{ route('lembur') }}"
+                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('lembur') ? 'bg-pink-200' : ''}}">
+                        <i class="fa-solid fa-business-time"></i>
+                        <span>Lembur</span>
+                    </a>
+                @endif
 
                 <a wire:navigate href="{{ route('cuti') }}"
                     class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('cuti') ? 'bg-pink-200' : ''}}">
@@ -101,19 +105,20 @@
                     <i class="fa-solid fa-clock"></i>
                     <span>Presensi</span>
                 </a>
-
-                <a wire:navigate href="{{ route('lembur') }}"
-                    class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('lembur') ? 'bg-pink-200' : ''}}">
-                    <i class="fa-solid fa-business-time"></i>
-                    <span>Lembur</span>
-                </a>
-
+                @if (auth()->user()->hasRole([
+                    'Admin', 'SDM Yayasan', 'SDM Universitas', 'Rektor', 'Pimpinan', 'Staff', 'Tendik'
+                ]))
+                    <a wire:navigate href="{{ route('lembur') }}"
+                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('lembur') ? 'bg-pink-200' : ''}}">
+                        <i class="fa-solid fa-business-time"></i>
+                        <span>Lembur</span>
+                    </a>
+                @endif
                 <a wire:navigate href="{{ route('cuti') }}"
                     class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('cuti') ? 'bg-pink-200' : ''}}">
                     <i class="fa-solid fa-plane-departure"></i>
                     <span>Cuti</span>
                 </a>
-
                 <a wire:navigate href="{{ route('surat-menyurat') }}"
                     class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('surat-menyurat') ? 'bg-pink-200' : ''}}">
                     <i class="fa-solid fa-envelope"></i>
@@ -127,6 +132,7 @@
                 'Admin',
                 'SDM Yayasan',
                 'SDM Universitas',
+                'Rektor',
                 'Pimpinan'
         ]))
 
@@ -138,7 +144,12 @@
                         'justify-between': sidebarToggle,
                         'justify-center': !sidebarToggle,
                         'bg-pink-200':
-                            {{ request()->routeIs('manajemen-pengguna','manajemen-pegawai','manajemen-presensi', 'manajemen-lembur','manajemen-cuti','manajemen-surat-menyurat') ? 'true' : 'false' }}
+                            {{ request()->routeIs(
+                                    'manajemen-pengguna','manajemen-pegawai','manajemen-presensi', 'manajemen-lembur','manajemen-cuti','manajemen-surat-menyurat', 'manajemen-pegawai-detail',
+                                )
+
+                                ? 'true' : 'false'
+                            }}
                             && !(sidebarToggle && open.manajemen)
                     }"
                     class="flex items-center w-full p-2 rounded-md hover:bg-pink-200 cursor-pointer"
@@ -168,7 +179,7 @@
                     @endif
 
                     <a wire:navigate href="{{ route('manajemen-pegawai') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('manajemen-pegawai') ? 'bg-pink-200' : ''}}">
+                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('manajemen-pegawai', 'manajemen-pegawai-detail') ? 'bg-pink-200' : ''}}">
                         <i class="fa-solid fa-users"></i>
                         <span>Pegawai</span>
                     </a>
@@ -208,7 +219,7 @@
                     @endif
 
                     <a wire:navigate href="{{ route('manajemen-pegawai') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('manajemen-pegawai') ? 'bg-pink-200' : ''}}">
+                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('manajemen-pegawai', 'manajemen-pegawai-detail') ? 'bg-pink-200' : ''}}">
                         <i class="fa-solid fa-users"></i>
                         <span>Pegawai</span>
                     </a>
@@ -235,7 +246,7 @@
         @endif
 
         {{-- KONFIGURASI --}}
-        @if (auth()->user()->hasRole('Admin'))
+        @if (auth()->user()->hasRole(['Admin', 'SDM Yayasan']))
             <div class="flex flex-col gap-1">
 
                 {{-- Parent --}}
@@ -266,17 +277,20 @@
                 {{-- Sub Menu --}}
                 <div x-show="open.konfigurasi && sidebarToggle" x-transition class="ml-2 flex flex-col gap-2">
 
-                    <a wire:navigate href="{{ route('konfigurasi-unit-kerja') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-unit-kerja') ? 'bg-pink-200' : ''}}">
-                        <i class="fa-solid fa-building text-lg"></i>
-                        <span>Unit Kerja</span>
-                    </a>
 
-                    <a wire:navigate href="{{ route('konfigurasi-alur-persetujuan') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-alur-persetujuan') ? 'bg-pink-200' : ''}}">
-                        <i class="fa-solid fa-diagram-project"></i>
-                        <span>Alur Persetujuan</span>
-                    </a>
+                    @if (auth()->user()->hasRole('Admin'))
+                        <a wire:navigate href="{{ route('konfigurasi-unit-kerja') }}"
+                            class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-unit-kerja') ? 'bg-pink-200' : ''}}">
+                            <i class="fa-solid fa-building text-lg"></i>
+                            <span>Unit Kerja</span>
+                        </a>
+
+                        <a wire:navigate href="{{ route('konfigurasi-alur-persetujuan') }}"
+                            class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-alur-persetujuan') ? 'bg-pink-200' : ''}}">
+                            <i class="fa-solid fa-diagram-project"></i>
+                            <span>Alur Persetujuan</span>
+                        </a>
+                    @endif
 
                     <a wire:navigate href="{{ route('konfigurasi-hari-libur') }}"
                         class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-hari-libur') ? 'bg-pink-200' : ''}}">
@@ -293,17 +307,19 @@
                     class="absolute left-26 top-32 w-56 bg-white shadow-lg rounded-lg p-2"
                 >
 
-                    <a wire:navigate href="{{ route('konfigurasi-unit-kerja') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-unit-kerja') ? 'bg-pink-200' : ''}}">
-                        <i class="fa-solid fa-building text-lg"></i>
-                        <span>Unit Kerja</span>
-                    </a>
+                    @if (auth()->user()->hasRole('Admin'))
+                        <a wire:navigate href="{{ route('konfigurasi-unit-kerja') }}"
+                            class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-unit-kerja') ? 'bg-pink-200' : ''}}">
+                            <i class="fa-solid fa-building text-lg"></i>
+                            <span>Unit Kerja</span>
+                        </a>
 
-                    <a wire:navigate href="{{ route('konfigurasi-alur-persetujuan') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-alur-persetujuan') ? 'bg-pink-200' : ''}}">
-                        <i class="fa-solid fa-diagram-project"></i>
-                        <span>Alur Persetujuan</span>
-                    </a>
+                        <a wire:navigate href="{{ route('konfigurasi-alur-persetujuan') }}"
+                            class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-alur-persetujuan') ? 'bg-pink-200' : ''}}">
+                            <i class="fa-solid fa-diagram-project"></i>
+                            <span>Alur Persetujuan</span>
+                        </a>
+                    @endif
 
                     <a wire:navigate href="{{ route('konfigurasi-hari-libur') }}"
                         class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-hari-libur') ? 'bg-pink-200' : ''}}">
@@ -316,7 +332,7 @@
     </div>
 
 
-    {{-- Akun / Logout (Tetap di bawah) --}}
+    {{-- Akun --}}
     <div class=" flex flex-col border-t border-gray-300 pt-3 mt-2 w-full gap-2">
 
         <div :class="sidebarToggle ? 'gap-2 justify-start' : 'justify-center'" class="flex items-center gap-2">

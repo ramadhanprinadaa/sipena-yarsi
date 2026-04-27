@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Users;
+namespace App\Livewire\Manajemen\Users;
 
 use Livewire\Component;
 use Livewire\Attributes\On;
@@ -101,7 +101,7 @@ class DetailUser extends Component
 
     public function render()
     {
-        return view('livewire.users.detail-user');
+        return view('livewire.manajemen.users.detail-user');
     }
 
     public function getIsDirtyProperty()

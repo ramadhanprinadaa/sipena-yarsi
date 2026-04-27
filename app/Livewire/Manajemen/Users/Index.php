@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Users;
+namespace App\Livewire\Manajemen\Users;
 
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -69,7 +69,7 @@ class Index extends Component
                         });
                 });
         }
-        return view('livewire.users.index', [
+        return view('livewire.manajemen.users.index', [
             'users' => $users->paginate(4),
             'roleColors' => $this->roleColors,
         ]);

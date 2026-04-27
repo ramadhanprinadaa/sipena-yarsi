@@ -13,20 +13,21 @@ return new class extends Migration
     {
         Schema::create('pegawai', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('unit_kerja_id')->nullable();
             $table->string('nip')->unique();
             $table->string('ktp')->unique();
             $table->string('npwp')->unique();
             $table->string('nama');
             $table->string('gelar_depan')->nullable();
             $table->string('gelar_belakang')->nullable();
-            $table->date('tanggal_lahir');
             $table->string('tempat_lahir');
-            $table->string('tanggal_pensiun');
+            $table->date('tanggal_lahir');
+            $table->date('tanggal_pensiun');
+            $table->string('jenis_kelamin')->nullable();
             $table->text('alamat_ktp');
             $table->text('alamat_domisili');
             $table->string('no_telpon');
             $table->string('email_yarsi');
-            $table->string('jenis_kelamin');
             $table->string('status');
             $table->timestamps();
         });
