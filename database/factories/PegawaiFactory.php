@@ -30,6 +30,7 @@ class PegawaiFactory extends Factory
             'gelar_belakang' => $this->faker->optional()->randomElement(['S.Kom', 'S.T', 'M.Kom', 'M.T']),
             'tanggal_lahir' => $this->faker->date(),
             'tempat_lahir' => $this->faker->city(),
+            'tanggal_bergabung' => $this->faker->dateTimeBetween('-5 years', 'now')->format('Y-m-d'),
             'tanggal_pensiun' => $this->faker->dateTimeBetween('+5 years', '+20 years')->format('Y-m-d'),
             'jenis_kelamin' => $this->faker->randomElement(['L', 'P']),
             'alamat_ktp' => $this->faker->address(),

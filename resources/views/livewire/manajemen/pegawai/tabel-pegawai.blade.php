@@ -1,7 +1,7 @@
-<div class="flex flex-col space-y-4 h-full">
+<div class="flex flex-col space-y-4 max-h-92">
 
     <!-- Filter & Search -->
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-2">
 
         <!-- Filter -->
         <div class="flex gap-2">
@@ -173,7 +173,7 @@
         </div>
 
         <!-- Search -->
-        <div class="relative w-76">
+        <div class="relative">
             <div class="absolute inset-y-0 flex items-center ps-3 pointer-events-none">
                 <svg class="w-4 h-4 text-body" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg>
             </div>
@@ -182,159 +182,282 @@
     </div>
 
     <!-- Table -->
-    <div class="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-md border border-default">
-        <table class="w-full text-sm text-left rtl:text-right text-body">
-            <thead class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
-                <tr>
-                    <th scope="col" class="px-6 py-3 font-medium">
-                        Nama Pegawai
-                    </th>
-                    <th scope="col" class="px-6 py-3 font-medium">
-                        NIK Pegawai
-                    </th>
-                    <th scope="col" class="px-6 py-3 font-medium">
-                        Usia
-                    </th>
-                    @if (auth()->user()->HasRole(['Admin', 'SDM Yayasan', 'SDM Universitas']))
-                        <th scope="col" class="px-6 py-3 font-medium">
-                            Unit Kerja
+    <div class="relative w-full bg-neutral-primary-soft shadow-xs rounded-md border border-default flex flex-col flex-1 min-h-0">
+
+        <div class="rounded-md overflow-y-auto flex-1">
+            <table class="w-full table-fixed text-sm text-left rtl:text-right text-body h-full">
+                <thead class="sticky top-0 text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
+                    <tr>
+                        <th scope="col" class="px-4 py-3 font-medium w-36">
+                            Nama Pegawai
                         </th>
-                    @endif
-                    <th scope="col" class="px-6 py-3 font-medium">
-                        Tanggal Bergabung
-                    </th>
-                    <th scope="col" class="px-6 py-3 font-medium">
-                        Tanggal Pensiun
-                    </th>
-                    <th scope="col" class="px-6 py-3 font-medium">
-                        Status
-                    </th>
-                    <th scope="col" class="px-6 py-3 font-medium">
-                        Aksi
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                    <th scope="row" class="px-6 py-2 font-medium text-heading whitespace-nowrap">
-                        Apple MacBook Pro 17"
-                    </th>
-                    <td class="px-6 py-2">
-                        Silver
-                    </td>
-                    <td class="px-6 py-2">
-                        Laptop
-                    </td>
-                    <td class="px-6 py-2">
-                        $2999
-                    </td>
-                    <td class="px-6 py-2 text-right">
-                        <a href="#" class="font-medium text-fg-brand hover:underline">Edit</a>
-                    </td>
-                </tr>
-                <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                    <th scope="row" class="px-6 py-2 font-medium text-heading whitespace-nowrap">
-                        Apple MacBook Pro 17"
-                    </th>
-                    <td class="px-6 py-2">
-                        Silver
-                    </td>
-                    <td class="px-6 py-2">
-                        Laptop
-                    </td>
-                    <td class="px-6 py-2">
-                        $2999
-                    </td>
-                    <td class="px-6 py-2 text-right">
-                        <a href="#" class="font-medium text-fg-brand hover:underline">Edit</a>
-                    </td>
-                </tr>
-                <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                    <th scope="row" class="px-6 py-2 font-medium text-heading whitespace-nowrap">
-                        Apple MacBook Pro 17"
-                    </th>
-                    <td class="px-6 py-2">
-                        Silver
-                    </td>
-                    <td class="px-6 py-2">
-                        Laptop
-                    </td>
-                    <td class="px-6 py-2">
-                        $2999
-                    </td>
-                    <td class="px-6 py-2 text-right">
-                        <a href="#" class="font-medium text-fg-brand hover:underline">Edit</a>
-                    </td>
-                </tr>
-                <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                    <th scope="row" class="px-6 py-2 font-medium text-heading whitespace-nowrap">
-                        Apple MacBook Pro 17"
-                    </th>
-                    <td class="px-6 py-2">
-                        Silver
-                    </td>
-                    <td class="px-6 py-2">
-                        Laptop
-                    </td>
-                    <td class="px-6 py-2">
-                        $2999
-                    </td>
-                    <td class="px-6 py-2 text-right">
-                        <a href="#" class="font-medium text-fg-brand hover:underline">Edit</a>
-                    </td>
-                </tr>
-                <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                    <th scope="row" class="px-6 py-2 font-medium text-heading whitespace-nowrap">
-                        Apple MacBook Pro 17"
-                    </th>
-                    <td class="px-6 py-2">
-                        Silver
-                    </td>
-                    <td class="px-6 py-2">
-                        Laptop
-                    </td>
-                    <td class="px-6 py-2">
-                        $2999
-                    </td>
-                    <td class="px-6 py-2 text-right">
-                        <a href="#" class="font-medium text-fg-brand hover:underline">Edit</a>
-                    </td>
-                </tr>
-                <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                    <th scope="row" class="px-6 py-2 font-medium text-heading whitespace-nowrap">
-                        Apple MacBook Pro 17"
-                    </th>
-                    <td class="px-6 py-2">
-                        Silver
-                    </td>
-                    <td class="px-6 py-2">
-                        Laptop
-                    </td>
-                    <td class="px-6 py-2">
-                        $2999
-                    </td>
-                    <td class="px-6 py-2 text-right">
-                        <a href="#" class="font-medium text-fg-brand hover:underline">Edit</a>
-                    </td>
-                </tr>
-                <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                    <th scope="row" class="px-6 py-2 font-medium text-heading whitespace-nowrap">
-                        Apple MacBook Pro 17"
-                    </th>
-                    <td class="px-6 py-2">
-                        Silver
-                    </td>
-                    <td class="px-6 py-2">
-                        Laptop
-                    </td>
-                    <td class="px-6 py-2">
-                        $2999
-                    </td>
-                    <td class="px-6 py-2 text-right">
-                        <a href="#" class="font-medium text-fg-brand hover:underline">Edit</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                        <th scope="col" class="px-4 py-3 font-medium w-32">
+                            NIK Pegawai
+                        </th>
+                        <th scope="col" class="px-4 py-3 font-medium w-28">
+                            Usia (Tahun)
+                        </th>
+                        @if (auth()->user()->HasRole(['Admin', 'SDM Yayasan', 'SDM Universitas']))
+                            <th scope="col" class="px-4 py-3 font-medium w-36">
+                                Unit Kerja
+                            </th>
+                        @endif
+                        <th scope="col" class="px-4 py-3 font-medium w-40">
+                            Tanggal Bergabung
+                        </th>
+                        <th scope="col" class="px-4 py-3 font-medium w-36">
+                            Tanggal Pensiun
+                        </th>
+                        <th scope="col" class="px-4 py-3 font-medium text-center w-20">
+                            Status
+                        </th>
+                        <th scope="col" class="px-4 py-3 font-medium text-center w-20">
+                            Aksi
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
+                        <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
+                            Apple MacBook Pro 17"
+                        </th>
+                        <td class="px-4 py-2 truncate">
+                            12345678
+                        </td>
+                        <td class="px-4 py-2">
+                            20
+                        </td>
+                        <td class="px-4 py-2 truncate">
+                            Fakultas Teknologi Informasi
+                        </td>
+                        <td class="px-4 py-2">
+                            19 Agustus 2022
+                        </td>
+                        <td class="px-4 py-2">
+                            19 Agustus 2030
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            Nonaktif
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            <a href="#" class="font-medium text-fg-brand hover:underline">Lihat</a>
+                        </td>
+                    </tr>
+                    <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
+                        <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
+                            Apple MacBook Pro 17"
+                        </th>
+                        <td class="px-4 py-2 truncate">
+                            12345678
+                        </td>
+                        <td class="px-4 py-2">
+                            20
+                        </td>
+                        <td class="px-4 py-2 truncate">
+                            Fakultas Teknologi Informasi
+                        </td>
+                        <td class="px-4 py-2">
+                            19 Agustus 2022
+                        </td>
+                        <td class="px-4 py-2">
+                            19 Agustus 2030
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            Nonaktif
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            <a href="#" class="font-medium text-fg-brand hover:underline">Lihat</a>
+                        </td>
+                    </tr>
+                    <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
+                        <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
+                            Apple MacBook Pro 17"
+                        </th>
+                        <td class="px-4 py-2 truncate">
+                            12345678
+                        </td>
+                        <td class="px-4 py-2">
+                            20
+                        </td>
+                        <td class="px-4 py-2 truncate">
+                            Fakultas Teknologi Informasi
+                        </td>
+                        <td class="px-4 py-2">
+                            19 Agustus 2022
+                        </td>
+                        <td class="px-4 py-2">
+                            19 Agustus 2030
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            Nonaktif
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            <a href="#" class="font-medium text-fg-brand hover:underline">Lihat</a>
+                        </td>
+                    </tr>
+                    <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
+                        <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
+                            Apple MacBook Pro 17"
+                        </th>
+                        <td class="px-4 py-2 truncate">
+                            12345678
+                        </td>
+                        <td class="px-4 py-2">
+                            20
+                        </td>
+                        <td class="px-4 py-2 truncate">
+                            Fakultas Teknologi Informasi
+                        </td>
+                        <td class="px-4 py-2">
+                            19 Agustus 2022
+                        </td>
+                        <td class="px-4 py-2">
+                            19 Agustus 2030
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            Nonaktif
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            <a href="#" class="font-medium text-fg-brand hover:underline">Lihat</a>
+                        </td>
+                    </tr>
+                    <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
+                        <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
+                            Apple MacBook Pro 17"
+                        </th>
+                        <td class="px-4 py-2 truncate">
+                            12345678
+                        </td>
+                        <td class="px-4 py-2">
+                            20
+                        </td>
+                        <td class="px-4 py-2 truncate">
+                            Fakultas Teknologi Informasi
+                        </td>
+                        <td class="px-4 py-2">
+                            19 Agustus 2022
+                        </td>
+                        <td class="px-4 py-2">
+                            19 Agustus 2030
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            Nonaktif
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            <a href="#" class="font-medium text-fg-brand hover:underline">Lihat</a>
+                        </td>
+                    </tr>
+                    <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
+                        <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
+                            Apple MacBook Pro 17"
+                        </th>
+                        <td class="px-4 py-2 truncate">
+                            12345678
+                        </td>
+                        <td class="px-4 py-2">
+                            20
+                        </td>
+                        <td class="px-4 py-2 truncate">
+                            Fakultas Teknologi Informasi
+                        </td>
+                        <td class="px-4 py-2">
+                            19 Agustus 2022
+                        </td>
+                        <td class="px-4 py-2">
+                            19 Agustus 2030
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            Nonaktif
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            <a href="#" class="font-medium text-fg-brand hover:underline">Lihat</a>
+                        </td>
+                    </tr>
+                    <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
+                        <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
+                            Apple MacBook Pro 17"
+                        </th>
+                        <td class="px-4 py-2 truncate">
+                            12345678
+                        </td>
+                        <td class="px-4 py-2">
+                            20
+                        </td>
+                        <td class="px-4 py-2 truncate">
+                            Fakultas Teknologi Informasi
+                        </td>
+                        <td class="px-4 py-2">
+                            19 Agustus 2022
+                        </td>
+                        <td class="px-4 py-2">
+                            19 Agustus 2030
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            Nonaktif
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            <a href="#" class="font-medium text-fg-brand hover:underline">Lihat</a>
+                        </td>
+                    </tr>
+                    <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
+                        <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
+                            Apple MacBook Pro 17"
+                        </th>
+                        <td class="px-4 py-2 truncate">
+                            12345678
+                        </td>
+                        <td class="px-4 py-2">
+                            20
+                        </td>
+                        <td class="px-4 py-2 truncate">
+                            Fakultas Teknologi Informasi
+                        </td>
+                        <td class="px-4 py-2">
+                            19 Agustus 2022
+                        </td>
+                        <td class="px-4 py-2">
+                            19 Agustus 2030
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            Nonaktif
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            <a href="#" class="font-medium text-fg-brand hover:underline">Lihat</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer & Pagination -->
+        <div class="text-body bg-neutral-secondary-medium border-t border-default-medium rounded-md">
+            <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between px-4 py-2" aria-label="Table navigation">
+                <span class="text-sm font-normal text-body block w-full md:inline md:w-auto">Menampilkan <span class="font-semibold text-heading">1-10</span> dari <span class="font-semibold text-heading">1000</span></span>
+                <ul class="flex -space-x-px text-sm">
+                    <li>
+                        <a href="#" class="flex items-center justify-center text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading font-medium rounded-s-base text-sm px-3 h-9 focus:outline-none">Previous</a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center justify-center text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading font-medium text-sm w-9 h-9 focus:outline-none">1</a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center justify-center text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading font-medium text-sm w-9 h-9 focus:outline-none">2</a>
+                    </li>
+                    <li>
+                        <a href="#" aria-current="page" class="flex items-center justify-center text-fg-brand bg-brand-softer box-border border border-default-medium hover:bg-brand-soft hover:text-fg-brand font-medium text-sm w-9 h-9 focus:outline-none">3</a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center justify-center text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading font-medium text-sm w-9 h-9 focus:outline-none">...</a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center justify-center text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading font-medium text-sm w-9 h-9 focus:outline-none">5</a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center justify-center text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading font-medium rounded-e-base text-sm px-3 h-9 focus:outline-none">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
     </div>
 </div>

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('gelar_belakang')->nullable();
             $table->string('tempat_lahir');
             $table->date('tanggal_lahir');
+            $table->date('tanggal_bergabung');
             $table->date('tanggal_pensiun');
             $table->string('jenis_kelamin')->nullable();
             $table->text('alamat_ktp');
