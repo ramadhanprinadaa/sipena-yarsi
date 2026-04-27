@@ -35,7 +35,6 @@
             </div>
         </div>
 
-
         <div class="flex gap-3">
             {{-- Search --}}
             <div class="relative w-72">

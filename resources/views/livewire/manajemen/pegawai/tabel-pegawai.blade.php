@@ -8,7 +8,7 @@
 
             @if(auth()->user()->hasRole(['Admin', 'SDM Yayasan', 'SDM Universitas']))
                 <!-- Filter Unit Kerja -->
-                <div class="relative w-44" x-data="{ open: false, selected: 'Semua Unit Kerja' }">
+                <div class="relative w-42" x-data="{ open: false, selected: 'Semua Unit Kerja' }">
                     <button
                         @click="open = !open"
                         class="filter-dropdown"
@@ -51,7 +51,7 @@
             @endif
 
             <!-- Filter Gelar -->
-            <div class="relative w-44" x-data="{ open: false, selected: 'Semua Gelar' }">
+            <div class="relative w-34" x-data="{ open: false, selected: 'Semua Gelar' }">
                 <button
                     @click="open = !open"
                     class="filter-dropdown"
@@ -98,7 +98,7 @@
             </div>
 
             <!-- Filter Status -->
-            <div class="relative w-44" x-data="{ open: false, selected: 'Semua Status' }">
+            <div class="relative w-36" x-data="{ open: false, selected: 'Semua Status' }">
                 <button
                     @click="open = !open"
                     class="filter-dropdown"
@@ -135,7 +135,7 @@
             </div>
 
             <!-- Filter Rentang Masa Kerja -->
-            <div class="relative w-64" x-data="{ open: false, selected: 'Semua Rentang Masa Kerja' }">
+            <div class="relative w-62" x-data="{ open: false, selected: 'Semua Rentang Masa Kerja' }">
                 <button
                     @click="open = !open"
                     class="filter-dropdown"
@@ -173,7 +173,7 @@
         </div>
 
         <!-- Search -->
-        <div class="relative">
+        <div class="relative w-77">
             <div class="absolute inset-y-0 flex items-center ps-3 pointer-events-none">
                 <svg class="w-4 h-4 text-body" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg>
             </div>
@@ -182,11 +182,12 @@
     </div>
 
     <!-- Table -->
-    <div class="relative w-full bg-neutral-primary-soft shadow-xs rounded-md border border-default flex flex-col flex-1 min-h-0">
+    <div class="table-container">
 
-        <div class="rounded-md overflow-y-auto flex-1">
-            <table class="w-full table-fixed text-sm text-left rtl:text-right text-body h-full">
-                <thead class="sticky top-0 text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
+        <!-- Main Content -->
+        <div class="table-wrapper">
+            <table class="table">
+                <thead class="table-header">
                     <tr>
                         <th scope="col" class="px-4 py-3 font-medium w-36">
                             Nama Pegawai
@@ -216,244 +217,83 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
-                    <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                        <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
-                            Apple MacBook Pro 17"
-                        </th>
-                        <td class="px-4 py-2 truncate">
-                            12345678
-                        </td>
-                        <td class="px-4 py-2">
-                            20
-                        </td>
-                        <td class="px-4 py-2 truncate">
-                            Fakultas Teknologi Informasi
-                        </td>
-                        <td class="px-4 py-2">
-                            19 Agustus 2022
-                        </td>
-                        <td class="px-4 py-2">
-                            19 Agustus 2030
-                        </td>
-                        <td class="px-4 py-2 text-center">
-                            Nonaktif
-                        </td>
-                        <td class="px-4 py-2 text-center">
-                            <a href="#" class="font-medium text-fg-brand hover:underline">Lihat</a>
-                        </td>
-                    </tr>
-                    <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                        <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
-                            Apple MacBook Pro 17"
-                        </th>
-                        <td class="px-4 py-2 truncate">
-                            12345678
-                        </td>
-                        <td class="px-4 py-2">
-                            20
-                        </td>
-                        <td class="px-4 py-2 truncate">
-                            Fakultas Teknologi Informasi
-                        </td>
-                        <td class="px-4 py-2">
-                            19 Agustus 2022
-                        </td>
-                        <td class="px-4 py-2">
-                            19 Agustus 2030
-                        </td>
-                        <td class="px-4 py-2 text-center">
-                            Nonaktif
-                        </td>
-                        <td class="px-4 py-2 text-center">
-                            <a href="#" class="font-medium text-fg-brand hover:underline">Lihat</a>
-                        </td>
-                    </tr>
-                    <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                        <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
-                            Apple MacBook Pro 17"
-                        </th>
-                        <td class="px-4 py-2 truncate">
-                            12345678
-                        </td>
-                        <td class="px-4 py-2">
-                            20
-                        </td>
-                        <td class="px-4 py-2 truncate">
-                            Fakultas Teknologi Informasi
-                        </td>
-                        <td class="px-4 py-2">
-                            19 Agustus 2022
-                        </td>
-                        <td class="px-4 py-2">
-                            19 Agustus 2030
-                        </td>
-                        <td class="px-4 py-2 text-center">
-                            Nonaktif
-                        </td>
-                        <td class="px-4 py-2 text-center">
-                            <a href="#" class="font-medium text-fg-brand hover:underline">Lihat</a>
-                        </td>
-                    </tr>
-                    <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                        <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
-                            Apple MacBook Pro 17"
-                        </th>
-                        <td class="px-4 py-2 truncate">
-                            12345678
-                        </td>
-                        <td class="px-4 py-2">
-                            20
-                        </td>
-                        <td class="px-4 py-2 truncate">
-                            Fakultas Teknologi Informasi
-                        </td>
-                        <td class="px-4 py-2">
-                            19 Agustus 2022
-                        </td>
-                        <td class="px-4 py-2">
-                            19 Agustus 2030
-                        </td>
-                        <td class="px-4 py-2 text-center">
-                            Nonaktif
-                        </td>
-                        <td class="px-4 py-2 text-center">
-                            <a href="#" class="font-medium text-fg-brand hover:underline">Lihat</a>
-                        </td>
-                    </tr>
-                    <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                        <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
-                            Apple MacBook Pro 17"
-                        </th>
-                        <td class="px-4 py-2 truncate">
-                            12345678
-                        </td>
-                        <td class="px-4 py-2">
-                            20
-                        </td>
-                        <td class="px-4 py-2 truncate">
-                            Fakultas Teknologi Informasi
-                        </td>
-                        <td class="px-4 py-2">
-                            19 Agustus 2022
-                        </td>
-                        <td class="px-4 py-2">
-                            19 Agustus 2030
-                        </td>
-                        <td class="px-4 py-2 text-center">
-                            Nonaktif
-                        </td>
-                        <td class="px-4 py-2 text-center">
-                            <a href="#" class="font-medium text-fg-brand hover:underline">Lihat</a>
-                        </td>
-                    </tr>
-                    <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                        <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
-                            Apple MacBook Pro 17"
-                        </th>
-                        <td class="px-4 py-2 truncate">
-                            12345678
-                        </td>
-                        <td class="px-4 py-2">
-                            20
-                        </td>
-                        <td class="px-4 py-2 truncate">
-                            Fakultas Teknologi Informasi
-                        </td>
-                        <td class="px-4 py-2">
-                            19 Agustus 2022
-                        </td>
-                        <td class="px-4 py-2">
-                            19 Agustus 2030
-                        </td>
-                        <td class="px-4 py-2 text-center">
-                            Nonaktif
-                        </td>
-                        <td class="px-4 py-2 text-center">
-                            <a href="#" class="font-medium text-fg-brand hover:underline">Lihat</a>
-                        </td>
-                    </tr>
-                    <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                        <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
-                            Apple MacBook Pro 17"
-                        </th>
-                        <td class="px-4 py-2 truncate">
-                            12345678
-                        </td>
-                        <td class="px-4 py-2">
-                            20
-                        </td>
-                        <td class="px-4 py-2 truncate">
-                            Fakultas Teknologi Informasi
-                        </td>
-                        <td class="px-4 py-2">
-                            19 Agustus 2022
-                        </td>
-                        <td class="px-4 py-2">
-                            19 Agustus 2030
-                        </td>
-                        <td class="px-4 py-2 text-center">
-                            Nonaktif
-                        </td>
-                        <td class="px-4 py-2 text-center">
-                            <a href="#" class="font-medium text-fg-brand hover:underline">Lihat</a>
-                        </td>
-                    </tr>
-                    <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                        <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
-                            Apple MacBook Pro 17"
-                        </th>
-                        <td class="px-4 py-2 truncate">
-                            12345678
-                        </td>
-                        <td class="px-4 py-2">
-                            20
-                        </td>
-                        <td class="px-4 py-2 truncate">
-                            Fakultas Teknologi Informasi
-                        </td>
-                        <td class="px-4 py-2">
-                            19 Agustus 2022
-                        </td>
-                        <td class="px-4 py-2">
-                            19 Agustus 2030
-                        </td>
-                        <td class="px-4 py-2 text-center">
-                            Nonaktif
-                        </td>
-                        <td class="px-4 py-2 text-center">
-                            <a href="#" class="font-medium text-fg-brand hover:underline">Lihat</a>
-                        </td>
-                    </tr>
+                <tbody>
+                    @for ($i = 0; $i < 10; $i++)
+                        <tr class="table-row">
+                            <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
+                                Ambatukam Rodok
+                            </th>
+                            <td class="px-4 py-2 truncate">
+                                12345678
+                            </td>
+                            <td class="px-4 py-2">
+                                20
+                            </td>
+                            <td class="px-4 py-2 truncate">
+                                Fakultas Teknologi Informasi
+                            </td>
+                            <td class="px-4 py-2">
+                                19 Agustus 2022
+                            </td>
+                            <td class="px-4 py-2">
+                                19 Agustus 2030
+                            </td>
+                            <td class="px-4 py-2 text-center">
+                                @if (false)
+                                    <span class="px-2.5 py-1 text-xs font-medium rounded-md bg-green-100 text-green-700">
+                                        Aktif
+                                    </span>
+                                @else
+                                    <span class="px-2.5 py-1 text-xs font-medium rounded-md bg-red-100 text-red-700">
+                                        Nonaktif
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-2 text-center">
+                                <a
+                                    wire:navigate href="{{route('manajemen-pegawai-detail', ['id' => 1])}}"
+                                    class="px-2 py-1 text-xs text-white rounded-md bg-blue-600 hover:bg-blue-700 transition">
+                                    Lihat
+                                </a>
+                            </td>
+                        </tr>
+                    @endfor
                 </tbody>
             </table>
         </div>
 
         <!-- Footer & Pagination -->
         <div class="text-body bg-neutral-secondary-medium border-t border-default-medium rounded-md">
+
             <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between px-4 py-2" aria-label="Table navigation">
-                <span class="text-sm font-normal text-body block w-full md:inline md:w-auto">Menampilkan <span class="font-semibold text-heading">1-10</span> dari <span class="font-semibold text-heading">1000</span></span>
+                <span class="text-sm font-normal text-body block w-full md:inline md:w-auto">
+                    Menampilkan
+                    <span class="font-semibold text-heading">1-10</span> dari
+                    <span class="font-semibold text-heading">1000</span>
+                </span>
+
                 <ul class="flex -space-x-px text-sm">
                     <li>
-                        <a href="#" class="flex items-center justify-center text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading font-medium rounded-s-base text-sm px-3 h-9 focus:outline-none">Previous</a>
+                        <a href="#" class="table-pagination-btn rounded-s-base text-sm px-3">Previous</a>
                     </li>
                     <li>
-                        <a href="#" class="flex items-center justify-center text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading font-medium text-sm w-9 h-9 focus:outline-none">1</a>
+                        <a href="#" class="table-pagination-btn w-9">1</a>
                     </li>
                     <li>
-                        <a href="#" class="flex items-center justify-center text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading font-medium text-sm w-9 h-9 focus:outline-none">2</a>
+                        <a href="#" class="table-pagination-btn w-9">2</a>
+                    </li>
+                    <!-- Active Page Button -->
+                    <li>
+                        <a href="#" class="table-pagination-btn-active">3</a>
                     </li>
                     <li>
-                        <a href="#" aria-current="page" class="flex items-center justify-center text-fg-brand bg-brand-softer box-border border border-default-medium hover:bg-brand-soft hover:text-fg-brand font-medium text-sm w-9 h-9 focus:outline-none">3</a>
+                        <a href="#" class="table-pagination-btn w-9">...</a>
                     </li>
                     <li>
-                        <a href="#" class="flex items-center justify-center text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading font-medium text-sm w-9 h-9 focus:outline-none">...</a>
+                        <a href="#" class="table-pagination-btn w-9">5</a>
                     </li>
                     <li>
-                        <a href="#" class="flex items-center justify-center text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading font-medium text-sm w-9 h-9 focus:outline-none">5</a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center justify-center text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading font-medium rounded-e-base text-sm px-3 h-9 focus:outline-none">Next</a>
+                        <a href="#" class="table-pagination-btn rounded-e-base text-sm px-3">Next</a>
                     </li>
                 </ul>
             </nav>

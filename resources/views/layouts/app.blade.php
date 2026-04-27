@@ -38,7 +38,7 @@
         </aside>
 
         {{-- Right Content --}}
-        <div :class="sidebarToggle ? 'ml-64' : 'ml-26'" class="flex-1 flex flex-col gap-4">
+        <div :class="sidebarToggle ? 'ml-64' : 'ml-26'" class="flex-1 flex flex-col gap-4 min-w-0 overflow-x-hidden">
 
             {{-- Section --}}
             <div class="flex items-center gap-2 sticky top-24 z-30">
@@ -57,7 +57,7 @@
             </div>
 
             {{-- Main Content --}}
-            <main class="bg-white/20 backdrop-blur-sm shadow-md rounded-xl p-6 min-h-[calc(100vh-157px)] mt-23">
+            <main class="bg-white/20 backdrop-blur-sm shadow-md rounded-xl p-6 min-h-[calc(100vh-157px)] mt-23 overflow-x-auto">
                 @yield('content')
             </main>
 
