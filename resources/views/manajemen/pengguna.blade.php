@@ -38,6 +38,7 @@
                 <span x-text="message"></span>
             </div>
         </div>
+        
         <div class="flex-1">
             <livewire:manajemen.users.index />
             <livewire:manajemen.users.add-user />

@@ -1,4 +1,4 @@
-<div class="flex flex-col space-y-4 max-h-92">
+<div class="flex flex-col space-y-4 h-[calc(100vh-280px)]">
 
     <!-- Filter & Search -->
     <div class="flex items-center justify-between gap-2">

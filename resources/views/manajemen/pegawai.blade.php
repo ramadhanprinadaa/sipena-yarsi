@@ -34,9 +34,10 @@
         </div>
 
         <!-- Table Pegawai -->
-        <div class="flex-1">
+        <div class="flex-1 mb-10">
             <livewire:manajemen.pegawai.tabel-pegawai />
         </div>
+
     </div>
 
 @endsection
