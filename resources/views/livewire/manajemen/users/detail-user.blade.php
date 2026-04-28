@@ -226,7 +226,7 @@
 
                     <button
                         wire:click="close"
-                        class="px-4 py-2 text-sm border border-gray-200 rounded hover:bg-gray-100 cursor-pointer"
+                        class="px-4 py-2 text-sm border border-gray-200 rounded-md hover:bg-gray-100 cursor-pointer"
                     >
                         Tutup
                     </button>
@@ -236,7 +236,7 @@
                             wire:click="save"
                             @disabled(!$this->isDirty)
                             class="px-4 py-2 text-sm text-white bg-indigo-500
-                            hover:bg-indigo-600 rounded cursor-pointer"
+                            hover:bg-indigo-600 rounded-md cursor-pointer"
                         >
                             <i class="fa-solid fa-floppy-disk mr-1"></i>
                             Simpan Perubahan

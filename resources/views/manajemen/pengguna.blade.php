@@ -14,9 +14,9 @@
     <div class="flex flex-col h-full min-h-0">
 
         <div class="flex justify-between mb-2">
-            <div class="flex flex-col gap-2">
-                <h1 class="text-2xl font-bold">Daftar Pengguna</h1>
-                <p class="text-sm text-gray-800">Kelola akun pengguna dan hak akses</p>
+            <div class="flex flex-col gap-2 font-poppins">
+                <h1 class="text-2xl font-semibold">Daftar Pengguna</h1>
+                <p class="text-sm font-medium">Kelola akun pengguna dan hak akses</p>
             </div>
             <div
                 x-data="{ show: false, message: '', type: 'success' }"
@@ -38,7 +38,7 @@
                 <span x-text="message"></span>
             </div>
         </div>
-        
+
         <div class="flex-1">
             <livewire:manajemen.users.index />
             <livewire:manajemen.users.add-user />

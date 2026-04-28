@@ -72,6 +72,7 @@ class PegawaiSeeder extends Seeder
             'nama' => 'Chintya Mutiara Putri',
             'email_yarsi' => 'tiara@yarsi.ac.id',
             'jenis_kelamin' => 'P',
+            'unit_kerja_id' => 4
         ]);
     }
 }

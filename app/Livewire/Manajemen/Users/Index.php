@@ -48,7 +48,8 @@ class Index extends Component
     {
         $users = User::with(['role', 'pegawai'])
             ->where('role_id', '!=', 1)
-            ->oldest();
+            ->orderBy('role_id')
+            ->orderBy('users.username');
 
         if ($this->selectedRole) {
             $users->whereHas('role', function ($q) {
@@ -70,7 +71,7 @@ class Index extends Component
                 });
         }
         return view('livewire.manajemen.users.index', [
-            'users' => $users->paginate(4),
+            'users' => $users->paginate(10),
             'roleColors' => $this->roleColors,
         ]);
     }

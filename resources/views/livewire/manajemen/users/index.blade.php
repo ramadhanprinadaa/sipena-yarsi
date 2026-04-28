@@ -1,4 +1,4 @@
-<div class="flex flex-col space-y-4 h-full">
+<div class="flex flex-col space-y-4 h-[calc(100vh-280px)]">
 
     <!-- Filter & Search -->
     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -56,15 +56,25 @@
     </div>
 
     <!-- Table -->
-    <div class="flex flex-col flex-1 min-h-0 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm">
-        <div class="flex-1 overflow-y-auto no-scrollbar">
-            <table class="min-w-full text-sm">
+    <div class="table-container relative">
+        <!-- Loading -->
+        <div wire:loading>
+            <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
+                <div role="status">
+                    <x-ui.spinner />
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="table-wrapper">
+            <table class="table">
                 <!-- Header -->
-                <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider sticky top-0">
+                <thead class="table-header">
                     <tr>
                         <th
                             wire:click="sortBy('username')"
-                            class="px-4 py-3 text-left font-semibold cursor-pointer select-none"
+                            scope="col" class="px-4 py-3 font-medium w-30"
                         >
                             <div class="flex items-center justify-between gap-2">
                                 <span>Username</span>
@@ -77,67 +87,67 @@
                                 </span>
                             </div>
                         </th>
-                        <th class="px-4 py-3 text-left font-semibold">Nama</th>
-                        <th class="px-4 py-3 text-left font-semibold">NIP</th>
-                        <th class="px-4 py-3 text-left font-semibold">Email</th>
-                        <th class="px-4 py-3 text-left font-semibold">Role</th>
-                        <th class="px-4 py-3 text-left font-semibold">Status</th>
-                        <th class="px-4 py-3 text-left font-semibold">Aksi</th>
+                        <th scope="col" class="px-4 py-3 font-medium w-40">Nama</th>
+                        <th scope="col" class="px-4 py-3 font-medium w-30">NIP</th>
+                        <th scope="col" class="px-4 py-3 font-medium w-40">Email</th>
+                        <th scope="col" class="px-4 py-3 font-medium w-30">Role</th>
+                        <th scope="col" class="px-4 py-3 font-medium w-20">Status</th>
+                        <th scope="col" class="px-4 py-3 font-medium w-20">Aksi</th>
                     </tr>
                 </thead>
                 <!-- Body -->
-                <tbody class="divide-y divide-gray-100">
+                <tbody>
                     @foreach ($users as $user)
-                    <tr wire:key="user-{{ $user->id }}" class="hover:bg-gray-50 transition">
+                    <tr wire:key="user-{{ $user->id }}" class="table-row">
 
                         <!-- Username -->
-                        <td class="px-4 py-3 font-medium text-gray-700 max-w-40 truncate">
+                        <td class="px-4 py-2 font-medium text-heading truncate">
                             {{ $user->username }}
                         </td>
 
                         <!-- Nama -->
-                        <td class="px-4 py-3 max-w-40 truncate"
+                        <td class="px-4 py-2 font-medium truncate"
                             title="{{ $user->pegawai->nama ?? 'N/A' }}">
                             {{ $user->pegawai->nama ?? '-' }}
                         </td>
 
                         <!-- NIP -->
-                        <td class="px-4 py-3 text-gray-600">
+                        <td class="px-4 py-2 truncate">
                             {{ $user->pegawai->nip ?? '-' }}
                         </td>
 
                         <!-- Email -->
-                        <td class="px-4 py-3 text-gray-600 max-w-48 truncate">
+                        <td class="px-4 py-2 truncate">
                             {{ $user->email }}
                         </td>
 
                         <!-- Role -->
-                        <td class="px-4 py-3">
+                        <td class="px-4 py-2">
                             @php
                                 $role = $user->role->name ?? '';
                                 $roleColor = $roleColors[$role] ?? $roleColors['default'];
                             @endphp
-                            <span class="px-2.5 py-1 text-xs font-medium rounded-full {{ $roleColor }}">
+                            <span class="px-2.5 py-1 text-xs font-medium rounded-md {{ $roleColor }}">
                                 {{ $role }}
                             </span>
                         </td>
 
                         <!-- Status -->
-                        <td class="px-4 py-3">
+                        <td class="px-4 py-2">
                             @if ($user->status == 'active')
-                                <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
+                                <span class="px-2.5 py-1 text-xs font-medium rounded-md bg-green-100 text-green-700">
                                     Aktif
                                 </span>
                             @else
-                                <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">
+                                <span class="px-2.5 py-1 text-xs font-medium rounded-md bg-red-100 text-red-700">
                                     Nonaktif
                                 </span>
                             @endif
                         </td>
 
                         <!-- Aksi -->
-                        <td class="px-4 py-3">
-                            <button wire:click="openDetail({{ $user->id }})" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition cursor-pointer">
+                        <td class="px-4 py-2">
+                            <button wire:click="openDetail({{ $user->id }})" class="px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition cursor-pointer">
                                 Lihat
                             </button>
                         </td>
@@ -146,8 +156,63 @@
                 </tbody>
             </table>
         </div>
-        <div class="px-4 py-2 bg-gray-100 border-t border-gray-200">
-            {{ $users->links() }}
+
+        <!-- Footer & Pagination -->
+        <div class="text-body bg-neutral-secondary-medium border-t border-default-medium rounded-md">
+
+            <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between px-4 py-2" aria-label="Table navigation">
+                <span class="text-sm font-normal text-body block w-full md:inline md:w-auto">
+                    Menampilkan
+                    <span class="font-semibold text-heading">{{ $users->firstItem() }}-{{ $users->lastItem() }}</span> dari
+                    <span class="font-semibold text-heading">{{ $users->total() }} pengguna</span>
+                </span>
+
+                <ul class="flex -space-x-px text-sm border border-gray-300 rounded-lg">
+                    <li>
+                        <button
+                            wire:click="gotoPage(1)"
+                            @disabled($users->onFirstPage())
+                            class="table-pagination-btn rounded-s-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                            <i class="fa-solid fa-angles-left text-xs"></i>
+                        </button>
+                    </li>
+                    <li>
+                        <button
+                            wire:click="previousPage"
+                            @disabled($users->onFirstPage())
+                            class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                            Previous
+                        </button>
+                    </li>
+                    @for ($i = max(1, $users->currentPage() - 3);
+                        $i <= min($users->lastPage(), $users->currentPage() + 3);
+                        $i++)
+                        <li>
+                            <button
+                                wire:click="gotoPage({{ $i }})"
+                                class="w-9 {{ $users->currentPage() == $i ? 'table-pagination-btn-active' : 'table-pagination-btn' }}">
+                                {{ $i }}
+                            </button>
+                        </li>
+                    @endfor
+                    <li>
+                        <button
+                            wire:click="nextPage"
+                            @disabled(!$users->hasMorePages())
+                            class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                            Next
+                        </button>
+                    </li>
+                    <button
+                        wire:click="gotoPage({{ $users->lastPage() }})"
+                        @disabled($users->onLastPage())
+                        class="table-pagination-btn rounded-e-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                        <i class="fa-solid fa-angles-right text-xs"></i>
+                    </button>
+                </ul>
+            </nav>
         </div>
     </div>
 </div>

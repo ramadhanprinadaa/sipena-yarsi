@@ -14,6 +14,6 @@ class UnitSDMSeeder extends Seeder
     public function run(): void
     {
         UnitSdm::create(['name' => 'SDM Yayasan']);
-        UnitSdm::create(['name' => 'SDM Universitas']);
+        UnitSdm::create(['name' => 'SDM Universitas', 'hr_id' => 12]);
     }
 }

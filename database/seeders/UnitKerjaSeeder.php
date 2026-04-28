@@ -17,6 +17,6 @@ class UnitKerjaSeeder extends Seeder
         UnitKerja::create(['name' => 'Preschool', 'unit_sdm_id' => 1]);
         UnitKerja::create(['name' => 'Masjid', 'unit_sdm_id' => 1]);
         UnitKerja::create(['name' => 'Fakultas Kedokteran', 'unit_sdm_id' => 2]);
-        UnitKerja::create(['name' => 'Fakultas Teknologi Informasi', 'unit_sdm_id' => 2]);
+        UnitKerja::create(['name' => 'Fakultas Teknologi Informasi', 'unit_sdm_id' => 2, 'pimpinan_id' => 2]);
     }
 }

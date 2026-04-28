@@ -8,10 +8,11 @@
 
             @if(auth()->user()->hasRole(['Admin', 'SDM Yayasan', 'SDM Universitas']))
                 <!-- Filter Unit Kerja -->
-                <div class="relative w-42" x-data="{ open: false, selected: 'Semua Unit Kerja' }">
+                <div class="relative w-46" x-data="{ open: false, selected: 'Semua Unit Kerja' }">
                     <button
                         @click="open = !open"
                         class="filter-dropdown"
+                        wire.model.live="selectedUnitKerja"
                         type="button">
                             <span x-text="selected" class="truncate"></span>
                             <svg
@@ -26,25 +27,23 @@
                         class="dropdown-menu">
                         <ul class="p-2 text-sm text-body font-medium">
                             <li>
-                                <button @click="selected='Semua Unit Kerja'; open=false" class="dropdown-item">
+                                <button
+                                    @click="selected='Semua Unit Kerja'; open=false"
+                                    wire:click="$set('selectedUnitKerja', null)"
+                                    class="dropdown-item">
                                     Semua Unit Kerja
                                 </button>
                             </li>
-                            <li>
-                                <button @click="selected='Fakultas Teknologi Informasi'; open=false" class="dropdown-item">
-                                    Fakultas Teknologi Informasi
-                                </button>
-                            </li>
-                            <li>
-                                <button @click="selected='Sekretariat Yayasan'; open=false" class="dropdown-item">
-                                    Sekretariat Yayasan
-                                </button>
-                            </li>
-                            <li>
-                                <button @click="selected='Masjid'; open=false" class="dropdown-item">
-                                    Masjid
-                                </button>
-                            </li>
+                            @foreach ($unit_kerja as $unit)
+                                <li>
+                                    <button
+                                        @click="selected='{{$unit->name}}'; open=false"
+                                        wire:click="$set('selectedUnitKerja', '{{ $unit->id }}')"
+                                        class="dropdown-item">
+                                        {{ $unit->name }}
+                                    </button>
+                                </li>
+                            @endforeach
                         </ul>
                     </div>
                 </div>
@@ -182,7 +181,16 @@
     </div>
 
     <!-- Table -->
-    <div class="table-container">
+    <div class="table-container relative">
+
+        <!-- Loading -->
+        <div wire:loading>
+            <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
+                <div role="status">
+                    <x-ui.spinner />
+                </div>
+            </div>
+        </div>
 
         <!-- Main Content -->
         <div class="table-wrapper">
@@ -196,7 +204,7 @@
                             NIK Pegawai
                         </th>
                         <th scope="col" class="px-4 py-3 font-medium w-28">
-                            Usia (Tahun)
+                            Usia
                         </th>
                         @if (auth()->user()->HasRole(['Admin', 'SDM Yayasan', 'SDM Universitas']))
                             <th scope="col" class="px-4 py-3 font-medium w-36">
@@ -218,28 +226,30 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @for ($i = 0; $i < 10; $i++)
+                    @foreach ($pegawai as $p)
                         <tr class="table-row">
                             <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
-                                Ambatukam Rodok
+                                {{ $p->nama }}
                             </th>
                             <td class="px-4 py-2 truncate">
-                                12345678
+                                {{ $p->nip }}
                             </td>
                             <td class="px-4 py-2">
-                                20
+                                {{ $p->age }} Tahun
                             </td>
-                            <td class="px-4 py-2 truncate">
-                                Fakultas Teknologi Informasi
+                            @if (auth()->user()->HasRole(['Admin', 'SDM Yayasan', 'SDM Universitas']))
+                                <td class="px-4 py-2 truncate">
+                                    {{ $p->unitKerja->name }}
+                                </td>
+                            @endif
+                            <td class="px-4 py-2">
+                                {{ $p->tanggal_bergabung->translatedFormat('d F Y') }}
                             </td>
                             <td class="px-4 py-2">
-                                19 Agustus 2022
-                            </td>
-                            <td class="px-4 py-2">
-                                19 Agustus 2030
+                                {{ $p->tanggal_pensiun->translatedFormat('d F Y') }}
                             </td>
                             <td class="px-4 py-2 text-center">
-                                @if (false)
+                                @if ($p->status == 'active')
                                     <span class="px-2.5 py-1 text-xs font-medium rounded-md bg-green-100 text-green-700">
                                         Aktif
                                     </span>
@@ -251,13 +261,13 @@
                             </td>
                             <td class="px-4 py-2 text-center">
                                 <a
-                                    wire:navigate href="{{route('manajemen-pegawai-detail', ['id' => 1])}}"
+                                    wire:navigate href="{{route('manajemen-pegawai-detail', $p->id)}}"
                                     class="px-2 py-1 text-xs text-white rounded-md bg-blue-600 hover:bg-blue-700 transition">
                                     Lihat
                                 </a>
                             </td>
                         </tr>
-                    @endfor
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -268,36 +278,56 @@
             <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between px-4 py-2" aria-label="Table navigation">
                 <span class="text-sm font-normal text-body block w-full md:inline md:w-auto">
                     Menampilkan
-                    <span class="font-semibold text-heading">1-10</span> dari
-                    <span class="font-semibold text-heading">1000</span>
+                    <span class="font-semibold text-heading">{{ $pegawai->firstItem() }}-{{ $pegawai->lastItem() }}</span> dari
+                    <span class="font-semibold text-heading">{{ $pegawai->total() }} pegawai</span>
                 </span>
 
-                <ul class="flex -space-x-px text-sm">
+                <ul class="flex -space-x-px text-sm border border-gray-300 rounded-lg">
                     <li>
-                        <a href="#" class="table-pagination-btn rounded-s-base text-sm px-3">Previous</a>
+                        <button
+                            wire:click="gotoPage(1)"
+                            @disabled($pegawai->onFirstPage())
+                            class="table-pagination-btn rounded-s-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                            <i class="fa-solid fa-angles-left text-xs"></i>
+                        </button>
                     </li>
                     <li>
-                        <a href="#" class="table-pagination-btn w-9">1</a>
+                        <button
+                            wire:click="previousPage"
+                            @disabled($pegawai->onFirstPage())
+                            class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                            Previous
+                        </button>
                     </li>
+                    @for ($i = max(1, $pegawai->currentPage() - 3);
+                        $i <= min($pegawai->lastPage(), $pegawai->currentPage() + 3);
+                        $i++)
+                        <li>
+                            <button
+                                wire:click="gotoPage({{ $i }})"
+                                class="w-9 {{ $pegawai->currentPage() == $i ? 'table-pagination-btn-active' : 'table-pagination-btn' }}">
+                                {{ $i }}
+                            </button>
+                        </li>
+                    @endfor
                     <li>
-                        <a href="#" class="table-pagination-btn w-9">2</a>
+                        <button
+                            wire:click="nextPage"
+                            @disabled(!$pegawai->hasMorePages())
+                            class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                            Next
+                        </button>
                     </li>
-                    <!-- Active Page Button -->
-                    <li>
-                        <a href="#" class="table-pagination-btn-active">3</a>
-                    </li>
-                    <li>
-                        <a href="#" class="table-pagination-btn w-9">...</a>
-                    </li>
-                    <li>
-                        <a href="#" class="table-pagination-btn w-9">5</a>
-                    </li>
-                    <li>
-                        <a href="#" class="table-pagination-btn rounded-e-base text-sm px-3">Next</a>
-                    </li>
+                    <button
+                        wire:click="gotoPage({{ $pegawai->lastPage() }})"
+                        @disabled($pegawai->onLastPage())
+                        class="table-pagination-btn rounded-e-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                        <i class="fa-solid fa-angles-right text-xs"></i>
+                    </button>
                 </ul>
             </nav>
         </div>
-
     </div>
 </div>
