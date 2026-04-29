@@ -8,7 +8,7 @@
 
             @if(auth()->user()->hasRole(['Admin', 'SDM Yayasan', 'SDM Universitas']))
                 <!-- Filter Unit Kerja -->
-                <div class="relative w-46" x-data="{ open: false, selected: 'Semua Unit Kerja' }">
+                <div class="relative w-44" x-data="{ open: false, selected: 'Semua Unit Kerja' }">
                     <button
                         @click="open = !open"
                         class="filter-dropdown"
@@ -61,12 +61,51 @@
                         </ul>
                     </div>
                 </div>
+
+                <!-- Filter Jabatan -->
+                <div class="relative w-40" x-data="{ open: false, selected: 'Semua Jabatan' }">
+                    <button
+                        @click="open = !open"
+                        wire.model.live="selectedJabatan"
+                        class="filter-dropdown"
+                        type="button">
+                            <span x-text="selected" class="truncate"></span>
+                            <svg
+                                class="w-4 h-4 ms-1.5 -me-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/>
+                            </svg>
+                    </button>
+                    <!-- Menu -->
+                    <div
+                        x-show="open"
+                        @click.outside="open = false"
+                        x-transition
+                        class="dropdown-menu">
+                        <ul class="p-2 text-sm text-body font-medium">
+                            <li>
+                                <button @click="selected='Semua Jabatan'; open=false" class="dropdown-item" wire:click="$set('selectedJabatan', null)">
+                                    Semua Jabatan
+                                </button>
+                            </li>
+                            <li>
+                                <button @click="selected='Pimpinan'; open=false" class="dropdown-item" wire:click="$set('selectedJabatan', 'Pimpinan')">
+                                    Pimpinan
+                                </button>
+                            </li>
+                            <li>
+                                <button @click="selected='Pegawai'; open=false" class="dropdown-item" wire:click="$set('selectedJabatan', 'Pegawai')">
+                                    Pegawai
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             @endif
 
             <!-- Filter Gelar -->
             <div class="relative w-34" x-data="{ open: false, selected: 'Semua Gelar' }">
                 <button
                     @click="open = !open"
+                    wire.model.live="selectedGelar"
                     class="filter-dropdown"
                     type="button">
                         <span x-text="selected" class="truncate"></span>
@@ -82,27 +121,27 @@
                     class="dropdown-menu">
                     <ul class="p-2 text-sm text-body font-medium">
                         <li>
-                            <button @click="selected='Semua Gelar'; open=false" class="dropdown-item">
+                            <button @click="selected='Semua Gelar'; open=false" class="dropdown-item" wire:click="$set('selectedGelar', null)">
                                 Semua Gelar
                             </button>
                         </li>
                         <li>
-                            <button @click="selected='Sarjana'; open=false" class="dropdown-item">
+                            <button @click="selected='Sarjana'; open=false" class="dropdown-item" wire:click="$set('selectedGelar','Sarjana')">
                                 Sarjana
                             </button>
                         </li>
                         <li>
-                            <button @click="selected='Magister'; open=false" class="dropdown-item">
+                            <button @click="selected='Magister'; open=false" class="dropdown-item" wire:click="$set('selectedGelar','Magister')">
                                 Magister
                             </button>
                         </li>
                         <li>
-                            <button @click="selected='Doktor'; open=false" class="dropdown-item">
+                            <button @click="selected='Doktor'; open=false" class="dropdown-item" wire:click="$set('selectedGelar','Doktor')">
                                 Doktor
                             </button>
                         </li>
                         <li>
-                            <button @click="selected='Professor'; open=false" class="dropdown-item">
+                            <button @click="selected='Professor'; open=false" class="dropdown-item" wire:click="$set('selectedGelar','Professor')">
                                 Professor
                             </button>
                         </li>
@@ -114,6 +153,7 @@
             <div class="relative w-36" x-data="{ open: false, selected: 'Semua Status' }">
                 <button
                     @click="open = !open"
+                    wire:model.live="selectedStatus"
                     class="filter-dropdown"
                     type="button">
                         <span x-text="selected" class="truncate"></span>
@@ -129,17 +169,17 @@
                     class="dropdown-menu">
                     <ul class="p-2 text-sm text-body font-medium">
                         <li>
-                            <button @click="selected='Semua Status'; open=false" class="dropdown-item">
+                            <button @click="selected='Semua Status'; open=false" class="dropdown-item" wire:click="$set('selectedStatus', null)">
                                 Semua Status
                             </button>
                         </li>
                         <li>
-                            <button @click="selected='Aktif'; open=false" class="dropdown-item">
+                            <button @click="selected='Aktif'; open=false" class="dropdown-item" wire:click="$set('selectedStatus', 'active')">
                                 Aktif
                             </button>
                         </li>
                         <li>
-                            <button @click="selected='Nonaktif'; open=false" class="dropdown-item">
+                            <button @click="selected='Nonaktif'; open=false" class="dropdown-item" wire:click="$set('selectedStatus', 'inactive')">
                                 Nonaktif
                             </button>
                         </li>
@@ -148,9 +188,10 @@
             </div>
 
             <!-- Filter Rentang Masa Kerja -->
-            <div class="relative w-62" x-data="{ open: false, selected: 'Semua Rentang Masa Kerja' }">
+            <div class="relative w-46" x-data="{ open: false, selected: 'Semua Masa Kerja' }">
                 <button
                     @click="open = !open"
+                    wire:model.live="selectedMasaKerja"
                     class="filter-dropdown"
                     type="button">
                         <span x-text="selected" class="truncate"></span>
@@ -166,18 +207,28 @@
                     class="dropdown-menu">
                     <ul class="p-2 text-sm text-body font-medium">
                         <li>
-                            <button @click="selected='Semua Rentang Masa Kerja'; open=false" class="dropdown-item">
-                                Semua Rentang Masa Kerja
+                            <button @click="selected='Semua Masa Kerja'; open=false" class="dropdown-item" wire:click="$set('selectedMasaKerja', null)">
+                                Semua Masa Kerja
                             </button>
                         </li>
                         <li>
-                            <button @click="selected='1-5 Tahun'; open=false" class="dropdown-item">
-                                1-5 Tahun
+                            <button @click="selected='0-2 Tahun'; open=false" class="dropdown-item" wire:click="$set('selectedMasaKerja', '0-2 Tahun')">
+                                0-2 Tahun
                             </button>
                         </li>
                         <li>
-                            <button @click="selected='5-10 Tahun'; open=false" class="dropdown-item">
+                            <button @click="selected='1-5 Tahun'; open=false" class="dropdown-item" wire:click="$set('selectedMasaKerja', '2-5 Tahun')">
+                                2-5 Tahun
+                            </button>
+                        </li>
+                        <li>
+                            <button @click="selected='5-10 Tahun'; open=false" class="dropdown-item" wire:click="$set('selectedMasaKerja', '5-10 Tahun')">
                                 5-10 Tahun
+                            </button>
+                        </li>
+                        <li>
+                            <button @click="selected='&gt; 10 Tahun'; open=false" class="dropdown-item" wire:click="$set('selectedMasaKerja', '> 10 Tahun')">
+                                &gt; 10 Tahun
                             </button>
                         </li>
                     </ul>
@@ -190,7 +241,8 @@
             <div class="absolute inset-y-0 flex items-center ps-3 pointer-events-none">
                 <svg class="w-4 h-4 text-body" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg>
             </div>
-            <input type="text" class="input-search" placeholder="Cari Nama atau NIP ...">
+            <input type="text" class="input-search"
+                wire:model.live.debounce.300ms="search" placeholder="Cari Nama atau NIP ...">
         </div>
     </div>
 
@@ -213,7 +265,7 @@
                     <tr>
                         <th scope="col" class="px-4 py-3 font-medium w-36">
                             <div class="flex items-center justify-between gap-2">
-                                <span>Nama Pegawai</span>
+                                <span class="truncate">Nama Pegawai</span>
                                 <div>
                                     <button wire:click="sortBy('pegawai.nama')"
                                         class="flex items-center justify-between w-full hover:text-indigo-500 cursor-pointer">
@@ -222,10 +274,10 @@
                                 </div>
                             </div>
                         </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-32">
-                            NIK Pegawai
-                        </th>
                         <th scope="col" class="px-4 py-3 font-medium w-28">
+                            <span class="truncate">NIK Pegawai</span>
+                        </th>
+                        <th scope="col" class="px-4 py-3 font-medium w-22">
                             <div class="flex items-center justify-between gap-2">
                                 <span>Usia</span>
                                 <div>
@@ -237,21 +289,24 @@
                             </div>
                         </th>
                         @if (auth()->user()->HasRole(['Admin', 'SDM Yayasan', 'SDM Universitas']))
-                            <th scope="col" class="px-4 py-3 font-medium w-36">
+                            <th scope="col" class="px-4 py-3 font-medium w-32">
                                 <div class="flex items-center justify-between gap-2">
                                     <span>Unit Kerja</span>
                                     <div>
-                                    <button wire:click="sortBy('unit_kerja')"
-                                        class="flex items-center justify-between w-full hover:text-indigo-500 cursor-pointer">
-                                        <i class="fa-solid {{ $this->sortIcon('unit_kerja') }}"></i>
-                                    </button>
+                                        <button wire:click="sortBy('unit_kerja')"
+                                            class="flex items-center justify-between w-full hover:text-indigo-500 cursor-pointer">
+                                            <i class="fa-solid {{ $this->sortIcon('unit_kerja') }}"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                                </div>
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-medium w-24 text-center">
+                                Jabatan
                             </th>
                         @endif
                         <th scope="col" class="px-4 py-3 font-medium w-40">
                             <div class="flex items-center justify-between gap-2">
-                                <span>Tanggal Bergabung</span>
+                                <span class="truncate">Tanggal Bergabung</span>
                                 <div>
                                     <button wire:click="sortBy('pegawai.tanggal_bergabung')"
                                         class="flex items-center justify-between w-full hover:text-indigo-500 cursor-pointer">
@@ -262,7 +317,7 @@
                         </th>
                         <th scope="col" class="px-4 py-3 font-medium w-36">
                             <div class="flex items-center justify-between gap-2">
-                                <span>Tanggal Pensiun</span>
+                                <span class="truncate">Tanggal Pensiun</span>
                                 <div>
                                     <button wire:click="sortBy('pegawai.tanggal_pensiun')"
                                         class="flex items-center justify-between w-full hover:text-indigo-500 cursor-pointer">
@@ -271,10 +326,10 @@
                                 </div>
                             </div>
                         </th>
-                        <th scope="col" class="px-4 py-3 font-medium text-center w-20">
+                        <th scope="col" class="px-4 py-3 font-medium text-center w-18">
                             Status
                         </th>
-                        <th scope="col" class="px-4 py-3 font-medium text-center w-20">
+                        <th scope="col" class="px-4 py-3 font-medium text-center w-18">
                             Aksi
                         </th>
                     </tr>
@@ -288,18 +343,29 @@
                             <td class="px-4 py-2 truncate">
                                 {{ $p->nip }}
                             </td>
-                            <td class="px-4 py-2">
+                            <td class="px-4 py-2 truncate">
                                 {{ $p->age }} Tahun
                             </td>
                             @if (auth()->user()->HasRole(['Admin', 'SDM Yayasan', 'SDM Universitas']))
                                 <td class="px-4 py-2 truncate">
                                     {{ $p->unit_kerja->name }}
                                 </td>
+                                <td class="px-4 py-2 truncate text-center">
+                                    @if( $p->memimpin_unit != null)
+                                        <span class="px-2.5 py-1 text-xs font-medium rounded-md bg-amber-100 text-amber-600">
+                                            Pimpinan
+                                        </span>
+                                    @else
+                                        <span class="px-2.5 py-1 text-xs font-medium rounded-md bg-violet-100 text-violet-600">
+                                            Pegawai
+                                        </span>
+                                    @endif
+                                </td>
                             @endif
-                            <td class="px-4 py-2">
+                            <td class="px-4 py-2 truncate">
                                 {{ $p->tanggal_bergabung->translatedFormat('d F Y') }}
                             </td>
-                            <td class="px-4 py-2">
+                            <td class="px-4 py-2 truncate">
                                 {{ $p->tanggal_pensiun->translatedFormat('d F Y') }}
                             </td>
                             <td class="px-4 py-2 text-center">

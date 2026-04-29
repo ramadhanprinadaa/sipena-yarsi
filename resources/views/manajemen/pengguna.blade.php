@@ -3,10 +3,10 @@
 @section('title', 'SIPENA | Manajemen Pengguna')
 
 @section('breadcrumb')
-    <div class="flex flex-wrap justify-center items-center space-x-2 text-sm text-gray-500 font-medium">
+    <div class="flex flex-wrap justify-center items-center space-x-2 text-sm text-gray-400 font-medium">
         <span>Manajemen</span>
-        <i class="fa-solid fa-chevron-right"></i>
-        <a href="{{ route('manajemen-pegawai') }}" class="text-indigo-400">Pengguna</a>
+        <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i>
+        <a href="{{ route('manajemen-pegawai') }}" class="text-indigo-600 hover:text-indigo-500">Pengguna</a>
     </div>
 @endsection
 
