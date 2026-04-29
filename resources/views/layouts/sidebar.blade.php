@@ -284,7 +284,11 @@
                             <i class="fa-solid fa-building text-lg"></i>
                             <span>Unit Kerja</span>
                         </a>
-
+                        <a wire:navigate href="{{ route('konfigurasi-unit-sdm') }}"
+                            class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-unit-sdm') ? 'bg-pink-200' : ''}}">
+                            <i class="fa-solid fa-building-lock text-lg"></i>
+                            <span>Unit SDM</span>
+                        </a>
                         <a wire:navigate href="{{ route('konfigurasi-alur-persetujuan') }}"
                             class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-alur-persetujuan') ? 'bg-pink-200' : ''}}">
                             <i class="fa-solid fa-diagram-project"></i>
@@ -312,6 +316,12 @@
                             class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-unit-kerja') ? 'bg-pink-200' : ''}}">
                             <i class="fa-solid fa-building text-lg"></i>
                             <span>Unit Kerja</span>
+                        </a>
+
+                        <a wire:navigate href="{{ route('konfigurasi-unit-sdm') }}"
+                            class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-unit-sdm') ? 'bg-pink-200' : ''}}">
+                            <i class="fa-solid fa-building-lock text-lg"></i>
+                            <span>Unit SDM</span>
                         </a>
 
                         <a wire:navigate href="{{ route('konfigurasi-alur-persetujuan') }}"

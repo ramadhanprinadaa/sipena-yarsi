@@ -102,4 +102,17 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Pegawai::class, 'pegawai_id');
     }
+
+    public function getUnitKerjaLabelAttribute()
+    {
+        if ($this->hasRole('SDM Universitas')) {
+            return $this->pegawai?->unit_kerja?->unitSdm?->name;
+        }
+
+        if ($this->hasRole('Pimpinan')) {
+            return $this->pegawai?->unit_kerja?->name;
+        }
+
+        return null;
+    }
 }

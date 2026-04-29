@@ -62,6 +62,7 @@ class PegawaiSeeder extends Seeder
             'nama' => 'Annisa Putri Yuniar',
             'email_yarsi' => 'putri@yarsi.ac.id',
             'jenis_kelamin' => 'P',
+            'unit_kerja_id' => 5
         ]);
         Pegawai::factory()->create([
             'nama' => 'Fatimah Adelia N',
@@ -72,7 +73,7 @@ class PegawaiSeeder extends Seeder
             'nama' => 'Chintya Mutiara Putri',
             'email_yarsi' => 'tiara@yarsi.ac.id',
             'jenis_kelamin' => 'P',
-            'unit_kerja_id' => 4
+            'unit_kerja_id' => 5
         ]);
     }
 }

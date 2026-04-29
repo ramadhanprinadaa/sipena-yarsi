@@ -34,16 +34,30 @@
                                     Semua Unit Kerja
                                 </button>
                             </li>
-                            @foreach ($unit_kerja as $unit)
-                                <li>
-                                    <button
-                                        @click="selected='{{$unit->name}}'; open=false"
-                                        wire:click="$set('selectedUnitKerja', '{{ $unit->id }}')"
-                                        class="dropdown-item">
-                                        {{ $unit->name }}
-                                    </button>
-                                </li>
-                            @endforeach
+                            @if (auth()->user()->HasRole('SDM Universitas'))
+                                @foreach ($unit_kerja_universitas as $unit)
+                                    <li>
+                                        <button
+                                            @click="selected='{{$unit->name}}'; open=false"
+                                            wire:click="$set('selectedUnitKerja', '{{ $unit->id }}')"
+                                            class="dropdown-item">
+                                            {{ $unit->name }}
+                                        </button>
+                                    </li>
+                                @endforeach
+                            @endif
+                            @if (auth()->user()->HasRole(['Admin', 'SDM Yayasan']))
+                                @foreach ($unit_kerja as $unit)
+                                    <li>
+                                        <button
+                                            @click="selected='{{$unit->name}}'; open=false"
+                                            wire:click="$set('selectedUnitKerja', '{{ $unit->id }}')"
+                                            class="dropdown-item">
+                                            {{ $unit->name }}
+                                        </button>
+                                    </li>
+                                @endforeach
+                            @endif
                         </ul>
                     </div>
                 </div>
@@ -198,24 +212,64 @@
                 <thead class="table-header">
                     <tr>
                         <th scope="col" class="px-4 py-3 font-medium w-36">
-                            Nama Pegawai
+                            <div class="flex items-center justify-between gap-2">
+                                <span>Nama Pegawai</span>
+                                <div>
+                                    <button wire:click="sortBy('pegawai.nama')"
+                                        class="flex items-center justify-between w-full hover:text-indigo-500 cursor-pointer">
+                                        <i class="fa-solid {{ $this->sortIcon('pegawai.nama') }}"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </th>
                         <th scope="col" class="px-4 py-3 font-medium w-32">
                             NIK Pegawai
                         </th>
                         <th scope="col" class="px-4 py-3 font-medium w-28">
-                            Usia
+                            <div class="flex items-center justify-between gap-2">
+                                <span>Usia</span>
+                                <div>
+                                    <button wire:click="sortBy('pegawai.tanggal_lahir')"
+                                        class="flex items-center justify-between w-full hover:text-indigo-500 cursor-pointer">
+                                        <i class="fa-solid {{ $this->sortIcon('pegawai.tanggal_lahir') }}"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </th>
                         @if (auth()->user()->HasRole(['Admin', 'SDM Yayasan', 'SDM Universitas']))
                             <th scope="col" class="px-4 py-3 font-medium w-36">
-                                Unit Kerja
+                                <div class="flex items-center justify-between gap-2">
+                                    <span>Unit Kerja</span>
+                                    <div>
+                                    <button wire:click="sortBy('unit_kerja')"
+                                        class="flex items-center justify-between w-full hover:text-indigo-500 cursor-pointer">
+                                        <i class="fa-solid {{ $this->sortIcon('unit_kerja') }}"></i>
+                                    </button>
+                                </div>
+                                </div>
                             </th>
                         @endif
                         <th scope="col" class="px-4 py-3 font-medium w-40">
-                            Tanggal Bergabung
+                            <div class="flex items-center justify-between gap-2">
+                                <span>Tanggal Bergabung</span>
+                                <div>
+                                    <button wire:click="sortBy('pegawai.tanggal_bergabung')"
+                                        class="flex items-center justify-between w-full hover:text-indigo-500 cursor-pointer">
+                                        <i class="fa-solid {{ $this->sortIcon('pegawai.tanggal_bergabung') }}"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </th>
                         <th scope="col" class="px-4 py-3 font-medium w-36">
-                            Tanggal Pensiun
+                            <div class="flex items-center justify-between gap-2">
+                                <span>Tanggal Pensiun</span>
+                                <div>
+                                    <button wire:click="sortBy('pegawai.tanggal_pensiun')"
+                                        class="flex items-center justify-between w-full hover:text-indigo-500 cursor-pointer">
+                                        <i class="fa-solid {{ $this->sortIcon('pegawai.tanggal_pensiun') }}"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </th>
                         <th scope="col" class="px-4 py-3 font-medium text-center w-20">
                             Status
@@ -239,7 +293,7 @@
                             </td>
                             @if (auth()->user()->HasRole(['Admin', 'SDM Yayasan', 'SDM Universitas']))
                                 <td class="px-4 py-2 truncate">
-                                    {{ $p->unitKerja->name }}
+                                    {{ $p->unit_kerja->name }}
                                 </td>
                             @endif
                             <td class="px-4 py-2">
