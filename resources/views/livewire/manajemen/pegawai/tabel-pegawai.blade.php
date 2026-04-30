@@ -12,7 +12,7 @@
                     <button
                         @click="open = !open"
                         class="filter-dropdown"
-                        wire.model.live="selectedUnitKerja"
+                        wire:model.live="selectedUnitKerja"
                         type="button">
                             <span x-text="selected" class="truncate"></span>
                             <svg
@@ -105,7 +105,7 @@
             <div class="relative w-34" x-data="{ open: false, selected: 'Semua Gelar' }">
                 <button
                     @click="open = !open"
-                    wire.model.live="selectedGelar"
+                    wire:model.live="selectedGelar"
                     class="filter-dropdown"
                     type="button">
                         <span x-text="selected" class="truncate"></span>

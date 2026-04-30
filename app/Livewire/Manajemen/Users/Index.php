@@ -76,6 +76,21 @@ class Index extends Component
         ]);
     }
 
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSelectedRole()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSelectedStatus()
+    {
+        $this->resetPage();
+    }
+
     public function openDetail($id)
     {
         $this->dispatch('open-user-detail', $id);

@@ -11,21 +11,38 @@
 @endsection
 
 @section('content')
-    <div class="flex flex-col h-full min-h-0">
+    <div x-data="{ open: false }" @close-modal.window="open = false" class="flex flex-col h-full min-h-0">
+
         <div class="flex items-end justify-between mb-4">
             <div class="flex flex-col gap-2 font-poppins">
                 <h1 class="text-2xl font-semibold">Unit Kerja</h1>
                 <p class="text-sm font-medium">Kelola daftar unit kerja dalam organisasi Anda.</p>
             </div>
 
-            <button class="flex items-center px-3 h-10 justify-center cursor-pointer bg-indigo-500 hover:bg-indigo-700 text-white text-sm rounded-md transition">
-                <i class="fa-solid fa-plus text-sm mr-2"></i>
-                Tambah Unit Kerja
+            <button
+                @click="open = true"
+                class="flex items-center px-3 h-10 justify-center cursor-pointer bg-indigo-500 hover:bg-indigo-700 text-white text-sm rounded-md transition">
+                    <i class="fa-solid fa-plus text-sm mr-2"></i>
+                    Tambah Unit Kerja
             </button>
         </div>
 
         <div class="flex-1">
             <livewire:config.unit-kerja.tabel-unit-kerja/>
+        </div>
+
+        <!-- Modal Detail Unit Kerja -->
+
+        <!-- Modal Form Tambah Unit Kerja -->
+        <div
+            x-show="open"
+            x-transition
+            @keydown.escape.window="open = false"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+
+            <div @click.stop>
+                <livewire:config.unit-kerja.tambah-unit-kerja />
+            </div>
         </div>
     </div>
 @endsection
