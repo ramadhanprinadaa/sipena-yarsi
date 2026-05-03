@@ -11,11 +11,11 @@
 
             {{-- Menu Beranda --}}
             <div class="flex flex-col space-y-2 w-full text-sm">
-                <a href="{{ route('kepegawaian') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('kepegawaian') ? 'bg-pink-200' : ''}}">
+                <a href="{{ route('kepegawaian') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-gradient-to-r hover:from-[#2B76FF]/50 hover:to-[#A8C7FF]/50 hover:text-white cursor-pointer text-gray-800 {{ request()->routeIs('kepegawaian') ? 'bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white' : ''}}">
                     <i class="text-lg fa-solid fa-address-card"></i>
                     <span :class="sidebarToggle ? 'block' : 'hidden'">Kepegawaian</span>
                 </a>
-                <a href="{{ route('presensi') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('presensi') ? 'bg-pink-200' : ''}}">
+                <a href="{{ route('presensi') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-gradient-to-r hover:from-[#2B76FF]/50 hover:to-[#A8C7FF]/50 hover:text-white cursor-pointer text-gray-800 {{ request()->routeIs('presensi') ? 'bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white' : ''}}">
                     <i class="text-xl fa-solid fa-clock"></i>
                     <span :class="sidebarToggle ? 'block' : 'hidden'">Presensi</span>
                 </a>
@@ -28,16 +28,16 @@
                         'Staff',
                         'Tendik'
                 ]))
-                    <a href="{{ route('lembur') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('lembur') ? 'bg-pink-200' : ''}}">
+                    <a href="{{ route('lembur') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-gradient-to-r hover:from-[#2B76FF]/50 hover:to-[#A8C7FF]/50 hover:text-white cursor-pointer text-gray-800 {{ request()->routeIs('lembur') ? 'bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white' : ''}}">
                         <i class="text-lg fa-solid fa-business-time"></i>
                         <span :class="sidebarToggle ? 'block' : 'hidden'">Lembur</span>
                     </a>
                 @endif
-                <a href="{{ route('cuti') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('cuti') ? 'bg-pink-200' : ''}}">
+                <a href="{{ route('cuti') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-gradient-to-r hover:from-[#2B76FF]/50 hover:to-[#A8C7FF]/50 hover:text-white cursor-pointer text-gray-800 {{ request()->routeIs('cuti') ? 'bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white' : ''}}">
                     <i class="text-lg fa-solid fa-plane-departure"></i>
                     <span :class="sidebarToggle ? 'block' : 'hidden'">Cuti</span>
                 </a>
-                <a href="{{ route('surat-menyurat') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('surat-menyurat') ? 'bg-pink-200' : ''}}">
+                <a href="{{ route('surat-menyurat') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-gradient-to-r hover:from-[#2B76FF]/50 hover:to-[#A8C7FF]/50 hover:text-white cursor-pointer text-gray-800 {{ request()->routeIs('surat-menyurat') ? 'bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white' : ''}}">
                     <i class="text-xl fa-solid fa-envelope"></i>
                     <span :class="sidebarToggle ? 'block' : 'hidden'">Surat Menyurat</span>
                 </a>
@@ -59,32 +59,32 @@
                 {{-- Menu Manajemen --}}
                 @if (auth()->user()->hasRole('Admin'))
                     <div class="flex flex-col space-y-2 w-full">
-                        <a href="{{ route('manajemen-pengguna') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('manajemen-pengguna') ? 'bg-pink-200' : ''}}">
+                        <a href="{{ route('manajemen-pengguna') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-gradient-to-r hover:from-[#2B76FF]/50 hover:to-[#A8C7FF]/50 hover:text-white cursor-pointer text-gray-800 {{ request()->routeIs('manajemen-pengguna') ? 'bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white' : ''}}">
                             <i class="text-lg fa-solid fa-address-book"></i>
                             <span :class="sidebarToggle ? 'block' : 'hidden'">Pengguna</span>
                         </a>
                     </div>
                 @endif
                 <div class="flex flex-col space-y-2 w-full">
-                    <a href="{{ route('manajemen-pegawai') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('manajemen-pegawai') ? 'bg-pink-200' : ''}}">
+                    <a href="{{ route('manajemen-pegawai') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-gradient-to-r hover:from-[#2B76FF]/50 hover:to-[#A8C7FF]/50 hover:text-white cursor-pointer text-gray-800 {{ request()->routeIs('manajemen-pegawai') ? 'bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white' : ''}}">
                         <i class="text-md fa-solid fa-users"></i>
                         <span :class="sidebarToggle ? 'block' : 'hidden'">Pegawai</span>
                     </a>
                 </div>
                 <div class="flex flex-col space-y-2 w-full">
-                    <a href="{{ route('manajemen-presensi') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('manajemen-presensi') ? 'bg-pink-200' : ''}}">
+                    <a href="{{ route('manajemen-presensi') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-gradient-to-r hover:from-[#2B76FF]/50 hover:to-[#A8C7FF]/50 hover:text-white cursor-pointer text-gray-800 {{ request()->routeIs('manajemen-presensi') ? 'bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white' : ''}}">
                         <i class="text-lg fa-solid fa-list-check"></i>
                         <span :class="sidebarToggle ? 'block' : 'hidden'">Presensi</span>
                     </a>
                 </div>
                 <div class="flex flex-col space-y-2 w-full">
-                    <a href="{{ route('manajemen-lembur') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('manajemen-lembur') ? 'bg-pink-200' : ''}}">
+                    <a href="{{ route('manajemen-lembur') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-gradient-to-r hover:from-[#2B76FF]/50 hover:to-[#A8C7FF]/50 hover:text-white cursor-pointer text-gray-800 {{ request()->routeIs('manajemen-lembur') ? 'bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white' : ''}}">
                         <i class="text-md fa-solid fa-user-check"></i>
                         <span :class="sidebarToggle ? 'block' : 'hidden'">Pengajuan Lembur</span>
                     </a>
                 </div>
                 <div class="flex flex-col space-y-2 w-full">
-                    <a href="{{ route('manajemen-cuti') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-pink-200 cursor-pointer text-gray-800 {{ request()->routeIs('manajemen-cuti') ? 'bg-pink-200' : ''}}">
+                    <a href="{{ route('manajemen-cuti') }}" :class="sidebarToggle ? 'justify-start gap-3' : 'justify-center'" class="flex items-center w-full p-2 rounded-md transition hover:bg-gradient-to-r hover:from-[#2B76FF]/50 hover:to-[#A8C7FF]/50 hover:text-white cursor-pointer text-gray-800 {{ request()->routeIs('manajemen-cuti') ? 'bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white' : ''}}">
                         <i class="text-lg fa-solid fa-calendar-check"></i>
                         <span :class="sidebarToggle ? 'block' : 'hidden'">Pengajuan Cuti</span>
                     </a>

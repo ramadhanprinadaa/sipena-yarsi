@@ -17,6 +17,7 @@
     },
     "dependencies": {
         "bootstrap": "^5.3.8",
+        "flatpickr": "^4.6.13",
         "flowbite": "^4.0.1",
         "jquery": "^4.0.0",
         "tippy.js": "^6.3.7"

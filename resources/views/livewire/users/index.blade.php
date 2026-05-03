@@ -8,7 +8,7 @@
 
             {{-- Role --}}
             <div class="relative w-48">
-              	<select wire:model.live="selectedRole" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
+              	<select wire:model.live="selectedRole" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
                     <option value="">Semua Role</option>
                     @foreach($roles as $role)
                         <option value="{{ $role->name }}">{{ $role->name }}</option>
@@ -22,7 +22,7 @@
             </div>
 
             <div class="relative w-48">
-                <select wire:model.live="selectedStatus" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
+                <select wire:model.live="selectedStatus" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
                     <option value="">Semua Status</option>
                     <option value="active">Aktif</option>
                     <option value="inactive">Nonaktif</option>
@@ -37,7 +37,7 @@
 
         <div class="flex gap-3">
             <!-- Search -->
-            <div class="flex items-center w-full md:w-72 border border-gray-200 rounded-md bg-white px-3">
+            <div class="flex items-center w-full md:w-72 border border-gray-200 rounded-[10px] bg-white px-3">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      class="w-5 h-5 text-gray-400"
                      fill="none"
@@ -57,18 +57,18 @@
             </div>
 
             <!-- Add User Button -->
-            <button wire:click="$dispatch('open-add-user')" class="flex items-center px-3 justify-center cursor-pointer bg-indigo-500 hover:bg-indigo-700 text-white text-sm rounded-md transition">
+            <button wire:click="$dispatch('open-add-user')" class="flex items-center px-3 justify-center cursor-pointer bg-indigo-500 hover:bg-indigo-700 text-white text-sm rounded-[10px] transition">
                 <i class="fa-solid fa-user-plus mr-2"></i> Tambah Pengguna
             </button>
         </div>
     </div>
 
     <!-- Table -->
-    <div class="flex flex-col flex-1 min-h-0 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm">
+    <div class="flex flex-col flex-1 min-h-0 overflow-hidden bg-[#F5F7FA]/50 border border-gray-200 rounded-[20px] shadow-sm">
         <div class="flex-1 overflow-y-auto no-scrollbar">
             <table class="min-w-full text-sm">
                 <!-- Header -->
-                <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider sticky top-0">
+                <thead class="bg-[#F5F7FA] text-gray-600 text-xs uppercase tracking-wider sticky top-0">
                     <tr>
                         <th
                             wire:click="sortBy('username')"
@@ -85,53 +85,53 @@
                                 </span>
                             </div>
                         </th>
-                        <th class="px-4 py-3 text-left font-semibold">Nama</th>
-                        <th class="px-4 py-3 text-left font-semibold">NIP</th>
-                        <th class="px-4 py-3 text-left font-semibold">Email</th>
-                        <th class="px-4 py-3 text-left font-semibold">Role</th>
-                        <th class="px-4 py-3 text-left font-semibold">Status</th>
-                        <th class="px-4 py-3 text-left font-semibold">Aksi</th>
+                        <th class="px-4 py-4 text-left font-semibold">Nama</th>
+                        <th class="px-4 py-4 text-left font-semibold">NIP</th>
+                        <th class="w-[285px] py-4 text-left font-semibold">Email</th>
+                        <th class="w-[185px] py-4 text-center font-semibold">Role</th>
+                        <th class="px-4 py-4 text-center font-semibold">Status</th>
+                        <th class="px-4 py-4 text-center font-semibold">Aksi</th>
                     </tr>
                 </thead>
                 <!-- Body -->
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-[#878787]/30">
                     @foreach ($users as $user)
-                    <tr wire:key="user-{{ $user->id }}" class="hover:bg-gray-50 transition">
+                    <tr wire:key="user-{{ $user->id }}" class="hover:bg-[#F5F7FA]/50 transition">
 
                         <!-- Username -->
-                        <td class="px-4 py-3 font-medium text-gray-700 max-w-40 truncate">
+                        <td class="px-4 py-4 font-medium text-gray-700 max-w-40 truncate">
                             {{ $user->username }}
                         </td>
 
                         <!-- Nama -->
-                        <td class="px-4 py-3 max-w-40 truncate"
+                        <td class="px-4 py-4 max-w-40 truncate"
                             title="{{ $user->pegawai->nama ?? 'N/A' }}">
                             {{ $user->pegawai->nama ?? '-' }}
                         </td>
 
                         <!-- NIP -->
-                        <td class="px-4 py-3 text-gray-600">
+                        <td class="px-4 py-4 text-gray-600">
                             {{ $user->pegawai->nip ?? '-' }}
                         </td>
 
                         <!-- Email -->
-                        <td class="px-4 py-3 text-gray-600 max-w-48 truncate">
+                        <td class="w-[285px] py-4 text-gray-600">
                             {{ $user->email }}
                         </td>
 
                         <!-- Role -->
-                        <td class="px-4 py-3">
+                        <td class="w-[185px] py-4 text-center">
                             @php
                                 $role = $user->role->name ?? '';
                                 $roleColor = $roleColors[$role] ?? $roleColors['default'];
                             @endphp
-                            <span class="px-2.5 py-1 text-xs font-medium rounded-full {{ $roleColor }}">
+                            <span class="px-3 py-1 text-xs font-medium rounded-full {{ $roleColor }}">
                                 {{ $role }}
                             </span>
                         </td>
 
                         <!-- Status -->
-                        <td class="px-4 py-3">
+                        <td class="px-4 py-4 text-center">
                             @if ($user->status == 'active')
                                 <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
                                     Aktif
@@ -144,7 +144,7 @@
                         </td>
 
                         <!-- Aksi -->
-                        <td class="px-4 py-3">
+                        <td class="px-4 py-4 text-center">
                             <button wire:click="openDetail({{ $user->id }})" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition cursor-pointer">
                                 Lihat
                             </button>

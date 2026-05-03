@@ -80,7 +80,7 @@
                         <label for="username" 
                         class="block text-sm text-gray-700">
                             Username / Email
-                        </label>
+                        </label>    
 
                         @error('username')
                             <small class="text-red-500">
