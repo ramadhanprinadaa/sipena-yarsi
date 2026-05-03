@@ -51,10 +51,10 @@ class DetailUser extends Component
             : '';
 
         $this->formEdit = [
-            'email' => $user->email,
-            'role_id' => $user->role_id,
+            'email'      => $user->email,
+            'role_id'    => $user->role_id,
             'pegawai_id' => $user->pegawai_id,
-            'status' => $user->status,
+            'status'     => $user->status,
         ];
 
         $this->pegawaiInitialId   = $this->formEdit['pegawai_id'];

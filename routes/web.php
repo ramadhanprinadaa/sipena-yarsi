@@ -6,7 +6,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ManajemenPegawaiController;
 
 use App\Livewire\Manajemen\Pegawai\DetailPegawai;
-use App\Livewire\Config\UnitKerja;
 
 Route::get('/', function () {
     return Auth::check() ? redirect()->route('kepegawaian') : redirect()->route('login');
@@ -47,7 +46,6 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('konfigurasi')->group(function () {
         Route::middleware('role:Admin, SDM Yayasan')->group(function () {
-            Route::livewire('unit-kerja-livewire', UnitKerja::class)->name('konfigurasi-unit-kerja-livewire');
             Route::view('unit-kerja', 'config.unit-kerja')->name('konfigurasi-unit-kerja');
             Route::view('unit-sdm', 'config.unit-kerja')->name('konfigurasi-unit-sdm');
             Route::view('alur-persetujuan', 'config.alur-persetujuan')->name('konfigurasi-alur-persetujuan');

@@ -33,7 +33,7 @@ class TambahUnitKerja extends Component
     protected function rules()
     {
         return [
-            'form.nama_unit' => ['required', 'unique:unit_kerja,name', 'string', 'min:8', 'max:255'],
+            'form.nama_unit' => ['required', 'unique:unit_kerja,name', 'string', 'max:255'],
             'form.unit_sdm_id' => ['required', 'exists:unit_sdm,id'],
             'form.pimpinan_id' => ['nullable', 'exists:pegawai,id'],
             'form.unit_induk_id' => ['nullable', 'exists:unit_kerja,id'],
@@ -46,7 +46,6 @@ class TambahUnitKerja extends Component
             'form.nama_unit.required' => 'Nama unit wajib diisi.',
             'form.nama_unit.unique' => 'Nama unit sudah digunakan.',
             'form.nama_unit.string' => 'Nama unit harus berupa teks huruf A-Z.',
-            'form.nama_unit.min' => 'Nama unit minimal 8 karakter.',
             'form.nama_unit.max' => 'Nama unit maksimal 100 karakter.',
 
             'form.unit_sdm_id.required' => 'Unit SDM wajib dipilih.',
@@ -173,7 +172,8 @@ class TambahUnitKerja extends Component
         $this->unitIndukResults = [];
     }
 
-    public function save() {
+    public function save()
+    {
 
         // manual validation for pimpinan and unit induk
         if (!empty($this->pimpinanSearch) && empty($this->form['pimpinan_id'])) {
@@ -196,7 +196,11 @@ class TambahUnitKerja extends Component
         ]);
         $this->resetForm();
         $this->dispatch('close-modal');
-        $this->dispatch('notify', type: 'success', message: 'Unit kerja berhasil ditambahkan');
+        $this->dispatch(
+            'notify',
+            type: 'success',
+            message: 'Unit Kerja berhasil ditambahkan'
+        );
         $this->dispatch('refresh-table');
     }
 

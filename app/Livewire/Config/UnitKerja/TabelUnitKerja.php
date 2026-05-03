@@ -4,7 +4,6 @@ namespace App\Livewire\Config\UnitKerja;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Pegawai;
 use App\Models\UnitKerja;
 use Livewire\Attributes\On;
 
@@ -19,18 +18,17 @@ class TabelUnitKerja extends Component
     public string $sortField = 'unit_kerja.name';
     public string $sortDirection = 'asc';
 
-    public bool $showDetail = false;
-
-    public function updatedSelectedUnitSdm(){
-        $this->resetPage();
-    }
-
-    public function updatedSearch()
+    public function updatedSelectedUnitSdm(): void
     {
         $this->resetPage();
     }
 
-    public function sortBy($field)
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
@@ -41,19 +39,26 @@ class TabelUnitKerja extends Component
         $this->sortField = $field;
         $this->resetPage();
     }
-    public function sortIcon($field)
+
+    public function sortIcon(string $field): string
     {
         if ($this->sortField !== $field) {
             return 'fa-sort-down';
         }
-        return $this->sortDirection === 'asc'
-            ? 'fa-sort-down'
-            : 'fa-sort-up';
+        return $this->sortDirection === 'asc' ? 'fa-sort-down' : 'fa-sort-up';
     }
+
+    public function openDetail(int $id): void
+    {
+        $this->dispatch('show-detail', id: $id);
+    }
+
+    #[On('refresh-table')]
+    public function refreshTable(): void {}
 
     public function render()
     {
-        $unit_kerja = UnitKerja::with(['unitSdm', 'pegawai']);
+        $unit_kerja = UnitKerja::with(['unitSdm', 'pegawai', 'pimpinan']);
 
         $unit_kerja->orderBy($this->sortField, $this->sortDirection);
 
@@ -74,13 +79,4 @@ class TabelUnitKerja extends Component
             'unit_kerja' => $unit_kerja->paginate(10),
         ]);
     }
-
-    public function openDetail($id)
-    {
-        $this->dispatch('open-unit-detail', $id);
-        $this->showDetail = true;
-    }
-
-    #[On('refresh-table')]
-    public function refreshTable() {}
 }

@@ -154,7 +154,9 @@
                                 @endif
                             </td>
                             <td class="px-4 py-2 text-center">
-                                <button wire:click="openDetail({{ $unit->id }})" class="px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition cursor-pointer">
+                                <button
+                                    wire:click="openDetail({{ $unit->id }})"
+                                    class="px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition cursor-pointer">
                                     Lihat
                                 </button>
                             </td>

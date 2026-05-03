@@ -96,6 +96,7 @@ class Index extends Component
         $this->dispatch('open-user-detail', $id);
         $this->showDetail = true;
     }
+
     #[On('refresh-table')]
     public function refreshTable() {}
 }
