@@ -23,17 +23,17 @@
     @livewireStyles
 </head>
 
-<body class="bg-gradient-to-br from-blue-300 via-purple-300 to-gray-50" x-data="{ sidebarToggle: $persist(true) }">
+<body class="bg-gradient-to-br from-[#62A6FF] via-[#E4B4FF] to-[#D8E9FF]" x-data="{ sidebarToggle: $persist(true) }">
 
     {{-- Header --}}
-    <header class=" flex items-center fixed top-0 left-0 right-0 z-50 h-18 m-3 p-4 bg-white/70 backdrop-blur-sm shadow-md rounded-xl">
+    <header class=" flex items-center fixed top-0 left-0 right-0 z-50 h-18 m-3 p-4 bg-white/75 backdrop-blur-sm shadow-md rounded-xl">
         @include('layouts.header')
     </header>
 
     <div class="flex px-4 gap-4">
 
         {{-- Sidebar --}}
-        <aside :class="sidebarToggle ? 'w-60 p-3' : 'w-24 p-2'" class="fixed top-24 z-40 left-3 bottom-4 bg-white/70 backdrop-blur-sm shadow-md rounded-xl">
+        <aside :class="sidebarToggle ? 'w-60 p-3' : 'w-24 p-2'" class="fixed top-24 z-40 left-3 bottom-4 bg-white/75 backdrop-blur-sm shadow-md rounded-xl no-scrollbar">
             @include('layouts.sidebar')
         </aside>
 
@@ -56,10 +56,28 @@
 
             </div>
 
+            @php
+                $currentRoute = Route::currentRouteName();
+                $userRole = auth()->user()->role->name ?? null;
+                $isCutiPage = $currentRoute === 'cuti';
+                $isCutiRole = in_array($userRole, ['Staff', 'Tendik', 'Dosen']);
+                $removeMtFromMain = $isCutiPage && $isCutiRole;
+            @endphp
+
+            {{-- Cards Cuti Section --}}
+            @if ($removeMtFromMain)
+            <div class="{{ $removeMtFromMain ? 'mt-23' : '' }}">
+                @yield('CardsCuti')
+            </div>
+            @endif
+
             {{-- Main Content --}}
             <main class="bg-white/20 backdrop-blur-sm shadow-md rounded-xl p-6 min-h-[calc(100vh-157px)] mt-35 overflow-x-auto">
                 @yield('content')
             </main>
+
+            {{-- Form Cards Section --}}
+            @yield('formCards')
 
             {{-- Footer --}}
             <footer class="backdrop-blur-sm shadow-md rounded-xl mb-4 p-6 bg-black/80 text-gray-300">

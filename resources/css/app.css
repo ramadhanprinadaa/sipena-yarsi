@@ -19,7 +19,27 @@
   }
 }
 
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+      display: none;
+  }
+  .no-scrollbar {
+      -ms-overflow-style: none;  /* IE & Edge lama */
+      scrollbar-width: none;     /* Firefox */
+  }
+}
+
 @layer components {
+  /* Sidebar */
+  .nav-link {
+      @apply flex items-center gap-3 p-2 rounded-md text-sm transition;
+  }
+  .nav-link-inactive {
+      @apply hover:bg-gradient-to-r hover:from-[#2B76FF] hover:to-[#A8C7FF] hover:text-white;
+  }
+  .nav-link-active {
+      @apply bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white;
+  }
   /* Manajemen Pegawai */
   .filter-dropdown {
     @apply inline-flex items-center justify-between text-body bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-indigo-500 shadow-xs font-medium leading-5 rounded-md text-sm px-3 py-2 focus:outline-none cursor-pointer w-full;

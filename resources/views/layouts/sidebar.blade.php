@@ -30,11 +30,11 @@
                 :class="{
                     'justify-between': sidebarToggle,
                     'justify-center': !sidebarToggle,
-                    'bg-pink-200':
+                    'bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white':
                         {{ request()->routeIs('kepegawaian','presensi','lembur','cuti','surat-menyurat') ? 'true' : 'false' }}
                         && !(sidebarToggle && open.beranda)
                 }"
-                class="flex items-center w-full p-2 rounded-md hover:bg-pink-200 cursor-pointer"
+                class="flex items-center w-full p-2 rounded-md hover:bg-gradient-to-r hover:from-[#2B76FF] hover:to-[#A8C7FF] hover:text-white cursor-pointer"
                 >
 
                 <div :class="sidebarToggle ? 'gap-3' : 'flex-col gap-2'" class="flex items-center">
@@ -53,13 +53,13 @@
             <div x-show="sidebarToggle && open.beranda" x-transition class="ml-2 flex flex-col gap-2">
 
                 <a wire:navigate href="{{ route('kepegawaian') }}"
-                    class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('kepegawaian') ? 'bg-pink-200' : ''}}">
+                    class="nav-link {{ request()->routeIs('kepegawaian') ? 'nav-link-active' : 'nav-link-inactive' }}">
                     <i class="fa-solid fa-address-card"></i>
                     <span>Kepegawaian</span>
                 </a>
 
                 <a wire:navigate href="{{ route('presensi') }}"
-                    class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('presensi') ? 'bg-pink-200' : ''}}">
+                    class="nav-link {{ request()->routeIs('presensi') ? 'nav-link-active' : 'nav-link-inactive' }}">
                     <i class="fa-solid fa-clock"></i>
                     <span>Presensi</span>
                 </a>
@@ -68,20 +68,20 @@
                     'Admin', 'SDM Yayasan', 'SDM Universitas', 'Rektor', 'Pimpinan', 'Staff', 'Tendik'
                 ]))
                     <a wire:navigate href="{{ route('lembur') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('lembur') ? 'bg-pink-200' : ''}}">
+                        class="nav-link {{ request()->routeIs('lembur') ? 'nav-link-active' : 'nav-link-inactive' }}">
                         <i class="fa-solid fa-business-time"></i>
                         <span>Lembur</span>
                     </a>
                 @endif
 
                 <a wire:navigate href="{{ route('cuti') }}"
-                    class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('cuti') ? 'bg-pink-200' : ''}}">
+                    class="nav-link {{ request()->routeIs('cuti') ? 'nav-link-active' : 'nav-link-inactive' }}">
                     <i class="fa-solid fa-plane-departure"></i>
                     <span>Cuti</span>
                 </a>
 
                 <a wire:navigate href="{{ route('surat-menyurat') }}"
-                    class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('surat-menyurat') ? 'bg-pink-200' : ''}}">
+                    class="nav-link {{ request()->routeIs('surat-menyurat') ? 'nav-link-active' : 'nav-link-inactive' }}">
                     <i class="fa-solid fa-envelope"></i>
                     <span>Surat Menyurat</span>
                 </a>
@@ -96,12 +96,12 @@
                 class="absolute left-26 top-0 w-56 bg-white shadow-lg rounded-lg p-2"
             >
                 <a wire:navigate href="{{ route('kepegawaian') }}"
-                    class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('kepegawaian') ? 'bg-pink-200' : ''}}">
+                    class="nav-link {{ request()->routeIs('kepegawaian') ? 'nav-link-active' : 'nav-link-inactive'}}">
                     <i class="fa-solid fa-address-card"></i>
                     <span>Kepegawaian</span>
                 </a>
                 <a wire:navigate href="{{ route('presensi') }}"
-                    class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('presensi') ? 'bg-pink-200' : ''}}">
+                    class="nav-link {{ request()->routeIs('presensi') ? 'nav-link-active' : 'nav-link-inactive' }}">
                     <i class="fa-solid fa-clock"></i>
                     <span>Presensi</span>
                 </a>
@@ -109,18 +109,18 @@
                     'Admin', 'SDM Yayasan', 'SDM Universitas', 'Rektor', 'Pimpinan', 'Staff', 'Tendik'
                 ]))
                     <a wire:navigate href="{{ route('lembur') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('lembur') ? 'bg-pink-200' : ''}}">
+                        class="nav-link {{ request()->routeIs('lembur') ? 'nav-link-active' : 'nav-link-inactive' }}">
                         <i class="fa-solid fa-business-time"></i>
                         <span>Lembur</span>
                     </a>
                 @endif
                 <a wire:navigate href="{{ route('cuti') }}"
-                    class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('cuti') ? 'bg-pink-200' : ''}}">
+                    class="nav-link {{ request()->routeIs('cuti') ? 'nav-link-active' : 'nav-link-inactive' }}">
                     <i class="fa-solid fa-plane-departure"></i>
                     <span>Cuti</span>
                 </a>
                 <a wire:navigate href="{{ route('surat-menyurat') }}"
-                    class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('surat-menyurat') ? 'bg-pink-200' : ''}}">
+                    class="nav-link {{ request()->routeIs('surat-menyurat') ? 'nav-link-active' : 'nav-link-inactive' }}">
                     <i class="fa-solid fa-envelope"></i>
                     <span>Surat Menyurat</span>
                 </a>
@@ -143,7 +143,7 @@
                     :class="{
                         'justify-between': sidebarToggle,
                         'justify-center': !sidebarToggle,
-                        'bg-pink-200':
+                        'bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white':
                             {{ request()->routeIs(
                                     'manajemen-pengguna','manajemen-pegawai','manajemen-presensi', 'manajemen-lembur','manajemen-cuti','manajemen-surat-menyurat', 'manajemen-pegawai-detail',
                                 )
@@ -152,7 +152,7 @@
                             }}
                             && !(sidebarToggle && open.manajemen)
                     }"
-                    class="flex items-center w-full p-2 rounded-md hover:bg-pink-200 cursor-pointer"
+                    class="flex items-center w-full p-2 rounded-md hover:bg-gradient-to-r hover:from-[#2B76FF] hover:to-[#A8C7FF] hover:text-white cursor-pointer"
                     >
 
                     <div :class="sidebarToggle ? 'gap-3' : 'flex-col gap-1'" class="flex items-center">
@@ -172,32 +172,32 @@
 
                     @if (auth()->user()->hasRole('Admin'))
                         <a wire:navigate href="{{ route('manajemen-pengguna') }}"
-                            class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('manajemen-pengguna') ? 'bg-pink-200' : ''}}">
+                            class="nav-link {{ request()->routeIs('manajemen-pengguna') ? 'nav-link-active' : 'nav-link-inactive' }}">
                             <i class="fa-solid fa-address-book text-lg"></i>
                             <span>Pengguna</span>
                         </a>
                     @endif
 
                     <a wire:navigate href="{{ route('manajemen-pegawai') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('manajemen-pegawai', 'manajemen-pegawai-detail') ? 'bg-pink-200' : ''}}">
+                        class="nav-link {{ request()->routeIs('manajemen-pegawai', 'manajemen-pegawai-detail') ? 'nav-link-active' : 'nav-link-inactive' }}">
                         <i class="fa-solid fa-users"></i>
                         <span>Pegawai</span>
                     </a>
 
                     <a wire:navigate href="{{ route('manajemen-presensi') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('manajemen-presensi') ? 'bg-pink-200' : ''}}">
+                        class="nav-link {{ request()->routeIs('manajemen-presensi') ? 'nav-link-active' : 'nav-link-inactive' }}">
                         <i class="fa-solid fa-list-check text-lg"></i>
                         <span>Presensi</span>
                     </a>
 
                     <a wire:navigate href="{{ route('manajemen-lembur') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('manajemen-lembur') ? 'bg-pink-200' : ''}}">
+                        class="nav-link {{ request()->routeIs('manajemen-lembur') ? 'nav-link-active' : 'nav-link-inactive' }}">
                         <i class="fa-solid fa-user-check"></i>
                         <span>Pengajuan Lembur</span>
                     </a>
 
                     <a wire:navigate href="{{ route('manajemen-cuti') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('manajemen-cuti') ? 'bg-pink-200' : ''}}">
+                        class="nav-link {{ request()->routeIs('manajemen-cuti') ? 'nav-link-active' : 'nav-link-inactive' }}">
                         <i class="fa-solid fa-calendar-check text-lg"></i>
                         <span>Pengajuan Cuti</span>
                     </a>
@@ -212,32 +212,32 @@
                 >
                     @if (auth()->user()->hasRole('Admin'))
                         <a wire:navigate href="{{ route('manajemen-pengguna') }}"
-                            class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('manajemen-pengguna') ? 'bg-pink-200' : ''}}">
+                            class="nav-link {{ request()->routeIs('manajemen-pengguna') ? 'nav-link-active' : 'nav-link-inactive'}}">
                             <i class="fa-solid fa-address-book text-lg"></i>
                             <span>Pengguna</span>
                         </a>
                     @endif
 
                     <a wire:navigate href="{{ route('manajemen-pegawai') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('manajemen-pegawai', 'manajemen-pegawai-detail') ? 'bg-pink-200' : ''}}">
+                        class="nav-link {{ request()->routeIs('manajemen-pegawai', 'manajemen-pegawai-detail') ? 'nav-link-active' : 'nav-link-inactive' }}">
                         <i class="fa-solid fa-users"></i>
                         <span>Pegawai</span>
                     </a>
 
                     <a wire:navigate href="{{ route('manajemen-presensi') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('manajemen-presensi') ? 'bg-pink-200' : ''}}">
+                        class="nav-link {{ request()->routeIs('manajemen-presensi') ? 'nav-link-active' : 'nav-link-inactive' }}">
                         <i class="fa-solid fa-list-check text-lg"></i>
                         <span>Presensi</span>
                     </a>
 
                     <a wire:navigate href="{{ route('manajemen-lembur') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('manajemen-lembur') ? 'bg-pink-200' : ''}}">
+                        class="nav-link {{ request()->routeIs('manajemen-lembur') ? 'nav-link-active' : 'nav-link-inactive' }}">
                         <i class="fa-solid fa-user-check"></i>
                         <span>Pengajuan Lembur</span>
                     </a>
 
                     <a wire:navigate href="{{ route('manajemen-cuti') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('manajemen-cuti') ? 'bg-pink-200' : ''}}">
+                        class="nav-link {{ request()->routeIs('manajemen-cuti') ? 'nav-link-active' : 'nav-link-inactive' }}">
                         <i class="fa-solid fa-calendar-check text-lg"></i>
                         <span>Pengajuan Cuti</span>
                     </a>
@@ -255,11 +255,11 @@
                     :class="{
                         'justify-between': sidebarToggle,
                         'justify-center': !sidebarToggle,
-                        'bg-pink-200':
+                        'bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white':
                             {{ request()->routeIs('konfigurasi-unit-kerja', 'konfigurasi-alur-persetujuan', 'konfigurasi-hari-libur') ? 'true' : 'false' }}
                             && !(sidebarToggle && open.konfigurasi)
                     }"
-                    class="flex items-center w-full p-2 rounded-md hover:bg-pink-200 cursor-pointer"
+                    class="flex items-center w-full p-2 rounded-md hover:bg-gradient-to-r hover:from-[#2B76FF] hover:to-[#A8C7FF] hover:text-white cursor-pointer"
                     >
 
                     <div :class="sidebarToggle ? 'gap-3' : 'flex-col gap-1'" class="flex items-center">
@@ -280,24 +280,19 @@
 
                     @if (auth()->user()->hasRole('Admin'))
                         <a wire:navigate href="{{ route('konfigurasi-unit-kerja') }}"
-                            class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-unit-kerja') ? 'bg-pink-200' : ''}}">
+                            class="nav-link {{ request()->routeIs('konfigurasi-unit-kerja') ? 'nav-link-active' : 'nav-link-inactive' }}">
                             <i class="fa-solid fa-building text-lg"></i>
                             <span>Unit Kerja</span>
                         </a>
-                        <a wire:navigate href="{{ route('konfigurasi-unit-sdm') }}"
-                            class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-unit-sdm') ? 'bg-pink-200' : ''}}">
-                            <i class="fa-solid fa-building-lock text-lg"></i>
-                            <span>Unit SDM</span>
-                        </a>
                         <a wire:navigate href="{{ route('konfigurasi-alur-persetujuan') }}"
-                            class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-alur-persetujuan') ? 'bg-pink-200' : ''}}">
+                            class="nav-link {{ request()->routeIs('konfigurasi-alur-persetujuan') ? 'nav-link-active' : 'nav-link-inactive' }}">
                             <i class="fa-solid fa-diagram-project"></i>
                             <span>Alur Persetujuan</span>
                         </a>
                     @endif
 
                     <a wire:navigate href="{{ route('konfigurasi-hari-libur') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-hari-libur') ? 'bg-pink-200' : ''}}">
+                        class="nav-link {{ request()->routeIs('konfigurasi-hari-libur') ? 'nav-link-active' : 'nav-link-inactive' }}">
                         <i class="fa-solid fa-calendar-plus text-lg"></i>
                         <span>Hari Libur</span>
                     </a>
@@ -313,26 +308,20 @@
 
                     @if (auth()->user()->hasRole('Admin'))
                         <a wire:navigate href="{{ route('konfigurasi-unit-kerja') }}"
-                            class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-unit-kerja') ? 'bg-pink-200' : ''}}">
+                            class="nav-link {{ request()->routeIs('konfigurasi-unit-kerja') ? 'nav-link-active' : 'nav-link-inactive' }}">
                             <i class="fa-solid fa-building text-lg"></i>
                             <span>Unit Kerja</span>
                         </a>
 
-                        <a wire:navigate href="{{ route('konfigurasi-unit-sdm') }}"
-                            class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-unit-sdm') ? 'bg-pink-200' : ''}}">
-                            <i class="fa-solid fa-building-lock text-lg"></i>
-                            <span>Unit SDM</span>
-                        </a>
-
                         <a wire:navigate href="{{ route('konfigurasi-alur-persetujuan') }}"
-                            class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-alur-persetujuan') ? 'bg-pink-200' : ''}}">
+                            class="nav-link {{ request()->routeIs('konfigurasi-alur-persetujuan') ? 'nav-link-active' : 'nav-link-inactive' }}">
                             <i class="fa-solid fa-diagram-project"></i>
                             <span>Alur Persetujuan</span>
                         </a>
                     @endif
 
                     <a wire:navigate href="{{ route('konfigurasi-hari-libur') }}"
-                        class="flex items-center gap-3 p-2 rounded-md hover:bg-pink-200 text-sm {{ request()->routeIs('konfigurasi-hari-libur') ? 'bg-pink-200' : ''}}">
+                        class="nav-link {{ request()->routeIs('konfigurasi-hari-libur') ? 'nav-link-active' : 'nav-link-inactive' }}">
                         <i class="fa-solid fa-calendar-plus text-lg"></i>
                         <span>Hari Libur</span>
                     </a>
@@ -346,7 +335,7 @@
     <div class=" flex flex-col border-t border-gray-300 pt-3 mt-2 w-full gap-2">
 
         <div :class="sidebarToggle ? 'gap-2 justify-start' : 'justify-center'" class="flex items-center gap-2">
-            <div :class="sidebarToggle ? 'rounded-md' : 'rounded-md w-full'" class="w-10 h-10 bg-pink-200 text-gray-800 flex items-center justify-center">
+            <div :class="sidebarToggle ? 'rounded-md' : 'rounded-md w-full'" class="w-10 h-10 bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white text-gray-800 flex items-center justify-center">
                 <i :class="sidebarToggle ? 'text-lg' : 'text-lg'" class="fa-solid fa-user"></i>
             </div>
 
