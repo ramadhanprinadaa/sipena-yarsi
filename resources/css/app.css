@@ -21,25 +21,49 @@
 
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
-      display: none;
+    display: none;
   }
   .no-scrollbar {
-      -ms-overflow-style: none;  /* IE & Edge lama */
-      scrollbar-width: none;     /* Firefox */
+    -ms-overflow-style: none; /* IE & Edge lama */
+    scrollbar-width: none; /* Firefox */
   }
 }
 
 @layer components {
   /* Sidebar */
   .nav-link {
-      @apply flex items-center gap-3 p-2 rounded-md text-sm transition;
+    @apply flex items-center gap-3 p-2 rounded-md text-sm transition;
   }
   .nav-link-inactive {
-      @apply hover:bg-gradient-to-r hover:from-[#2B76FF] hover:to-[#A8C7FF] hover:text-white;
+    @apply hover:bg-gradient-to-r hover:from-[#2B76FF] hover:to-[#A8C7FF] hover:text-white;
   }
   .nav-link-active {
-      @apply bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white;
+    @apply bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white;
   }
+
+  /* Form */
+  .input-wrapper {
+    @apply relative w-full mb-5;
+  }
+  .input-field {
+    @apply block py-2 px-0 w-full text-sm text-heading bg-transparent border-0 border-b-2 border-default-medium appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500;
+  }
+  .input-label {
+    @apply absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 origin-[0] peer-focus:start-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto;
+  }
+
+  .input-label-btn {
+    @apply absolute text-sm text-gray-500 duration-300 transform origin-[0] left-0 top-2 translate-y-0 scale-100 cursor-pointer transition-all;
+  }
+
+  .input-label-btn-selected {
+    @apply -translate-y-5 scale-75;
+  }
+
+  .input-label-btn-focus {
+    @apply text-indigo-500;
+  }
+
   /* Manajemen Pegawai */
   .filter-dropdown {
     @apply inline-flex items-center justify-between text-body bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-indigo-500 shadow-xs font-medium leading-5 rounded-md text-sm px-3 py-2 focus:outline-none cursor-pointer w-full;

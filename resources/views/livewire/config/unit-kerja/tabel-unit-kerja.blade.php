@@ -1,4 +1,4 @@
-<div class="flex flex-col space-y-3 h-[calc(100vh-280px)] bg-white/20 backdrop-blur-sm shadow-md rounded-xl p-4">
+<div class="flex flex-col space-y-3 h-[calc(100vh-280px)] bg-white/20 backdrop-blur-md shadow-md rounded-xl p-4">
     <!-- Filter & Search -->
     <div class="flex items-center justify-between gap-2">
         <!-- Search -->

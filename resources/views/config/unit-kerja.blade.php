@@ -18,6 +18,7 @@
         @close-detail.window="openDetail = false"
         class="flex flex-col h-full min-h-0">
 
+        {{-- Header --}}
         <div class="flex items-end justify-between mb-4">
             <div class="flex flex-col gap-2 font-poppins">
                 <h1 class="text-2xl font-semibold">Unit Kerja</h1>
@@ -25,6 +26,7 @@
             </div>
 
             <div class="flex flex-row justify-between gap-2">
+                {{-- Message Notification --}}
                 <div
                     x-data="{ show: false, message: '', type: 'success' }"
                     x-on:notify.window="
@@ -84,7 +86,6 @@
                 </div>
             </div>
         </template>
-
 
         {{-- Modal Form Tambah Unit Kerja --}}
         <template x-teleport="body">
