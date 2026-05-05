@@ -33,7 +33,7 @@ class UnitKerja extends Model
 {
     protected $table = 'unit_kerja';
 
-    protected $guarded = ['id'];
+    protected $fillable = ['id', 'parent_id', 'pimpinan_id', 'unit_sdm_id', 'name'];
 
     public function parent()
     {

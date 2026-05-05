@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             UnitSDMSeeder::class,
             UnitKerjaSeeder::class,
+            StatusPegawaiSeeder::class,
+            JenisPegawaiSeeder::class
         ]);
     }
 }

@@ -263,9 +263,10 @@
             <table class="table">
                 <thead class="table-header">
                     <tr>
-                        <th scope="col" class="px-4 py-3 font-medium w-36">
+                        <th scope="col" class="px-4 py-3 font-medium w-8">#</th>
+                        <th scope="col" class="px-4 py-3 font-medium w-42">
                             <div class="flex items-center justify-between gap-2">
-                                <span class="truncate">Nama Pegawai</span>
+                                <span class="truncate">Nama dan NIK Pegawai</span>
                                 <div>
                                     <button wire:click="sortBy('pegawai.nama')"
                                         class="flex items-center justify-between w-full hover:text-indigo-500 cursor-pointer">
@@ -274,10 +275,7 @@
                                 </div>
                             </div>
                         </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-28">
-                            <span class="truncate">NIK Pegawai</span>
-                        </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-22">
+                        <th scope="col" class="px-4 py-3 font-medium w-16">
                             <div class="flex items-center justify-between gap-2">
                                 <span>Usia</span>
                                 <div>
@@ -291,6 +289,7 @@
                         @if (auth()->user()->HasRole(['Admin', 'SDM Yayasan', 'SDM Universitas']))
                             <th scope="col" class="px-4 py-3 font-medium w-32">
                                 <div class="flex items-center justify-between gap-2">
+                                    <div></div>
                                     <span>Unit Kerja</span>
                                     <div>
                                         <button wire:click="sortBy('unit_kerja')"
@@ -304,6 +303,9 @@
                                 Jabatan
                             </th>
                         @endif
+                        <th scope="col" class="px-4 py-3 font-medium truncate text-center w-24">
+                            Status
+                        </th>
                         <th scope="col" class="px-4 py-3 font-medium w-40">
                             <div class="flex items-center justify-between gap-2">
                                 <span class="truncate">Tanggal Bergabung</span>
@@ -317,7 +319,7 @@
                         </th>
                         <th scope="col" class="px-4 py-3 font-medium w-36">
                             <div class="flex items-center justify-between gap-2">
-                                <span class="truncate">Tanggal Pensiun</span>
+                                <span class="truncate">Tanggal Berakhir Masa Kerja / Pensiun</span>
                                 <div>
                                     <button wire:click="sortBy('pegawai.tanggal_pensiun')"
                                         class="flex items-center justify-between w-full hover:text-indigo-500 cursor-pointer">
@@ -327,65 +329,97 @@
                             </div>
                         </th>
                         <th scope="col" class="px-4 py-3 font-medium text-center w-18">
-                            Status
-                        </th>
-                        <th scope="col" class="px-4 py-3 font-medium text-center w-18">
                             Aksi
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($pegawai as $p)
-                        <tr class="table-row">
-                            <th scope="row" class="px-4 py-2 font-medium text-heading truncate">
-                                {{ $p->nama }}
-                            </th>
-                            <td class="px-4 py-2 truncate">
-                                {{ $p->nip }}
+                        @php
+                            $isNonActive =
+                                ($p->tanggal_habis_kontrak && $p->tanggal_habis_kontrak < now()) ||
+                                ($p->tanggal_pensiun && $p->tanggal_pensiun < now());
+                        @endphp
+
+                        <tr class="table-row hover:bg-gray-50 transition">
+
+                            <!-- No -->
+                            <td class="px-3 py-2 text-center text-gray-400 text-sm">
+                                {{ $pegawai->firstItem() + $loop->index }}
                             </td>
-                            <td class="px-4 py-2 truncate">
-                                {{ $p->age }} Tahun
+
+                            <!-- Nama -->
+                            <td class="px-3 py-2">
+                                <div class="flex flex-col leading-tight">
+                                    <span class="font-semibold text-gray-800 truncate">
+                                        {{ $p->nama }}
+                                    </span>
+                                    <span class="text-xs text-gray-400">
+                                        {{ $p->nip }}
+                                    </span>
+                                </div>
                             </td>
+
+                            <!-- Usia -->
+                            <td class="px-3 py-2 text-sm text-gray-600">
+                                {{ $p->age }} th
+                            </td>
+
                             @if (auth()->user()->HasRole(['Admin', 'SDM Yayasan', 'SDM Universitas']))
-                                <td class="px-4 py-2 truncate">
+                                <!-- Unit -->
+                                <td class="px-3 py-2 text-sm text-gray-700 truncate">
                                     {{ $p->unit_kerja->name }}
                                 </td>
-                                <td class="px-4 py-2 truncate text-center">
-                                    @if( $p->memimpin_unit != null)
+
+                                <!-- Jabatan -->
+                                <td class="px-3 py-2 text-center">
+                                    @if($p->memimpin_unit)
                                         <span class="px-2.5 py-1 text-xs font-medium rounded-md bg-amber-100 text-amber-600">
                                             Pimpinan
                                         </span>
                                     @else
-                                        <span class="px-2.5 py-1 text-xs font-medium rounded-md bg-violet-100 text-violet-600">
+                                        <span class="px-2.5 py-1 text-xs font-medium rounded-md bg-indigo-100 text-indigo-600">
                                             Pegawai
                                         </span>
                                     @endif
                                 </td>
                             @endif
+                            <!-- Status -->
+                            <td class="px-3 py-2 text-center">
+                                @if($isNonActive)
+                                    <span class="px-2 py-1 text-xs font-medium rounded-md bg-red-100 text-red-600">
+                                        Tidak Aktif
+                                    </span>
+                                @elseif($p->status_pegawai->status == 'Kontrak')
+                                    <span class="px-2 py-1 text-xs font-medium rounded-md bg-amber-100 text-amber-600">
+                                        {{ $p->status_pegawai->status }}
+                                    </span>
+                                @else
+                                    <span class="px-2 py-1 text-xs font-medium rounded-md bg-emerald-100 text-emerald-600">
+                                        {{ $p->status_pegawai->status }}
+                                    </span>
+                                @endif
+                            </td>
                             <td class="px-4 py-2 truncate">
                                 {{ $p->tanggal_bergabung->translatedFormat('d F Y') }}
                             </td>
                             <td class="px-4 py-2 truncate">
-                                {{ $p->tanggal_pensiun->translatedFormat('d F Y') }}
+                                {{
+                                    $p->status_pegawai?->status === 'Kontrak'
+                                    ? ($p->tanggal_habis_kontrak?->translatedFormat('d F Y') ?? '-')
+                                    : ($p->tanggal_pensiun?->translatedFormat('d F Y') ?? '-')
+                                }}
                             </td>
-                            <td class="px-4 py-2 text-center">
-                                @if ($p->status == 'active')
-                                    <span class="px-2.5 py-1 text-xs font-medium rounded-md bg-green-100 text-green-700">
-                                        Aktif
-                                    </span>
-                                @else
-                                    <span class="px-2.5 py-1 text-xs font-medium rounded-md bg-red-100 text-red-700">
-                                        Nonaktif
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="px-4 py-2 text-center">
+                            <!-- Aksi -->
+                            <td class="px-3 py-2 text-center">
                                 <a
-                                    wire:navigate href="{{route('manajemen-pegawai-detail', $p->id)}}"
-                                    class="px-2 py-1 text-xs text-white rounded-md bg-blue-600 hover:bg-blue-700 transition">
-                                    Lihat
+                                    wire:navigate
+                                    href="{{ route('manajemen-pegawai-detail', $p->id) }}"
+                                    class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-white bg-indigo-500 hover:bg-indigo-600 rounded-md transition">
+                                    Detail
                                 </a>
                             </td>
+
                         </tr>
                     @endforeach
                 </tbody>

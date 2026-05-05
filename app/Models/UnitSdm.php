@@ -27,7 +27,7 @@ class UnitSdm extends Model
 {
     protected $table = 'unit_sdm';
 
-    protected $guarded = ['id'];
+    protected $fillable = ['id', 'hr_id', 'name'];
 
     public function hr()
     {

@@ -41,56 +41,9 @@ class UserSeeder extends Seeder
                 'email' => 'ramadhanprinada@gmail.com',
                 'password' => Hash::make('password')
             ],
-            [
-                'role_id' => 5,
-                'pegawai_id' => 2,
-                'username' => 'rafly.eryan',
-                'email' => 'raflyeryan@gmail.com',
-                'password' => Hash::make('password')
-            ],
-            [
-                'role_id' => 5,
-                'pegawai_id' => 3,
-                'username' => 'hilal.akbar',
-                'email' => 'hilalakbar@gmail.com',
-                'password' => Hash::make('password')
-            ],
-            [
-                'role_id' => 3,
-                'pegawai_id' => 10,
-                'username' => 'annisa.putri',
-                'email' => 'putriannisa@gmail.com',
-                'password' => Hash::make('password')
-            ],
-            [
-                'role_id' => 3,
-                'pegawai_id' => 12,
-                'username' => 'tiara.putri',
-                'email' => 'putritiara@gmail.com',
-                'password' => Hash::make('password')
-            ],
-            [
-                'role_id' => 6,
-                'pegawai_id' => 11,
-                'username' => 'fatimah.adelian',
-                'email' => 'fatimahadelian@gmail.com',
-                'password' => Hash::make('password')
-            ],
-            [
-                'role_id' => 7,
-                'username' => 'wily.ahmad',
-                'email' => 'wilyahmad@gmail.com',
-                'password' => Hash::make('password')
-            ],
-            [
-                // 'role_id' => 7,
-                'username' => 'arya.kusuma',
-                'email' => 'aryakusuma@gmail.com',
-                'password' => Hash::make('password')
-            ],
         ];
 
-        foreach ($user as $key => $value){
+        foreach ($user as $key => $value) {
             User::create($value);
         }
     }

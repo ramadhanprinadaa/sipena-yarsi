@@ -14,12 +14,13 @@ class Pegawai extends Model
 
     protected $guarded = ['id'];
 
-    protected $attribute = [
+    protected $attributes = [
         'status' => 'active'
     ];
 
     protected $casts = [
         'tanggal_bergabung' => 'date',
+        'tanggal_habis_kontrak' => 'date',
         'tanggal_pensiun' => 'date',
         'tanggal_lahir' => 'date'
     ];
@@ -44,4 +45,13 @@ class Pegawai extends Model
         return $this->hasOne(UnitKerja::class, 'pimpinan_id');
     }
 
+    public function status_pegawai()
+    {
+        return $this->belongsTo(StatusPegawai::class, 'status_pegawai_id');
+    }
+
+    public function jenis_pegawai()
+    {
+        return $this->belongsTo(JenisPegawai::class, 'jenis_pegawai_id');
+    }
 }
