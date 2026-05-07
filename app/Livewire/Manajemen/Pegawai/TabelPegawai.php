@@ -7,6 +7,7 @@ use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Pegawai;
 use App\Models\UnitKerja;
+use Livewire\Attributes\On;
 
 class TabelPegawai extends Component
 {
@@ -29,9 +30,12 @@ class TabelPegawai extends Component
     public $sortField = null;
     public $sortDirection = 'asc';
 
+    #[On('refresh-table')]
+    public function refreshTable(): void {}
+
     public function mount()
     {
-        $this->unit_kerja = UnitKerja::with('unitSdm')->get();
+        $this->unit_kerja = UnitKerja::with('unitSdm')->orderBy('name', 'asc')->get();
         $this->unit_kerja_universitas = UnitKerja::with('unitSdm')
             ->whereHas('unitSdm', function ($query) {
                 $query->where('name', 'SDM Universitas');

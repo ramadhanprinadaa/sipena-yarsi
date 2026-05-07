@@ -24,7 +24,7 @@
     <!-- Nama -->
     <div>
         <input type="text"
-            class="w-full border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 text-sm"
+            class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm"
             wire:model.live.debounce.500ms="form.nama_unit"
             placeholder="Nama Unit Kerja">
         @error('form.nama_unit')
@@ -42,7 +42,7 @@
             wire:model.live="form.unit_sdm_id"
             class="w-full flex justify-between items-center py-2 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none text-sm cursor-pointer">
             <span
-                :class="selected ? 'text-gray-900' : 'text-gray-500/90'"
+                :class="selected ? 'text-gray-900' : 'text-gray-600/90'"
                 x-text="
                     selected == 1 ? 'SDM Yayasan' :
                     selected == 2 ? 'SDM Universitas' :
@@ -87,7 +87,7 @@
     <div class="relative">
         <div class="flex gap-2">
           <input type="text"
-              class="w-full border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 text-sm"
+              class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm"
               wire:model.live.debounce.500ms="pimpinanSearch"
               placeholder="Pimpinan Unit">
           @if($form['pimpinan_id'])
@@ -132,7 +132,7 @@
     <div class="relative">
         <div class="flex gap-2">
             <input type="text"
-                class="w-full border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 text-sm"
+                class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm"
                 wire:model.live.debounce.400ms="unitIndukSearch"
                 placeholder="Unit Induk">
             @if($form['unit_induk_id'])

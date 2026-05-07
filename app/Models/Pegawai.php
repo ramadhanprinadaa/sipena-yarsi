@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Carbon\Carbon;
 
 class Pegawai extends Model
@@ -19,11 +20,27 @@ class Pegawai extends Model
     ];
 
     protected $casts = [
-        'tanggal_bergabung' => 'date',
-        'tanggal_habis_kontrak' => 'date',
-        'tanggal_pensiun' => 'date',
-        'tanggal_lahir' => 'date'
+        'ktp' => 'encrypted',
+        'tanggal_bergabung' => 'date:d/m/Y',
+        'tanggal_habis_kontrak' => 'date:d/m/Y',
+        'tanggal_pensiun' => 'date:d/m/Y',
+        'tanggal_lahir' => 'date:d/m/Y'
     ];
+
+    protected function nama(): Attribute
+    {
+        return Attribute::make(
+            get: fn(string $value) => ucwords(strtolower($value)),
+            set: fn(string $value) => strtolower($value),
+        );
+    }
+
+    protected function namaGelar(): Attribute
+    {
+        return Attribute::make(
+            get: fn($value) => trim("{$this->gelar_depan} {$this->nama}, {$this->gelar_belakang}")
+        );
+    }
 
     public function getAgeAttribute()
     {

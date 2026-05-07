@@ -103,6 +103,11 @@ class User extends Authenticatable
         return $this->belongsTo(Pegawai::class, 'pegawai_id');
     }
 
+    public function import_pegawai()
+    {
+        return $this->hasMany(ImportPegawai::class, 'imported_by');
+    }
+
     public function getUnitKerjaLabelAttribute()
     {
         if ($this->hasRole('SDM Universitas')) {

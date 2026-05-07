@@ -13,8 +13,10 @@
 @section('content')
 
     <div
-        x-data="{ openAddModal: false }"
+        x-data="{ openAddModal: false, openImportModal: false, openProgressModal: false }"
+        @open-progress-modal.window="openProgressModal = true"
         @close-add-modal.window="openAddModal = false"
+        @close-import-modal.window="openImportModal = false"
         class="flex flex-col h-full min-h-0">
 
         <!-- Header -->
@@ -69,7 +71,9 @@
 
                     <!-- Button Add Pegawai & Import -->
                     <div class="flex gap-2">
-                        <button class="flex items-center px-3 h-10 justify-center cursor-pointer bg-emerald-600 hover:bg-emerald-800 text-white text-sm rounded-md transition">
+                        <button
+                            @click="openImportModal = true"
+                            class="flex items-center px-3 h-10 justify-center cursor-pointer bg-emerald-600 hover:bg-emerald-800 text-white text-sm rounded-md transition">
                             <i class="fa-solid fa-upload mr-2"></i>
                             Import Excel
                         </button>
@@ -88,6 +92,63 @@
         <div class="flex-1">
             <livewire:manajemen.pegawai.tabel-pegawai />
         </div>
+
+        <!-- Modal Import Pegawai -->
+        <template x-teleport="body">
+            <div
+                x-show="openImportModal"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                @click.self="openImportModal = false"
+                @keydown.escape.window="openImportModal = false"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md"
+                style="display: none;">
+                <div
+                    x-show="openImportModal"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                    x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+                    @click.stop>
+                    <livewire:manajemen.pegawai.import-pegawai />
+                </div>
+            </div>
+        </template>
+
+        <!-- Modal Progress Import -->
+        <template x-teleport="body">
+            <div
+                x-show="openProgressModal"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                @click.self="openProgressModal = false"
+                @keydown.escape.window="openProgressModal = false"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md"
+                style="display: none;">
+                <div
+                    x-show="openProgressModal"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                    x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+                    @click.stop>
+
+                    <h1>Progress Import</h1>
+                </div>
+            </div>
+        </template>
 
         <!-- Modal Tambah Pegawai -->
         <template x-teleport="body">

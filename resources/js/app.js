@@ -1,6 +1,10 @@
 import "./bootstrap";
+import "flowbite";
+import Datepicker from "flowbite-datepicker";
+
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
+
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 

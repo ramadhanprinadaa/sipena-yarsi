@@ -107,7 +107,7 @@
             type="text"
             value="{{ $user->pegawai?->nama ?? '-'}}"
             disabled
-            class="mt-1 px-3 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-gray-200 disabled:text-gray-600"
+            class="border-0 mt-1 px-3 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-gray-200 disabled:text-gray-600"
           />
         </div>
       </div>
@@ -123,7 +123,7 @@
             type="text"
             value="{{  $user->pegawai?->nip ?? '-' }}"
             disabled
-            class="mt-1 px-3 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-gray-200 disabled:text-gray-600"
+            class="border-0 mt-1 px-3 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-gray-200 disabled:text-gray-600"
           />
         </div>
       </div>
@@ -140,7 +140,7 @@
             type="text"
             value="{{ $user->pegawai?->email_yarsi ?? '-' }}"
             disabled
-            class="mt-1 px-3 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-gray-200 disabled:text-gray-600"
+            class="border-0 mt-1 px-3 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-gray-200 disabled:text-gray-600"
           />
         </div>
       </div>
@@ -186,7 +186,7 @@
             type="text"
             value="{{ $user->username }}"
             disabled
-            class="mt-1 px-3 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-gray-200 disabled:text-gray-600"
+            class="border-0 mt-1 px-3 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-gray-200 disabled:text-gray-600"
           />
         </div>
       </div>
@@ -203,7 +203,7 @@
             type="text"
             value="{{ $user->role->name }}"
             disabled
-            class="mt-1 px-3 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-gray-200 disabled:text-gray-600"
+            class="border-0 mt-1 px-3 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-gray-200 disabled:text-gray-600"
           />
         </div>
       </div>

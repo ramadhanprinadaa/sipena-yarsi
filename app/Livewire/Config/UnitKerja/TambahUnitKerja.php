@@ -192,7 +192,7 @@ class TambahUnitKerja extends Component
             'name' => $validated['nama_unit'],
             'unit_sdm_id' => $validated['unit_sdm_id'],
             'pimpinan_id' => $validated['pimpinan_id'],
-            'unit_induk_id' => $validated['unit_induk_id'],
+            'parent_id' => $validated['unit_induk_id'],
         ]);
         $this->resetForm();
         $this->dispatch('close-modal');

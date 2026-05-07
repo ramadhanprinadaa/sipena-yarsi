@@ -11,15 +11,14 @@
     }"
     class="bg-white w-[720px] max-w-[95vw] h-[88vh] mx-auto rounded-xl shadow-2xl flex flex-col overflow-hidden"
 >
-
     <!-- Header -->
     <header class="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
         <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-indigo-50 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
                 <i class="fa-solid fa-user-plus text-base text-indigo-500"></i>
             </div>
             <div>
-                <h2 class="text-base font-semibold text-gray-800 leading-tight">Form Tambah Pegawai</h2>
+                <h2 class="text-md font-bold text-gray-800 leading-tight tracking-tight">Form Tambah Pegawai</h2>
                 <p class="text-xs text-gray-400 leading-tight">Isi data pegawai baru secara lengkap</p>
             </div>
         </div>
@@ -41,7 +40,9 @@
                     <!-- Step Node -->
                     <button
                         type="button"
-                        @click="current = index"
+                        @click="if (index <= current) {
+                            current = index
+                        }"
                         class="flex flex-col items-center gap-1 group cursor-pointer">
 
                         <div
@@ -80,16 +81,13 @@
             </template>
         </div>
     </div>
-
     <!-- Form -->
     <form wire:submit.prevent="save" class="flex flex-col flex-1 min-h-0">
 
         <!-- Scrollable Content -->
         <div class="flex-1 overflow-y-auto px-6 py-4">
 
-            <!-- ===================== -->
-            <!-- Tab: Data Pegawai     -->
-            <!-- ===================== -->
+            <!-- Tab: Data Pegawai -->
             <div x-show="tab === 'pegawai'" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0">
 
                 <p class="text-xs font-medium text-indigo-400 uppercase tracking-wider mb-4">Identitas Pegawai</p>
@@ -304,9 +302,7 @@
                 </div>
             </div>
 
-            <!-- ===================== -->
             <!-- Tab: Biodata Pegawai  -->
-            <!-- ===================== -->
             <div x-show="tab === 'biodata'" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0">
 
                 <p class="text-xs font-medium text-indigo-400 uppercase tracking-wider mb-4">Data Pribadi</p>
@@ -337,9 +333,39 @@
                     </div>
                     <!-- Tanggal Lahir -->
                     <div>
-                        <div class="input-wrapper group">
-                            <input wire:model.live="form.tanggal_lahir" type="date" id="floating_tanggal_lahir" class="input-field peer" placeholder=" ">
-                            <label for="floating_tanggal_lahir" class="input-label">Tanggal Lahir</label>
+                        <div class="input-wrapper group relative"
+                            x-data
+                            x-init="
+                                const picker = document.getElementById('floating_tanggal_lahir');
+                                picker.addEventListener('changeDate', () => {
+                                    $wire.set('form.tanggal_lahir', picker.value);
+                                });
+                            "
+                        >
+                            <!-- Icon -->
+                            <div class="absolute inset-y-0 flex items-center ps-1 pointer-events-none z-10">
+                                <i class="fa-solid fa-calendar-days text-body text-xs"></i>
+                            </div>
+                            <!-- Input -->
+                            <input
+                                wire:model.defer="form.tanggal_lahir"
+                                type="text"
+                                id="floating_tanggal_lahir"
+                                datepicker
+                                datepicker-autohide
+                                datepicker-format="dd/mm/yyyy"
+                                datepicker-language="id"
+                                placeholder=" "
+                                class="input-field peer ps-6"
+                            >
+                            <!-- Label -->
+                            <label
+                                for="floating_tanggal_lahir"
+                                class="input-label ps-6 inset-y-2 peer-focus:ps-1 peer-[:not(:placeholder-shown)]:ps-1"
+                            >
+                                Tanggal Lahir
+                            </label>
+
                         </div>
                         @error('form.tanggal_lahir') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
                     </div>
@@ -418,9 +444,39 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6">
                     <!-- Tanggal Bergabung -->
                     <div>
-                        <div class="input-wrapper group">
-                            <input wire:model.live="form.tanggal_bergabung" type="date" id="floating_tanggal_bergabung" class="input-field peer" placeholder=" ">
-                            <label for="floating_tanggal_bergabung" class="input-label">Tanggal Bergabung</label>
+                        <div class="input-wrapper group relative"
+                            x-data
+                            x-init="
+                                const picker = document.getElementById('floating_tanggal_bergabung');
+                                picker.addEventListener('changeDate', () => {
+                                    $wire.set('form.tanggal_bergabung', picker.value);
+                                });
+                            "
+                        >
+                            <!-- Icon -->
+                            <div class="absolute inset-y-0 flex items-center ps-1 pointer-events-none z-10">
+                                <i class="fa-solid fa-calendar-days text-body text-xs"></i>
+                            </div>
+                            <!-- Input -->
+                            <input
+                                wire:model.defer="form.tanggal_bergabung"
+                                type="text"
+                                id="floating_tanggal_bergabung"
+                                datepicker
+                                datepicker-autohide
+                                datepicker-format="dd/mm/yyyy"
+                                datepicker-language="id"
+                                placeholder=" "
+                                class="input-field peer ps-6"
+                            >
+                            <!-- Label -->
+                            <label
+                                for="floating_tanggal_bergabung"
+                                class="input-label ps-6 inset-y-2 peer-focus:ps-1 peer-[:not(:placeholder-shown)]:ps-1"
+                            >
+                                Tanggal Bergabung
+                            </label>
+
                         </div>
                         @error('form.tanggal_bergabung') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
                     </div>
@@ -429,9 +485,43 @@
                         @case(1)
                             <!-- Tanggal Pensiun -->
                             <div>
-                                <div class="input-wrapper group">
-                                    <input wire:model.live="form.tanggal_pensiun" type="date" id="floating_tanggal_pensiun" class="input-field peer" placeholder=" ">
-                                    <label for="floating_tanggal_pensiun" class="input-label">Tanggal Pensiun</label>
+                                <div class="input-wrapper group relative"
+                                    x-data
+                                    x-init="
+                                        new Datepicker(
+                                            $refs.pensiun,
+                                            {
+                                                format: 'dd/mm/yyyy',
+                                                language: 'id',
+                                                autohide: true
+                                            }
+                                        );
+                                        const picker = document.getElementById('floating_tanggal_pensiun');
+                                        picker.addEventListener('changeDate', () => {
+                                            $wire.set('form.tanggal_pensiun', $refs.pensiun.value);
+                                        });
+                                    "
+                                >
+                                    <!-- Icon -->
+                                    <div class="absolute inset-y-0 flex items-center ps-1 pointer-events-none z-10">
+                                        <i class="fa-solid fa-calendar-days text-body text-xs"></i>
+                                    </div>
+                                    <!-- Input -->
+                                    <input
+                                        x-ref="pensiun"
+                                        type="text"
+                                        id="floating_tanggal_pensiun"
+                                        placeholder=" "
+                                        class="input-field peer ps-6"
+                                    >
+                                    <!-- Label -->
+                                    <label
+                                        for="floating_tanggal_pensiun"
+                                        class="input-label ps-6 inset-y-2 peer-focus:ps-1 peer-[:not(:placeholder-shown)]:ps-1"
+                                    >
+                                        Tanggal Pensiun
+                                    </label>
+
                                 </div>
                                 @error('form.tanggal_pensiun') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
                             </div>
@@ -439,9 +529,45 @@
                         @case(2)
                             <!-- Tanggal Habis Kontrak -->
                             <div>
-                                <div class="input-wrapper group">
-                                    <input wire:model.live="form.tanggal_habis_kontrak" type="date" id="floating_habis_kontrak" class="input-field peer" placeholder=" ">
-                                    <label for="floating_tanggal_habis_kontrak" class="input-label">Tanggal Habis Kontrak</label>
+                                <div class="input-wrapper group relative"
+                                    wire:key="tanggal-habis-kontrak"
+                                    wire:ignore
+                                    x-data
+                                    x-init="
+                                        new Datepicker(
+                                            $refs.kontrak,
+                                            {
+                                                format: 'dd/mm/yyyy',
+                                                language: 'id',
+                                                autohide: true
+                                            }
+                                        );
+                                        const picker = document.getElementById('floating_tanggal_habis_kontrak');
+                                        picker.addEventListener('changeDate', () => {
+                                            $wire.set('form.tanggal_habis_kontrak', $refs.kontrak.value);
+                                        });
+                                    "
+                                >
+                                    <!-- Icon -->
+                                    <div class="absolute inset-y-0 flex items-center ps-1 pointer-events-none z-10">
+                                        <i class="fa-solid fa-calendar-days text-body text-xs"></i>
+                                    </div>
+                                    <!-- Input -->
+                                    <input
+                                        x-ref="kontrak"
+                                        type="text"
+                                        id="floating_tanggal_habis_kontrak"
+                                        placeholder=" "
+                                        class="input-field peer ps-6"
+                                    >
+                                    <!-- Label -->
+                                    <label
+                                        for="floating_tanggal_habis_kontrak"
+                                        class="input-label ps-6 inset-y-2 peer-focus:ps-1 peer-[:not(:placeholder-shown)]:ps-1"
+                                    >
+                                        Tanggal Habis Kontrak
+                                    </label>
+
                                 </div>
                                 @error('form.tanggal_habis_kontrak') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
                             </div>
@@ -450,9 +576,7 @@
                 </div>
             </div>
 
-            <!-- ===================== -->
             <!-- Tab: Alamat Pegawai   -->
-            <!-- ===================== -->
             <div x-show="tab === 'alamat'" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0">
 
                 <p class="text-xs font-medium text-indigo-400 uppercase tracking-wider mb-4">Kontak</p>
@@ -512,9 +636,11 @@
                 <i class="fa-solid fa-arrow-left text-xs"></i>
                 Sebelumnya
             </button>
+
             <div x-show="current === 0" class="w-px"></div>
 
             <div class="flex items-center gap-2">
+
                 <!-- Cancel -->
                 <button
                     type="button"
@@ -529,6 +655,12 @@
                         type="button"
                         wire:click="nextStep"
                         class="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-indigo-500 hover:bg-indigo-600 text-white rounded-md transition cursor-pointer">
+
+                        <!-- Loading -->
+                        <svg aria-hidden="true" wire:loading wire:target="nextStep"
+                            class="w-4 h-4 self-center text-neutral-quaternary animate-spin fill-brand" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg>
+                        <span class="sr-only">Loading...</span>
+
                         Selanjutnya
                         <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
@@ -538,8 +670,14 @@
                 <template x-if="current === steps.length - 1">
                     <button
                         type="submit"
-                        wire:click="save"
                         class="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-emerald-500 hover:bg-emerald-600 text-white rounded-md transition cursor-pointer">
+
+                        <!-- Loading -->
+                        <svg aria-hidden="true"
+                            wire:loading wire:target="save" class="w-4 h-4 text-neutral-quaternary animate-spin fill-brand" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                        </svg>
+                        <span class="sr-only">Loading...</span>
+
                         <i class="fa-solid fa-floppy-disk text-xs"></i>
                         Simpan Data
                     </button>

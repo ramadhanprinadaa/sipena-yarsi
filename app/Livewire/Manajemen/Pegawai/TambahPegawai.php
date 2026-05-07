@@ -4,6 +4,9 @@ namespace App\Livewire\Manajemen\Pegawai;
 
 use Livewire\Component;
 use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Carbon;
+
 use App\Models\UnitKerja;
 use App\Models\Pegawai;
 use App\Models\JenisPegawai;
@@ -11,19 +14,38 @@ use App\Models\StatusPegawai;
 
 class TambahPegawai extends Component
 {
-    public $unitKerja = [];
-    public $jenisPegawai = [];
-    public $statusPegawai = [];
-    public $form;
+    const STATUS_TETAP = 1;
+    const STATUS_KONTRAK = 2;
 
-    public $currentTab = 0;
+    public array $form;
+    public int $currentTab = 0;
+
+    public $unitKerja;
+    public $jenisPegawai;
+    public $statusPegawai;
+
 
     public function mount()
     {
         $this->form = $this->defaultForm();
-        $this->unitKerja = UnitKerja::orderBy('name')->get(['id', 'name']);
-        $this->jenisPegawai = JenisPegawai::get(['id', 'jenis']);
-        $this->statusPegawai = StatusPegawai::get(['id', 'status']);
+        $this->unitKerja = Cache::remember(
+            'unit_kerja',
+            3600,
+            fn() =>
+            UnitKerja::orderBy('name')->get(['id', 'name'])
+        );
+        $this->jenisPegawai = Cache::remember(
+            'jenis_pegawai',
+            3600,
+            fn() =>
+            JenisPegawai::get(['id', 'jenis'])
+        );
+        $this->statusPegawai = Cache::remember(
+            'status_pegawai',
+            3600,
+            fn() =>
+            StatusPegawai::get(['status', 'id'])
+        );
     }
 
     #[On('close-add-modal')]
@@ -64,8 +86,8 @@ class TambahPegawai extends Component
         return [
             'form.nama' => ['required', 'string', 'max:100'],
             'form.ktp' => ['required', 'digits:16', 'unique:pegawai,ktp'],
-            'form.nip' => ['required', 'regex:/^\d{10,20}$/', 'unique:pegawai,nip'],
-            'form.npwp' => ['nullable', 'regex:/^\d{15,16}$/', 'unique:pegawai,npwp'],
+            'form.nip' => ['required', 'digits_between:10,20', 'unique:pegawai,nip'],
+            'form.npwp' => ['nullable', 'digits_between:15,16', 'unique:pegawai,npwp'],
             'form.unit_kerja_id' => ['required', 'exists:unit_kerja,id'],
             'form.jenis_pegawai_id' => ['required', 'exists:jenis_pegawai,id'],
             'form.status_pegawai_id' => ['required', 'exists:status_pegawai,id'],
@@ -73,11 +95,11 @@ class TambahPegawai extends Component
             'form.gelar_depan' => ['nullable', 'string', 'max:50'],
             'form.gelar_belakang' => ['nullable', 'string', 'max:50'],
             'form.tempat_lahir' => ['required', 'string', 'max:50'],
-            'form.tanggal_lahir' => ['required', 'date'],
+            'form.tanggal_lahir' => ['required', 'date_format:d/m/Y'],
             'form.jenis_kelamin' => ['required', 'in:L,P'],
-            'form.tanggal_bergabung' => ['required', 'date'],
-            'form.tanggal_habis_kontrak' => ['nullable', 'date', 'required_if:form.status_pegawai_id,2'],
-            'form.tanggal_pensiun' => ['nullable', 'date', 'required_if:form.status_pegawai_id,1'],
+            'form.tanggal_bergabung' => ['required', 'date_format:d/m/Y'],
+            'form.tanggal_habis_kontrak' => ['nullable', 'date_format:d/m/Y', 'required_if:form.status_pegawai_id,' . self::STATUS_KONTRAK],
+            'form.tanggal_pensiun' => ['nullable', 'date_format:d/m/Y', 'required_if:form.status_pegawai_id,' . self::STATUS_TETAP],
 
             'form.no_telpon' => ['required', 'regex:/^\d{10,15}$/'],
             'form.email_yarsi' => ['nullable', 'email', 'unique:pegawai,email_yarsi'],
@@ -86,35 +108,43 @@ class TambahPegawai extends Component
         ];
     }
 
-    protected function rulesPerStep()
+    private function stepFields()
     {
         return [
-            0 => [ // Data Pegawai
-                'form.nama' => ['required', 'string', 'max:100'],
-                'form.ktp' => ['required', 'digits:16', 'unique:pegawai,ktp'],
-                'form.nip' => ['required', 'regex:/^\d{10,20}$/', 'unique:pegawai,nip'],
-                'form.npwp' => ['nullable', 'regex:/^\d{15,16}$/', 'unique:pegawai,npwp'],
-                'form.unit_kerja_id' => ['required', 'exists:unit_kerja,id'],
-                'form.jenis_pegawai_id' => ['required', 'exists:jenis_pegawai,id'],
-                'form.status_pegawai_id' => ['required', 'exists:status_pegawai,id'],
+            0 => [
+                'form.nama',
+                'form.ktp',
+                'form.nip',
+                'form.npwp',
+                'form.unit_kerja_id',
+                'form.jenis_pegawai_id',
+                'form.status_pegawai_id',
             ],
-            1 => [ // Biodata
-                'form.gelar_depan' => ['nullable', 'string', 'max:50'],
-                'form.gelar_belakang' => ['nullable', 'string', 'max:50'],
-                'form.tempat_lahir' => ['required', 'string', 'max:50'],
-                'form.tanggal_lahir' => ['required', 'date'],
-                'form.jenis_kelamin' => ['required', 'in:L,P'],
-                'form.tanggal_bergabung' => ['required', 'date'],
-                'form.tanggal_habis_kontrak' => ['nullable', 'date', 'required_if:form.status_pegawai_id,2'],
-                'form.tanggal_pensiun' => ['nullable', 'date', 'required_if:form.status_pegawai_id,1'],
+            1 => [
+                'form.gelar_depan',
+                'form.gelar_belakang',
+                'form.tempat_lahir',
+                'form.tanggal_lahir',
+                'form.jenis_kelamin',
+                'form.tanggal_bergabung',
+                'form.tanggal_habis_kontrak',
+                'form.tanggal_pensiun',
             ],
-            2 => [ // Kontak & Alamat
-                'form.no_telpon' => ['required', 'regex:/^\d{10,15}$/'],
-                'form.email_yarsi' => ['nullable', 'email', 'unique:pegawai,email_yarsi'],
-                'form.alamat_ktp' => ['required', 'string', 'max:255'],
-                'form.alamat_domisili' => ['nullable', 'string', 'max:255'],
+            2 => [
+                'form.no_telpon',
+                'form.email_yarsi',
+                'form.alamat_ktp',
+                'form.alamat_domisili',
             ],
         ];
+    }
+
+    private function rulesPerCurrentStep(): array
+    {
+        $rules = $this->rules();
+        return collect($this->stepFields()[$this->currentTab])
+            ->mapWithKeys(fn($field) => [$field => $rules[$field]])
+            ->toArray();
     }
 
     protected function messages()
@@ -152,19 +182,19 @@ class TambahPegawai extends Component
             'form.tempat_lahir.max' => 'Tempat lahir maksimal 50 karakter.',
 
             'form.tanggal_lahir.required' => 'Tanggal lahir wajib diisi.',
-            'form.tanggal_lahir.date' => 'Format tanggal lahir tidak valid.',
+            'form.tanggal_lahir.date_format' => 'Format tanggal lahir tidak valid.',
 
             'form.jenis_kelamin.required' => 'Jenis kelamin wajib dipilih.',
             'form.jenis_kelamin.in' => 'Jenis kelamin harus L atau P.',
 
             'form.tanggal_bergabung.required' => 'Tanggal bergabung wajib diisi.',
-            'form.tanggal_bergabung.date' => 'Format tanggal bergabung tidak valid.',
+            'form.tanggal_bergabung.date_format' => 'Format tanggal bergabung tidak valid.',
 
             'form.tanggal_habis_kontrak.required_if' => 'Tanggal habis kontrak wajib diisi untuk pegawai kontrak.',
-            'form.tanggal_habis_kontrak.date' => 'Format tanggal habis kontrak tidak valid.',
+            'form.tanggal_habis_kontrak.date_format' => 'Format tanggal habis kontrak tidak valid.',
 
             'form.tanggal_pensiun.required_if' => 'Tanggal pensiun wajib diisi untuk pegawai tetap.',
-            'form.tanggal_pensiun.date' => 'Format tanggal pensiun tidak valid.',
+            'form.tanggal_pensiun.date_format' => 'Format tanggal pensiun tidak valid.',
 
             // ===== KONTAK =====
             'form.no_telpon.required' => 'Nomor telepon wajib diisi.',
@@ -213,9 +243,8 @@ class TambahPegawai extends Component
 
     public function updated($property)
     {
-        if (str_starts_with($property, 'form.')) {
-            $this->validateOnly($property);
-        }
+        if (!str_starts_with($property, 'form.')) return;
+        $this->validateOnly($property, $this->rules());
     }
 
     public function resetForm()
@@ -227,7 +256,7 @@ class TambahPegawai extends Component
 
     public function nextStep()
     {
-        $this->validate($this->rulesPerStep()[$this->currentTab]);
+        $this->validate($this->rulesPerCurrentStep());
         $this->currentTab++;
     }
 
@@ -236,14 +265,24 @@ class TambahPegawai extends Component
         $this->currentTab--;
     }
 
+    private function normalizeDate($date)
+    {
+        return filled($date)
+            ? Carbon::createFromFormat('d/m/Y', $date)->format('Y-m-d')
+            : null;
+    }
     public function save()
     {
         $this->validate($this->rules());
 
         $data = $this->form;
 
-        $data['tanggal_pensiun'] = $data['tanggal_pensiun'] ?: null;
-        $data['tanggal_habis_kontrak'] = $data['tanggal_habis_kontrak'] ?: null;
+        $data['tanggal_lahir'] = $this->normalizeDate($data['tanggal_lahir']);
+        $data['tanggal_bergabung'] = $this->normalizeDate($data['tanggal_bergabung']);
+
+        $data['npwp'] = $data['npwp'] ?: null;
+        $data['tanggal_pensiun'] = $this->normalizeDate($data['tanggal_pensiun']) ?: null;
+        $data['tanggal_habis_kontrak'] = $this->normalizeDate($data['tanggal_habis_kontrak']) ?: null;
 
         Pegawai::create($data);
 

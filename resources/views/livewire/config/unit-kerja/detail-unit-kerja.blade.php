@@ -141,7 +141,7 @@
                     type="text"
                     wire:model.live="form.name"
                     placeholder="Nama Unit Kerja"
-                    class="w-full border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 text-sm bg-transparent transition-colors duration-150
+                    class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm bg-transparent transition-colors duration-150
                            @error('form.name') border-red-400 @enderror">
                 @error('form.nama_unit')
                     <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
@@ -215,7 +215,7 @@
                         wire:model.live.debounce.400ms="pimpinanSearch"
                         wire:blur="restorePimpinan"
                         placeholder="Cari nama atau NIP pimpinan..."
-                        class="w-full border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 text-sm bg-transparent transition-colors duration-150
+                        class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm bg-transparent transition-colors duration-150
                                @error('form.pimpinan_id') border-red-400 @enderror">
                     @if ($form['pimpinan_id'])
                         <button
@@ -256,7 +256,7 @@
                         wire:model.live.debounce.400ms="unitIndukSearch"
                         wire:blur="restoreUnitInduk"
                         placeholder="Cari nama unit induk..."
-                        class="w-full border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 text-sm bg-transparent transition-colors duration-150
+                        class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm bg-transparent transition-colors duration-150
                                @error('form.unit_induk_id') border-red-400 @enderror">
                     @if ($form['parent_id'])
                         <button

@@ -2,8 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ManajemenPegawaiController;
+use App\Http\Controllers\FileUploadController;
 
 use App\Livewire\Manajemen\Pegawai\DetailPegawai;
 
@@ -20,6 +22,12 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.handle.logout');
     Route::view('/profile', 'profile-page')->name('profile');
+
+    Route::get('/upload', function () {
+        return view('testing.upload');
+    })->name('upload');
+    Route::post('/upload', [FileUploadController::class, 'store'])->name('upload.store');
+    Route::delete('/upload', [FileUploadController::class, 'destroy'])->name('upload.destroy');
 
     Route::prefix('beranda')->group(function () {
         Route::view('/presensi', 'dashboard.presensi')->name('presensi');
