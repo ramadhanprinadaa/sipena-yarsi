@@ -3,54 +3,98 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
-use Symfony\Component\Routing\Route as RoutingRoute;
+use App\Http\Controllers\ManajemenPegawaiController;
+use App\Http\Controllers\PresensiController;
+use App\Livewire\Manajemen\Pegawai\DetailPegawai;
 
 Route::get('/', function () {
-    return Auth::check() ? redirect()->route('kepegawaian') : redirect()->route('login');
+    return Auth::check()
+        ? redirect()->route('kepegawaian')
+        : redirect()->route('login');
 });
 
 Route::middleware('guest')->group(function () {
+
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->name('auth.handle.login');
+
+    Route::post('/login', [AuthController::class, 'login'])
+        ->name('auth.handle.login');
 });
 
 Route::middleware('auth')->group(function () {
 
-    Route::post('/logout', [AuthController::class, 'logout'])->name('auth.handle.logout');
+    Route::post('/logout', [AuthController::class, 'logout'])
+        ->name('auth.handle.logout');
 
     Route::prefix('beranda')->group(function () {
-        Route::view('/presensi', 'dashboard.presensi')->name('presensi');
-        Route::view('/kepegawaian', 'dashboard.pegawai')->name('kepegawaian');
-        Route::view('/lembur', 'dashboard.lembur')->name('lembur')->middleware('role:Admin,SDM Yayasan,SDM Universitas,Staff,Tendik');
-        Route::view('/cuti', 'dashboard.cuti')->name('cuti');
-        Route::view('/surat-menyurat', 'dashboard.surat-menyurat')->name('surat-menyurat');
+
+        Route::view('/presensi', 'dashboard.presensi')
+            ->name('presensi');
+
+        Route::view('/kepegawaian', 'dashboard.pegawai')
+            ->name('kepegawaian');
+
+        Route::view('/lembur', 'dashboard.lembur')
+            ->name('lembur')
+            ->middleware('role:Admin,SDM Yayasan,SDM Universitas,Staff,Tendik');
+
+        Route::view('/cuti', 'dashboard.cuti')
+            ->name('cuti');
+
+        Route::view('/surat-menyurat', 'dashboard.surat-menyurat')
+            ->name('surat-menyurat');
     });
 
     Route::prefix('manajemen')->group(function () {
+
         Route::middleware('role:Admin')->group(function () {
-            Route::view('pengguna', 'manajemen.pengguna')->name('manajemen-pengguna');
+
+            Route::view('pengguna', 'manajemen.pengguna')
+                ->name('manajemen-pengguna');
         });
-        Route::middleware('role:Admin,SDM Yayasan,SDM Universitas,Pimpinan')->group(function () {
-            Route::view('pegawai', 'manajemen.pegawai')->name('manajemen-pegawai');
-            Route::view('presensi', 'manajemen.presensi')->name('manajemen-presensi');
-            Route::view('lembur', 'manajemen.lembur')->name('manajemen-lembur');
-            Route::view('cuti', 'manajemen.cuti')->name('manajemen-cuti');
+
+        // Export Presensi
+        Route::get('/presensi/export-riwayat', [PresensiController::class, 'exportRiwayat'])
+            ->name('presensi.export.riwayat');
+
+        Route::get('/presensi/export-rekap', [PresensiController::class, 'exportRekap'])
+            ->name('presensi.export.rekap');
+
+        Route::middleware('role:Admin,SDM Yayasan,SDM Universitas,Rektor,Pimpinan')->group(function () {
+
+            Route::get('pegawai', [ManajemenPegawaiController::class, 'index'])
+                ->name('manajemen-pegawai');
+
+            Route::livewire('pegawai/{id}', DetailPegawai::class)
+                ->name('manajemen-pegawai-detail');
+
+            Route::view('presensi', 'manajemen.presensi')
+                ->name('manajemen-presensi');
+
+            Route::view('lembur', 'manajemen.lembur')
+                ->name('manajemen-lembur');
+
+            Route::view('cuti', 'manajemen.cuti')
+                ->name('manajemen-cuti');
         });
     });
 });
+
 // Test Error
 Route::get('/test-401', function () {
     abort(401);
 });
+
 Route::get('/test-403', function () {
     abort(403);
 });
+
 Route::get('/test-500', function () {
     abort(500);
 });
 
 // Test DB
-// Route::get('/test-db', function() {
+// Route::get('/test-db', function () {
 //     $users = App\Models\User::all();
 //     $roles = App\Models\Role::find(4)->users()->get();
 
