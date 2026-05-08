@@ -118,7 +118,7 @@
                     <!-- Filter & Search -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
 
-                         <!-- Search -->
+                        <!-- Search -->
                             <div class="flex items-center w-full md:w-72 border border-gray-200 rounded-[10px] bg-white px-3">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M16 10a6 6 0 11-12 0 6 6 0 0112 0z"/>

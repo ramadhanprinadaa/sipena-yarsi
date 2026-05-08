@@ -13,18 +13,25 @@ return new class extends Migration
     {
         Schema::create('pegawai', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('unit_kerja_id')->nullable();
+            $table->foreignId('jenis_pegawai_id')->nullable(); // kontrak / tetap
+            $table->foreignId('status_pegawai_id')->nullable();
             $table->string('nip')->unique();
             $table->string('ktp')->unique();
-            $table->string('npwp')->unique();
+            $table->string('npwp')->unique()->nullable();
             $table->string('nama');
             $table->string('gelar_depan')->nullable();
             $table->string('gelar_belakang')->nullable();
-            $table->date('tanggal_lahir');
             $table->string('tempat_lahir');
-            $table->string('tanggal_pensiun');
+            $table->date('tanggal_lahir');
+            $table->date('tanggal_bergabung');
+            $table->date('tanggal_habis_kontrak')->nullable();
+            $table->date('tanggal_pensiun')->nullable();
+            $table->string('jenis_kelamin')->nullable();
             $table->text('alamat_ktp');
-            $table->text('alamat_domisili');
-            $table->string('no_telepon');
+            $table->text('alamat_domisili')->nullable();
+            $table->string('no_telpon')->nullable();
+            $table->string('email_yarsi')->nullable();
             $table->string('status');
             $table->timestamps();
         });

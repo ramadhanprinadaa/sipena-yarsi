@@ -1,36 +1,105 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-@import 'tailwindcss';
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import "tailwindcss";
 @import "flowbite/src/themes/default";
 
+@plugin "flowbite/plugin";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
-
+@source "../../node_modules/flowbite";
+@source "../node_modules/flowbite-datepicker";
 
 @layer base {
-    body {
-        font-family: 'Lexend', sans-serif;
-    }
+  body {
+    font-family: "Lexend", sans-serif;
+  }
+  .font-poppins {
+    font-family: "Poppins", sans-serif;
+  }
+  .font-lexend {
+    font-family: "Lexend", sans-serif;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE & Edge lama */
+    scrollbar-width: none; /* Firefox */
+  }
 }
 
 @layer components {
-    .bg-gradient-primary {
-        background: var(--color-primary);
-    }
-    .sidebar-item {
-        @apply flex items-start justify-center w-full p-2 rounded-md transition hover:bg-cyan-100;
-    }
-    .sidebar-item.active {
-        @apply bg-gradient-to-r from-blue-300 via-pink-200 to-gray-50;
-    }
-    .no-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
-    .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
-}
+  /* Sidebar */
+  .nav-link {
+    @apply flex items-center gap-3 p-2 rounded-md text-sm transition;
+  }
+  .nav-link-inactive {
+    @apply hover:bg-gradient-to-r hover:from-[#2B76FF] hover:to-[#A8C7FF] hover:text-white;
+  }
+  .nav-link-active {
+    @apply bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white;
+  }
 
+  /* Form */
+  .input-wrapper {
+    @apply relative w-full mb-5;
+  }
+  .input-field {
+    @apply block py-2 px-0 w-full text-sm text-heading bg-transparent border-0 border-b-2 border-default-medium appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500;
+  }
+  .input-label {
+    @apply absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 origin-[0] peer-focus:start-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto;
+  }
+
+  .input-label-btn {
+    @apply absolute text-sm text-gray-500 duration-300 transform origin-[0] left-0 top-2 translate-y-0 scale-100 cursor-pointer transition-all;
+  }
+
+  .input-label-btn-selected {
+    @apply -translate-y-5 scale-75;
+  }
+
+  .input-label-btn-focus {
+    @apply text-indigo-500;
+  }
+
+  /* Manajemen Pegawai */
+  .filter-dropdown {
+    @apply inline-flex items-center justify-between text-body bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-indigo-500 shadow-xs font-medium leading-5 rounded-md text-sm px-3 py-2 focus:outline-none cursor-pointer w-full;
+  }
+  .dropdown-menu {
+    @apply absolute left-0 z-10 w-full bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg mt-2;
+  }
+  .dropdown-item {
+    @apply inline-flex items-center text-left w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded;
+  }
+  .input-search {
+    @apply block w-full max-w-96 ps-9 pe-3 py-2 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-md outline-none focus:ring-3 focus:ring-indigo-500 shadow-xs placeholder:text-body;
+  }
+  .table-container {
+    @apply relative w-full bg-neutral-primary-soft shadow-xs rounded-md border border-default flex flex-col flex-1 min-h-0;
+  }
+  .table-wrapper {
+    @apply rounded-md overflow-y-auto flex-1;
+  }
+  .table {
+    @apply w-full table-fixed text-sm text-left rtl:text-right text-body h-full rounded-md;
+  }
+  .table-header {
+    @apply sticky top-0 text-sm text-body bg-neutral-secondary-medium border-b border-default-medium;
+  }
+  .table-row {
+    @apply bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium;
+  }
+  .table-pagination-btn {
+    @apply flex items-center justify-center text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading font-medium text-sm h-9 focus:outline-none;
+  }
+  .table-pagination-btn-active {
+    @apply flex items-center justify-center text-fg-brand bg-brand-softer box-border border border-default-medium hover:bg-brand-soft hover:text-fg-brand font-medium text-sm w-9 h-9 focus:outline-none;
+  }
+}

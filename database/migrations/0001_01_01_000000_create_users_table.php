@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('role_id')->constrained()->onDelete('cascade'); // Default role is 'Dosen' (id_role = 6)
-            $table->foreignId('pegawai_id')->nullable()->constrained('pegawai')->nullOnDelete();
-            $table->unsignedInteger('pimpinan_id')->nullable();
+            $table->foreignId('role_id')->default(8); // Default role is 'Dosen' (id_role = 6)
+            $table->foreignId('pegawai_id')->nullable();
             $table->string('username');
             $table->string('email')->unique();
             $table->string('password');

@@ -7,6 +7,37 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * @property int $id
+ * @property int $role_id
+ * @property int|null $pegawai_id
+ * @property string $username
+ * @property string $email
+ * @property string $password
+ * @property string $status
+ * @property string|null $remember_token
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read int|null $notifications_count
+ * @property-read \App\Models\Pegawai|null $pegawai
+ * @property-read \App\Models\Role|null $role
+ * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePegawaiId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRememberToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRoleId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUsername($value)
+ * @mixin \Eloquent
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -40,7 +71,7 @@ class User extends Authenticatable
 
     protected $attributes = [
         'status' => 'active',
-        'role_id' => 7
+        'role_id' => 8
     ];
 
     /**
@@ -70,5 +101,23 @@ class User extends Authenticatable
     public function pegawai()
     {
         return $this->belongsTo(Pegawai::class, 'pegawai_id');
+    }
+
+    public function import_pegawai()
+    {
+        return $this->hasMany(ImportPegawai::class, 'imported_by');
+    }
+
+    public function getUnitKerjaLabelAttribute()
+    {
+        if ($this->hasRole('SDM Universitas')) {
+            return $this->pegawai?->unit_kerja?->unitSdm?->name;
+        }
+
+        if ($this->hasRole('Pimpinan')) {
+            return $this->pegawai?->unit_kerja?->name;
+        }
+
+        return null;
     }
 }

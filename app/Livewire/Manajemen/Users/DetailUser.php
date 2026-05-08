@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Users;
+namespace App\Livewire\Manajemen\Users;
 
 use Livewire\Component;
 use Livewire\Attributes\On;
@@ -51,10 +51,10 @@ class DetailUser extends Component
             : '';
 
         $this->formEdit = [
-            'email' => $user->email,
-            'role_id' => $user->role_id,
+            'email'      => $user->email,
+            'role_id'    => $user->role_id,
             'pegawai_id' => $user->pegawai_id,
-            'status' => $user->status,
+            'status'     => $user->status,
         ];
 
         $this->pegawaiInitialId   = $this->formEdit['pegawai_id'];
@@ -66,7 +66,7 @@ class DetailUser extends Component
     public function close()
     {
         $this->resetValidation();
-        $this->reset();
+        $this->resetExcept('roles');
         $this->show = false;
     }
 
@@ -101,7 +101,7 @@ class DetailUser extends Component
 
     public function render()
     {
-        return view('livewire.users.detail-user');
+        return view('livewire.manajemen.users.detail-user');
     }
 
     public function getIsDirtyProperty()

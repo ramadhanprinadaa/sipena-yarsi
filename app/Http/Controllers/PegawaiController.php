@@ -12,7 +12,7 @@ class PegawaiController extends Controller
      */
     public function index()
     {
-        //
+        // 
     }
 
     /**
