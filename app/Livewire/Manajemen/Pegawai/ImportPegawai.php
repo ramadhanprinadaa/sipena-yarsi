@@ -2,13 +2,17 @@
 
 namespace App\Livewire\Manajemen\Pegawai;
 
-use Livewire\Component;
-use Livewire\Attributes\On;
-use Livewire\Attributes\Validate;
-use Livewire\WithFileUploads;
+use App\Imports\PegawaiImport;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+
+use Livewire\Component;
+use Livewire\WithFileUploads;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Validate;
+
+use Maatwebsite\Excel\Facades\Excel;
 
 class ImportPegawai extends Component
 {
@@ -17,12 +21,32 @@ class ImportPegawai extends Component
     #[Validate('required|file|mimes:xlsx,xls,csv,ods,tsv|max:10240')]
     public $file;
 
-    public string $errorMessage;
+    public ?string $errorMessage = null;
+
+    public bool $showResult = false;
+
+    public array $importSummary = [];
+
+    public function messages()
+    {
+        return [
+            'file.required' => 'Silahkan pilih file terlebih dahulu.',
+            'file.mimes' => 'File harus berformat .xlsx, .xls, .csv, .ods, atau .tsv.',
+            'file.max' => 'Ukuran file maksimal 10 MB.',
+        ];
+    }
+
+    public function import(string $filePath): array
+    {
+        $import = new PegawaiImport();
+        Excel::import($import, $filePath);
+        return $import->getSummary() ?? [];
+    }
 
     public function downloadTemplate()
     {
         $path = storage_path('app/public/templates/template_import_pegawai.xlsx');
-        if(!file_exists($path)) {
+        if (!file_exists($path)) {
             $this->errorMessage = 'File template tidak ditemukan. Silahkan hubungi administrator.';
             return;
         }
@@ -39,23 +63,40 @@ class ImportPegawai extends Component
     public function save()
     {
         $this->validate();
-        $path = $this->file->store('imports/pegawai');
-        $filename = $this->file->getClientOriginalName() . '_' . time();
+        try {
+            $originalName = pathinfo($this->file->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $this->file->getClientOriginalExtension();
+            $filename = $originalName . '_' . time() . '.' . $extension;
+            $path = $this->file->storeAs('imports/pegawai', $filename);
 
-        DB::table('import_pegawai')->insert([
-            'file_name' => $filename,
-            'file_path' => $path,
-            'imported_by' => Auth::user()->id,
-            'total_rows' => null,
-            'success_rows' => null,
-            'failed_rows' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+            // Import Excel
+            $summary = $this->import($path);
 
-        $this->dispatch('close-import-modal');
-        $this->dispatch('open-progress-modal');
+            // dd($summary);
+
+            // Save Log to DB
+            DB::table('import_pegawai')->insert([
+                'file_name'         => $filename,
+                'file_path'         => $path,
+                'imported_by'       => Auth::id(),
+                'total_rows'        => $summary['total_rows'] ?? 0,
+                'success_rows'      => $summary['success_rows'] ?? 0,
+                'failed_rows'       => $summary['failed_rows'] ?? 0,
+                'duplicate_rows'    => $summary['duplicate_rows'] ?? 0,
+                'created_at'        => now(),
+                'updated_at'        => now(),
+            ]);
+
+            $this->importSummary = $summary;
+        } catch (\Throwable $e) {
+            $this->errorMessage = $e->getMessage();
+            // dd($e->getMessage());
+        }
+
+        $this->showResult = true;
+        $this->dispatch('refresh-table');
         $this->reset('file');
+        // $this->dispatch('open-progress-modal');
     }
 
     // handle close
@@ -63,6 +104,15 @@ class ImportPegawai extends Component
     public function handleClose()
     {
         $this->reset('file');
+        $this->resetValidation();
+        $this->showResult = false;
+    }
+
+    public function resetImport()
+    {
+        $this->reset('file');
+        $this->resetValidation();
+        $this->showResult = false;
     }
 
     public function render()

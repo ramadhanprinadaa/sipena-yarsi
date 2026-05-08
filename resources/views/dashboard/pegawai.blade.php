@@ -4,505 +4,181 @@
 
 @section('breadcrumb')
     <div class="flex flex-wrap justify-center items-center space-x-2 text-sm text-gray-400 font-medium">
-        <span>Beranda</span>
-        <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i>
-
-        <a href="{{ route('kepegawaian') }}" class="text-indigo-600 hover:text-indigo-500">
-            Kepegawaian
-        </a>
-
-        <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i>
-
-        <span class="text-gray-600">Detail Pegawai</span>
+    <span>Beranda</span>
+    <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i>
+    <a href="{{ route('kepegawaian') }}" class="text-indigo-600 hover:text-indigo-500">Kepegawaian</a>
     </div>
 @endsection
 
 @section('content')
+<div class="space-y-6">
 
-    <div class="space-y-6">
+    <!-- Profil Header Card -->
+    <div class="bg-white shadow-lg rounded-2xl p-6 flex flex-col md:flex-row items-center md:items-start gap-6 relative overflow-hidden">
+        <!-- Dekorasi Top Bar -->
+        <div class="absolute top-0 left-0 w-full h-2 bg-blue-900"></div>
 
-        {{-- HEADER --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-
-            <div class="bg-gradient-to-r from-indigo-600 to-indigo-500 p-6">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-
-                    <div class="flex items-center gap-5">
-
-                        <div class="w-24 h-24 rounded-2xl bg-white/20 flex items-center justify-center text-white text-4xl">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
-
-                        <div class="text-white">
-
-                            <h1 class="text-3xl font-bold">
-                                Dr. Ahmad Ramadhan, S.Kom., M.Kom
-                            </h1>
-
-                            <div class="mt-2 flex flex-wrap items-center gap-3 text-sm">
-
-                                <span class="bg-white/20 px-3 py-1 rounded-full">
-                                    NIP: 198912312023011001
-                                </span>
-
-                                <span class="bg-emerald-500 px-3 py-1 rounded-full">
-                                    Pegawai Tetap
-                                </span>
-
-                                <span class="bg-yellow-400 text-gray-800 px-3 py-1 rounded-full">
-                                    Aktif
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="flex gap-3">
-
-                        <button
-                            class="text-white bg-white/20 hover:bg-white/30 transition px-5 py-2.5 rounded-xl">
-                            <i class="fa-solid fa-print mr-2"></i>
-                            Cetak
-                        </button>
-
-                        <button
-                            class="text-indigo-600 bg-white hover:bg-gray-100 transition px-5 py-2.5 rounded-xl font-medium">
-                            <i class="fa-solid fa-pen-to-square mr-2"></i>
-                            Edit
-                        </button>
-
-                    </div>
-
-                </div>
-            </div>
-
+        <div class="w-24 h-24 rounded-full bg-blue-50 text-blue-900 border-4 border-white shadow-md flex items-center justify-center text-4xl shrink-0">
+            <i class="fa-solid fa-user-tie"></i>
         </div>
 
-
-        {{-- GRID --}}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-            {{-- LEFT --}}
-            <div class="lg:col-span-2 space-y-6">
-
-                {{-- INFORMASI PRIBADI --}}
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200">
-
-                    <div class="border-b border-gray-100 px-6 py-4">
-                        <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                            <i class="fa-solid fa-id-card text-indigo-600"></i>
-                            Informasi Pribadi
-                        </h2>
-                    </div>
-
-                    <div class="p-6">
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-                            <div>
-                                <label class="text-sm text-gray-500">Nama Lengkap</label>
-                                <p class="font-medium text-gray-800">
-                                    Dr. Ahmad Ramadhan, S.Kom., M.Kom
-                                </p>
-                            </div>
-
-                            <div>
-                                <label class="text-sm text-gray-500">Jenis Kelamin</label>
-                                <p class="font-medium text-gray-800">
-                                    Laki-Laki
-                                </p>
-                            </div>
-
-                            <div>
-                                <label class="text-sm text-gray-500">Tempat Lahir</label>
-                                <p class="font-medium text-gray-800">
-                                    Jakarta
-                                </p>
-                            </div>
-
-                            <div>
-                                <label class="text-sm text-gray-500">Tanggal Lahir</label>
-                                <p class="font-medium text-gray-800">
-                                    31 Desember 1989
-                                </p>
-                            </div>
-
-                            <div>
-                                <label class="text-sm text-gray-500">KTP</label>
-                                <p class="font-medium text-gray-800">
-                                    3201010101010001
-                                </p>
-                            </div>
-
-                            <div>
-                                <label class="text-sm text-gray-500">NPWP</label>
-                                <p class="font-medium text-gray-800">
-                                    09.888.777.6-123.000
-                                </p>
-                            </div>
-
-                            <div>
-                                <label class="text-sm text-gray-500">No Telepon</label>
-                                <p class="font-medium text-gray-800">
-                                    081234567890
-                                </p>
-                            </div>
-
-                            <div>
-                                <label class="text-sm text-gray-500">Email YARSI</label>
-                                <p class="font-medium text-gray-800">
-                                    ahmad.ramadhan@yarsi.ac.id
-                                </p>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                {{-- INFORMASI KEPEGAWAIAN --}}
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200">
-
-                    <div class="border-b border-gray-100 px-6 py-4">
-                        <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                            <i class="fa-solid fa-briefcase text-indigo-600"></i>
-                            Informasi Kepegawaian
-                        </h2>
-                    </div>
-
-                    <div class="p-6">
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-                            <div>
-                                <label class="text-sm text-gray-500">Unit Kerja</label>
-                                <p class="font-medium text-gray-800">
-                                    Fakultas Teknologi Informasi
-                                </p>
-                            </div>
-
-                            <div>
-                                <label class="text-sm text-gray-500">Jenis Pegawai</label>
-                                <p class="font-medium text-gray-800">
-                                    Pegawai Tetap
-                                </p>
-                            </div>
-
-                            <div>
-                                <label class="text-sm text-gray-500">Status Pegawai</label>
-                                <p class="font-medium text-gray-800">
-                                    Aktif
-                                </p>
-                            </div>
-
-                            <div>
-                                <label class="text-sm text-gray-500">Tanggal Bergabung</label>
-                                <p class="font-medium text-gray-800">
-                                    01 Januari 2023
-                                </p>
-                            </div>
-
-                            <div>
-                                <label class="text-sm text-gray-500">Tanggal Habis Kontrak</label>
-                                <p class="font-medium text-gray-800">
-                                    -
-                                </p>
-                            </div>
-
-                            <div>
-                                <label class="text-sm text-gray-500">Tanggal Pensiun</label>
-                                <p class="font-medium text-gray-800">
-                                    31 Desember 2045
-                                </p>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                {{-- ALAMAT --}}
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200">
-
-                    <div class="border-b border-gray-100 px-6 py-4">
-                        <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                            <i class="fa-solid fa-location-dot text-indigo-600"></i>
-                            Informasi Alamat
-                        </h2>
-                    </div>
-
-                    <div class="p-6 space-y-5">
-
-                        <div>
-                            <label class="text-sm text-gray-500">Alamat KTP</label>
-
-                            <div class="mt-2 bg-gray-50 border border-gray-200 rounded-xl p-4 text-gray-700">
-                                Jl. Melati Indah No. 88, Jakarta Selatan, DKI Jakarta
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="text-sm text-gray-500">Alamat Domisili</label>
-
-                            <div class="mt-2 bg-gray-50 border border-gray-200 rounded-xl p-4 text-gray-700">
-                                Jl. Mawar Residence Blok A2 No. 10, Depok, Jawa Barat
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                {{-- DATA KELUARGA --}}
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200">
-
-                    <div class="border-b border-gray-100 px-6 py-4 flex justify-between items-center">
-
-                        <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                            <i class="fa-solid fa-people-roof text-indigo-600"></i>
-                            Data Keluarga
-                        </h2>
-
-                        <button
-                            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-4 py-2 rounded-xl transition">
-                            <i class="fa-solid fa-plus mr-1"></i>
-                            Tambah
-                        </button>
-
-                    </div>
-
-                    <div class="overflow-x-auto">
-
-                        <table class="w-full text-sm text-left text-gray-600">
-
-                            <thead class="bg-gray-50 text-gray-700 uppercase text-xs">
-                                <tr>
-                                    <th class="px-6 py-4">No</th>
-                                    <th class="px-6 py-4">Nama</th>
-                                    <th class="px-6 py-4">Hubungan</th>
-                                    <th class="px-6 py-4">Jenis Kelamin</th>
-                                    <th class="px-6 py-4">Tanggal Lahir</th>
-                                    <th class="px-6 py-4">Pekerjaan</th>
-                                    <th class="px-6 py-4 text-center">Aksi</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-
-                                <tr class="border-t hover:bg-gray-50">
-                                    <td class="px-6 py-4">1</td>
-                                    <td class="px-6 py-4 font-medium text-gray-800">
-                                        Siti Nurhaliza
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        Istri
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        Perempuan
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        12 Mei 1992
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        Dosen
-                                    </td>
-
-                                    <td class="px-6 py-4">
-                                        <div class="flex justify-center gap-2">
-
-                                            <button
-                                                class="w-9 h-9 rounded-lg bg-yellow-100 text-yellow-600 hover:bg-yellow-200">
-                                                <i class="fa-solid fa-pen"></i>
-                                            </button>
-
-                                            <button
-                                                class="w-9 h-9 rounded-lg bg-red-100 text-red-600 hover:bg-red-200">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </button>
-
-                                        </div>
-                                    </td>
-                                </tr>
-
-
-                                <tr class="border-t hover:bg-gray-50">
-                                    <td class="px-6 py-4">2</td>
-                                    <td class="px-6 py-4 font-medium text-gray-800">
-                                        Muhammad Raihan
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        Anak
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        Laki-Laki
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        20 Februari 2018
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        Pelajar
-                                    </td>
-
-                                    <td class="px-6 py-4">
-                                        <div class="flex justify-center gap-2">
-
-                                            <button
-                                                class="w-9 h-9 rounded-lg bg-yellow-100 text-yellow-600 hover:bg-yellow-200">
-                                                <i class="fa-solid fa-pen"></i>
-                                            </button>
-
-                                            <button
-                                                class="w-9 h-9 rounded-lg bg-red-100 text-red-600 hover:bg-red-200">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </button>
-
-                                        </div>
-                                    </td>
-                                </tr>
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
+        <div class="flex-1 text-center md:text-left">
+            <!-- Gelar Depan + Nama + Gelar Belakang -->
+            <h1 class="text-2xl font-bold text-gray-900">Dr. Budi Santoso, S.Kom., M.T.</h1>
+            <p class="text-blue-900 font-semibold mt-1">
+                <i class="fa-solid fa-id-badge mr-2"></i>NIP: 198501152010121002
+            </p>
+            <div class="mt-3 flex flex-wrap justify-center md:justify-start gap-2">
+                <span class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full border border-green-200">
+                    <i class="fa-solid fa-circle-check mr-1"></i> Aktif
+                </span>
+                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full border border-blue-200">
+                    <i class="fa-solid fa-user-shield mr-1"></i> Pegawai Tetap
+                </span>
+                <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-3 py-1 rounded-full border border-purple-200">
+                    <i class="fa-solid fa-building mr-1"></i> Fakultas Teknologi Informasi
+                </span>
             </div>
-
-
-            {{-- RIGHT --}}
-            <div class="space-y-6">
-
-                {{-- STATUS --}}
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-
-                    <h2 class="text-lg font-semibold text-gray-800 mb-5">
-                        Status Pegawai
-                    </h2>
-
-                    <div class="space-y-4">
-
-                        <div class="flex items-center justify-between">
-                            <span class="text-gray-500">
-                                Status
-                            </span>
-
-                            <span
-                                class="bg-emerald-100 text-emerald-700 text-sm px-3 py-1 rounded-full font-medium">
-                                Aktif
-                            </span>
-                        </div>
-
-                        <div class="flex items-center justify-between">
-                            <span class="text-gray-500">
-                                Jenis
-                            </span>
-
-                            <span
-                                class="bg-indigo-100 text-indigo-700 text-sm px-3 py-1 rounded-full font-medium">
-                                Tetap
-                            </span>
-                        </div>
-
-                        <div class="flex items-center justify-between">
-                            <span class="text-gray-500">
-                                Masa Kerja
-                            </span>
-
-                            <span class="font-medium text-gray-800">
-                                3 Tahun
-                            </span>
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                {{-- QUICK INFO --}}
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-
-                    <h2 class="text-lg font-semibold text-gray-800 mb-5">
-                        Informasi Tambahan
-                    </h2>
-
-                    <div class="space-y-5">
-
-                        <div class="flex items-start gap-3">
-
-                            <div
-                                class="w-11 h-11 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
-                                <i class="fa-solid fa-envelope"></i>
-                            </div>
-
-                            <div>
-                                <p class="text-sm text-gray-500">
-                                    Email
-                                </p>
-
-                                <p class="font-medium text-gray-800">
-                                    ahmad.ramadhan@yarsi.ac.id
-                                </p>
-                            </div>
-
-                        </div>
-
-
-                        <div class="flex items-start gap-3">
-
-                            <div
-                                class="w-11 h-11 rounded-xl bg-green-100 text-green-600 flex items-center justify-center">
-                                <i class="fa-solid fa-phone"></i>
-                            </div>
-
-                            <div>
-                                <p class="text-sm text-gray-500">
-                                    Telepon
-                                </p>
-
-                                <p class="font-medium text-gray-800">
-                                    081234567890
-                                </p>
-                            </div>
-
-                        </div>
-
-
-                        <div class="flex items-start gap-3">
-
-                            <div
-                                class="w-11 h-11 rounded-xl bg-yellow-100 text-yellow-600 flex items-center justify-center">
-                                <i class="fa-solid fa-calendar"></i>
-                            </div>
-
-                            <div>
-                                <p class="text-sm text-gray-500">
-                                    Bergabung
-                                </p>
-
-                                <p class="font-medium text-gray-800">
-                                    01 Januari 2023
-                                </p>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
         </div>
 
+        <div class="mt-4 md:mt-0 flex gap-2">
+            <button type="button" class="text-white bg-blue-900 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 focus:outline-none shadow-sm transition-all">
+                <i class="fa-solid fa-pen-to-square mr-2"></i>Edit Data
+            </button>
+        </div>
     </div>
 
+    <!-- Grid Detail Informasi -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+        <!-- Kartu Informasi Pribadi -->
+        <div class="bg-white shadow-lg rounded-2xl p-6 border-t-4 border-blue-400">
+            <h2 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">
+                <i class="fa-solid fa-address-card text-blue-500 mr-2"></i>Informasi Pribadi
+            </h2>
+            <ul class="space-y-4 text-sm">
+                <li class="flex justify-between items-center pb-2 border-b border-gray-50">
+                    <span class="text-gray-500"><i class="fa-regular fa-id-card w-5 text-center"></i> No. KTP</span>
+                    <span class="font-medium text-gray-900">3171234567890001</span>
+                </li>
+                <li class="flex justify-between items-center pb-2 border-b border-gray-50">
+                    <span class="text-gray-500"><i class="fa-solid fa-money-check w-5 text-center"></i> NPWP</span>
+                    <span class="font-medium text-gray-900">98.765.432.1-098.000</span>
+                </li>
+                <li class="flex justify-between items-center pb-2 border-b border-gray-50">
+                    <span class="text-gray-500"><i class="fa-solid fa-cake-candles w-5 text-center"></i> Tempat, Tgl Lahir</span>
+                    <span class="font-medium text-gray-900">Jakarta, 15 Januari 1985</span>
+                </li>
+                <li class="flex justify-between items-center pb-2 border-b border-gray-50">
+                    <span class="text-gray-500"><i class="fa-solid fa-venus-mars w-5 text-center"></i> Jenis Kelamin</span>
+                    <span class="font-medium text-gray-900">Laki-laki</span>
+                </li>
+                <li class="flex justify-between items-center pb-2 border-b border-gray-50">
+                    <span class="text-gray-500"><i class="fa-solid fa-envelope w-5 text-center"></i> Email Institusi</span>
+                    <span class="font-medium text-gray-900">budi.santoso@yarsi.ac.id</span>
+                </li>
+                <li class="flex justify-between items-center pb-2 border-b border-gray-50">
+                    <span class="text-gray-500"><i class="fa-solid fa-phone w-5 text-center"></i> No. Telpon</span>
+                    <span class="font-medium text-gray-900">0812-3456-7890</span>
+                </li>
+                <li class="flex flex-col gap-1 pb-2 border-b border-gray-50">
+                    <span class="text-gray-500"><i class="fa-solid fa-house w-5 text-center"></i> Alamat KTP</span>
+                    <span class="font-medium text-gray-900 pl-6 leading-relaxed">Jl. Letjen Suprapto No.13, RT.10/RW.5, Cemp. Putih Tim., Kec. Cemp. Putih, Jakarta Pusat 10510</span>
+                </li>
+                <li class="flex flex-col gap-1 pb-1">
+                    <span class="text-gray-500"><i class="fa-solid fa-map-location-dot w-5 text-center"></i> Alamat Domisili</span>
+                    <span class="font-medium text-gray-900 pl-6 leading-relaxed">Sama dengan alamat KTP</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Kartu Informasi Kepegawaian -->
+        <div class="bg-white shadow-lg rounded-2xl p-6 border-t-4 border-indigo-400">
+            <h2 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">
+                <i class="fa-solid fa-briefcase text-indigo-500 mr-2"></i>Informasi Kepegawaian
+            </h2>
+            <ul class="space-y-4 text-sm">
+                <li class="flex justify-between items-center pb-2 border-b border-gray-50">
+                    <span class="text-gray-500"><i class="fa-solid fa-network-wired w-5 text-center"></i> Unit Kerja</span>
+                    <span class="font-medium text-gray-900">Fakultas Teknologi Informasi</span>
+                </li>
+                <li class="flex justify-between items-center pb-2 border-b border-gray-50">
+                    <span class="text-gray-500"><i class="fa-solid fa-user-tag w-5 text-center"></i> Jenis Pegawai</span>
+                    <span class="font-medium text-gray-900">Dosen Tetap</span>
+                </li>
+                <li class="flex justify-between items-center pb-2 border-b border-gray-50">
+                    <span class="text-gray-500"><i class="fa-solid fa-star-half-stroke w-5 text-center"></i> Status Kepegawaian</span>
+                    <span class="font-medium text-gray-900">Aktif</span>
+                </li>
+                <li class="flex justify-between items-center pb-2 border-b border-gray-50">
+                    <span class="text-gray-500"><i class="fa-solid fa-calendar-check w-5 text-center"></i> Tanggal Bergabung</span>
+                    <span class="font-medium text-gray-900">01 September 2010</span>
+                </li>
+                <li class="flex justify-between items-center pb-2 border-b border-gray-50">
+                    <span class="text-gray-500"><i class="fa-solid fa-file-signature w-5 text-center"></i> Tanggal Habis Kontrak</span>
+                    <span class="font-medium text-gray-400 italic">Tidak ada (Pegawai Tetap)</span>
+                </li>
+                <li class="flex justify-between items-center pb-2 border-b border-gray-50">
+                    <span class="text-gray-500"><i class="fa-solid fa-hourglass-end w-5 text-center"></i> Tanggal Pensiun</span>
+                    <span class="font-medium text-gray-900">15 Januari 2045</span>
+                </li>
+                <li class="flex justify-between items-center pb-2 border-b border-gray-50">
+                    <span class="text-gray-500"><i class="fa-solid fa-clock-rotate-left w-5 text-center"></i> Data Dibuat</span>
+                    <span class="font-medium text-gray-900">10 Mei 2023</span>
+                </li>
+                <li class="flex justify-between items-center pb-1">
+                    <span class="text-gray-500"><i class="fa-solid fa-pen w-5 text-center"></i> Terakhir Diubah</span>
+                    <span class="font-medium text-gray-900">02 November 2023</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Bagian Tabel Daftar Keluarga -->
+    <div class="bg-white shadow-lg rounded-2xl p-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+            <h2 class="text-lg font-bold text-gray-900">
+                <i class="fa-solid fa-people-roof text-blue-900 mr-2"></i>Daftar Keluarga
+            </h2>
+            <button type="button" class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2 focus:outline-none flex items-center shadow-sm transition-all">
+                <i class="fa-solid fa-plus mr-2"></i> Tambah Anggota
+            </button>
+        </div>
+
+        <div class="relative overflow-x-auto shadow-sm sm:rounded-lg border border-gray-200">
+            <table class="w-full text-sm text-left text-gray-600">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-4 w-10 text-center font-bold">No</th>
+                        <th scope="col" class="px-6 py-4 font-bold">Nama Lengkap</th>
+                        <th scope="col" class="px-6 py-4 font-bold">Hubungan</th>
+                        <th scope="col" class="px-6 py-4 font-bold">Jenis Kelamin</th>
+                        <th scope="col" class="px-6 py-4 font-bold">Tempat, Tanggal Lahir</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="bg-white border-b hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 text-center">1</td>
+                        <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">Siti Aminah, S.E.</td>
+                        <td class="px-6 py-4">
+                            <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded">Istri</span>
+                        </td>
+                        <td class="px-6 py-4">Perempuan</td>
+                        <td class="px-6 py-4">Bandung, 12 Mei 1988</td>
+                    </tr>
+                    <tr class="bg-white hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 text-center">2</td>
+                        <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">Ahmad Fathan Santoso</td>
+                        <td class="px-6 py-4">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Anak</span>
+                        </td>
+                        <td class="px-6 py-4">Laki-laki</td>
+                        <td class="px-6 py-4">Jakarta, 05 Agustus 2015</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
 @endsection

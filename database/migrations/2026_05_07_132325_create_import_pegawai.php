@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('total_rows')->nullable();
             $table->integer('success_rows')->nullable();
             $table->integer('failed_rows')->nullable();
+            $table->integer('duplicate_rows')->nullable();
             $table->timestamps();
         });
     }
