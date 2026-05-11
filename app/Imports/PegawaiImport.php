@@ -189,13 +189,13 @@ class PegawaiImport implements ToCollection, WithHeadingRow
     public function getSummary()
     {
         return [
-            'total_rows'        => $this->totalRows,
-            'success_rows'      => $this->successRows,
-            'failed_rows'       => $this->failedRows,
-            'duplicate_rows'    => $this->duplicateRows,
-            'failures'          => $this->failures,
-            'duplicates'        => $this->duplicates,
-            'success_data'      => $this->successData,
+            'total_rows'         => $this->totalRows,
+            'total_success'      => $this->successRows,
+            'total_failed'       => $this->failedRows,
+            'total_duplicate'    => $this->duplicateRows,
+            'failures'           => $this->failures,
+            'duplicates'         => $this->duplicates,
+            'success_data'       => $this->successData,
         ];
     }
 }

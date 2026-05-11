@@ -80,9 +80,9 @@ class ImportPegawai extends Component
                 'file_path'         => $path,
                 'imported_by'       => Auth::id(),
                 'total_rows'        => $summary['total_rows'] ?? 0,
-                'success_rows'      => $summary['success_rows'] ?? 0,
-                'failed_rows'       => $summary['failed_rows'] ?? 0,
-                'duplicate_rows'    => $summary['duplicate_rows'] ?? 0,
+                'total_success'      => $summary['total_success'] ?? 0,
+                'total_failed'       => $summary['total_failed'] ?? 0,
+                'total_duplicate'    => $summary['total_duplicate'] ?? 0,
                 'created_at'        => now(),
                 'updated_at'        => now(),
             ]);

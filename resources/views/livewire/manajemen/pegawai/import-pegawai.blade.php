@@ -281,21 +281,21 @@
                 <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
                     <p class="text-xs text-emerald-500 font-medium">Berhasil</p>
                     <h3 class="mt-1 text-2xl font-bold text-emerald-600">
-                        {{ $importSummary['success_rows'] ?? 0 }}
+                        {{ $importSummary['total_success'] ?? 0 }}
                     </h3>
                 </div>
 
                 <div class="rounded-2xl border border-red-100 bg-red-50 p-4">
                     <p class="text-xs text-red-500 font-medium">Gagal</p>
                     <h3 class="mt-1 text-2xl font-bold text-red-600">
-                        {{ $importSummary['failed_rows'] ?? 0 }}
+                        {{ $importSummary['total_failed'] ?? 0 }}
                     </h3>
                 </div>
 
                 <div class="rounded-2xl border border-yellow-100 bg-yellow-50 p-4">
                     <p class="text-xs text-yellow-500 font-medium">Duplikat</p>
                     <h3 class="mt-1 text-2xl font-bold text-yellow-600">
-                        {{ $importSummary['duplicate_rows'] ?? 0 }}
+                        {{ $importSummary['total_duplicate'] ?? 0 }}
                     </h3>
                 </div>
             </div>
