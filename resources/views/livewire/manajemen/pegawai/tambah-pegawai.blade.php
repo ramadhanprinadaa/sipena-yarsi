@@ -620,7 +620,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
         <!-- Footer -->
@@ -684,6 +683,5 @@
                 </template>
             </div>
         </div>
-
     </form>
 </div>

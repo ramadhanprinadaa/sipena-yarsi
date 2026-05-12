@@ -93,7 +93,7 @@
                 x-show="!sidebarToggle && floating === 'beranda'"
                 @mouseleave="floating = null"
                 x-transition
-                class="absolute left-26 top-0 w-56 bg-white shadow-lg rounded-lg p-2"
+                class="absolute left-26 top-0 w-56 bg-white shadow-lg rounded-lg p-2 flex flex-col gap-1"
             >
                 <a wire:navigate href="{{ route('kepegawaian') }}"
                     class="nav-link {{ request()->routeIs('kepegawaian') ? 'nav-link-active' : 'nav-link-inactive'}}">
@@ -208,7 +208,7 @@
                     x-show="floating === 'manajemen' && !sidebarToggle"
                     @mouseleave="floating = null"
                     x-transition
-                    class="absolute left-26 top-18 w-56 bg-white shadow-lg rounded-lg p-2"
+                    class="absolute left-26 top-18 w-56 bg-white shadow-lg rounded-lg p-2 flex flex-col gap-1"
                 >
                     @if (auth()->user()->hasRole('Admin'))
                         <a wire:navigate href="{{ route('manajemen-pengguna') }}"
@@ -256,7 +256,7 @@
                         'justify-between': sidebarToggle,
                         'justify-center': !sidebarToggle,
                         'bg-gradient-to-r from-[#2B76FF] to-[#A8C7FF] text-white':
-                            {{ request()->routeIs('konfigurasi-unit-kerja', 'konfigurasi-alur-persetujuan', 'konfigurasi-hari-libur') ? 'true' : 'false' }}
+                            {{ request()->routeIs('konfigurasi-unit-kerja', 'konfigurasi-alur-persetujuan', 'konfigurasi-kalender') ? 'true' : 'false' }}
                             && !(sidebarToggle && open.konfigurasi)
                     }"
                     class="flex items-center w-full p-2 rounded-md hover:bg-gradient-to-r hover:from-[#2B76FF] hover:to-[#A8C7FF] hover:text-white cursor-pointer"
@@ -277,24 +277,20 @@
                 {{-- Sub Menu --}}
                 <div x-show="open.konfigurasi && sidebarToggle" x-transition class="ml-2 flex flex-col gap-2">
 
-
-                    @if (auth()->user()->hasRole('Admin'))
-                        <a wire:navigate href="{{ route('konfigurasi-unit-kerja') }}"
-                            class="nav-link {{ request()->routeIs('konfigurasi-unit-kerja') ? 'nav-link-active' : 'nav-link-inactive' }}">
-                            <i class="fa-solid fa-building text-lg"></i>
-                            <span>Unit Kerja</span>
-                        </a>
-                        <a wire:navigate href="{{ route('konfigurasi-alur-persetujuan') }}"
-                            class="nav-link {{ request()->routeIs('konfigurasi-alur-persetujuan') ? 'nav-link-active' : 'nav-link-inactive' }}">
-                            <i class="fa-solid fa-diagram-project"></i>
-                            <span>Alur Persetujuan</span>
-                        </a>
-                    @endif
-
-                    <a wire:navigate href="{{ route('konfigurasi-hari-libur') }}"
-                        class="nav-link {{ request()->routeIs('konfigurasi-hari-libur') ? 'nav-link-active' : 'nav-link-inactive' }}">
+                    <a wire:navigate href="{{ route('konfigurasi-unit-kerja') }}"
+                        class="nav-link {{ request()->routeIs('konfigurasi-unit-kerja') ? 'nav-link-active' : 'nav-link-inactive' }}">
+                        <i class="fa-solid fa-building text-lg"></i>
+                        <span>Unit Kerja</span>
+                    </a>
+                    <a wire:navigate href="{{ route('konfigurasi-kalender') }}"
+                        class="nav-link {{ request()->routeIs('konfigurasi-kalender') ? 'nav-link-active' : 'nav-link-inactive' }}">
                         <i class="fa-solid fa-calendar-plus text-lg"></i>
-                        <span>Hari Libur</span>
+                        <span>Kalender</span>
+                    </a>
+                    <a wire:navigate href="{{ route('konfigurasi-alur-persetujuan') }}"
+                        class="nav-link {{ request()->routeIs('konfigurasi-alur-persetujuan') ? 'nav-link-active' : 'nav-link-inactive' }}">
+                        <i class="fa-solid fa-diagram-project"></i>
+                        <span>Alur Persetujuan</span>
                     </a>
                 </div>
 
@@ -303,27 +299,23 @@
                     x-show="floating === 'konfigurasi' && !sidebarToggle"
                     @mouseleave="floating = null"
                     x-transition
-                    class="absolute left-26 top-32 w-56 bg-white shadow-lg rounded-lg p-2"
+                    class="absolute left-26 top-32 w-56 bg-white shadow-lg rounded-lg p-2 flex flex-col gap-1"
                 >
 
-                    @if (auth()->user()->hasRole('Admin'))
-                        <a wire:navigate href="{{ route('konfigurasi-unit-kerja') }}"
-                            class="nav-link {{ request()->routeIs('konfigurasi-unit-kerja') ? 'nav-link-active' : 'nav-link-inactive' }}">
-                            <i class="fa-solid fa-building text-lg"></i>
-                            <span>Unit Kerja</span>
-                        </a>
-
-                        <a wire:navigate href="{{ route('konfigurasi-alur-persetujuan') }}"
-                            class="nav-link {{ request()->routeIs('konfigurasi-alur-persetujuan') ? 'nav-link-active' : 'nav-link-inactive' }}">
-                            <i class="fa-solid fa-diagram-project"></i>
-                            <span>Alur Persetujuan</span>
-                        </a>
-                    @endif
-
-                    <a wire:navigate href="{{ route('konfigurasi-hari-libur') }}"
-                        class="nav-link {{ request()->routeIs('konfigurasi-hari-libur') ? 'nav-link-active' : 'nav-link-inactive' }}">
+                    <a wire:navigate href="{{ route('konfigurasi-unit-kerja') }}"
+                        class="nav-link {{ request()->routeIs('konfigurasi-unit-kerja') ? 'nav-link-active' : 'nav-link-inactive' }}">
+                        <i class="fa-solid fa-building text-lg"></i>
+                        <span>Unit Kerja</span>
+                    </a>
+                    <a wire:navigate href="{{ route('konfigurasi-kalender') }}"
+                        class="nav-link {{ request()->routeIs('konfigurasi-kalender') ? 'nav-link-active' : 'nav-link-inactive' }}">
                         <i class="fa-solid fa-calendar-plus text-lg"></i>
-                        <span>Hari Libur</span>
+                        <span>Kalender</span>
+                    </a>
+                    <a wire:navigate href="{{ route('konfigurasi-alur-persetujuan') }}"
+                        class="nav-link {{ request()->routeIs('konfigurasi-alur-persetujuan') ? 'nav-link-active' : 'nav-link-inactive' }}">
+                        <i class="fa-solid fa-diagram-project"></i>
+                        <span>Alur Persetujuan</span>
                     </a>
                 </div>
             </div>
