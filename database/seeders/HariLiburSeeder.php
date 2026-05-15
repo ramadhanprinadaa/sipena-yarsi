@@ -17,25 +17,19 @@ class HariLiburSeeder extends Seeder
         HariLibur::create([
             'tanggal'           => '2026-05-12',
             'nama_hari_libur'   => 'Idul Adha',
-            'jenis_hari_libur'  => 'nasional',
+            'jenis_hari_libur'  => 'Hari Libur Nasional',
             'keterangan'        => ''
         ]);
         HariLibur::create([
             'tanggal'           => '2026-05-15',
             'nama_hari_libur'   => 'Hari Tasyrik',
-            'jenis_hari_libur'  => 'nasional',
-            'keterangan'        => ''
-        ]);
-        HariLibur::create([
-            'tanggal'           => '2026-05-22',
-            'nama_hari_libur'   => 'Hari Ambarawa',
-            'jenis_hari_libur'  => 'nasional',
+            'jenis_hari_libur'  => 'Hari Libur Nasional',
             'keterangan'        => ''
         ]);
         HariLibur::create([
             'tanggal'           => '2026-05-27',
             'nama_hari_libur'   => 'Hari Lahir Pancasila',
-            'jenis_hari_libur'  => 'nasional',
+            'jenis_hari_libur'  => 'Hari Libur Nasional',
             'keterangan'        => ''
         ]);
     }

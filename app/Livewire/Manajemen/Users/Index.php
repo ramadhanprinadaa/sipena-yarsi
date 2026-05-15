@@ -90,11 +90,9 @@ class Index extends Component
     {
         $this->resetPage();
     }
-
-    public function openDetail($id)
+    public function selectUser($id)
     {
-        $this->dispatch('open-user-detail', $id);
-        $this->showDetail = true;
+        $this->dispatch('load-detail-modal', userId: $id);
     }
 
     #[On('refresh-table')]

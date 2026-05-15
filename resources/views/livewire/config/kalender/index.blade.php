@@ -59,7 +59,7 @@
 
         <div
             wire:loading.flex
-            wire:target="previousMonth,nextMonth,selectedDate"
+            wire:target="previousMonth, nextMonth, goToToday, updatedSelectedDate"
             class="absolute inset-0 z-10 items-center justify-center bg-white/70 backdrop-blur-sm">
 
             <div class="flex items-center gap-2 text-sm text-gray-500">
@@ -83,7 +83,10 @@
             <!-- Calendar Days -->
             <div class="grid grid-cols-7 divide-x divide-y divide-gray-200">
                 @foreach ($calendar as $day)
-                    <div class="min-h-[100px] p-2 flex flex-col gap-1 bg-white hover:bg-indigo-50/50 transition-colors cursor-pointer">
+                    <div
+                        @click="$dispatch('open-loading-detail')"
+                        wire:click="selectDay('{{ $day['date'] }}')"
+                        class="min-h-[100px] p-2 flex flex-col gap-1 bg-white hover:bg-indigo-50/50 transition-colors cursor-pointer">
 
                         <!-- Day Number -->
                         <span class="inline-flex items-center justify-center w-7 h-7 text-xs rounded-full font-medium
@@ -96,8 +99,21 @@
 
                         <!-- Holiday Badge -->
                         @if ($day['is_holiday'])
-                            <div class="px-1 py-0.5 text-[0.7rem] font-medium text-red-700 bg-red-50 rounded truncate leading-4">
-                                {{ $day['holiday_name'] }}
+                            <div class="flex flex-col gap-1">
+                                @foreach ($day['holidays'] as $holiday)
+                                    <div
+                                        class="px-1 py-0.5 text-[0.7rem] font-medium rounded truncate leading-4
+                                        {{ match($holiday->jenis_hari_libur) {
+                                                'Hari Libur Nasional' => 'bg-red-50 text-red-700',
+                                                'Hari Libur Cuti Bersama' => 'bg-amber-50 text-amber-700',
+                                                'Hari Libur Institusi' => 'bg-blue-50 text-blue-700',
+                                                default => 'bg-gray-50 text-gray-700',
+                                            }
+                                        }}"
+                                    >
+                                        {{ $holiday->nama_hari_libur }}
+                                    </div>
+                                @endforeach
                             </div>
                         @endif
                     </div>

@@ -12,8 +12,13 @@
 
 @section('content')
     <div
-        x-data="{ openModal: false, openDetail: false }"
-        @open-detail.window="openDetail = true"
+        x-data="{
+            openModal: false,
+            openDetail: false,
+            openLoadingDetail: false
+        }"
+        @open-detail.window="openDetail = true; openLoadingDetail = false;"
+        @open-loading-detail.window="openLoadingDetail = true;"
         @close-modal.window="openModal = false"
         @close-detail.window="openDetail = false"
         class="flex flex-col h-full min-h-0">
@@ -62,16 +67,26 @@
         {{-- Modal Detail Unit Kerja --}}
         <template x-teleport="body">
             <div
-                x-show="openDetail"
+                x-show="openLoadingDetail || openDetail"
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100"
                 x-transition:leave="transition ease-in duration-150"
                 x-transition:leave-start="opacity-100"
                 x-transition:leave-end="opacity-0"
-                @keydown.escape.window="openDetail && $dispatch('close-detail')"
+                @click.self="openDetail = false"
+                @keydown.escape.window="openDetail = false"
                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-md"
                 style="display: none;">
+
+                <div
+                    x-show="openLoadingDetail"
+                    class="flex flex-col items-center gap-4">
+                    <div class="w-10 h-10 border-[3px] border-white/20 border-t-white rounded-full animate-spin"></div>
+                    <div class="text-sm font-medium tracking-wide text-white">
+                        Memuat Data...
+                    </div>
+                </div>
 
                 <div
                     x-show="openDetail"

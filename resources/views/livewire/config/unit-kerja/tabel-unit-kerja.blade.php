@@ -1,5 +1,5 @@
 <div class="flex flex-col space-y-3 h-[calc(100vh-280px)] bg-white/20 backdrop-blur-md shadow-md rounded-xl p-4">
-    
+
     <!-- Filter & Search -->
     <div class="flex items-center justify-between gap-2">
         <!-- Search -->
@@ -58,7 +58,7 @@
     <!-- Table -->
      <div class="table-container relative">
         <!-- Loading -->
-        <div wire:loading>
+        <div wire:loading wire:target="search, selectedUnitSdm, gotoPage, previousPage, nextPage, sortBy">
             <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
                 <div role="status">
                     <x-ui.spinner />
@@ -156,7 +156,8 @@
                             </td>
                             <td class="px-4 py-2 text-center">
                                 <button
-                                    wire:click="openDetail({{ $unit->id }})"
+                                    @click="$dispatch('open-loading-detail')"
+                                    wire:click="selectUnit({{ $unit->id }})"
                                     class="px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition cursor-pointer">
                                     Lihat
                                 </button>

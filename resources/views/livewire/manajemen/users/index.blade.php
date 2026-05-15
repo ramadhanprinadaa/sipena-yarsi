@@ -3,7 +3,7 @@
     <!-- Filter & Search -->
     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
 
-      <!-- Filter -->
+      <!-- Filter & Search -->
         <div class="flex flex-wrap gap-3">
 
             {{-- Role --}}
@@ -16,8 +16,6 @@
                 </select>
                 <svg class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        d="M19 9l-7 7-7-7"/>
                 </svg>
             </div>
 
@@ -29,8 +27,6 @@
                 </select>
                 <svg class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        d="M19 9l-7 7-7-7"/>
                 </svg>
             </div>
         </div>
@@ -49,7 +45,7 @@
             </div>
 
             <!-- Add User Button -->
-            <button wire:click="$dispatch('open-add-user')" class="flex items-center px-3 justify-center cursor-pointer bg-indigo-500 hover:bg-indigo-700 text-white text-sm rounded-md transition">
+            <button @click="$dispatch('open-add-modal')" class="flex items-center px-3 justify-center cursor-pointer bg-indigo-500 hover:bg-indigo-700 text-white text-sm rounded-md transition">
                 <i class="fa-solid fa-user-plus mr-2"></i> Tambah Pengguna
             </button>
         </div>
@@ -57,8 +53,9 @@
 
     <!-- Table -->
     <div class="table-container relative">
+
         <!-- Loading -->
-        <div wire:loading>
+        <div wire:loading wire:target="search, selectedRole, selectedStatus, sortBy, gotoPage, previousPage, nextPage">
             <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
                 <div role="status">
                     <x-ui.spinner />
@@ -147,7 +144,10 @@
 
                         <!-- Aksi -->
                         <td class="px-4 py-2">
-                            <button wire:click="openDetail({{ $user->id }})" class="px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition cursor-pointer">
+                            <button
+                                @click="$dispatch('open-loading-detail')"
+                                wire:click="selectUser({{ $user->id }})"
+                                class="px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition cursor-pointer">
                                 Lihat
                             </button>
                         </td>

@@ -3,10 +3,9 @@
 namespace App\Livewire\Config\Kalender;
 
 use App\Models\HariLibur;
-
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
-
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class Index extends Component
@@ -18,6 +17,7 @@ class Index extends Component
     public string $selectedDate = '';
 
     public array $calendar = [];
+    public array $selectedDay = [];
     public array $dayNames = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
     public function mount()
@@ -44,7 +44,7 @@ class Index extends Component
         $holidays = HariLibur::query()
             ->whereBetween('tanggal', [$calendarStart->toDateString(), $calendarEnd->toDateString()])
             ->get()
-            ->keyBy(
+            ->groupBy(
                 fn($holiday) => Carbon::parse(
                     $holiday->tanggal
                 )->toDateString()
@@ -59,7 +59,7 @@ class Index extends Component
 
         foreach ($period as $date) {
             $formattedDate = $date->toDateString();
-            $holiday = $holidays->get($formattedDate);
+            $dayHolidays = $holidays->get($formattedDate, collect());
             $calendar[] = [
                 'date'              => $formattedDate,
                 'day'               => $date->day,
@@ -68,16 +68,15 @@ class Index extends Component
                 'is_today'          => $date->isToday(),
                 'is_weekend'        => $date->isWeekend(),
                 'is_sunday'         => $date->isSunday(),
-                'is_holiday'        => $holiday !== null,
-                'holiday_name'      => $holiday?->nama_hari_libur,
-                'holiday_type'      => $holiday?->jenis_hari_libur,
+                'is_holiday'        => $dayHolidays->isNotEmpty(),
+                'holidays'          => $dayHolidays,
             ];
         }
 
         // Get Layout Calendar
         while (count($calendar) < 35) {
             $lastDate = Carbon::parse(last($calendar)['date'])->addDay();
-            $holiday = $holidays->get($lastDate->toDateString());
+            $dayHolidays = $holidays->get($formattedDate, collect());
             $calendar[] = [
                 'date'              => $lastDate->toDateString(),
                 'day'               => $lastDate->day,
@@ -86,9 +85,8 @@ class Index extends Component
                 'is_today'          => $lastDate->isToday(),
                 'is_weekend'        => $lastDate->isWeekend(),
                 'is_sunday'         => $lastDate->isSunday(),
-                'is_holiday'        => $holiday !== null,
-                'holiday_name'      => null,
-                'holiday_type'      => null,
+                'is_holiday'        => $dayHolidays->isNotEmpty(),
+                'holidays'          => $dayHolidays,
             ];
         }
         $this->calendar = $calendar;
@@ -135,6 +133,19 @@ class Index extends Component
         return filled($date)
             ? Carbon::createFromFormat('d/m/Y', $date)->format('Y-m-d')
             : null;
+    }
+
+    public function selectDay($date)
+    {
+        $day = collect($this->calendar)
+            ->firstWhere('date', $date);
+        $this->dispatch('load-detail-modal', day: $day);
+    }
+
+    #[On('refresh-calendar')]
+    public function refreshCalendar()
+    {
+        $this->generateCalendar();
     }
 
     public function render()

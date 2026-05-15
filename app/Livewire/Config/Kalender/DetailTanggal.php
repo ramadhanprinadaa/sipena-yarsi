@@ -10,9 +10,7 @@ use Livewire\Component;
 class DetailTanggal extends Component
 {
     public $date = null;
-
     public $day = [];
-
     public $editingHolidayId = null;
 
     public $form = [
@@ -29,53 +27,42 @@ class DetailTanggal extends Component
         'Hari Libur Institusi',
     ];
 
-    #[On('show-detail-modal')]
+    #[On('load-detail-modal')]
     public function loadData($day = null)
     {
         if (! $day) {
             return;
         }
-
         $this->day = $day;
-
         $this->date = $day['date'];
-
         $this->dispatch('open-detail-modal');
     }
 
     public function startEdit($holidayId)
     {
         $holiday = HariLibur::find($holidayId);
-
         if (! $holiday) {
             return;
         }
-
         $this->editingHolidayId = $holiday->id;
-
         $this->form = [
             'nama_hari_libur' => $holiday->nama_hari_libur,
             'jenis_hari_libur' => $holiday->jenis_hari_libur,
             'keterangan' => $holiday->keterangan,
         ];
-
         $this->originalForm = $this->form;
-
         $this->resetValidation();
     }
 
     public function cancelEdit()
     {
         $this->editingHolidayId = null;
-
         $this->form = [
             'nama_hari_libur' => '',
             'jenis_hari_libur' => '',
             'keterangan' => '',
         ];
-
         $this->originalForm = [];
-
         $this->resetValidation();
     }
 
@@ -83,7 +70,7 @@ class DetailTanggal extends Component
     {
         return [
             'form.nama_hari_libur' => ['required', 'string', 'max:100'],
-            'form.jenis_hari_libur' => ['required'],
+            'form.jenis_hari_libur' => ['required', 'string', 'in:' . implode(',', $this->jenisHariLibur)],
             'form.keterangan' => ['nullable'],
         ];
     }
@@ -93,6 +80,15 @@ class DetailTanggal extends Component
         return [
             'form.nama_hari_libur.required' => 'Nama hari libur wajib diisi.',
             'form.jenis_hari_libur.required' => 'Jenis hari libur wajib dipilih.',
+        ];
+    }
+
+    protected function validationAttributes()
+    {
+        return [
+            'form.nama_hari_libur' => 'nama hari libur',
+            'form.jenis_hari_libur' => 'jenis hari libur',
+            'form.keterangan' => 'keterangan',
         ];
     }
 
@@ -106,48 +102,35 @@ class DetailTanggal extends Component
         if (! $this->editingHolidayId) {
             return;
         }
-
-        $this->validate();
-
+        $validated = $this->validate()['form'];
         $holiday = HariLibur::find($this->editingHolidayId);
-
         if (! $holiday) {
             return;
         }
-
-        $holiday->update($this->form);
-
+        $holiday->update($validated);
         $this->refreshDay();
-
         $this->dispatch(
             'notify',
             type: 'success',
-            message: 'Hari libur berhasil diperbarui.'
+            message: 'Event Tanggal berhasil diperbarui.'
         );
-
-        $this->dispatch('refresh-calendar');
-
         $this->cancelEdit();
+        $this->dispatch('refresh-calendar');
     }
 
     public function deleteHoliday($holidayId)
     {
         $holiday = HariLibur::find($holidayId);
-
         if (! $holiday) {
             return;
         }
-
         $holiday->delete();
-
         $this->refreshDay();
-
         $this->dispatch(
             'notify',
             type: 'success',
-            message: 'Hari libur berhasil dihapus.'
+            message: 'Event Tanggal berhasil dihapus.'
         );
-
         $this->dispatch('refresh-calendar');
     }
 
@@ -156,17 +139,14 @@ class DetailTanggal extends Component
         $holidays = HariLibur::query()
             ->whereDate('tanggal', $this->date)
             ->get();
-
         $this->day['holidays'] = $holidays;
-
         $this->day['is_holiday'] = $holidays->isNotEmpty();
     }
 
+    #[On('close-detail-modal')]
     public function close()
     {
         $this->reset();
-
-        $this->dispatch('close-detail-modal');
     }
 
     public function render()

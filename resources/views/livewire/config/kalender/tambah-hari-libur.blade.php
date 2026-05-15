@@ -1,7 +1,7 @@
 <div class="bg-white w-[720px] max-w-[95vw] h-[78vh] mx-auto rounded-xl shadow-2xl flex flex-col overflow-hidden">
 
     <!-- Header -->
-    <header class="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
+    <header class="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
                 <i class="fa-solid fa-calendar-plus text-base text-indigo-500"></i>
@@ -27,10 +27,10 @@
             <!-- Nama Hari Libur -->
             <div>
                 <div class="input-wrapper group">
-                    <input wire:model.live="form.nama" type="text" id="floating_nama" class="input-field peer" placeholder=" ">
-                    <label for="floating_nama" class="input-label">Nama Hari Libur</label>
+                    <input wire:model.live="form.nama_hari_libur" type="text" id="floating_nama_hari_libur" class="input-field peer" placeholder=" ">
+                    <label for="floating_nama_hari_libur" class="input-label">Nama Hari Libur</label>
                 </div>
-                @error('form.nama') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                @error('form.nama_hari_libur') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
             </div>
 
             <!-- Tanggal Hari Libur -->
@@ -38,9 +38,9 @@
                 <div class="input-wrapper group relative"
                     x-data
                     x-init="
-                        const picker = document.getElementById('floating_tanggal_hari_libur');
+                        const picker = document.getElementById('floating_tanggal');
                         picker.addEventListener('changeDate', () => {
-                            $wire.set('form.tanggal_bergabung', picker.value);
+                            $wire.set('form.tanggal', picker.value);
                         });
                     "
                 >
@@ -50,9 +50,9 @@
                     </div>
                     <!-- Input -->
                     <input
-                        wire:model.defer="form.tanggal_hari_libur"
+                        wire:model.defer="form.tanggal"
                         type="text"
-                        id="floating_tanggal_hari_libur"
+                        id="floating_tanggal"
                         datepicker
                         datepicker-autohide
                         datepicker-format="dd/mm/yyyy"
@@ -62,13 +62,13 @@
                     >
                     <!-- Label -->
                     <label
-                        for="floating_tanggal_hari_libur"
+                        for="floating_tanggal"
                         class="input-label ps-6 inset-y-2 peer-focus:ps-1 peer-[:not(:placeholder-shown)]:ps-1"
                     >
                         Tanggal Hari Libur
                     </label>
                 </div>
-                @error('form.tanggal_hari_libur') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                @error('form.tanggal') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
             </div>
 
             <!-- Jenis Hari Libur -->
@@ -149,9 +149,23 @@
 
             <button
                 type="submit"
-                @disabled(true)
+                @disabled(
+                    blank($form['nama_hari_libur']) ||
+                    blank($form['tanggal']) ||
+                    blank($form['jenis_hari_libur']) ||
+                    $errors->any()
+                )
                 class="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-500">
-                Simpan
+
+                <!-- Loading spinner -->
+                <svg wire:loading wire:target="save"
+                    class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+
+                <span wire:loading.remove wire:target="save">Simpan Hari Libur</span>
+                <span wire:loading wire:target="save">Menyimpan...</span>
             </button>
         </div>
     </form>

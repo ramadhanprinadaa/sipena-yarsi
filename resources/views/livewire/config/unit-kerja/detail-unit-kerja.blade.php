@@ -1,4 +1,4 @@
-<div class="bg-white w-2xl mx-auto p-6 rounded-xl shadow-lg">
+<div class="bg-white w-3xl h-[68vh] mx-auto p-6 rounded-xl shadow-lg">
 
     {{-- ═══════════════════════════ HEADER ════════════════════════════════ --}}
     <header class="flex items-center justify-between pb-4 mb-5 border-b border-gray-200">
@@ -41,7 +41,7 @@
             {{-- Tombol Tutup --}}
             <button
                 type="button"
-                wire:click="close"
+                @click="$dispatch('close-detail')"
                 wire:loading.attr="disabled"
                 class="w-7 h-7 flex items-center justify-center rounded-md bg-red-400 hover:bg-red-500 active:bg-red-600 text-white cursor-pointer transition-colors duration-150 disabled:opacity-60">
                 <i class="fa-solid fa-xmark text-sm"></i>

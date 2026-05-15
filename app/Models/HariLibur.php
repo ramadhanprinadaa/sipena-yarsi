@@ -20,15 +20,7 @@ class HariLibur extends Model
         'tanggal' => 'date:d/m/Y',
     ];
 
-    protected function nama_hari_libur(): Attribute
-    {
-        return Attribute::make(
-            get: fn(string $value) => ucwords(strtolower($value)),
-            set: fn(string $value) => strtolower($value),
-        );
-    }
-
-    protected function jenis_hari_libur(): Attribute
+    protected function jenisHariLibur(): Attribute
     {
         return Attribute::make(
             get: fn(string $value) => ucwords(strtolower($value)),

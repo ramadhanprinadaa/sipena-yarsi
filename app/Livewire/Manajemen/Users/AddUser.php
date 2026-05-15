@@ -14,9 +14,7 @@ use App\Models\Pegawai;
 class AddUser extends Component
 {
     public $open = false;
-
     public $roles = [];
-
     public $form = [
         'username'   => '',
         'email'      => '',
@@ -28,13 +26,18 @@ class AddUser extends Component
     public $pegawaiSearch = '';
     public $pegawaiResults = [];
 
-    #[On('open-add-user')]
+    #[On('open-add-modal')]
     public function open()
     {
         $this->resetForm();
         $this->resetValidation();
+    }
 
-        $this->open = true;
+    #[On('close-add-modal')]
+    public function close()
+    {
+        $this->resetForm();
+        $this->resetValidation();
     }
 
     public function mount()
@@ -43,14 +46,6 @@ class AddUser extends Component
             ->whereKeyNot(1)
             ->orderBy('id')
             ->get(['id', 'name']);
-    }
-
-    public function close()
-    {
-        $this->resetValidation();
-        $this->resetForm();
-
-        $this->open = false;
     }
 
     protected function rules()
@@ -144,8 +139,7 @@ class AddUser extends Component
         );
 
         $this->dispatch('refresh-table');
-
-        $this->close();
+        $this->dispatch('close-add-modal');
     }
 
     public function updatedPegawaiSearch()
