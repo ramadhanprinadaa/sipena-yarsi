@@ -58,11 +58,12 @@
     <div class="flex-1 p-4 overflow-y-auto relative">
 
         <div
+            wire:target="selectedDate, previousMonth, nextMonth, goToToday"
             wire:loading.flex
-            wire:target="previousMonth, nextMonth, goToToday, updatedSelectedDate"
             class="absolute inset-0 z-10 items-center justify-center bg-white/70 backdrop-blur-sm">
 
-            <div class="flex items-center gap-2 text-sm text-gray-500">
+            <div
+                class="flex items-center gap-2 text-sm text-gray-500">
                 <i class="fa-solid fa-spinner fa-spin"></i>
                 <span>Memuat kalender...</span>
             </div>

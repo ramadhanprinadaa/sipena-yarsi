@@ -3,8 +3,8 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\ManajemenPegawaiController;
+use App\Http\Controllers\PegawaiController;
 use App\Livewire\Manajemen\Pegawai\DetailPegawai;
-
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -30,7 +30,7 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('beranda')->group(function () {
         Route::view('/presensi', 'dashboard.presensi')->name('presensi');
-        Route::view('/kepegawaian', 'dashboard.pegawai')->name('kepegawaian');
+        Route::get('/kepegawaian', [PegawaiController::class, 'pegawai'])->name('kepegawaian');
         Route::view('/lembur', 'dashboard.lembur')->name('lembur')->middleware('role:Admin,SDM Yayasan,SDM Universitas,Rektor,Staff,Tendik');
         Route::view('/cuti', 'dashboard.cuti')->name('cuti');
         Route::view('/surat-menyurat', 'dashboard.surat-menyurat')->name('surat-menyurat');

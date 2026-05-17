@@ -47,6 +47,24 @@ class Pegawai extends Model
         return Carbon::parse($this->tanggal_lahir)->age;
     }
 
+    public function getMasaKerjaAttribute()
+    {
+        if (!$this->tanggal_bergabung) {
+            return '-';
+        }
+        $diff = $this->tanggal_bergabung->diff(now());
+        return "{$diff->m} Bulan";
+    }
+
+    public function getJenisKelaminAttribute($value)
+    {
+        return match ($value) {
+            'L' => 'Laki-Laki',
+            'P' => 'Perempuan',
+            default => '-',
+        };
+    }
+
     public function user()
     {
         return $this->hasOne(User::class, 'pegawai_id');
@@ -70,5 +88,24 @@ class Pegawai extends Model
     public function jenis_pegawai()
     {
         return $this->belongsTo(JenisPegawai::class, 'jenis_pegawai_id');
+    }
+
+    public function keluarga()
+    {
+        return $this->hasMany(Keluarga::class, 'pegawai_id');
+    }
+
+    public function rekening()
+    {
+        return $this->hasOne(Rekening::class, 'pegawai_id');
+    }
+
+    public function getStatusLabelAttribute()
+    {
+        return match ($this->status) {
+            'active' => 'Aktif',
+            'inactive' => 'Tidak Aktif',
+            default => '-',
+        };
     }
 }
