@@ -42,10 +42,17 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password')
             ],
             [
-                'role_id' => 6,
+                'role_id' => 7,
                 'pegawai_id' => 52,
                 'username' => 'annisa.putri',
                 'email' => 'annisaputri@gmail.com',
+                'password' => Hash::make('password')
+            ],
+            [
+                'role_id' => 6,
+                'pegawai_id' => 53,
+                'username' => 'rafly.eryan',
+                'email' => 'raflyeryan@gmail.com',
                 'password' => Hash::make('password')
             ],
         ];
