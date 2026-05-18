@@ -12,19 +12,19 @@ class Presensi extends Model
     protected $table = 'presensi';
 
     protected $fillable = [
-        'pegawai_id',
+        'pegawai_nip',
         'import_presensi_id',
         'tanggal',
         'jam_masuk',
         'jam_keluar',
         'status_kehadiran_id',
         'keterangan',
-        'updated_by'
+        'updated_by',
     ];
 
     public function pegawai()
     {
-        return $this->belongsTo(Pegawai::class, 'pegawai_id');
+        return $this->belongsTo(Pegawai::class, 'pegawai_nip', 'nip');
     }
 
     public function status_kehadiran()
@@ -40,5 +40,12 @@ class Presensi extends Model
     public function presensi_logs()
     {
         return $this->hasMany(PresensiLog::class, 'presensi_id');
+    }
+
+    public function scopeByPegawaiDanTanggal($query, $pegawaiNip, $tanggal)
+    {
+        return $query
+            ->where('pegawai_nip', $pegawaiNip)
+            ->whereDate('tanggal', $tanggal);
     }
 }

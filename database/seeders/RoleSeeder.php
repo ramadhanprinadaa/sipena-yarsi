@@ -19,7 +19,6 @@ class RoleSeeder extends Seeder
         Role::create(['id' => 4, 'name' => 'Rektor']);
         Role::create(['id' => 5, 'name' => 'Pimpinan']);
         Role::create(['id' => 6, 'name' => 'Staff']);
-        Role::create(['id' => 7, 'name' => 'Tendik']);
-        Role::create(['id' => 8, 'name' => 'Dosen']);
+        Role::create(['id' => 7, 'name' => 'Dosen']);
     }
 }

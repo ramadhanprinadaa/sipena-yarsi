@@ -9,6 +9,7 @@ class StatusKehadiran extends Model
     protected $table = 'status_kehadiran';
 
     protected $fillable = [
+        'id',
         'kondisi',
         'status',
         'warna',

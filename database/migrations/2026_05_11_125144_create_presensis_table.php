@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('presensi', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pegawai_id');
+            $table->string('pegawai_nip');
+            $table->foreign('pegawai_nip')->references('nip')->on('pegawai');
             $table->foreignId('import_presensi_id')->nullable();
             $table->date('tanggal');
             $table->time('jam_masuk')->nullable();
@@ -21,6 +22,7 @@ return new class extends Migration
             $table->foreignId('status_kehadiran_id')->nullable();
             $table->string('keterangan')->nullable();
             $table->foreignId('updated_by')->nullable();
+            $table->unique(['pegawai_nip', 'tanggal']);
             $table->timestamps();
         });
     }

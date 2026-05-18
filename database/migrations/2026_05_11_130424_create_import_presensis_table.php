@@ -20,6 +20,8 @@ return new class extends Migration
             $table->integer('total_success')->nullable();
             $table->integer('total_failed')->nullable();
             $table->integer('total_duplicate')->nullable();
+            $table->integer('total_updated')->nullable();
+            $table->integer('total_skipped')->nullable();
             $table->json('summary')->nullable();
             $table->timestamps();
         });

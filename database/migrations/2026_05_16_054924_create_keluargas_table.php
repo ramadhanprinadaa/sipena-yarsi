@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('hubungan');
             $table->string('tempat_lahir');
             $table->date('tanggal_lahir');
-            $table->string('pekerjaan');
-            $table->string('no_telpon');
-            $table->string('alamat');
+            $table->string('pekerjaan')->nullable();
+            $table->string('no_telpon')->nullable();
+            $table->string('alamat')->nullable();
             $table->foreignId('updated_by')->nullable();
             $table->timestamps();
         });

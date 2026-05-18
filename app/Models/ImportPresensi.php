@@ -10,10 +10,14 @@ class ImportPresensi extends Model
 
     protected $fillable = [
         'file_name',
+        'file_path',
+        'imported_by',
         'total_rows',
         'total_success',
         'total_failed',
         'total_duplicate',
+        'total_updated',
+        'total_skipped',
         'summary'
     ];
 

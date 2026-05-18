@@ -1,20 +1,21 @@
 <?php
 
-namespace App\Livewire\Manajemen\Pegawai;
+namespace App\Livewire\Manajemen\Presensi;
 
-use App\Imports\PegawaiImport;
+use App\Imports\PresensiImport;
+
+use App\Models\ImportPresensi as ImportPresensiModel;
 
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
-
 use Maatwebsite\Excel\Facades\Excel;
 
-class ImportPegawai extends Component
+
+class ImportPresensi extends Component
 {
     use WithFileUploads;
 
@@ -25,8 +26,6 @@ class ImportPegawai extends Component
 
     public bool $showResult = false;
 
-    public array $importSummary = [];
-
     public function messages()
     {
         return [
@@ -36,16 +35,9 @@ class ImportPegawai extends Component
         ];
     }
 
-    public function import(string $filePath): array
-    {
-        $import = new PegawaiImport();
-        Excel::import($import, $filePath);
-        return $import->getSummary() ?? [];
-    }
-
     public function downloadTemplate()
     {
-        $path = storage_path('app/public/templates/template_import_pegawai.xlsx');
+        $path = storage_path('app/public/templates/template_import_presensi.xlsx');
         if (!file_exists($path)) {
             $this->errorMessage = 'File template tidak ditemukan. Silahkan hubungi administrator.';
             return;
@@ -53,10 +45,43 @@ class ImportPegawai extends Component
 
         return response()->download(
             file: $path,
-            name: 'template_import_pegawai.xlsx',
+            name: 'template_import_presensi.xlsx',
             headers: [
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ]
+        );
+    }
+
+    public function import()
+    {
+        $originalFileName = pathinfo($this->file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = $this->file->getClientOriginalExtension();
+        $filename = $originalFileName . '_' . time() . '.' . $extension;
+        $filepath = $this->file->storeAs('imports/presensi', $filename);
+
+        $this->validate();
+
+        $importPresensi = ImportPresensiModel::create([
+            'file_name'       => $filename,
+            'file_path'       => $filepath,
+            'imported_by'     => Auth::id(),
+            'total_rows'      => null,
+            'total_success'   => null,
+            'total_failed'    => null,
+            'total_duplicate' => null,
+            'total_updated'   => null,
+            'total_skipped'   => null,
+            'summary'         => null,
+        ]);
+
+        Excel::import(
+            new PresensiImport($importPresensi),
+            $filepath
+        );
+
+        session()->flash(
+            'success',
+            'Import presensi berhasil.'
         );
     }
 
@@ -64,42 +89,15 @@ class ImportPegawai extends Component
     {
         $this->validate();
         try {
-            $originalName = pathinfo($this->file->getClientOriginalName(), PATHINFO_FILENAME);
-            $extension = $this->file->getClientOriginalExtension();
-            $filename = $originalName . '_' . time() . '.' . $extension;
-            $path = $this->file->storeAs('imports/pegawai', $filename);
-
-            // Import Excel
-            $summary = $this->import($path);
-
-            // dd($summary);
-
-            // Save Log to DB
-            DB::table('import_pegawai')->insert([
-                'file_name'         => $filename,
-                'file_path'         => $path,
-                'imported_by'       => Auth::id(),
-                'total_rows'        => $summary['total_rows'] ?? 0,
-                'total_success'      => $summary['total_success'] ?? 0,
-                'total_failed'       => $summary['total_failed'] ?? 0,
-                'total_duplicate'    => $summary['total_duplicate'] ?? 0,
-                'created_at'        => now(),
-                'updated_at'        => now(),
-            ]);
-
-            $this->importSummary = $summary;
+            $this->import();
         } catch (\Throwable $e) {
             $this->errorMessage = $e->getMessage();
-            // dd($e->getMessage());
         }
-
         $this->showResult = true;
         $this->dispatch('refresh-table');
         $this->reset('file');
-        // $this->dispatch('open-progress-modal');
     }
 
-    // handle close
     #[On('close-import-modal')]
     public function handleClose()
     {
@@ -117,6 +115,6 @@ class ImportPegawai extends Component
 
     public function render()
     {
-        return view('livewire.manajemen.pegawai.import-pegawai');
+        return view('livewire.manajemen.presensi.import-presensi');
     }
 }

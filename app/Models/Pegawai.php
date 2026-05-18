@@ -13,7 +13,28 @@ class Pegawai extends Model
 
     protected $table = 'pegawai';
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'unit_kerja_id',
+        'jenis_pegawai_id',
+        'status_pegawai_id',
+        'nip',
+        'ktp',
+        'npwp',
+        'nama',
+        'gelar_depan',
+        'gelar_belakang',
+        'tempat_lahir',
+        'tanggal_lahir',
+        'tanggal_bergabung',
+        'tanggal_habis_kontrak',
+        'tanggal_pensiun',
+        'jenis_kelamin',
+        'alamat_ktp',
+        'alamat_domisili',
+        'no_telpon',
+        'email_yarsi',
+        'status',
+    ];
 
     protected $attributes = [
         'status' => 'active'
@@ -98,6 +119,11 @@ class Pegawai extends Model
     public function rekening()
     {
         return $this->hasOne(Rekening::class, 'pegawai_id');
+    }
+
+    public function presensi()
+    {
+        return $this->hasMany(Presensi::class, 'pegawai_nip', 'nip');
     }
 
     public function getStatusLabelAttribute()
