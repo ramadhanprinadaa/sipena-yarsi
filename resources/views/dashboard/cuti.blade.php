@@ -69,20 +69,11 @@
                 @if(in_array('riwayat', $allowedTabs))
                 <div x-show="activeTab === 'riwayat'" class="flex flex-col space-y-4 h-full min-h-0">
 
-                    <!-- Filter & Search -->
+                    <!-- Filter  -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
-
-                         <!-- Search -->
-                            <div class="flex items-center w-full md:w-72 border border-gray-200 rounded-[10px] bg-white px-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M16 10a6 6 0 11-12 0 6 6 0 0112 0z"/>
-                                </svg>
-                                <input type="text" placeholder="Cari Nama atau NIP..." class="w-full h-10 px-2 text-sm outline-none">
-                            </div>
 
                         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-end">
                             
-                            <!-- Filter -->
                             <div class="flex flex-wrap gap-3">
                                 <div class="relative w-48">
                                     <!-- Icon -->
@@ -106,9 +97,6 @@
                                         <option value="approved">Ditolak</option>
                                         <option value="rejected">Menunggu Persetujuan</option>
                                     </select>
-                                    <svg class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-                                    </svg>
                             </div>
 
                         </div>

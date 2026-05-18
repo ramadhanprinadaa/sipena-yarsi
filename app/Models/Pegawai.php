@@ -71,4 +71,18 @@ class Pegawai extends Model
     {
         return $this->belongsTo(JenisPegawai::class, 'jenis_pegawai_id');
     }
+
+    public function lembur()
+    {
+        return $this->hasMany(Lembur::class);
+    }
+
+     public function suratPerintahLembur()
+    {
+        return $this->belongsToMany(
+            SuratPerintahLembur::class,
+            'surat_perintah_lembur_pegawai'
+        );
+    }
+
 }

@@ -66,13 +66,13 @@
 
             {{-- Cards Cuti Section --}}
             @if ($removeMtFromMain)
-            <div class="{{ $removeMtFromMain ? 'mt-23' : '' }}">
+            <div class="{{ $removeMtFromMain ? 'mt-35' : '' }}">
                 @yield('CardsCuti')
             </div>
             @endif
 
             {{-- Main Content --}}
-            <main class="bg-white/25 backdrop-blur-sm shadow-md rounded-[20px] p-6 min-h-[calc(100vh-157px)] {{ $removeMtFromMain ? '' : 'mt-23' }}">
+            <main class="bg-white/25 backdrop-blur-sm shadow-md rounded-[20px] p-6 min-h-[calc(100vh-157px)] {{ $removeMtFromMain ? '' : 'mt-35' }}">
                 @yield('content')
             </main>
 
