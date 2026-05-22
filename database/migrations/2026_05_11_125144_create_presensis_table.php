@@ -15,13 +15,17 @@ return new class extends Migration
             $table->id();
             $table->string('pegawai_nip');
             $table->foreign('pegawai_nip')->references('nip')->on('pegawai');
-            $table->foreignId('import_presensi_id')->nullable();
+
             $table->date('tanggal');
             $table->time('jam_masuk')->nullable();
             $table->time('jam_keluar')->nullable();
+
             $table->foreignId('status_kehadiran_id')->nullable();
-            $table->string('keterangan')->nullable();
+            $table->foreignId('last_import_presensi_id')->nullable();
+
+            $table->foreignId('created_by')->nullable();
             $table->foreignId('updated_by')->nullable();
+
             $table->unique(['pegawai_nip', 'tanggal']);
             $table->timestamps();
         });

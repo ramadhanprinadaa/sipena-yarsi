@@ -23,16 +23,15 @@
         @open-loading-detail.window="openLoadingDetail = true;"
         @close-add-modal.window="openModal = false"
         @close-detail-modal.window="openDetailModal = false"
+        class="flex flex-col h-full min-h-0"
     >
-        <!-- Header Page -->
-        <div class="flex items-end justify-between mb-4">
-            <div class="font-poppins ms-2">
-                <h1 class="text-2xl font-semibold text-gray-800">
-                    Kalender
-                </h1>
-                <p class="mt-1 text-sm font-medium">
-                    Kelola kalender akademik untuk mengatur hari libur dalam tahun ajaran.
-                </p>
+        <!-- Header -->
+        <div class="flex justify-between mb-4 ps-3 pt-1 items-end">
+
+            {{-- Header --}}
+            <div class="flex flex-col gap-1 font-poppins">
+                <h1 class="text-2xl font-semibold">Kalender</h1>
+                <p class="text-sm font-medium">Kelola kalender akademik untuk mengatur hari libur dalam tahun ajaran.</p>
             </div>
             <!-- Action -->
             <div class="flex items-center gap-2">
@@ -45,7 +44,7 @@
             </div>
         </div>
 
-        <div class="flex-1">
+        <div class="flex-1 bg-white/30 backdrop-blur-xl shadow-md rounded-xl p-6">
             <livewire:config.kalender.index />
         </div>
 

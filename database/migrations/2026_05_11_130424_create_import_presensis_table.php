@@ -15,14 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string('file_name');
             $table->string('file_path');
-            $table->foreignId('imported_by');
+            $table->date('periode_mulai')->nullable();
+            $table->date('periode_selesai')->nullable();
             $table->integer('total_rows')->nullable();
-            $table->integer('total_success')->nullable();
-            $table->integer('total_failed')->nullable();
-            $table->integer('total_duplicate')->nullable();
+            $table->integer('total_created')->nullable();
             $table->integer('total_updated')->nullable();
             $table->integer('total_skipped')->nullable();
-            $table->json('summary')->nullable();
+            $table->integer('total_failed')->nullable();
+            $table->json('error_summary')->nullable();
+            $table->foreignId('imported_by');
             $table->timestamps();
         });
     }

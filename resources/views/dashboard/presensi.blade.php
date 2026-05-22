@@ -11,7 +11,9 @@
 @endsection
 
 @section('content')
-    <h1 class="text-2xl font-bold mb-4">Presensi</h1>
-    <p>Selamat datang di halaman presensi. Di sini Anda dapat melihat dan mengelola kehadiran Anda.</p>
+    <div class="bg-white/20 backdrop-blur-sm shadow-md rounded-xl p-6 min-h-[calc(100vh-157px)]">
+        <h1 class="text-2xl font-bold mb-4">Presensi</h1>
+        <p>Selamat datang di halaman presensi. Di sini Anda dapat melihat dan mengelola kehadiran Anda.</p>
+    </div>
 @endsection
 

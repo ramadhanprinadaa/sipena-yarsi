@@ -54,12 +54,11 @@ class ImportPresensi extends Component
 
     public function import()
     {
+        $this->validate();
         $originalFileName = pathinfo($this->file->getClientOriginalName(), PATHINFO_FILENAME);
         $extension = $this->file->getClientOriginalExtension();
         $filename = $originalFileName . '_' . time() . '.' . $extension;
         $filepath = $this->file->storeAs('imports/presensi', $filename);
-
-        $this->validate();
 
         $importPresensi = ImportPresensiModel::create([
             'file_name'       => $filename,
@@ -71,17 +70,12 @@ class ImportPresensi extends Component
             'total_duplicate' => null,
             'total_updated'   => null,
             'total_skipped'   => null,
-            'summary'         => null,
+            'error_summary'   => null,
         ]);
 
         Excel::import(
             new PresensiImport($importPresensi),
             $filepath
-        );
-
-        session()->flash(
-            'success',
-            'Import presensi berhasil.'
         );
     }
 
@@ -95,7 +89,12 @@ class ImportPresensi extends Component
         }
         $this->showResult = true;
         $this->dispatch('refresh-table');
-        $this->reset('file');
+        $this->dispatch(
+            'notify',
+            type: 'success',
+            message: 'Data Absensi Berhasil Ditambahkan'
+        );
+        $this->resetImport();
     }
 
     #[On('close-import-modal')]

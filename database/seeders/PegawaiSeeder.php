@@ -15,6 +15,7 @@ class PegawaiSeeder extends Seeder
     {
         Pegawai::factory()->count(50)->create();
 
+        // Muhammad Ramadhan Prinada
         Pegawai::create([
             'unit_kerja_id'           => 10,
             'jenis_pegawai_id'        => 3,
@@ -37,6 +38,8 @@ class PegawaiSeeder extends Seeder
             'email_yarsi'             => 'ramadhanprinada@yarsi.ac.id',
             'status'                  => 'active',
         ]);
+
+        // Annisa Putri
         Pegawai::create([
             'unit_kerja_id'           => 2,
             'jenis_pegawai_id'        => 4,
@@ -59,6 +62,8 @@ class PegawaiSeeder extends Seeder
             'email_yarsi'             => 'annisaputri@yarsi.ac.id',
             'status'                  => 'active',
         ]);
+
+        // Rafly Eryan Azis
         Pegawai::create([
             'unit_kerja_id'             => 10,
             'jenis_pegawai_id'          => 2,
@@ -79,6 +84,30 @@ class PegawaiSeeder extends Seeder
             'alamat_domisili'           => 'Jl. Salemba Raya, Jakarta Pusat',
             'no_telpon'                 => '081234567891',
             'email_yarsi'               => 'raflyeryan@yarsi.ac.id',
+            'status'                    => 'active',
+        ]);
+
+        // Agus Widayat
+        Pegawai::create([
+            'unit_kerja_id'             => 10,
+            'jenis_pegawai_id'          => 2,
+            'status_pegawai_id'         => 1,
+            'nip'                       => '531142102011',
+            'ktp'                       => '3171010101010004',
+            'npwp'                      => '3171010101010004',
+            'nama'                      => 'Agus Widayat',
+            'gelar_depan'               => null,
+            'gelar_belakang'            => null,
+            'tempat_lahir'              => 'Jakarta',
+            'tanggal_lahir'             => '2001-01-01',
+            'tanggal_bergabung'         => '2024-01-01',
+            'tanggal_habis_kontrak'     => '2027-01-01',
+            'tanggal_pensiun'           => null,
+            'jenis_kelamin'             => 'L',
+            'alamat_ktp'                => 'Jl. Salemba Raya, Jakarta Pusat',
+            'alamat_domisili'           => 'Jl. Salemba Raya, Jakarta Pusat',
+            'no_telpon'                 => '081234567891',
+            'email_yarsi'               => 'aguswidayat@yarsi.ac.id',
             'status'                    => 'active',
         ]);
     }

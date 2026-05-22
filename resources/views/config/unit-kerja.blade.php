@@ -24,8 +24,8 @@
         class="flex flex-col h-full min-h-0">
 
         {{-- Header --}}
-        <div class="flex items-end justify-between mb-4">
-            <div class="flex flex-col gap-2 font-poppins">
+        <div class="flex justify-between mb-4 ps-3 pt-1 items-end">
+            <div class="flex flex-col gap-1 font-poppins">
                 <h1 class="text-2xl font-semibold">Unit Kerja</h1>
                 <p class="text-sm font-medium">Kelola daftar unit kerja dalam organisasi Anda.</p>
             </div>
@@ -60,7 +60,7 @@
             </div>
         </div>
 
-        <div class="flex-1">
+        <div class="flex-1 bg-white/30 backdrop-blur-xl shadow-md rounded-xl p-6">
             <livewire:config.unit-kerja.tabel-unit-kerja />
         </div>
 

@@ -72,7 +72,7 @@
             @endif
 
             {{-- Main Content --}}
-            <main class="bg-white/20 backdrop-blur-sm shadow-md rounded-xl p-6 min-h-[calc(100vh-157px)] {{ $removeMtFromMain ? '' : 'mt-35' }} overflow-x-auto">
+            <main class="{{ $removeMtFromMain ? '' : 'mt-35' }} overflow-x-visible overflow-y-visible">
                 @yield('content')
             </main>
 

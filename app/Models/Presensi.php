@@ -13,13 +13,19 @@ class Presensi extends Model
 
     protected $fillable = [
         'pegawai_nip',
-        'import_presensi_id',
         'tanggal',
         'jam_masuk',
         'jam_keluar',
         'status_kehadiran_id',
-        'keterangan',
+        'last_import_presensi_id',
+        'created_by',
         'updated_by',
+    ];
+
+    protected $casts = [
+        'tanggal' => 'date',
+        'jam_masuk' => 'datetime:H:i:s',
+        'jam_keluar' => 'datetime:H:i:s',
     ];
 
     public function pegawai()
@@ -27,25 +33,25 @@ class Presensi extends Model
         return $this->belongsTo(Pegawai::class, 'pegawai_nip', 'nip');
     }
 
-    public function status_kehadiran()
+    public function statusKehadiran()
     {
         return $this->belongsTo(StatusKehadiran::class, 'status_kehadiran_id');
     }
 
-    public function import_presensi()
+    public function lastImport()
     {
-        return $this->belongsTo(ImportPresensi::class, 'import_presensi_id');
+        return $this->belongsTo(ImportPresensi::class, 'last_import_presensi_id');
     }
 
-    public function presensi_logs()
+    public function presensiLogs()
     {
-        return $this->hasMany(PresensiLog::class, 'presensi_id');
+        return $this->hasMany(PresensiLog::class);
     }
 
     public function scopeByPegawaiDanTanggal($query, $pegawaiNip, $tanggal)
     {
         return $query
             ->where('pegawai_nip', $pegawaiNip)
-            ->whereDate('tanggal', $tanggal);
+            ->where('tanggal', $tanggal);
     }
 }

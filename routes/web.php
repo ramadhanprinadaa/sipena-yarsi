@@ -31,7 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('beranda')->group(function () {
         Route::view('/presensi', 'dashboard.presensi')->name('presensi');
         Route::get('/kepegawaian', [PegawaiController::class, 'pegawai'])->name('kepegawaian');
-        Route::view('/lembur', 'dashboard.lembur')->name('lembur')->middleware('role:Admin,SDM Yayasan,SDM Universitas,Rektor,Staff,Tendik');
+        Route::view('/lembur', 'dashboard.lembur')->name('lembur')->middleware('akses_lembur');
         Route::view('/cuti', 'dashboard.cuti')->name('cuti');
         Route::view('/surat-menyurat', 'dashboard.surat-menyurat')->name('surat-menyurat');
     });
@@ -60,6 +60,8 @@ Route::middleware('auth')->group(function () {
             Route::view('alur-persetujuan', 'config.alur-persetujuan')->name('konfigurasi-alur-persetujuan');
         });
     });
+
+    Route::view('sumber-daya', 'sumber-daya')->name('sumber-daya');
 });
 
 // Test Error

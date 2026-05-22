@@ -1,4 +1,4 @@
-<div class="relative flex flex-col gap-4 p-2 sm:p-3 pt-7 overflow-visible">
+<div class="relative flex flex-col gap-4 p-5 sm:p-3 items-center h-full lg:h-[calc(100vh-180px)]">
 
     {{-- Badge --}}
     <div class="absolute left-1/2 -translate-x-1/2 -top-7 z-20">
@@ -13,7 +13,7 @@
     </div>
 
     {{-- Header --}}
-    <div class="flex flex-col items-center text-center gap-1 mt-4">
+    <div class="flex-none flex flex-col items-center text-center gap-1 mt-4">
         <h1 class="text-sm sm:text-base font-semibold text-gray-800">
             Upload File Presensi
         </h1>
@@ -24,7 +24,7 @@
     </div>
 
     {{-- Dropzone File --}}
-    <div class="relative flex items-center justify-center w-full mt-2">
+    <div class="flex-1 flex flex-col w-full min-h-0 relative mt-2">
         <!-- Loading -->
         <div wire:loading wire:target="file">
             <div
@@ -52,13 +52,9 @@
         @endphp
 
         <label for="dropzone-file"
-            class="group relative flex flex-col items-center justify-center w-full min-h-[200px] rounded-2xl border-2 border-dashed transition-all duration-200 cursor-pointer overflow-hidden {{ $dropzoneClass }}">
+            class="group relative flex-1 flex flex-col items-center justify-center w-full rounded-2xl border-2 border-dashed transition-all duration-200 cursor-pointer overflow-hidden {{ $dropzoneClass }}">
 
-            <input
-                wire:model="file"
-                id="dropzone-file"
-                type="file"
-                accept=".xls,.xlsx,.csv,.ods,.tsv"
+            <input wire:model="file" id="dropzone-file" type="file" accept=".xls,.xlsx,.csv,.ods,.tsv"
                 class="hidden" />
 
             @if (!$file)
@@ -72,7 +68,7 @@
                                 d="M15 17h3a3 3 0 000-6h-.025A5.5 5.5 0 007.207 9.021A4 4 0 007 17h2m3 4V10m0 0l-3 3m3-3l3 3" />
                         </svg>
                     </div>
-                    <p class="text-[11px] sm:text-xs font-semibold text-gray-700 mt-4">
+                    <p class="text-sm font-semibold text-gray-700 mt-4">
                         Klik untuk upload file
                     </p>
                     <p class="text-xs text-gray-400 mt-1">
@@ -90,7 +86,6 @@
                         Maksimal ukuran file 10 MB
                     </p>
                 </div>
-
             @elseif($file)
                 <!-- File Selected -->
                 <div class="w-full h-full flex flex-col items-center justify-center text-center p-3">
@@ -141,24 +136,36 @@
     @enderror
 
     {{-- Template --}}
-    <div class="flex justify-end">
-        <a
-            href=""
-            class="text-[11px] text-blue-700 hover:text-blue-600 hover:underline font-medium mr-3"
-        >
-            Unduh Template
-        </a>
-    </div>
+    <button
+        wire:click="downloadTemplate"
+        type="button"
+        class="flex-none w-full flex justify-end text-[11px] text-blue-700 hover:text-blue-600 hover:underline font-medium mr-3 cursor-pointer">
+        Unduh Template
+    </button>
 
     <button
-        @disabled(!$file || $errors->has('file'))
-        class="bg-gradient-to-r from-blue-500 via-indigo-500 to-pink-500 w-full rounded-full py-2.5 px-4 text-white font-semibold transition-all duration-300
+        wire:click="save"
+        wire:loading.attr="disabled"
+        wire:loading.class="opacity-75 cursor-not-allowed"
+        @disabled(!$file || $errors->any())
+        type="button"
+        class="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-full text-white font-semibold transition-all duration-300 active:scale-95 bg-gradient-to-r from-blue-500 via-indigo-500 to-pink-500
         {{ !$file || $errors->has('file')
             ? 'cursor-not-allowed opacity-60'
-            : 'hover:scale-[1.01] active:scale-[0.99] cursor-pointer'
-            }}
+            : 'hover:scale-[1.01] cursor-pointer' }}
         ">
-        Upload File Presensi
+
+        <!-- Loading spinner -->
+        <svg wire:loading wire:target="save" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg"
+            fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+            </circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z">
+            </path>
+        </svg>
+
+        <span wire:loading.remove wire:target="save">Upload File Presensi</span>
+        <span wire:loading wire:target="save">Mengupload...</span>
     </button>
 
 </div>

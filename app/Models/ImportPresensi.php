@@ -11,19 +11,25 @@ class ImportPresensi extends Model
     protected $fillable = [
         'file_name',
         'file_path',
-        'imported_by',
+        'periode_mulai',
+        'periode_selesai',
         'total_rows',
-        'total_success',
-        'total_failed',
-        'total_duplicate',
+        'total_created',
         'total_updated',
         'total_skipped',
-        'summary'
+        'total_failed',
+        'error_summary',
+        'imported_by',
     ];
 
-    public function presensi()
+    protected $casts = [
+        'periode_mulai' => 'date',
+        'periode_selesai' => 'date',
+    ];
+
+    public function presensiLogs()
     {
-        return $this->hasMany(Presensi::class, 'import_presensi_id');
+        return $this->hasMany(PresensiLog::class);
     }
 
     public function user()

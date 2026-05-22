@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Presensi;
 use Illuminate\Database\Eloquent\Model;
 
 class StatusKehadiran extends Model
@@ -18,4 +19,9 @@ class StatusKehadiran extends Model
     protected $attributes = [
         'warna' => '########'
     ];
+
+    public function presensi()
+    {
+        return $this->hasMany(Presensi::class);
+    }
 }

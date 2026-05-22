@@ -11,23 +11,31 @@
 @endsection
 
 @section('content')
-    <div
-        x-data="{ openAddModal: false, openImportModal: false, openProgressModal: false }"
-        class="flex flex-col h-full min-h-0"
-    >
+    <div x-data="{ openAddModal: false, openImportModal: false, openProgressModal: false }" class="flex flex-col gap-6">
 
-        <!-- Tabel Riwayat Impor File Presensi & Upload File Presensi -->
-        <div class="grid grid-cols-1 lg:grid-cols-7 gap-3">
 
-            <!-- Tabel Riwayat Impor File Presensi -->
-            <div class="lg:col-span-5 bg-white/20 backdrop-blur-2xl p-3 rounded-lg h-auto lg:min-h-[calc(100vh-210px)]">
-                <livewire:manajemen.presensi.tabel-riwayat-import-presensi />
+        @if (auth()->user()->hasRole(['Admin', 'SDM Yayasan']))
+            <!-- Tabel Riwayat Impor File Presensi & Upload File Presensi -->
+            <div class="grid grid-cols-1 lg:grid-cols-7 gap-4 items-stretch">
+
+                <!-- Tabel Riwayat Impor File Presensi -->
+                <div class="lg:col-span-5 bg-white/30 backdrop-blur-2xl p-3 rounded-lg h-full">
+                    <livewire:manajemen.presensi.tabel-riwayat-import-presensi />
+                </div>
+
+                <!-- Upload File Presensi -->
+                <div class="lg:col-span-2 bg-white/30 backdrop-blur-2xl p-3 rounded-lg h-full">
+                    <livewire:manajemen.presensi.import-presensi />
+                </div>
             </div>
+        @endif
 
-            <!-- Upload File Presensi -->
-            <div class="lg:col-span-2 bg-white/20 backdrop-blur-2xl p-3 rounded-lg h-auto lg:min-h-[calc(100vh-210px)]">
-                <livewire:manajemen.presensi.import-presensi />
-            </div>
+        <div class="flex flex-col gap-4 bg-white/30 backdrop-blur-2xl p-3 rounded-lg h-full">
+            <livewire:manajemen.presensi.tabel-riwayat-presensi />
+        </div>
+
+        <div class="flex flex-col gap-4 bg-white/30 backdrop-blur-2xl p-3 rounded-lg h-full">
+            <livewire:manajemen.presensi.tabel-rekapitulasi-presensi />
         </div>
     </div>
 @endsection

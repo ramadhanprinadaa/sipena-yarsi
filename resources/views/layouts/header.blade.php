@@ -22,11 +22,9 @@
             >
         </div>
 
-
         {{-- Notification --}}
-        <div class="relative" x-data="{ dropdownOpen: false }"
-                    @mouseenter="dropdownOpen = true"
-                    @mouseleave="dropdownOpen = false">
+        <div class="relative" x-data="{ dropdownOpen: false }" @mouseenter="dropdownOpen = true"
+            @mouseleave="dropdownOpen = false">
 
             <!-- Avatar -->
             <button
@@ -34,23 +32,19 @@
                     rounded-full cursor-pointer
                     bg-gradient-to-br from-blue-300 to-pink-200
                     text-gray-700 shadow-sm hover:shadow-md
-                    transition"
-            >
+                    transition">
                 <i class="fa-solid fa-bell text-lg"></i>
-                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
+                <span
+                    class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
                     3
                 </span>
             </button>
 
             {{-- Dropdown --}}
-            <div
-                x-show="dropdownOpen"
-                x-transition
-                class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg z-50"
-            >
+            <div x-show="dropdownOpen" x-transition
+                class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg z-50">
                 <!-- Item -->
-                <a href="#"
-                    class="flex gap-3 px-3 py-2 hover:bg-gray-50 transition rounded-md">
+                <a href="#" class="flex gap-3 px-3 py-2 hover:bg-gray-50 transition rounded-md">
 
                     <div class="mt-1">
                         <i class="fa-solid fa-user-plus text-blue-500"></i>
@@ -69,8 +63,7 @@
                     <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
                 </a>
                 <!-- Item -->
-                <a href="#"
-                    class="flex gap-3 px-3 py-2 hover:bg-gray-50 transition rounded-md">
+                <a href="#" class="flex gap-3 px-3 py-2 hover:bg-gray-50 transition rounded-md">
 
                     <div class="mt-1">
                         <i class="fa-solid fa-file-signature text-emerald-500"></i>
@@ -93,32 +86,26 @@
         </div>
 
         {{-- User Profile --}}
-        <div class="relative" x-data="{ dropdownOpen: false }"
-                    @mouseenter="dropdownOpen = true"
-                    @mouseleave="dropdownOpen = false">
+        <div class="relative" x-data="{ dropdownOpen: false }" @mouseenter="dropdownOpen = true"
+            @mouseleave="dropdownOpen = false">
 
             <!-- Avatar -->
             <button
                 class="w-10 h-10 rounded-full cursor-pointer
                     bg-gradient-to-br from-blue-300 to-pink-200
                     text-gray-700 shadow-sm hover:shadow-md
-                    transition"
-            >
+                    transition">
                 <i class="fa-solid fa-user text-lg"></i>
             </button>
-            <div
-                x-show="dropdownOpen"
-                x-transition
-                class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50"
-            >
+            <div x-show="dropdownOpen" x-transition
+                class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
                 <a wire:navigate href="{{ route('profile') }}"
-                class="flex items-center gap-2 px-3 py-2 text-sm rounded-t-md text-gray-700 hover:bg-gray-100">
+                    class="flex items-center gap-2 px-3 py-2 text-sm rounded-t-md text-gray-700 hover:bg-gray-100">
                     <i class="fa-solid fa-user"></i>
                     <span>Profil</span>
                 </a>
 
-                <a href="#"
-                class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <a href="#" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     <i class="fa-solid fa-gear"></i>
                     <span>Pengaturan</span>
                 </a>
@@ -131,7 +118,7 @@
                     <button type="submit"
                         class="flex items-center gap-2 w-full text-left px-3 py-3 text-sm text-red-600 hover:bg-red-100 cursor-pointer rounded-b-md">
                         <i class="fa-solid fa-right-from-bracket"></i>
-                        <span >Keluar</span>
+                        <span>Keluar</span>
                     </button>
                 </form>
             </div>

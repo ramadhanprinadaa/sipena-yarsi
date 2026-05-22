@@ -1,5 +1,5 @@
 <!-- Calendar Container -->
-<div class="mt-4 bg-white border border-gray-100 shadow-sm rounded-xl flex flex-col overflow-hidden">
+<div class="bg-white border border-gray-100 shadow-sm rounded-xl flex flex-col overflow-hidden">
 
     <!-- Calendar Header -->
     <div class="flex flex-col gap-2 px-5 py-3 border-b border-gray-100 sm:flex-row sm:items-center sm:justify-between">

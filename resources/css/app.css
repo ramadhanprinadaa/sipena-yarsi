@@ -70,7 +70,7 @@
 
   /* Manajemen Pegawai */
   .filter-dropdown {
-    @apply inline-flex items-center justify-between text-body bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-indigo-500 shadow-xs font-medium leading-5 rounded-md text-sm px-3 py-2 focus:outline-none cursor-pointer w-full;
+    @apply inline-flex items-center justify-between text-body bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-3 focus:ring-indigo-500 shadow-xs font-medium leading-5 rounded-md text-sm px-3 py-2 focus:outline-none cursor-pointer w-full;
   }
   .dropdown-menu {
     @apply absolute left-0 z-10 w-full bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg mt-2;

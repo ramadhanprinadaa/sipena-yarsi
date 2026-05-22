@@ -11,16 +11,19 @@
 @endsection
 
 @section('content')
-    <div class="flex flex-col h-full min-h-0">
+    <div class="flex flex-col h-full min-h-[calc(100vh-157px)]">
 
-        <div class="flex justify-between mb-4">
+        <div class="flex items-end justify-between mb-4 ps-3 pt-1">
             <div class="flex flex-col gap-2">
                 <h1 class="text-2xl font-bold">Manajemen Pengajuan Lembur</h1>
                 <p class="text-sm text-gray-800">Kelola pengajuan lembur, surat perintah, dan rekapitulasi</p>
             </div>
         </div>
 
-        <livewire:manajemen.lembur.index />
+        <div class="flex-1 bg-white/30 backdrop-blur-xl shadow-md rounded-xl p-4">
+            <livewire:manajemen.lembur.index />
+        </div>
+
         <livewire:manajemen.lembur.add-spl />
         <livewire:manajemen.lembur.edit-spl />
 

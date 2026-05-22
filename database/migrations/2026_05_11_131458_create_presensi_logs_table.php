@@ -14,10 +14,8 @@ return new class extends Migration
         Schema::create('presensi_log', function (Blueprint $table) {
             $table->id();
             $table->foreignId('presensi_id');
-            $table->string('action');
-            $table->json('old_data')->nullable();
-            $table->json('new_data')->nullable();
-            $table->json('edited_fields')->nullable();
+            $table->foreignId('import_presensi_id');
+            $table->json('changes');
             $table->foreignId('edited_by')->nullable();
             $table->timestamps();
         });

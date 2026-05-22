@@ -28,19 +28,19 @@ class StatusKehadiranSeeder extends Seeder
         StatusKehadiran::create([
             'id'      => 3,
             'kondisi' => 'Absen 2x & < 6 Jam',
-            'status'  => 'Tidak Hadir',
+            'status'  => 'Tidak Hadir (Kurang Jam)',
             'warna'   => '#EAB308',
         ]);
         StatusKehadiran::create([
             'id'      => 4,
             'kondisi' => 'Absen 1x',
-            'status'  => 'Tidak Hadir',
+            'status'  => 'Tidak Hadir (Absen 1x)',
             'warna'   => '#EF4444',
         ]);
         StatusKehadiran::create([
             'id'      => 5,
             'kondisi' => 'Tidak Absen & Tanpa Ket.',
-            'status'  => 'Tidak Hadir',
+            'status'  => 'Tidak Hadir (Tidak Absen)',
             'warna'   => '#B91C1C',
         ]);
         StatusKehadiran::create([

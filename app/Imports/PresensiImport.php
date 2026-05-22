@@ -4,8 +4,11 @@ namespace App\Imports;
 
 use App\Models\HariLibur;
 use App\Models\ImportPresensi;
+use App\Models\Pegawai;
 use App\Models\Presensi;
+use App\Models\PresensiLog;
 use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Maatwebsite\Excel\Concerns\SkipsErrors;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnError;
@@ -32,96 +35,129 @@ class PresensiImport implements
     use SkipsFailures;
     use SkipsErrors;
 
-    protected $import;
+    const HADIR_NORMAL = 1;
+    const HADIR_KURANG_JAM = 2;
+    const TIDAK_HADIR_KURANG_JAM = 3;
+    const ABSEN_1X = 4;
+    const TIDAK_HADIR_TANPA_KETERANGAN = 5;
+    const IZIN = 6;
+    const SAKIT = 7;
+    const CUTI = 8;
+    const LEMBUR = 9;
 
-    protected $totalRows = 0;
-    protected $success = 0;
-    protected $failed = 0;
-    protected $updated = 0;
-    protected $skipped = 0;
+    protected ImportPresensi $import;
 
-    protected $detail = [];
+    protected int $totalRows = 0;
+    protected int $created = 0;
+    protected int $updated = 0;
+    protected int $skipped = 0;
+    protected int $failed = 0;
 
+    protected ?string $periodeMulai = null;
+    protected ?string $periodeSelesai = null;
+
+    protected array $pegawaiList = [];
+    protected array $hariLiburList = [];
+
+    protected array $importErrors = [];
 
     public function __construct(ImportPresensi $import)
     {
         $this->import = $import;
+        $this->pegawaiList = Pegawai::pluck('id', 'nip')->toArray();
+        $this->hariLiburList = HariLibur::pluck('tanggal')->map(fn($tanggal) => Carbon::parse($tanggal)->format('Y-m-d'))->toArray();
     }
 
     public function model(array $row)
     {
         $this->totalRows++;
+        $rowNumber = $this->totalRows + 8;
 
         try {
+            $pegawaiNip         = trim($row['id']);
+            $tanggal            = Carbon::parse($row['date'])->format('Y-m-d');
+            $attendanceStatus   = trim($row['attendance_status']);
+            $jamMasuk           = $row['actual_check_in_time'] !== '-'
+                ? Carbon::parse($row['actual_check_in_time'])->format('H:i:s')
+                : null;
+            $jamKeluar          = $row['actual_check_out_time'] !== '-'
+                ? Carbon::parse($row['actual_check_out_time'])->format('H:i:s')
+                : null;
 
-            $pegawaiNip         = $row['id'];
-            $tanggal            = $row['date'];
-            $attendaceStatus    = $row['attendance_status'];
-            $jamMasuk           = $row['actual_check_in_time'];
-            $jamKeluar          = $row['actual_check_out_time'];
+            if (!$this->periodeMulai || $tanggal < $this->periodeMulai) {
+                $this->periodeMulai = $tanggal;
+            }
 
-            // Handle Hari Libur
+            if (!$this->periodeSelesai || $tanggal > $this->periodeSelesai) {
+                $this->periodeSelesai = $tanggal;
+            }
+
+            if (!isset($this->pegawaiList[$pegawaiNip])) {
+                $this->failed++;
+                $this->recordError('Pegawai tidak ditemukan', $rowNumber);
+                return null;
+            }
+
             $isHariLibur = $this->isHariLibur($tanggal);
 
             if ($isHariLibur && !$jamMasuk && !$jamKeluar) {
                 $this->skipped++;
-                $this->detail[] = [
-                    'pegawai_nip' => $pegawaiNip,
-                    'tanggal' => $tanggal,
-                    'status' => 'skipped',
-                    'message' => 'Hari libur tanpa aktivitas',
-                ];
                 return null;
             }
 
-            $presensi = Presensi::updateOrCreate([
-                [
-                    'pegawai_nip'         => $pegawaiNip,
-                    'tanggal'             => $tanggal,
-                ],
-                [
-                    'import_presensi_id'  => $this->import->id,
-                    'jam_masuk'           => $jamMasuk,
-                    'jam_keluar'          => $jamKeluar,
-                    'status_kehadiran_id' => $this->getStatusKehadiran(
-                        $pegawaiNip,
-                        $tanggal,
-                        $attendaceStatus,
-                        $jamMasuk,
-                        $jamKeluar,
-                        $isHariLibur
-                    ),
-                ]
-            ]);
+            $statusKehadiranId = $this->getStatusKehadiran(
+                $pegawaiNip,
+                $tanggal,
+                $attendanceStatus,
+                $jamMasuk,
+                $jamKeluar,
+                $isHariLibur
+            );
 
+            $newData = [
+                'jam_masuk' => $jamMasuk,
+                'jam_keluar' => $jamKeluar,
+                'status_kehadiran_id' => $statusKehadiranId,
+                'last_import_presensi_id' => $this->import->id,
+            ];
+
+            // 1. Simpan / update ke tabel presensi
+            $presensi = Presensi::updateOrCreate(
+                [
+                    'pegawai_nip' => $pegawaiNip,
+                    'tanggal' => $tanggal,
+                ],
+                $newData
+            );
+
+            // 2. Deteksi perubahan untuk Presensi Log
+            $changes = [];
             if ($presensi->wasRecentlyCreated) {
-                $this->success++;
-                $this->detail[] = [
-                    'pegawai_nip' => $pegawaiNip,
-                    'tanggal' => $tanggal,
-                    'status' => 'created',
-                    'message' => 'Presensi berhasil ditambahkan',
-                ];
+                $this->created++;
             } else {
-                $this->updated++;
-                $this->detail[] = [
-                    'pegawai_nip' => $pegawaiNip,
-                    'tanggal' => $tanggal,
-                    'status' => 'updated',
-                    'message' => 'Presensi berhasil diperbarui',
-                ];
+                $rawChanges = $presensi->getChanges(); // Hanya mencatat kolom yang nilainya di-update
+                $changes = Arr::except($rawChanges, [
+                    'updated_at',
+                    'last_import_presensi_id'
+                ]);
+                if (!empty($changes)) {
+                    $this->updated++;
+                }
             }
 
-            return $presensi;
+            // 3. Insert ke Presensi Log jika ada data baru atau ada data yang berubah
+            if (!empty($changes)) {
+                PresensiLog::create([
+                    'presensi_id' => $presensi->id,
+                    'import_presensi_id' => $this->import->id,
+                    'changes' => json_encode($changes),
+                    'edited_by' => auth()->id(), // Mencatat user yang melakukan import
+                ]);
+            }
+            return null;
         } catch (Throwable $e) {
-
             $this->failed++;
-            $this->detail[] = [
-                'pegawai_nip' => $row['id'] ?? null,
-                'tanggal' => $row['date'] ?? null,
-                'status' => 'failed',
-                'message' => $e->getMessage(),
-            ];
+            $this->recordError($e->getMessage(), $rowNumber ?? 0);
             return null;
         }
     }
@@ -132,97 +168,96 @@ class PresensiImport implements
             AfterImport::class => function () {
 
                 $this->import->update([
+                    'periode_mulai'   => $this->periodeMulai,
+                    'periode_selesai' => $this->periodeSelesai,
                     'total_rows'      => $this->totalRows,
-                    'total_success'   => $this->success,
+                    'total_created'   => $this->created,
                     'total_failed'    => $this->failed,
                     'total_updated'   => $this->updated,
                     'total_skipped'   => $this->skipped,
-                    'summary'         => json_encode([
-                        'detail' => $this->detail,
-                    ]),
+                    'error_summary'   => json_encode(
+                        array_values($this->importErrors)
+                    ),
                 ]);
             },
         ];
     }
 
     public function getStatusKehadiran(
-        $pegawaiId,
+        $pegawaiNip,
         $tanggal,
-        $attendaceStatus,
+        $attendanceStatus,
         $jamMasuk,
         $jamKeluar,
         $isHariLibur = false
     ) {
-        $totalJamKerja = Carbon::parse($jamMasuk)->diffInHours(Carbon::parse($jamKeluar));
-
-        /**
-         * Cek dan Handle Hari Libur Jika Pegawai Masuk
-         */
-        if ($isHariLibur && ($jamMasuk || $jamKeluar)) {
-            return 9; // Masuk Hari Libur / Lembur
+        $totalJamKerja = 0;
+        if ($jamMasuk && $jamKeluar) {
+            $totalJamKerja = Carbon::parse($jamMasuk)
+                ->diffInHours(Carbon::parse($jamKeluar));
         }
 
-        /**
-         * Cek Pengajuan Cuti, Izin, dan Sakit
-         */
+        // Cek Lembur di Hari Libur
+        if ($isHariLibur && ($jamMasuk || $jamKeluar)) {
+            return self::LEMBUR;
+        }
 
         // Cek Izin
-        if ($this->isIzin($pegawaiId, $tanggal)) {
-            return 6; // Izin
+        if ($this->isIzin($pegawaiNip, $tanggal)) {
+            return self::IZIN;
         }
 
         // Cek Sakit
-        if ($this->isSakit($pegawaiId, $tanggal)) {
-            return 7; // Sakit
+        if ($this->isSakit($pegawaiNip, $tanggal)) {
+            return self::SAKIT;
         }
 
         // Cek Cuti
-        if ($this->isCuti($pegawaiId, $tanggal)) {
-            return 8; // Cuti
+        if ($this->isCuti($pegawaiNip, $tanggal, $jamMasuk, $jamKeluar, $attendanceStatus)) {
+            return self::CUTI;
         }
 
-
-        /**
-         * Cek Absensi Normal
-         */
-
-        // Absen 2x & ≥ 8 Jam
+        // Absen 2x & ≥ 8 Jam (Hadir Normal)
         if ($jamMasuk && $jamKeluar && $totalJamKerja >= 8) {
-            return 1; // Hadir Normal
+            return self::HADIR_NORMAL;
         }
 
-        // Absen 2x & 6 - 7,59 Jam
+        // Absen 2x & 6 - 7,59 Jam (Hadir Kurang Jam)
         if ($jamMasuk && $jamKeluar && $totalJamKerja >= 6 && $totalJamKerja < 8) {
-            return 2; // Hadir Kurang Jam
+            return self::HADIR_KURANG_JAM;
+        }
+
+        // Tidak Absen & Tanpa Ket. (Tidak Hadir dan TIdak Absen)
+        if (!$jamMasuk && !$jamKeluar && $attendanceStatus === 'A') {
+            return self::TIDAK_HADIR_TANPA_KETERANGAN;
         }
 
         // Absen 1x
         if (!$jamMasuk || !$jamKeluar) {
-            return 4; // Tidak Hadir (Merah Bata)
-        }
-
-        // Tidak Absen & Tanpa Ket.
-        if (!$jamMasuk && !$jamKeluar && $attendaceStatus === 'A') {
-            return 5; // Tidak Hadir (Merah)
+            return self::ABSEN_1X;
         }
 
         // Default Absen 2x & < 6 Jam
-        return 3; // Tidak Hadir (Kuning)
+        return self::HADIR_KURANG_JAM;
     }
 
-    public function isCuti($pegawaiId, $tanggal)
+    public function isCuti($pegawaiNip, $tanggal, $jamMasuk, $jamKeluar, $attendanceStatus)
     {
+        // cek sementara
+        if ($pegawaiNip && $tanggal && !$jamMasuk && !$jamKeluar && $attendanceStatus === 'CUTI') {
+            return true;
+        }
         // query cek data cuti pegawai
         return false;
     }
 
-    public function isIzin($pegawaiId, $tanggal)
+    public function isIzin($pegawaiNip, $tanggal)
     {
         // query cek data izin pegawai
         return false;
     }
 
-    public function isSakit($pegawaiId, $tanggal)
+    public function isSakit($pegawaiNip, $tanggal)
     {
         // query cek data sakit pegawai
         return false;
@@ -230,8 +265,34 @@ class PresensiImport implements
 
     public function isHariLibur($tanggal): bool
     {
-        return HariLibur::whereDate('tanggal', $tanggal)
-            ->exists();
+        // Cek Sabtu & Minggu
+        if (Carbon::parse($tanggal)->isWeekend()) {
+            return true;
+        }
+
+        // Cek Hari Libur Nasional / Custom
+        return in_array(
+            Carbon::parse($tanggal)->format('Y-m-d'),
+            $this->hariLiburList
+        );
+    }
+
+    protected function recordError(string $message, int $rowNumber) : void
+    {
+        if (!isset($this->importErrors[$message])) {
+
+            $this->importErrors[$message] = [
+                'message' => $message,
+                'count' => 0,
+                'rows' => [],
+            ];
+        }
+
+        $this->importErrors[$message]['count']++;
+
+        if (!in_array($rowNumber, $this->importErrors[$message]['rows'])) {
+            $this->importErrors[$message]['rows'][] = $rowNumber;
+        }
     }
 
     public function rules(): array
@@ -242,7 +303,7 @@ class PresensiImport implements
         ];
     }
 
-    public function headerRow(): int
+    public function headingRow(): int
     {
         return 8;
     }
