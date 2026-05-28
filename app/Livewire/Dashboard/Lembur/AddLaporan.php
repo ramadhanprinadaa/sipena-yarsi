@@ -8,6 +8,7 @@ use App\Models\Lembur;
 use App\Models\LaporanHasilLembur;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 
 class AddLaporan extends Component
@@ -50,6 +51,7 @@ class AddLaporan extends Component
                         'kegiatan' => $lembur->alasan_lembur,
                         'jam_mulai' => $lembur->jam_mulai,
                         'jam_selesai' => $lembur->jam_selesai,
+                        'jenis_hari' => $lembur->jenis_hari,
                     ];
                 })
                 ->toArray();
@@ -118,6 +120,8 @@ class AddLaporan extends Component
             return;
         }
 
+        $this->validateOvertimeRules($lembur);
+
         // Create LaporanHasilLembur record
         LaporanHasilLembur::create([
             'lembur_id' => $this->form['lembur_id'],
@@ -126,13 +130,51 @@ class AddLaporan extends Component
             'hasil_pekerjaan' => $this->form['hasil_pekerjaan'],
         ]);
 
-        $lembur->update([
-            'status' => 'Menunggu Verifikasi Atasan',
-        ]);
-
         // Emit event untuk refresh data
         $this->dispatch('laporan-created');
         $this->close();
+    }
+
+    private function validateOvertimeRules(Lembur $lembur): void
+    {
+        $start = $this->timeToMinutes($this->form['jam_mulai']);
+        $end = $this->timeToMinutes($this->form['jam_selesai']);
+
+        if ($end <= $start) {
+            throw ValidationException::withMessages([
+                'form.jam_selesai' => 'Jam aktual selesai harus lebih besar dari jam aktual mulai.',
+            ]);
+        }
+
+        $duration = $end - $start;
+
+        if ($lembur->jenis_hari === 'Hari Kerja Normal') {
+            if ($start < $this->timeToMinutes('16:00') || $end > $this->timeToMinutes('18:00')) {
+                throw ValidationException::withMessages([
+                    'form.jam_mulai' => 'Hari kerja normal hanya boleh antara pukul 16:00 sampai 18:00 WIB.',
+                    'form.jam_selesai' => 'Hari kerja normal tidak boleh melebihi pukul 18:00 WIB.',
+                ]);
+            }
+
+            if ($duration > 120) {
+                throw ValidationException::withMessages([
+                    'form.jam_selesai' => 'Hari kerja normal maksimal 2 jam.',
+                ]);
+            }
+        }
+
+        if (in_array($lembur->jenis_hari, ['Hari Libur Mingguan', 'Hari Libur Nasional']) && $duration > 300) {
+            throw ValidationException::withMessages([
+                'form.jam_selesai' => 'Hari libur mingguan/nasional maksimal 5 jam.',
+            ]);
+        }
+    }
+
+    private function timeToMinutes(string $time): int
+    {
+        [$hour, $minute] = array_map('intval', explode(':', substr($time, 0, 5)));
+
+        return ($hour * 60) + $minute;
     }
 
 }

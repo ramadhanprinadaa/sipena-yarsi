@@ -30,6 +30,9 @@ return new class extends Migration
             $table->enum('status', [
                 'Menunggu Pelaksanaan',
                 'Menunggu Verifikasi Atasan',
+                'Menunggu Verifikasi Rektor',
+                'Menunggu Verifikasi SDM Universitas',
+                'Menunggu Verifikasi SDM Yayasan',
                 'Menunggu Laporan',
                 'Selesai',
                 'Ditolak'

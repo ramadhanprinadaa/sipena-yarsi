@@ -142,8 +142,7 @@ class AddLembur extends Component
             return;
         }
 
-        // Create Lembur record
-        Lembur::create([
+        $lembur = new Lembur([
             'pegawai_id' => $user->pegawai->id,
             'surat_perintah_lembur_id' => $this->form['surat_perintah_lembur_id'],
             'tanggal_lembur' => $this->form['tanggal_lembur'],
@@ -151,8 +150,10 @@ class AddLembur extends Component
             'jam_mulai' => $this->form['jam_mulai'],
             'jam_selesai' => $this->form['jam_selesai'],
             'alasan_lembur' => $this->form['kegiatan'],
-            'status' => 'Menunggu Verifikasi Atasan',
         ]);
+        $lembur->setRelation('pegawai', $user->pegawai->loadMissing(['unit_kerja', 'user.role']));
+        $lembur->status = $this->initialApprovalStatusFor($lembur);
+        $lembur->save();
 
         // Emit event untuk refresh data
         $this->dispatch('lembur-created');
@@ -199,6 +200,28 @@ class AddLembur extends Component
         [$hour, $minute] = array_map('intval', explode(':', substr($time, 0, 5)));
 
         return ($hour * 60) + $minute;
+    }
+
+    private function initialApprovalStatusFor(Lembur $lembur): string
+    {
+        $role = $lembur->pegawai?->user?->role?->name;
+        $unitSdmId = (int) $lembur->pegawai?->unit_kerja?->unit_sdm_id;
+
+        if ($role === 'Pimpinan') {
+            return $unitSdmId === 1
+                ? 'Menunggu Verifikasi SDM Yayasan'
+                : 'Menunggu Verifikasi Rektor';
+        }
+
+        if ($role === 'Rektor') {
+            return 'Menunggu Verifikasi SDM Universitas';
+        }
+
+        if ($role === 'SDM Universitas') {
+            return 'Menunggu Verifikasi SDM Yayasan';
+        }
+
+        return 'Menunggu Verifikasi Atasan';
     }
 
 }

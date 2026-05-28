@@ -13,7 +13,7 @@
                                 <h2 class="text-2xl font-bold text-[#2B76FF]">
                                     Edit SPL
                                 </h2>
-                                <button wire:click="close" class="text-gray-400 hover:text-gray-600 cursor-pointer transition">
+                                <button type="button" wire:click="close" class="text-gray-400 hover:text-gray-600 cursor-pointer transition">
                                     <i class="fa-solid fa-xmark text-xl"></i>
                                 </button>
                             </div>
@@ -161,7 +161,7 @@
                                                         <td class="px-4 py-3 text-gray-600">{{ $pegawai->nip }}</td>
                                                         <td class="px-4 py-3 text-gray-600">{{ $pegawai->npwp }}</td>
                                                         <td class="px-4 py-3 text-center">
-                                                            <button wire:click="selectEmployee({{ $pegawai->id }})" 
+                                                            <button type="button" wire:click="selectEmployee({{ $pegawai->id }})" 
                                                                 class="p-1.5 rounded-lg transition cursor-pointer {{ in_array($pegawai->id, array_column($selectedEmployees, 'id')) ? 'text-white bg-[#2B76FF]' : 'text-[#2B76FF] hover:bg-blue-100' }}">
                                                                 <i class="fa-solid fa-check text-sm"></i>
                                                             </button>
@@ -195,7 +195,7 @@
                                                             <p class="text-xs text-gray-600">{{ $employee['nip'] }} - {{ $employee['npwp'] }}</p>
                                                         </div>
                                                     </div>
-                                                    <button wire:click="removeEmployee({{ $index }})" 
+                                                    <button type="button" wire:click="removeEmployee({{ $index }})" 
                                                         class="text-red-500 hover:text-red-700 cursor-pointer transition">
                                                         <i class="fa-solid fa-xmark text-sm"></i>
                                                     </button>

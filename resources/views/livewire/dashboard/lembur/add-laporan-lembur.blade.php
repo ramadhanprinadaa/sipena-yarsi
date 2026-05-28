@@ -86,20 +86,26 @@
                             @enderror
                         </div>
 
-                        {{-- Row: Jam Mulai & Jam Selesai --}}
+                        {{-- Row: Jam Aktual Mulai & Jam Selesai --}}
                         <div class="grid grid-cols-2 gap-4">
-                            <!-- Jam Mulai -->
+                            <!-- Jam Aktual Mulai -->
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Jam Mulai</label>
-                                <input type="time" wire:model.defer="form.jam_mulai" readonly
-                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition bg-gray-50">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Jam Aktual Mulai</label>
+                                <input type="time" wire:model.defer="form.jam_mulai"
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
+                                @error('form.jam_mulai')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
 
-                            <!-- Jam Selesai -->
+                            <!-- Jam Aktual Selesai -->
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Jam Selesai</label>
-                                <input type="time" wire:model.defer="form.jam_selesai" readonly
-                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition bg-gray-50">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Jam Aktual Selesai</label>
+                                <input type="time" wire:model.defer="form.jam_selesai"
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
+                                @error('form.jam_selesai')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
@@ -121,7 +127,7 @@
                     <button 
                         wire:click="submit"
                         class="w-full py-3 rounded-lg text-white font-semibold 
-                            bg-gradient-to-r from-[#2B76FF] via-[#7B61FF] to-[#FF00CC]  
+                            bg-gradient-to-r from-[#2B76FF] via-[#7B61FF] to-[#FF00CC]
                             hover:shadow-lg cursor-pointer transition duration-300">
                         Kirim Laporan
                     </button>

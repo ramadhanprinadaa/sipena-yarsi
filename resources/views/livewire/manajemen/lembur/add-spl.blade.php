@@ -14,6 +14,7 @@
                                     Buat & Terbitkan SPL
                                 </h2>
                                 <button 
+                                type="button"
                                 wire:click="close"
                                 class="text-gray-400 hover:text-gray-600 cursor-pointer transition"
                                 >
@@ -44,7 +45,8 @@
                                                 <label class="block text-xs font-semibold text-gray-700 mb-2">Unit Kerja</label>
                                                 <input type="text" placeholder="Engineering"
                                                     wire:model="form.unit_kerja"
-                                                    class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
+                                                    readonly
+                                                    class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition bg-gray-50">
                                             </div>
                                         </div>
                                         <div class="mt-4">
@@ -163,7 +165,7 @@
                                                         <td class="px-4 py-3 text-gray-600">{{ $pegawai->nip }}</td>
                                                         <td class="px-4 py-3 text-gray-600">{{ $pegawai->npwp }}</td>
                                                         <td class="px-4 py-3 text-center">
-                                                            <button wire:click="selectEmployee({{ $pegawai->id }})" 
+                                                            <button type="button" wire:click="selectEmployee({{ $pegawai->id }})" 
                                                                 class="p-1.5 rounded-lg transition cursor-pointer {{ in_array($pegawai->id, array_column($selectedEmployees, 'id')) ? 'text-white bg-[#2B76FF]' : 'text-[#2B76FF] hover:bg-blue-100' }}">
                                                                 <i class="fa-solid fa-check text-sm"></i>
                                                             </button>
@@ -197,7 +199,7 @@
                                                             <p class="text-xs text-gray-600">{{ $employee['nip'] }} - {{ $employee['npwp'] }}</p>
                                                         </div>
                                                     </div>
-                                                    <button wire:click="removeEmployee({{ $index }})" 
+                                                    <button type="button" wire:click="removeEmployee({{ $index }})" 
                                                         class="text-red-500 hover:text-red-700 cursor-pointer transition">
                                                         <i class="fa-solid fa-xmark text-sm"></i>
                                                     </button>
@@ -216,7 +218,7 @@
                                 <button 
                                     type="submit"
                                     class="w-full py-3 rounded-lg text-white font-semibold 
-                                        bg-gradient-to-r from-[#2B76FF] via-[#7B61FF] to-[#FF00CC]  
+                                        bg-gradient-to-r from-[#2B76FF] via-[#7B61FF] to-[#FF00CC]
                                         hover:shadow-lg cursor-pointer transition duration-300">
                                     Terbitkan SPL
                                 </button>
