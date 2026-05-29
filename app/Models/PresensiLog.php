@@ -16,6 +16,7 @@ class PresensiLog extends Model
         'import_presensi_id',
         'changes',
         'edited_by',
+        'keterangan',
     ];
 
     protected $casts = [

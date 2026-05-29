@@ -65,7 +65,7 @@ class PresensiImport implements
     {
         $this->import = $import;
         $this->pegawaiList = Pegawai::pluck('id', 'nip')->toArray();
-        $this->hariLiburList = HariLibur::pluck('tanggal')->map(fn($tanggal) => Carbon::parse($tanggal)->format('Y-m-d'))->toArray();
+        $this->hariLiburList = HariLibur::toBase()->pluck('tanggal')->toArray();
     }
 
     public function model(array $row)
@@ -77,12 +77,8 @@ class PresensiImport implements
             $pegawaiNip         = trim($row['id']);
             $tanggal            = Carbon::parse($row['date'])->format('Y-m-d');
             $attendanceStatus   = trim($row['attendance_status']);
-            $jamMasuk           = $row['actual_check_in_time'] !== '-'
-                ? Carbon::parse($row['actual_check_in_time'])->format('H:i:s')
-                : null;
-            $jamKeluar          = $row['actual_check_out_time'] !== '-'
-                ? Carbon::parse($row['actual_check_out_time'])->format('H:i:s')
-                : null;
+            $jamMasuk           = $this->parseExcelTime($row['actual_check_in_time'] ?? '-', $rowNumber, 'Actual Check In Time');
+            $jamKeluar          = $this->parseExcelTime($row['actual_check_out_time'] ?? '-', $rowNumber, 'Actual Check Out Time');
 
             if (!$this->periodeMulai || $tanggal < $this->periodeMulai) {
                 $this->periodeMulai = $tanggal;
@@ -90,6 +86,11 @@ class PresensiImport implements
 
             if (!$this->periodeSelesai || $tanggal > $this->periodeSelesai) {
                 $this->periodeSelesai = $tanggal;
+            }
+
+            if ($jamMasuk === false || $jamKeluar === false) {
+                $this->failed++;
+                return null;
             }
 
             if (!isset($this->pegawaiList[$pegawaiNip])) {
@@ -114,21 +115,26 @@ class PresensiImport implements
                 $isHariLibur
             );
 
-            $newData = [
-                'jam_masuk' => $jamMasuk,
-                'jam_keluar' => $jamKeluar,
-                'status_kehadiran_id' => $statusKehadiranId,
-                'last_import_presensi_id' => $this->import->id,
-            ];
+            $userId = $this->import->imported_by;
 
-            // 1. Simpan / update ke tabel presensi
-            $presensi = Presensi::updateOrCreate(
-                [
-                    'pegawai_nip' => $pegawaiNip,
-                    'tanggal' => $tanggal,
-                ],
-                $newData
-            );
+            $presensi = Presensi::firstOrNew([
+                'pegawai_nip' => $pegawaiNip,
+                'tanggal' => $tanggal,
+            ]);
+
+            if (!$presensi->exists) {
+                $presensi->created_by = $userId;
+            }
+
+            // Assign / Update data
+            $presensi->jam_masuk = $jamMasuk;
+            $presensi->jam_keluar = $jamKeluar;
+            $presensi->status_kehadiran_id = $statusKehadiranId;
+            $presensi->last_import_presensi_id = $this->import->id;
+            $presensi->updated_by = $userId; // Selalu diisi oleh user yang melakukan import/update terakhir
+
+            // Simpan ke database
+            $presensi->save();
 
             // 2. Deteksi perubahan untuk Presensi Log
             $changes = [];
@@ -138,6 +144,7 @@ class PresensiImport implements
                 $rawChanges = $presensi->getChanges(); // Hanya mencatat kolom yang nilainya di-update
                 $changes = Arr::except($rawChanges, [
                     'updated_at',
+                    'updated_by',
                     'last_import_presensi_id'
                 ]);
                 if (!empty($changes)) {
@@ -151,7 +158,7 @@ class PresensiImport implements
                     'presensi_id' => $presensi->id,
                     'import_presensi_id' => $this->import->id,
                     'changes' => json_encode($changes),
-                    'edited_by' => auth()->id(), // Mencatat user yang melakukan import
+                    'edited_by' => $userId, // Mencatat user yang melakukan import
                 ]);
             }
             return null;
@@ -175,9 +182,7 @@ class PresensiImport implements
                     'total_failed'    => $this->failed,
                     'total_updated'   => $this->updated,
                     'total_skipped'   => $this->skipped,
-                    'error_summary'   => json_encode(
-                        array_values($this->importErrors)
-                    ),
+                    'error_summary'   => $this->importErrors
                 ]);
             },
         ];
@@ -271,10 +276,7 @@ class PresensiImport implements
         }
 
         // Cek Hari Libur Nasional / Custom
-        return in_array(
-            Carbon::parse($tanggal)->format('Y-m-d'),
-            $this->hariLiburList
-        );
+        return in_array($tanggal, $this->hariLiburList);
     }
 
     protected function recordError(string $message, int $rowNumber) : void
@@ -292,6 +294,33 @@ class PresensiImport implements
 
         if (!in_array($rowNumber, $this->importErrors[$message]['rows'])) {
             $this->importErrors[$message]['rows'][] = $rowNumber;
+        }
+    }
+
+    protected function parseExcelTime($timeValue, int $rowNumber, string $kolomName)
+    {
+        // Jika datanya memang kosong atau strip, anggap null (bukan error)
+        if (empty(trim($timeValue)) || trim($timeValue) === '-') {
+            return null;
+        }
+
+        try {
+            // Skenario 1: Excel kadang membaca waktu sebagai angka desimal (Fraction of day)
+            // Contoh: 0.3194444 = 07:40:00
+            if (is_numeric($timeValue)) {
+                return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($timeValue)->format('H:i:s');
+            }
+
+            // Skenario 2: Bentuknya String tapi pakai titik (07.41 atau 07.41.00)
+            // Kita normalkan titik (.) menjadi titik dua (:)
+            $normalizedTime = str_replace('.', ':', trim($timeValue));
+
+            // Skenario 3: Parsing string yang sudah dinormalkan menggunakan Carbon
+            return Carbon::parse($normalizedTime)->format('H:i:s');
+        } catch (\Throwable $e) {
+            // Jika masuk ke catch, artinya format sudah sangat hancur dan tidak bisa ditebak
+            $this->recordError("Format waktu tidak valid pada kolom {$kolomName} (Data: {$timeValue})", $rowNumber);
+            return false;
         }
     }
 

@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('presensi_id');
             $table->foreignId('import_presensi_id');
-            $table->json('changes');
             $table->foreignId('edited_by')->nullable();
+            $table->json('changes');
+            $table->text('keterangan')->nullable();
             $table->timestamps();
         });
     }

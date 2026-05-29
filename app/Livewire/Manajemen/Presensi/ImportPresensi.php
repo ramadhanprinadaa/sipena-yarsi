@@ -77,32 +77,24 @@ class ImportPresensi extends Component
             new PresensiImport($importPresensi),
             $filepath
         );
+
+        return $importPresensi;
     }
 
     public function save()
     {
         $this->validate();
         try {
-            $this->import();
+            $importRecord = $this->import();
+            $this->dispatch('refresh-table-import');
+            $this->dispatch('load-detail-import', fileId: $importRecord->id);
+            $this->dispatch('open-loading-detail-import');
+
         } catch (\Throwable $e) {
             $this->errorMessage = $e->getMessage();
         }
-        $this->showResult = true;
-        $this->dispatch('refresh-table');
-        $this->dispatch(
-            'notify',
-            type: 'success',
-            message: 'Data Absensi Berhasil Ditambahkan'
-        );
-        $this->resetImport();
-    }
 
-    #[On('close-import-modal')]
-    public function handleClose()
-    {
-        $this->reset('file');
-        $this->resetValidation();
-        $this->showResult = false;
+        $this->resetImport();
     }
 
     public function resetImport()

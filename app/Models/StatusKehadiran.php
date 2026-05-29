@@ -24,4 +24,13 @@ class StatusKehadiran extends Model
     {
         return $this->hasMany(Presensi::class);
     }
+
+    public function getBadgeStyleAttribute(): string
+    {
+        return "
+            background-color: {$this->warna}20;
+            color: {$this->warna};
+            border-color: {$this->warna};
+        ";
+    }
 }

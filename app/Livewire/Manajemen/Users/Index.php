@@ -90,7 +90,7 @@ class Index extends Component
     {
         $this->resetPage();
     }
-    public function selectUser($id)
+    public function selectUser(int $id)
     {
         $this->dispatch('load-detail-modal', userId: $id);
     }

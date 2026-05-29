@@ -125,7 +125,7 @@ class User extends Authenticatable
     protected function username(): Attribute
     {
         return Attribute::make(
-            get: fn(string $value) => ucwords(strtolower($value)),
+            get: fn(string $value) => strtolower($value) === 'admin' ? ucwords($value) : $value,
             set: fn(string $value) => strtolower($value),
         );
     }

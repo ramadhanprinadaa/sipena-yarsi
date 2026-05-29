@@ -88,7 +88,7 @@
     @apply rounded-md overflow-y-auto flex-1;
   }
   .table {
-    @apply w-full table-fixed text-sm text-left rtl:text-right text-body h-full rounded-md;
+    @apply w-full table-fixed text-sm text-left rtl:text-right text-body rounded-md;
   }
   .table-header {
     @apply sticky top-0 text-sm text-body bg-neutral-secondary-medium border-b border-default-medium;

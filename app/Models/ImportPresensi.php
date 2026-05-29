@@ -22,10 +22,14 @@ class ImportPresensi extends Model
         'imported_by',
     ];
 
-    protected $casts = [
-        'periode_mulai' => 'date',
-        'periode_selesai' => 'date',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'periode_mulai' => 'date',
+            'periode_selesai' => 'date',
+            'error_summary' => 'array'
+        ];
+    }
 
     public function presensiLogs()
     {

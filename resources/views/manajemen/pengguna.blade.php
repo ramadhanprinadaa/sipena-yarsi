@@ -15,9 +15,11 @@
         openAddModal: false,
         openDetailModal: false,
         openLoadingDetail: false
-    }" @open-add-modal.window="openAddModal = true" @close-add-modal.window="openAddModal = false"
+    }"  @open-add-modal.window="openAddModal = true"
+        @close-add-modal.window="openAddModal = false"
         @open-detail-modal.window="openDetailModal = true; openLoadingDetail = false;"
-        @close-detail-modal.window="openDetailModal = false" @open-loading-detail.window="openLoadingDetail = true"
+        @close-detail-modal.window="openDetailModal = false"
+        @open-loading-detail.window="openLoadingDetail = true"
         class="flex flex-col h-full min-h-0">
 
         {{-- Header --}}

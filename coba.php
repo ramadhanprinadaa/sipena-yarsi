@@ -1,307 +1,225 @@
 <?php
 
-namespace App\Imports;
+namespace App\Livewire\Manajemen\Presensi;
 
-use App\Models\HariLibur;
-use App\Models\ImportPresensi;
 use App\Models\Pegawai;
-use App\Models\Presensi;
-use App\Models\PresensiLog;
+use App\Models\UnitKerja;
+use App\Services\StatusKehadiranService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Concerns\SkipsErrors;
-use Maatwebsite\Excel\Concerns\SkipsFailures;
-use Maatwebsite\Excel\Concerns\SkipsOnError;
-use Maatwebsite\Excel\Concerns\SkipsOnFailure;
-use Maatwebsite\Excel\Concerns\ToModel;
-use Maatwebsite\Excel\Concerns\WithBatchInserts;
-use Maatwebsite\Excel\Concerns\WithChunkReading;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Events\AfterImport;
-use Throwable;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Session;
+use Livewire\Component;
+use Livewire\WithPagination;
 
-class PresensiImport implements
-    ToModel,
-    WithHeadingRow,
-    WithValidation,
-    WithBatchInserts,
-    WithChunkReading,
-    SkipsOnFailure,
-    SkipsOnError,
-    WithEvents
+class TabelRekapitulasiPresensi extends Component
 {
-    use SkipsFailures;
-    use SkipsErrors;
+    use WithPagination;
+    protected string $paginationTheme = 'tailwind';
 
-    const HADIR_NORMAL = 1;
-    const HADIR_KURANG_JAM = 2;
-    const TIDAK_HADIR_KURANG_JAM = 3;
-    const ABSEN_1X = 4;
-    const TIDAK_HADIR_TANPA_KETERANGAN = 5;
-    const IZIN = 6;
-    const SAKIT = 7;
-    const CUTI = 8;
-    const LEMBUR = 9;
+    public array $unitKerja;
+    public array $unitKerjaUniversitas;
 
-    protected ImportPresensi $import;
+    // Filter
+    #[Session]
+    public ?string $selectedUnitKerja = null;
+    #[Session]
+    public ?string $selectedPeriodeMulai = null;
+    #[Session]
+    public ?string $selectedPeriodeSelesai = null;
 
-    protected int $totalRows = 0;
-    protected int $created = 0;
-    protected int $updated = 0;
-    protected int $skipped = 0;
-    protected int $failed = 0;
+    // Search
+    #[Session]
+    public $search = '';
 
-    protected ?string $periodeMulai = null;
-    protected ?string $periodeSelesai = null;
-
-    protected array $pegawaiList = [];
-    protected array $hariLiburList = [];
-
-    protected array $importErrors = [];
-
-    public function __construct(ImportPresensi $import)
+    #[On('refresh-table-riwayat-rekapitulasi')]
+    public function refreshTable(): void
     {
-        $this->import = $import;
-        $this->pegawaiList = Pegawai::pluck('id', 'nip')->toArray();
-        $this->hariLiburList = HariLibur::pluck('tanggal')->map(fn($tanggal) => Carbon::parse($tanggal)->format('Y-m-d'))->toArray();
+        $this->resetPage();
     }
 
-    public function model(array $row)
+    public function mount()
     {
-        $this->totalRows++;
-        $rowNumber = $this->totalRows + 8;
+        $this->unitKerja = UnitKerja::orderBy('name')
+            ->pluck('name')
+            ->toArray();
 
-        try {
-            $pegawaiNip         = trim($row['id']);
-            $tanggal            = Carbon::parse($row['date'])->format('Y-m-d');
-            $attendanceStatus   = trim($row['attendance_status']);
-            $jamMasuk           = $row['actual_check_in_time'] !== '-'
-                ? Carbon::parse($row['actual_check_in_time'])->format('H:i:s')
-                : null;
-            $jamKeluar          = $row['actual_check_out_time'] !== '-'
-                ? Carbon::parse($row['actual_check_out_time'])->format('H:i:s')
-                : null;
+        $this->unitKerjaUniversitas = UnitKerja::query()
+            ->whereHas('unitSdm', function ($q) {
+                $q->where('name', 'SDM Universitas');
+            })
+            ->orderBy('name')
+            ->pluck('name')
+            ->toArray();
+    }
 
-            // Get tanggal periode mulai absensi
-            if (!$this->periodeMulai || $tanggal < $this->periodeMulai) {
-                $this->periodeMulai = $tanggal;
+    public function updated(string $property): void
+    {
+        if (in_array($property, [
+            'search',
+            'selectedUnitKerja',
+            'selectedPeriodeMulai',
+            'selectedPeriodeSelesai',
+        ])) {
+            $this->resetPage();
+        }
+    }
+
+    #[Computed]
+    public function rekapitulasiPresensi()
+    {
+        // 1. Tentukan Periode (Default: Bulan Berjalan)
+        $mulai = $this->selectedPeriodeMulai
+            ? Carbon::createFromFormat('d/m/Y', $this->selectedPeriodeMulai)->startOfDay()
+            : now()->startOfMonth();
+
+        $selesai = $this->selectedPeriodeSelesai
+            ? Carbon::createFromFormat('d/m/Y', $this->selectedPeriodeSelesai)->endOfDay()
+            : now()->endOfMonth();
+
+        // 2. Query Pegawai dengan Eager Loading Presensi & Lembur untuk optimasi query (Hemat Query)
+        $query = Pegawai::query()
+            ->with([
+                'presensi' => function ($q) use ($mulai, $selesai) {
+                    $q->whereBetween('tanggal', [$mulai, $selesai]);
+                },
+                'lembur' => function ($q) use ($mulai, $selesai) {
+                    $q->whereBetween('tanggal_lembur', [$mulai, $selesai])
+                        ->where('status', 'Disetujui');
+                }
+            ]);
+
+        // Filter Unit Kerja
+        if ($this->selectedUnitKerja) {
+            $query->whereHas('unit_kerja', function ($q) {
+                $q->where('name', $this->selectedUnitKerja);
+            });
+        }
+
+        // Filter Pencarian
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('nama', 'like', '%' . $this->search . '%')
+                    ->orWhere('nip', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        $pegawais = $query->paginate(10);
+
+        // 3. Transformasi Data Rekapitulasi per Pegawai
+        $pegawais->getCollection()->transform(function ($pegawai) {
+            $hadir = 0;
+            $tidakHadir = 0;
+            $cuti = 0;
+            $izin = 0;
+            $sakit = 0;
+
+            $totalMenitKerja = 0;
+            $totalMenitLembur = 0;
+
+            // Map lembur by date untuk pencarian O(1)
+            $lemburByDate = $pegawai->lembur->keyBy(function ($l) {
+                return Carbon::parse($l->tanggal_lembur)->format('Y-m-d');
+            });
+
+            foreach ($pegawai->presensi as $presensi) {
+                $tanggalStr = Carbon::parse($presensi->tanggal)->format('Y-m-d');
+                $statusId = $presensi->status_kehadiran_id;
+
+                // A. Hitung Kehadiran Berdasarkan Konstanta Service
+                switch ($statusId) {
+                    case StatusKehadiranService::HADIR_NORMAL:
+                    case StatusKehadiranService::HADIR_KURANG_JAM:
+                        $hadir++;
+                        break;
+                    case StatusKehadiranService::TIDAK_HADIR_KURANG_JAM:
+                    case StatusKehadiranService::TIDAK_HADIR_ABSEN_1X:
+                    case StatusKehadiranService::TIDAK_HADIR_TANPA_KETERANGAN:
+                        $tidakHadir++;
+                        break;
+                    case StatusKehadiranService::IZIN:
+                        $izin++;
+                        break;
+                    case StatusKehadiranService::SAKIT:
+                        $sakit++;
+                        break;
+                    case StatusKehadiranService::CUTI:
+                        $cuti++;
+                        break;
+                }
+
+                // B. Hitung Menit Aktual Harian
+                $menitKerjaHariIni = 0;
+                if ($presensi->jam_masuk && $presensi->jam_keluar) {
+                    $masuk = Carbon::parse($presensi->jam_masuk);
+                    $keluar = Carbon::parse($presensi->jam_keluar);
+                    $menitKerjaHariIni = $masuk->diffInMinutes($keluar);
+                }
+
+                // C. Logika Lembur & Jam Kerja
+                $isLemburDisetujui = $lemburByDate->has($tanggalStr);
+                $dataLembur = $isLemburDisetujui ? $lemburByDate->get($tanggalStr) : null;
+
+                $isWeekend = Carbon::parse($presensi->tanggal)->isWeekend();
+                $isHariLibur = $statusId == StatusKehadiranService::LEMBUR || $isWeekend || ($dataLembur && in_array($dataLembur->jenis_hari, ['Hari Libur', 'Libur Nasional']));
+
+                // Hitung hanya jika status diakui sebagai kerja/lembur
+                if (in_array($statusId, [StatusKehadiranService::HADIR_NORMAL, StatusKehadiranService::HADIR_KURANG_JAM, StatusKehadiranService::LEMBUR])) {
+
+                    if (!$isHariLibur) {
+                        // --- HARI BIASA ---
+                        // Jam kerja maksimal diakui 8 jam (480 menit)
+                        $menitKerjaReguler = min($menitKerjaHariIni, 480);
+                        $totalMenitKerja += $menitKerjaReguler;
+
+                        // Hitung lembur jika disetujui & jam kerja tembus 8 jam (Hadir Normal)
+                        if ($isLemburDisetujui && $menitKerjaHariIni > 480) {
+                            $menitKelebihan = $menitKerjaHariIni - 480;
+                            // Batas maksimal lembur hari biasa = 2 jam (120 menit)
+                            $totalMenitLembur += min($menitKelebihan, 120);
+                        }
+                    } else {
+                        // --- HARI LIBUR / WEEKEND ---
+                        if ($isLemburDisetujui) {
+                            // Seluruh jam kerja dihitung lembur, maksimal 5 jam (300 menit)
+                            $totalMenitLembur += min($menitKerjaHariIni, 300);
+                        }
+                    }
+                }
             }
 
-            // Get tanggal periode selesai absensi
-            if (!$this->periodeSelesai || $tanggal > $this->periodeSelesai) {
-                $this->periodeSelesai = $tanggal;
-            }
-
-            // Handle Error / Skipped Jika Data NIP Pegawai Tidak Ditemukan
-            if (!isset($this->pegawaiList[$pegawaiNip])) {
-                $this->failed++;
-                $this->recordError('Pegawai tidak ditemukan', $rowNumber);
-                DB::rollBack();
-                return null;
-            }
-
-            $isHariLibur = $this->isHariLibur($tanggal);
-
-            // Handle Skipped Jika Tanggal adalah Hari Libur
-            if ($isHariLibur && !$jamMasuk && !$jamKeluar) {
-                $this->skipped++;
-                return null;
-            }
-
-            $statusKehadiranId = $this->getStatusKehadiran(
-                $pegawaiNip,
-                $tanggal,
-                $attendanceStatus,
-                $jamMasuk,
-                $jamKeluar,
-                $isHariLibur
-            );
-
-            $newData = [
-                'jam_masuk' => $jamMasuk,
-                'jam_keluar' => $jamKeluar,
-                'status_kehadiran_id' => $statusKehadiranId,
-                'last_import_presensi_id' => $this->import->id,
+            // D. Attach properti rekap ke object pegawai untuk dipanggil di Blade
+            $pegawai->rekap = [
+                'hadir' => $hadir,
+                'tidak_hadir' => $tidakHadir,
+                'cuti' => $cuti,
+                'izin' => $izin,
+                'sakit' => $sakit,
+                'total_jam_kerja' => floor($totalMenitKerja / 60) . 'h ' . ($totalMenitKerja % 60) . 'm',
+                'total_jam_lembur' => floor($totalMenitLembur / 60) . 'h ' . ($totalMenitLembur % 60) . 'm',
             ];
 
-            // Simpan / update
-            $presensi = Presensi::updateOrCreate(
-                [
-                    'pegawai_nip' => $pegawaiNip,
-                    'tanggal' => $tanggal,
-                ],
-                $newData
-            );
+            return $pegawai;
+        });
 
-            if ($presensi->wasRecentlyCreated) {
-                $this->created++;
-            } else {
-                $this->updated++;
-            }
-
-            DB::commit();
-            return $presensi;
-        } catch (Throwable $e) {
-            DB::rollBack();
-            $this->failed++;
-            $this->recordError($e->getMessage(), $rowNumber ?? 0);
-            return null;
-        }
+        return $pegawais;
     }
 
-    public function registerEvents(): array
+    #[Computed]
+    public function emptyStateMessage(): string
     {
-        return [
-            AfterImport::class => function () {
+        $mulai = $this->selectedPeriodeMulai ?: now()->startOfMonth()->format('d/m/Y');
+        $selesai = $this->selectedPeriodeSelesai ?: now()->endOfMonth()->format('d/m/Y');
 
-                $this->import->update([
-                    'total_rows'      => $this->totalRows,
-                    'total_created'   => $this->created,
-                    'total_failed'    => $this->failed,
-                    'total_updated'   => $this->updated,
-                    'total_skipped'   => $this->skipped,
-                    'summary'         => json_encode(
-                        array_values($this->importErrors)
-                    ),
-                ]);
-            },
-        ];
+        if ($this->selectedPeriodeMulai || $this->selectedPeriodeSelesai) {
+            return "Belum ada data rekapitulasi presensi untuk periode {$mulai} - {$selesai}.";
+        }
+
+        return "Belum ada data rekapitulasi presensi untuk bulan ini (" . now()->translatedFormat('F Y') . ").";
     }
 
-    public function getStatusKehadiran(
-        $pegawaiNip,
-        $tanggal,
-        $attendanceStatus,
-        $jamMasuk,
-        $jamKeluar,
-        $isHariLibur = false
-    ) {
-        $totalJamKerja = 0;
-        if ($jamMasuk && $jamKeluar) {
-            $totalJamKerja = Carbon::parse($jamMasuk)
-                ->diffInHours(Carbon::parse($jamKeluar));
-        }
-
-        // Cek Lembur di Hari Libur
-        if ($isHariLibur && ($jamMasuk || $jamKeluar)) {
-            return self::LEMBUR;
-        }
-
-        // Cek Izin
-        if ($this->isIzin($pegawaiNip, $tanggal)) {
-            return self::IZIN;
-        }
-
-        // Cek Sakit
-        if ($this->isSakit($pegawaiNip, $tanggal)) {
-            return self::SAKIT;
-        }
-
-        // Cek Cuti
-        if ($this->isCuti($pegawaiNip, $tanggal, $jamMasuk, $jamKeluar, $attendanceStatus)) {
-            return self::CUTI;
-        }
-
-        // Absen 2x & ≥ 8 Jam (Hadir Normal)
-        if ($jamMasuk && $jamKeluar && $totalJamKerja >= 8) {
-            return self::HADIR_NORMAL;
-        }
-
-        // Absen 2x & 6 - 7,59 Jam (Hadir Kurang Jam)
-        if ($jamMasuk && $jamKeluar && $totalJamKerja >= 6 && $totalJamKerja < 8) {
-            return self::HADIR_KURANG_JAM;
-        }
-
-        // Tidak Absen & Tanpa Ket. (Tidak Hadir dan TIdak Absen)
-        if (!$jamMasuk && !$jamKeluar && $attendanceStatus === 'A') {
-            return self::TIDAK_HADIR_TANPA_KETERANGAN;
-        }
-
-        // Absen 1x
-        if (!$jamMasuk || !$jamKeluar) {
-            return self::ABSEN_1X;
-        }
-
-        // Default Absen 2x & < 6 Jam
-        return self::HADIR_KURANG_JAM;
-    }
-
-    public function isCuti($pegawaiNip, $tanggal, $jamMasuk, $jamKeluar, $attendanceStatus)
+    public function render()
     {
-        // cek sementara
-        if ($pegawaiNip && $tanggal && !$jamMasuk && !$jamKeluar && $attendanceStatus === 'CUTI') {
-            return true;
-        }
-        // query cek data cuti pegawai
-        return false;
-    }
-
-    public function isIzin($pegawaiNip, $tanggal)
-    {
-        // query cek data izin pegawai
-        return false;
-    }
-
-    public function isSakit($pegawaiNip, $tanggal)
-    {
-        // query cek data sakit pegawai
-        return false;
-    }
-
-    public function isHariLibur($tanggal): bool
-    {
-        // Cek Sabtu & Minggu
-        if (Carbon::parse($tanggal)->isWeekend()) {
-            return true;
-        }
-
-        // Cek Hari Libur Nasional / Custom
-        return in_array(
-            Carbon::parse($tanggal)->format('Y-m-d'),
-            $this->hariLiburList
-        );
-    }
-
-    protected function recordError(string $message, int $rowNumber): void
-    {
-        if (!isset($this->importErrors[$message])) {
-
-            $this->importErrors[$message] = [
-                'message' => $message,
-                'count' => 0,
-                'rows' => [],
-            ];
-        }
-
-        $this->importErrors[$message]['count']++;
-
-        if (!in_array($rowNumber, $this->importErrors[$message]['rows'])) {
-            $this->importErrors[$message]['rows'][] = $rowNumber;
-        }
-    }
-
-    public function rules(): array
-    {
-        return [
-            '*.id' => ['required'],
-            '*.date' => ['required'],
-        ];
-    }
-
-    public function headingRow(): int
-    {
-        return 8;
-    }
-
-    public function batchSize(): int
-    {
-        return 1000;
-    }
-
-    public function chunkSize(): int
-    {
-        return 100;
+        return view('livewire.manajemen.presensi.tabel-rekapitulasi-presensi');
     }
 }

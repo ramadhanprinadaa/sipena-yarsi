@@ -1,8 +1,36 @@
-<div class="flex flex-col h-full lg:h-[calc(100vh-180px)] space-y-4 px-2 py-3">
+<div class="flex flex-col h-full lg:h-[calc(100vh-150px)] space-y-4 px-2 py-3">
     <!-- Header -->
-    <div class="flex justify-between">
-        <div class="flex-none flex gap-2 font-poppins">
-            <h1 class="text-2xl font-semibold">Riwayat Presensi Harian</h1>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+
+        @php
+            $user = auth()->user();
+            $unitName = null;
+
+            if ($user->hasRole('SDM Universitas')) {
+                $unitName = $user->pegawai?->unit_kerja?->unitSdm?->name;
+            } elseif ($user->hasRole('Pimpinan')) {
+                $unitName = $user->pegawai?->memimpin_unit?->name;
+            }
+        @endphp
+
+        <div class="flex-none font-poppins">
+            <div class="flex flex-wrap items-center gap-2">
+                <h1 class="text-2xl font-semibold text-slate-800 tracking-tight">
+                    Riwayat Presensi
+                </h1>
+
+               @if ($unitName)
+                    <div class="flex items-center gap-2 md:gap-3 text-slate-600">
+                        <span class="hidden md:inline text-xl text-slate-500">|</span>
+                        <span class="text-lg font-medium">
+                            {{ $unitName }}
+                        </span>
+                    </div>
+                @endif
+            </div>
+            <p class="text-sm text-slate-600 mt-1 hidden md:block">
+                Pantau presensi harian dan jam kerja pegawai dalam satu periode.
+            </p>
         </div>
 
         <!-- Search and Export Data -->
@@ -26,8 +54,12 @@
                 </div>
                 <input type="text" class="input-search placeholder-gray-400" wire:model.live.debounce.300ms="search"
                     placeholder="Cari Nama / NIP Pegawai ..." />
+                <!-- Clear Button -->
+                <button type="button" wire:click="$set('search', '')" x-show="$wire.search"
+                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-red-500 transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
             </div>
-
 
         </div>
     </div>
@@ -37,79 +69,63 @@
 
         <!-- Filter Dropdown -->
         <div class="flex flex-wrap items-center gap-2">
+
             @if (auth()->user()->hasRole(['Admin', 'SDM Yayasan', 'SDM Universitas']))
+
                 <!-- Filter Unit Kerja -->
-                <div class="relative w-44" x-data="{ open: false, selected: 'Semua Unit Kerja' }">
-                    <button @click="open = !open" class="filter-dropdown" wire:model.live="selectedUnitKerja"
-                        type="button">
-                        <span x-text="selected" class="truncate"></span>
+                <div class="relative w-54" x-data="{ open: false }">
+                    <button @click="open = !open" class="filter-dropdown" type="button">
+                        <span x-text="$wire.selectedUnitKerja ?? 'Semua Unit Kerja'" class="truncate"></span>
                         <svg class="w-4 h-4 ms-1.5 -me-0.5" xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="m19 9-7 7-7-7" />
                         </svg>
                     </button>
-                    <!-- Menu -->
                     <div x-show="open" @click.outside="open = false" x-transition
                         class="dropdown-menu h-[calc(100vh-340px)] overflow-auto">
                         <ul class="p-2 text-sm text-body font-medium">
                             <li>
-                                <button @click="selected='Semua Unit Kerja'; open=false"
-                                    wire:click="$set('selectedUnitKerja', null)" class="dropdown-item">
+                                <button @click="$wire.set('selectedUnitKerja', null); open=false" class="dropdown-item">
                                     Semua Unit Kerja
                                 </button>
                             </li>
-                            @if (auth()->user()->HasRole('SDM Universitas'))
-                                @foreach ($unit_kerja_universitas as $unit)
-                                    <li>
-                                        <button @click="selected='{{ $unit->name }}'; open=false"
-                                            wire:click="$set('selectedUnitKerja', '{{ $unit->id }}')"
-                                            class="dropdown-item">
-                                            {{ $unit->name }}
-                                        </button>
-                                    </li>
-                                @endforeach
-                            @endif
-                            @if (auth()->user()->HasRole(['Admin', 'SDM Yayasan']))
-                                @foreach ($unit_kerja as $unit)
-                                    <li>
-                                        <button @click="selected='{{ $unit->name }}'; open=false"
-                                            wire:click="$set('selectedUnitKerja', '{{ $unit->id }}')"
-                                            class="dropdown-item">
-                                            {{ $unit->name }}
-                                        </button>
-                                    </li>
-                                @endforeach
-                            @endif
+                            @foreach ($unitKerja as $unit)
+                                <li wire:key="unit-{{ $loop->index }}">
+                                    <button @click="$wire.set('selectedUnitKerja', '{{ $unit }}'); open=false"
+                                        class="dropdown-item">
+                                        {{ $unit }}
+                                    </button>
+                                </li>
+                            @endforeach
                         </ul>
                     </div>
                 </div>
 
                 <!-- Jenis Pegawai -->
-                <div class="relative w-50" x-data="{ open: false, selected: 'Semua Jenis Pegawai' }">
-                    <button @click="open = !open" class="filter-dropdown" wire:model.live="selectedJenisPegawai"
-                        type="button">
-                        <span x-text="selected" class="truncate"></span>
+                <div class="relative w-50" x-data="{ open: false }">
+                    <button @click="open = !open" class="filter-dropdown" type="button">
+                        <span x-text="$wire.selectedJenisPegawai ?? 'Semua Jenis Pegawai'" class="truncate"></span>
                         <svg class="w-4 h-4 ms-1.5 -me-0.5" xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="m19 9-7 7-7-7" />
                         </svg>
                     </button>
-                    <!-- Menu -->
                     <div x-show="open" @click.outside="open = false" x-transition
                         class="dropdown-menu h-[calc(100vh-340px)] overflow-auto">
                         <ul class="p-2 text-sm text-body font-medium">
                             <li>
-                                <button @click="selected='Semua Jenis Pegawai'; open=false"
-                                    wire:click="$set('selectedJenisPegawai', null)" class="dropdown-item">
-                                    Semua Unit Kerja
+                                <button @click="$wire.set('selectedJenisPegawai', null); open=false"
+                                    class="dropdown-item">
+                                    Semua Jenis Pegawai
                                 </button>
                             </li>
-                            @foreach ($jenis_pegawai as $jenis)
-                                <li>
-                                    <button @click="selected='{{ $jenis }}'; open=false"
-                                        wire:click="$set('selected', '{{ $jenis }}')" class="dropdown-item">
+                            @foreach ($jenisPegawai as $jenis)
+                                <li wire:key="jenis-{{ $loop->index }}">
+                                    <button
+                                        @click="$wire.set('selectedJenisPegawai', '{{ $jenis }}'); open=false"
+                                        class="dropdown-item">
                                         {{ $jenis }}
                                     </button>
                                 </li>
@@ -120,31 +136,30 @@
             @endif
 
             <!-- Status Kehadiran -->
-            <div class="relative w-54" x-data="{ open: false, selected: 'Semua Status Kehadiran' }">
-                <button @click="open = !open" class="filter-dropdown" wire:model.live="selectedStatusKehadiran"
-                    type="button">
-                    <span x-text="selected" class="truncate"></span>
+            <div class="relative w-54" x-data="{ open: false }">
+                <button @click="open = !open" class="filter-dropdown" type="button">
+                    <span x-text="$wire.selectedStatusKehadiran ?? 'Semua Status Kehadiran'" class="truncate"></span>
                     <svg class="w-4 h-4 ms-1.5 -me-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                         fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="m19 9-7 7-7-7" />
                     </svg>
                 </button>
-                <!-- Menu -->
                 <div x-show="open" @click.outside="open = false" x-transition
                     class="dropdown-menu h-[calc(100vh-340px)] overflow-auto">
                     <ul class="p-2 text-sm text-body font-medium">
                         <li>
-                            <button @click="selected='Semua Status Kehadiran'; open=false"
-                                wire:click="$set('selectedStatusKehadiran', null)" class="dropdown-item">
+                            <button @click="$wire.set('selectedStatusKehadiran', null); open=false"
+                                class="dropdown-item">
                                 Semua Status Kehadiran
                             </button>
                         </li>
-                        @foreach ($status_kehadiran as $status)
-                            <li>
-                                <button @click="selected='{{ $status->status }}'; open=false"
-                                    wire:click="$set('selected', '{{ $status->id }}')" class="dropdown-item">
-                                    {{ $status->status }}
+                        @foreach ($statusKehadiran as $status)
+                            <li wire:key="status-{{ $loop->index }}">
+                                <button
+                                    @click="$wire.set('selectedStatusKehadiran', '{{ $status }}'); open=false"
+                                    class="dropdown-item">
+                                    {{ $status }}
                                 </button>
                             </li>
                         @endforeach
@@ -155,40 +170,61 @@
 
         <!-- Filter Tanggal -->
         <div class="flex flex-wrap items-center gap-2">
+
             <!-- Periode Tanggal -->
-            <div class="relative w-50">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
-                </div>
-                <input type="text" x-data x-ref="picker" x-init="const picker = new Datepicker($refs.picker, {
+            <div x-data="{ picker: null }"
+                x-init="picker = new Datepicker($refs.input, {
                     format: 'dd/mm/yyyy',
                     autohide: true,
                     language: 'id'
                 });
-                $refs.picker.addEventListener('changeDate', () => {
-                    $wire.set('selectedDate', $refs.picker.value);
+
+                $refs.input.addEventListener('changeDate', () => {
+                    $wire.set('selectedPeriodeMulai', $refs.input.value);
                 });"
+                class="relative w-50">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
+                </div>
+                <input type="text" x-ref="input" wire:model.live="selectedPeriodeMulai"
                     placeholder="Pilih Periode Tanggal"
-                    class="w-full h-9 pl-9 pr-3 text-sm border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition"
-                    placeholder="Tanggal Mulai" />
+                    class="w-full h-9 pl-9 pr-3 text-sm border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition" />
+                <button type="button" x-show="$wire.selectedPeriodeMulai"
+                    @click="
+                    $wire.set('selectedPeriodeMulai', null);
+                    picker.setDate({ clear: true });
+                    $refs.input.value = '';"
+                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-red-500 transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
             </div>
 
             <!-- Periode Selesai -->
-            <div class="relative w-50">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
-                </div>
-                <input type="text" x-data x-ref="picker" x-init="const picker = new Datepicker($refs.picker, {
+            <div x-data="{ picker: null }"
+                x-init="picker = new Datepicker($refs.input, {
                     format: 'dd/mm/yyyy',
                     autohide: true,
                     language: 'id'
                 });
-                $refs.picker.addEventListener('changeDate', () => {
-                    $wire.set('selectedDate', $refs.picker.value);
+
+                $refs.input.addEventListener('changeDate', () => {
+                    $wire.set('selectedPeriodeSelesai', $refs.input.value);
                 });"
+                class="relative w-50">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
+                </div>
+                <input type="text" x-ref="input" wire:model.live="selectedPeriodeSelesai"
                     placeholder="Pilih Periode Selesai"
-                    class="w-full h-9 pl-9 pr-3 text-sm border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition"
-                    placeholder="Tanggal Selesai" />
+                    class="w-full h-9 pl-9 pr-3 text-sm border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition" />
+                <button type="button" x-show="$wire.selectedPeriodeSelesai"
+                    @click="
+                    $wire.set('selectedPeriodeSelesai', null);
+                    picker.setDate({ clear: true });
+                    $refs.input.value = '';"
+                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-red-500 transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
             </div>
         </div>
 
@@ -197,7 +233,8 @@
     <!-- Table -->
     <div class="table-container relative">
         <!-- Loading -->
-        <div wire:loading>
+        <div wire:loading
+            wire:target="search, selectedJenisPegawai, selectedUnitKerja, selectedStatusKehadiran, selectedPeriodeMulai, selectedPeriodeSelesai">
             <div
                 class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
                 <div role="status">
@@ -208,109 +245,106 @@
 
         <!-- Main Content -->
         <div class="table-wrapper overflow-x-auto">
-            <table class="table w-full table-fixed">
-                <thead class="table-header">
-                    <tr>
-                        <th scope="col" class="px-4 py-3 font-medium w-12 text-center">#</th>
-                        <th scope="col" class="px-4 py-3 font-medium w-44 text-left">
-                            Nama Pegawai
-                        </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-40 text-center">
-                            Tanggal Presensi
-                        </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-28 text-center">
-                            Jam Masuk
-                        </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-28 text-center">
-                            Jam Pulang
-                        </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-24 text-center">
-                            Total Jam
-                        </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-40 text-center">
-                            Status Kehadiran
-                        </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-24 text-center">
-                            Aksi
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @php
-                        $dummyEmployees = [
-                            ['nama' => 'Rafly Eryan Azis', 'nip' => '199801012022031001'],
-                            ['nama' => 'Andi Wijaya, S.Kom., M.T.', 'nip' => '199505122020121002'],
-                            ['nama' => 'Siti Aminah Rahmawati, M.Pd.', 'nip' => '199010102015012003'],
-                            ['nama' => 'Budi Santoso Herlambang', 'nip' => '198502152010031004'],
-                            ['nama' => 'Dr. Dewi Lestari, M.Si.', 'nip' => '199207202018082005'],
-                        ];
-                        $dummyStatuses = [
-                            [
-                                'label' => 'Hadir Normal',
-                                'color' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
-                            ],
-                            ['label' => 'Hadir Kurang Jam', 'color' => 'bg-amber-100 text-amber-700 border-amber-200'],
-                            ['label' => 'Tidak Hadir', 'color' => 'bg-red-100 text-red-700 border-red-200'],
-                            ['label' => 'Izin', 'color' => 'bg-blue-100 text-blue-700 border-blue-200'],
-                            ['label' => 'Sakit', 'color' => 'bg-orange-100 text-orange-700 border-orange-200'],
-                            ['label' => 'Cuti', 'color' => 'bg-purple-100 text-purple-700 border-purple-200'],
-                        ];
-                    @endphp
-                    @for ($i = 0; $i < 10; $i++)
-                        @php
-                            $emp = $dummyEmployees[$i % 5];
-                            $status = $dummyStatuses[rand(0, 5)];
-                        @endphp
-                        <tr class="table-row">
-                            <!-- No -->
-                            <td class="px-3 py-2 text-center text-gray-500 text-sm">
-                                {{ $i + 1 }}
-                            </td>
-
-                            <!-- Nama Pegawai -->
-                            <td class="px-3 py-2">
-                                <div class="flex flex-col min-w-0">
-                                    <span class="truncate text-sm font-semibold text-gray-800"
-                                        title="{{ $emp['nama'] }}">
-                                        {{ $emp['nama'] }}
-                                    </span>
-                                    <span class="text-[11px] text-gray-400">NIP. {{ $emp['nip'] }}</span>
-                                </div>
-                            </td>
-
-                            <!-- Tanggal Presensi -->
-                            <td class="px-3 py-2 text-sm text-center text-gray-600">
-                                {{ now()->subDays($i)->format('d/m/Y') }}
-                            </td>
-
-                            <!-- Jam Masuk -->
-                            <td class="px-3 py-2 text-center text-sm text-gray-600">07:55:12</td>
-
-                            <!-- Jam Pulang -->
-                            <td class="px-3 py-2 text-center text-gray-600">16:30:45</td>
-
-                            <!-- Total Jam -->
-                            <td class="px-3 py-2 text-center text-sm text-gray-600 font-medium">08:35</td>
-
-                            <!-- Status Kehadiran -->
-                            <td class="px-3 py-2 text-center">
-                                <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium border {{ $status['color'] }}">
-                                    {{ $status['label'] }}
-                                </span>
-                            </td>
-
-                            <!-- Aksi -->
-                            <td class="px-3 py-2 text-center">
-                                <button
-                                    class="bg-indigo-500 hover:bg-indigo-600 text-white text-[11px] font-semibold px-2 py-1 rounded-md shadow-sm transition-all duration-200 cursor-pointer">
-                                    Detail
-                                </button>
-                            </td>
+            @if ($this->riwayatPresensi->isEmpty())
+                <!-- Empty State -->
+                <div class="flex flex-col items-center justify-center h-full text-center">
+                    <div class="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-calendar-minus text-2xl text-indigo-500"></i>
+                    </div>
+                    <h3 class="text-base font-semibold text-gray-700">
+                        {{ $this->emptyStateMessage }}
+                    </h3>
+                    <p class="text-sm text-gray-500 mt-1 max-w-sm">
+                        Silahkan upload file presensi / Hubungi Administrator.
+                    </p>
+                </div>
+            @else
+                <table class="table w-full table-fixed">
+                    <thead class="table-header">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 font-medium w-[5%] text-center">#</th>
+                            <th scope="col" class="px-4 py-3 font-medium w-[17%] text-left">
+                                Nama Pegawai
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-medium w-[17%] text-left">
+                                Tanggal Presensi
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-medium w-[13%] text-center">
+                                Jam Masuk
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-medium w-[13%] text-center">
+                                Jam Pulang
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-medium w-[15%] text-center">
+                                Total Jam
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-medium w-[15%] text-center">
+                                Status Kehadiran
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-medium w-[10%] text-center">
+                                Aksi
+                            </th>
                         </tr>
-                    @endfor
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach ($this->riwayatPresensi as $riwayat)
+                            <tr class="table-row">
+                                <!-- No -->
+                                <td class="px-3 py-2 text-center text-gray-500 text-sm">
+                                    {{ $this->riwayatPresensi->firstItem() + $loop->index }}
+                                </td>
+
+                                <!-- Nama Pegawai -->
+                                <td class="px-3 py-2">
+                                    <div class="flex flex-col min-w-0">
+                                        <span class="truncate text-sm font-semibold text-gray-800"
+                                            title="{{ $riwayat->pegawai?->nama ?? $riwayat->pegawai_nip }}">
+                                            {{ $riwayat->pegawai?->nama ?? $riwayat->pegawai_nip }}
+                                        </span>
+                                        <span class="text-[11px] text-gray-400">NIP.
+                                            {{ $riwayat->pegawai_nip }}</span>
+                                    </div>
+                                </td>
+
+                                <!-- Tanggal Presensi -->
+                                <td class="px-3 py-2 text-sm text-gray-600 truncate">
+                                    {{ $riwayat->tanggal?->translatedFormat('l, d F Y') ?? '-' }}
+                                </td>
+
+                                <!-- Jam Masuk -->
+                                <td class="px-3 py-2 text-center text-sm text-gray-600">
+                                    {{ $riwayat->jam_masuk?->format('H:i:s') ?? '-' }}
+                                </td>
+
+                                <!-- Jam Pulang -->
+                                <td class="px-3 py-2 text-center text-gray-600">
+                                    {{ $riwayat->jam_keluar?->format('H:i:s') ?? '-' }}</td>
+
+                                <!-- Total Jam -->
+                                <td class="px-3 py-2 text-center text-gray-600 font-medium truncate">
+                                    {{ $riwayat->total_jam_kerja ?? '-' }}</td>
+
+                                <!-- Status Kehadiran -->
+                                <td class="px-3 py-2 text-center truncate">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium"
+                                        style="{{ $riwayat->statusKehadiran?->badge_style }}">
+                                        {{ $riwayat->statusKehadiran?->status }}
+                                    </span>
+                                </td>
+
+                                <!-- Aksi -->
+                                <td class="px-3 py-2 text-center">
+                                    <button @click="$dispatch('open-loading-detail-riwayat')"
+                                        wire:click="showDetailRiwayat({{ $riwayat->id }})"
+                                        class="bg-indigo-500 hover:bg-indigo-600 text-white text-[11px] font-semibold px-2 py-1 rounded-md shadow-sm transition-all duration-200 cursor-pointer">
+                                        Detail
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
         </div>
 
         <!-- Footer & Pagination -->
@@ -320,37 +354,41 @@
                 aria-label="Table navigation">
                 <span class="text-sm font-normal text-body block w-full md:inline md:w-auto">
                     Menampilkan
-                    <span class="font-semibold text-heading">10</span> dari
-                    <span class="font-semibold text-heading">100 file</span>
+                    <span
+                        class="font-semibold text-heading">{{ $this->riwayatPresensi->firstItem() }}-{{ $this->riwayatPresensi->lastItem() }}</span>
+                    dari
+                    <span class="font-semibold text-heading">{{ $this->riwayatPresensi->total() }} data</span>
                 </span>
 
                 <ul class="flex -space-x-px text-sm border border-gray-300 rounded-lg">
                     <li>
-                        <button wire:click=""
+                        <button wire:click="gotoPage(1)" @disabled($this->riwayatPresensi->onFirstPage())
                             class="table-pagination-btn rounded-s-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
                             <i class="fa-solid fa-angles-left text-xs"></i>
                         </button>
                     </li>
                     <li>
-                        <button wire:click=""
+                        <button wire:click="previousPage" @disabled($this->riwayatPresensi->onFirstPage())
                             class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
                             Previous
                         </button>
                     </li>
-                    @for ($i = 1; $i <= 5; $i++)
+                    @for ($i = max(1, $this->riwayatPresensi->currentPage() - 3); $i <= min($this->riwayatPresensi->lastPage(), $this->riwayatPresensi->currentPage() + 3); $i++)
                         <li>
-                            <button wire:click="" class="w-9 table-pagination-btn">
+                            <button wire:click="gotoPage({{ $i }})"
+                                class="w-9 {{ $this->riwayatPresensi->currentPage() == $i ? 'table-pagination-btn-active' : 'table-pagination-btn' }}">
                                 {{ $i }}
                             </button>
                         </li>
                     @endfor
                     <li>
-                        <button wire:click=""
+                        <button wire:click="nextPage" @disabled(!$this->riwayatPresensi->hasMorePages())
                             class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
                             Next
                         </button>
                     </li>
-                    <button wire:click=""
+                    <button wire:click="gotoPage({{ $this->riwayatPresensi->lastPage() }})"
+                        @disabled($this->riwayatPresensi->onLastPage())
                         class="table-pagination-btn rounded-e-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
                         <i class="fa-solid fa-angles-right text-xs"></i>
                     </button>
