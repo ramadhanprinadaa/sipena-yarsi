@@ -16,11 +16,20 @@ class Index extends Component
     public $spls = [];
     public $lemburList = [];
     public $laporanList = [];
+    public $rekapList = [];
+    public $rekapSummary = [
+        'hari' => 0,
+        'total_jam' => 0,
+        'selesai' => 0,
+        'menunggu' => 0,
+    ];
     public $selectedLembur = null;
 
     // Filter properties
     public $filterSplDate = '';
     public $filterRiwayatDate = '';
+    public $filterRekapStartDate = '';
+    public $filterRekapEndDate = '';
 
     public function mount()
     {
@@ -56,7 +65,7 @@ class Index extends Component
 
             // Load riwayat lembur milik pegawai user
             $lemburQuery = Lembur::where('pegawai_id', $user->pegawai->id)
-                ->with(['suratPerintahLembur', 'pegawai', 'laporanHasilLembur.persetujuan.approver.pegawai', 'laporanHasilLembur.persetujuan.approver.role', 'persetujuan.approver.pegawai', 'persetujuan.approver.role']);
+                ->with(['suratPerintahLembur', 'pegawai.unit_kerja', 'pegawai.user.role', 'laporanHasilLembur.persetujuan.approver.pegawai', 'laporanHasilLembur.persetujuan.approver.role', 'persetujuan.approver.pegawai', 'persetujuan.approver.role']);
 
             // Apply date filter untuk Riwayat Lembur
             if ($this->filterRiwayatDate) {
@@ -67,10 +76,45 @@ class Index extends Component
 
             $this->laporanList = Lembur::where('pegawai_id', $user->pegawai->id)
                 ->whereHas('laporanHasilLembur')
-                ->with(['suratPerintahLembur', 'pegawai', 'laporanHasilLembur.persetujuan.approver.pegawai', 'laporanHasilLembur.persetujuan.approver.role', 'persetujuan.approver.pegawai', 'persetujuan.approver.role'])
+                ->with(['suratPerintahLembur', 'pegawai.unit_kerja', 'pegawai.user.role', 'laporanHasilLembur.persetujuan.approver.pegawai', 'laporanHasilLembur.persetujuan.approver.role', 'persetujuan.approver.pegawai', 'persetujuan.approver.role'])
                 ->orderBy('updated_at', 'desc')
                 ->get();
+
+            $rekapQuery = Lembur::where('pegawai_id', $user->pegawai->id)
+                ->with(['suratPerintahLembur', 'laporanHasilLembur']);
+
+            $this->applyRekapPeriodFilter($rekapQuery);
+
+            $rekapList = $rekapQuery->orderBy('tanggal_lembur', 'desc')->get();
+
+            $this->rekapList = $rekapList;
+            $this->rekapSummary = [
+                'hari' => $rekapList->count(),
+                'total_jam' => $rekapList->sum(fn($lembur) => $this->durationInHours($lembur->jam_mulai, $lembur->jam_selesai)),
+                'selesai' => $rekapList->where('status', 'Selesai')->count(),
+                'menunggu' => $rekapList->filter(fn($lembur) => !in_array($lembur->status, ['Selesai', 'Ditolak']))->count(),
+            ];
         }
+    }
+
+    private function applyRekapPeriodFilter($query): void
+    {
+        if ($this->filterRekapStartDate) {
+            $query->whereDate('tanggal_lembur', '>=', $this->filterRekapStartDate);
+        }
+
+        if ($this->filterRekapEndDate) {
+            $query->whereDate('tanggal_lembur', '<=', $this->filterRekapEndDate);
+        }
+    }
+
+    private function durationInHours($start, $end): float
+    {
+        if (!$start || !$end) {
+            return 0;
+        }
+
+        return Carbon::parse($start)->diffInMinutes(Carbon::parse($end)) / 60;
     }
 
     private function syncDueLemburStatuses(): void
@@ -91,24 +135,37 @@ class Index extends Component
         $this->loadData();
     }
 
+    public function updatedFilterRekapStartDate()
+    {
+        $this->loadData();
+    }
+
+    public function updatedFilterRekapEndDate()
+    {
+        $this->loadData();
+    }
+
     public function render()
     {
         return view('livewire.dashboard.lembur.index');
     }
 
-    public function showDetail($lemburId) {
+    public function showDetail($lemburId)
+    {
         $this->selectedLembur = Lembur::with([
             'suratPerintahLembur.unitKerja',
-            'pegawai',
+            'pegawai.unit_kerja',
+            'pegawai.user.role',
             'laporanHasilLembur.persetujuan.approver.pegawai',
             'laporanHasilLembur.persetujuan.approver.role',
             'persetujuan.approver.pegawai',
             'persetujuan.approver.role'
-            ])->find($lemburId);
+        ])->find($lemburId);
         $this->openDetail = true;
     }
 
-    public function closeDetail() {
+    public function closeDetail()
+    {
         $this->openDetail = false;
         $this->selectedLembur = null;
     }
@@ -176,6 +233,53 @@ class Index extends Component
         ]);
     }
 
+    public function exportRekapExcel()
+    {
+        $data = collect($this->rekapList);
+        $filename = 'Rekap_Lembur_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+        return response()->streamDownload(function () use ($data) {
+            $sheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $activeSheet = $sheet->getActiveSheet();
+
+            $activeSheet->setCellValue('A1', 'Tanggal Lembur');
+            $activeSheet->setCellValue('B1', 'Jenis Hari');
+            $activeSheet->setCellValue('C1', 'Jam Mulai');
+            $activeSheet->setCellValue('D1', 'Jam Selesai');
+            $activeSheet->setCellValue('E1', 'Durasi');
+            $activeSheet->setCellValue('F1', 'Status');
+            $activeSheet->setCellValue('G1', 'Kegiatan');
+
+            $headerStyle = [
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '2B76FF']],
+                'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
+            ];
+            $activeSheet->getStyle('A1:G1')->applyFromArray($headerStyle);
+
+            $row = 2;
+            foreach ($data as $lembur) {
+                $activeSheet->setCellValue('A' . $row, $lembur->tanggal_lembur);
+                $activeSheet->setCellValue('B' . $row, $lembur->jenis_hari);
+                $activeSheet->setCellValue('C' . $row, $lembur->jam_mulai);
+                $activeSheet->setCellValue('D' . $row, $lembur->jam_selesai);
+                $activeSheet->setCellValue('E' . $row, $this->durationInHours($lembur->jam_mulai, $lembur->jam_selesai));
+                $activeSheet->setCellValue('F' . $row, $this->getStatusLembur($lembur));
+                $activeSheet->setCellValue('G' . $row, $lembur->alasan_lembur);
+                $row++;
+            }
+
+            foreach (range('A', 'G') as $column) {
+                $activeSheet->getColumnDimension($column)->setAutoSize(true);
+            }
+
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($sheet);
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
     public function getStatusLembur(Lembur $lembur): string
     {
         if ($lembur->status === 'Menunggu Pelaksanaan' && Carbon::parse($lembur->tanggal_lembur)->lte(Carbon::today()) && !$lembur->laporanHasilLembur) {
@@ -191,11 +295,63 @@ class Index extends Component
             return '-';
         }
 
-        return match ($lembur->status) {
-            'Selesai' => 'Disetujui',
-            'Ditolak' => 'Ditolak',
-            default => 'Menunggu Verifikasi Atasan',
-        };
+        return $this->getLaporanApprovalStatus($lembur);
+    }
+
+    private function getLaporanApprovalStatus(Lembur $lembur): string
+    {
+        $approval = $lembur->laporanHasilLembur?->persetujuan?->sortByDesc('approved_at')->first();
+
+        if (!$approval) {
+            return $this->initialApprovalStatusFor($lembur);
+        }
+
+        if ($approval->status === 'Ditolak') {
+            return 'Ditolak';
+        }
+
+        if ($approval->status === 'Disetujui' && $approval->role_approval === 'Pimpinan') {
+            return $this->sdmVerificationStatus($lembur);
+        }
+
+        if ($approval->status === 'Disetujui' && $approval->role_approval === 'Rektor') {
+            return 'Menunggu Verifikasi SDM Universitas';
+        }
+
+        if ($approval->status === 'Disetujui') {
+            return 'Disetujui';
+        }
+
+        return $this->initialApprovalStatusFor($lembur);
+    }
+
+    private function initialApprovalStatusFor(Lembur $lembur): string
+    {
+        $role = $lembur->pegawai?->user?->role?->name;
+        $unitSdmId = (int) $lembur->pegawai?->unit_kerja?->unit_sdm_id;
+
+        if ($role === 'Pimpinan') {
+            return $unitSdmId === 1
+                ? 'Menunggu Verifikasi SDM Yayasan'
+                : 'Menunggu Verifikasi Rektor';
+        }
+
+        if ($role === 'Rektor') {
+            return 'Menunggu Verifikasi SDM Universitas';
+        }
+
+        if ($role === 'SDM Universitas') {
+            return 'Menunggu Verifikasi SDM Yayasan';
+        }
+
+        return 'Menunggu Verifikasi Atasan';
+    }
+
+    private function sdmVerificationStatus(Lembur $lembur): string
+    {
+        return ((int) $lembur->pegawai?->unit_kerja?->unit_sdm_id) === 1
+            ? 'Menunggu Verifikasi SDM Yayasan'
+            : 'Menunggu Verifikasi SDM Universitas';
     }
 
     public function getApproverLabel(Lembur $lembur, string $type = 'latest'): string
@@ -249,5 +405,4 @@ class Index extends Component
 
         return $approval->catatan ?? '-';
     }
-
 }

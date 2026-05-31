@@ -24,12 +24,14 @@ class UserSeeder extends Seeder
             ],
             [
                 'role_id' => 2,
+                'pegawai_id' => 56,
                 'username' => 'sdm.yayasan',
                 'email' => 'sdmyayasan@gmail.com',
                 'password' => Hash::make('password')
             ],
             [
                 'role_id' => 3,
+                'pegawai_id' => 57,
                 'username' => 'sdm.universitas',
                 'email' => 'sdmuniversitas@gmail.com',
                 'password' => Hash::make('password')
@@ -67,6 +69,20 @@ class UserSeeder extends Seeder
                 'pegawai_id' => 55,
                 'username' => 'hilal.akbar',
                 'email' => 'hilalakbar@gmail.com',
+                'password' => Hash::make('password')
+            ],
+            [
+                'role_id' => 5,
+                'pegawai_id' => 59,
+                'username' => 'wily.ahmad',
+                'email' => 'wilyahmad@gmail.com',
+                'password' => Hash::make('password')
+            ],
+            [
+                'role_id' => 5,
+                'pegawai_id' => 60,
+                'username' => 'umam.syafiul',
+                'email' => 'umamsyafiul@gmail.com',
                 'password' => Hash::make('password')
             ],
         ];

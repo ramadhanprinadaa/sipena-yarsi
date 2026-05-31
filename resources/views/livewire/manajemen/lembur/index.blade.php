@@ -10,19 +10,19 @@
                         $defaultTab = 'riwayat';
                         break;
                     case 'SDM Yayasan':
-                        $allowedTabs = ['riwayat', 'rekap', 'verifikasi'];
-                        $defaultTab = 'riwayat';
+                        $allowedTabs = ['spl', 'riwayat', 'verifikasi', 'rekap'];
+                        $defaultTab = 'spl';
                         break;
                     case 'SDM Universitas':
-                        $allowedTabs = ['riwayat', 'verifikasi'];
-                        $defaultTab = 'riwayat';
+                        $allowedTabs = ['spl', 'riwayat', 'verifikasi', 'rekap'];
+                        $defaultTab = 'spl';
                         break;
                     case 'Pimpinan':
-                        $allowedTabs = ['spl', 'riwayat', 'verifikasi'];
+                        $allowedTabs = ['spl', 'riwayat', 'verifikasi', 'rekap'];
                         $defaultTab = 'spl';
                         break;
                     case 'Rektor':
-                        $allowedTabs = ['spl', 'riwayat', 'verifikasi'];
+                        $allowedTabs = ['spl', 'riwayat', 'verifikasi', 'rekap'];
                         $defaultTab = 'spl';
                         break;
                     default:
@@ -87,17 +87,6 @@
                             </button>
                         @endif
 
-                        {{-- Rekapitulasi - Admin & SDM Yayasan --}}
-                        @if(in_array('rekap', $allowedTabs))
-                            <button
-                                x-ref="btnRekap"
-                                @click="activeTab = 'rekap'; $nextTick(() => updateUnderline())"
-                                :class="activeTab === 'rekap' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'"
-                                class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
-                                <i class="fa-solid fa-chart-bar mr-2"></i>Rekapitulasi
-                            </button>
-                        @endif
-
                         {{-- Persetujuan & Verifikasi - SDM Yayasan, SDM Universitas, Pimpinan --}}
                         @if(in_array('verifikasi', $allowedTabs))
                             <button
@@ -106,6 +95,17 @@
                                 :class="activeTab === 'verifikasi' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'"
                                 class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
                                 <i class="fa-solid fa-check-double mr-2"></i>Persetujuan & Verifikasi Laporan Lembur
+                            </button>
+                        @endif
+
+                        {{-- Rekapitulasi - Admin & SDM Yayasan --}}
+                        @if(in_array('rekap', $allowedTabs))
+                            <button
+                                x-ref="btnRekap"
+                                @click="activeTab = 'rekap'; $nextTick(() => updateUnderline())"
+                                :class="activeTab === 'rekap' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'"
+                                class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
+                                <i class="fa-solid fa-chart-bar mr-2"></i>Rekapitulasi
                             </button>
                         @endif
                     </div>
@@ -192,12 +192,16 @@
                     <!-- Filter & Search -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
 
-                        <!-- Filter -->
+                        <!-- Filter (Left Side) -->
                         <div class="flex flex-wrap gap-3">
+                            <!-- Status Filter -->
                             <div class="relative w-48">
                                 <select wire:model.live="filterRiwayatStatus" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
                                     <option value="">Semua Status</option>
                                     <option value="Menunggu Verifikasi Atasan">Menunggu Verifikasi Atasan</option>
+                                    <option value="Menunggu Verifikasi Rektor">Menunggu Verifikasi Rektor</option>
+                                    <option value="Menunggu Verifikasi SDM Universitas">Menunggu Verifikasi SDM Universitas</option>
+                                    <option value="Menunggu Verifikasi SDM Yayasan">Menunggu Verifikasi SDM Yayasan</option>
                                     <option value="Menunggu Pelaksanaan">Menunggu Pelaksanaan</option>
                                     <option value="Menunggu Laporan">Menunggu Laporan</option>
                                     <option value="Selesai">Selesai</option>
@@ -205,18 +209,28 @@
                                 </select>
                             </div>
 
+                            <!-- Date Filter -->
                             <div class="relative w-48">
                                 <input type="date" wire:model.live="filterRiwayatDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400">
                             </div>
                         </div>
 
-                        <!-- Search -->
-                        <div class="flex items-center w-full md:w-72 border border-gray-200 rounded-[10px] bg-white px-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M16 10a6 6 0 11-12 0 6 6 0 0112 0z"/>
-                            </svg>
-                            <input type="text" wire:model.live="filterRiwayatSearch" placeholder="Cari Nama atau NIP..." class="w-full h-10 px-2 text-sm outline-none focus:ring-0 focus:border-transparent border-0 focus:outline-none focus:shadow-none">
+                        <!-- Search & Button (Right Side) -->
+                        <div class="flex flex-wrap gap-3">
+                            <!-- Search -->
+                            <div class="flex items-center w-full md:w-72 border border-gray-200 rounded-[10px] bg-white px-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M16 10a6 6 0 11-12 0 6 6 0 0112 0z"/>
+                                </svg>
+                                <input type="text" wire:model.live="filterRiwayatSearch" placeholder="Cari Nama atau NIP..." class="w-full h-10 px-2 text-sm outline-none focus:ring-0 focus:border-transparent border-0 focus:outline-none focus:shadow-none">
+                            </div>
+
+                            <!-- Button -->
+                            <button wire:click="exportRiwayatExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-green-500 hover:bg-green-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
+                                <i class="fa-solid fa-download mr-2"></i> Export Excel
+                            </button>
                         </div>
+
                     </div>
 
                     <!-- Table -->
@@ -246,7 +260,7 @@
                                             </td>
                                             <td class="px-4 py-4 text-gray-600">{{ $this->getApproverLabel($lembur, 'pengajuan') }}</td>
                                             <td class="px-4 py-4 text-center">
-                                                @if($lembur->status === 'Menunggu Verifikasi Atasan' && !$lembur->laporanHasilLembur)
+                                                @if($this->canApprovePengajuan($lembur) && !$lembur->laporanHasilLembur)
                                                     <button wire:click="openApprovalConfirmation('pengajuan', 'approve', {{ $lembur->id }})" class="px-3 py-1.5 text-xs font-medium text-blue-500 border border-blue-500 rounded-[10px] hover:bg-blue-600/10 transition cursor-pointer">
                                                         Setujui
                                                     </button>
@@ -283,22 +297,15 @@
                         <!-- Filter -->
                         <div class="flex flex-wrap gap-3">
                             <div class="relative w-48">
-                                <!-- Icon -->
-                                <i class="fa-regular fa-calendar text-[16px] absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                                <!-- Input -->
-                                <input
-                                    type="text"
-                                    id="dateRange"
-                                    placeholder="Periode Cut Off"
-                                    class="w-full h-10 pl-3 pr-10 text-sm bg-white border border-gray-400 rounded-[10px]
-                                        focus:outline-none focus:ring-2 focus:ring-indigo-400
-                                        placeholder:text-gray-500"
-                                >
+                                <input type="date" wire:model.live="filterRekapStartDate" placeholder="Start Date" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                            </div>
+                            <div class="relative w-48">
+                                <input type="date" wire:model.live="filterRekapEndDate" placeholder="End Date" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400">
                             </div>
                         </div>
 
                         <!-- Button -->
-                        <button class="flex items-center w-38 h-10 justify-center cursor-pointer bg-green-500 hover:bg-green-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
+                        <button wire:click="exportRekapExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-green-500 hover:bg-green-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
                             <i class="fa-solid fa-download mr-2"></i> Export Excel
                         </button>
                     </div>
@@ -318,12 +325,18 @@
                                 </thead>
                                 <!-- Body -->
                                 <tbody class="divide-y divide-[#878787]/30">
-                                    <tr class="hover:bg-[#F5F7FA]/50 transition">
-                                        <td class="px-4 py-4 font-medium text-gray-700">John Doe</td>
-                                        <td class="px-4 py-4 text-gray-600">123456789</td>
-                                        <td class="px-4 py-4 text-gray-600">5 hari</td>
-                                        <td class="px-4 py-4 text-gray-600">15 jam</td>
-                                    </tr>
+                                    @forelse($rekapList as $rekap)
+                                        <tr class="hover:bg-[#F5F7FA]/50 transition">
+                                            <td class="px-4 py-4 font-medium text-gray-700">{{ $rekap['nama'] }}</td>
+                                            <td class="px-4 py-4 text-gray-600">{{ $rekap['nip'] }}</td>
+                                            <td class="px-4 py-4 text-gray-600">{{ $rekap['hari'] }} hari</td>
+                                            <td class="px-4 py-4 text-gray-600">{{ number_format($rekap['total_jam'], 2) }} jam</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="px-4 py-4 text-center text-gray-500">Tidak ada data rekap lembur</td>
+                                        </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
@@ -388,7 +401,7 @@
                                             <td class="px-4 py-4 text-gray-600">{{ $this->getApprovalCatatan($lembur, 'laporan') }}</td>
                                             <td class="px-4 py-4 text-gray-600">{{ $this->getApproverLabel($lembur, 'laporan') }}</td>
                                             <td class="px-4 py-4 text-center">
-                                                @if($lembur->status === 'Menunggu Verifikasi Atasan')
+                                                @if($this->canApproveLaporan($lembur))
                                                     <button wire:click="openApprovalConfirmation('laporan', 'approve', {{ $lembur->id }})" class="px-3 py-1.5 text-xs font-medium text-blue-500 border border-blue-500 rounded-[10px] hover:bg-blue-600/10 transition cursor-pointer">
                                                         Setujui
                                                     </button>

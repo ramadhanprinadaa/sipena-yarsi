@@ -13,13 +13,14 @@
             }
         @endphp
 
+        <!-- Judul Header -->
         <div class="flex-none font-poppins">
             <div class="flex flex-wrap items-center gap-2">
                 <h1 class="text-2xl font-semibold text-slate-800 tracking-tight">
                     Riwayat Presensi
                 </h1>
 
-               @if ($unitName)
+                @if ($unitName)
                     <div class="flex items-center gap-2 md:gap-3 text-slate-600">
                         <span class="hidden md:inline text-xl text-slate-500">|</span>
                         <span class="text-lg font-medium">
@@ -37,7 +38,8 @@
         <div class="flex gap-2">
 
             <!-- Button Export Data -->
-            <button @click=""
+            <button
+                x-on:click="openExport = true;"
                 class="flex items-center px-3 h-9 self-center justify-center cursor-pointer bg-emerald-600/90 hover:bg-emerald-700 text-white text-sm rounded-md transition">
                 <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>
                 Export Excel
@@ -60,7 +62,6 @@
                     <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
-
         </div>
     </div>
 
@@ -172,17 +173,15 @@
         <div class="flex flex-wrap items-center gap-2">
 
             <!-- Periode Tanggal -->
-            <div x-data="{ picker: null }"
-                x-init="picker = new Datepicker($refs.input, {
-                    format: 'dd/mm/yyyy',
-                    autohide: true,
-                    language: 'id'
-                });
+            <div x-data="{ picker: null }" x-init="picker = new Datepicker($refs.input, {
+                format: 'dd/mm/yyyy',
+                autohide: true,
+                language: 'id'
+            });
 
-                $refs.input.addEventListener('changeDate', () => {
-                    $wire.set('selectedPeriodeMulai', $refs.input.value);
-                });"
-                class="relative w-50">
+            $refs.input.addEventListener('changeDate', () => {
+                $wire.set('selectedPeriodeMulai', $refs.input.value);
+            });" class="relative w-50">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
                 </div>
@@ -200,17 +199,15 @@
             </div>
 
             <!-- Periode Selesai -->
-            <div x-data="{ picker: null }"
-                x-init="picker = new Datepicker($refs.input, {
-                    format: 'dd/mm/yyyy',
-                    autohide: true,
-                    language: 'id'
-                });
+            <div x-data="{ picker: null }" x-init="picker = new Datepicker($refs.input, {
+                format: 'dd/mm/yyyy',
+                autohide: true,
+                language: 'id'
+            });
 
-                $refs.input.addEventListener('changeDate', () => {
-                    $wire.set('selectedPeriodeSelesai', $refs.input.value);
-                });"
-                class="relative w-50">
+            $refs.input.addEventListener('changeDate', () => {
+                $wire.set('selectedPeriodeSelesai', $refs.input.value);
+            });" class="relative w-50">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
                 </div>

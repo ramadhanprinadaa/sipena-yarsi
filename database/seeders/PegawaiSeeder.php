@@ -15,7 +15,7 @@ class PegawaiSeeder extends Seeder
     {
         Pegawai::factory()->count(50)->create();
 
-        // Muhammad Ramadhan Prinada
+        // Muhammad Ramadhan Prinada 51
         Pegawai::create([
             'unit_kerja_id'           => 10,
             'jenis_pegawai_id'        => 3,
@@ -39,7 +39,7 @@ class PegawaiSeeder extends Seeder
             'status'                  => 'active',
         ]);
 
-        // Annisa Putri
+        // Annisa Putri 52
         Pegawai::create([
             'unit_kerja_id'           => 2,
             'jenis_pegawai_id'        => 4,
@@ -63,7 +63,7 @@ class PegawaiSeeder extends Seeder
             'status'                  => 'active',
         ]);
 
-        // Rafly Eryan Azis
+        // Rafly Eryan Azis 53
         Pegawai::create([
             'unit_kerja_id'             => 10,
             'jenis_pegawai_id'          => 2,
@@ -87,7 +87,7 @@ class PegawaiSeeder extends Seeder
             'status'                    => 'active',
         ]);
 
-        // Agus Widayat
+        // Agus Widayat 54
         Pegawai::create([
             'unit_kerja_id'             => 10,
             'jenis_pegawai_id'          => 2,
@@ -111,10 +111,10 @@ class PegawaiSeeder extends Seeder
             'status'                    => 'active',
         ]);
 
-        // Hilal Rizqi Akbar
+        // Hilal Rizqi Akbar 55
         Pegawai::create([
-            'unit_kerja_id'             => 9,
-            'jenis_pegawai_id'          => 2,
+            'unit_kerja_id'             => 11,
+            'jenis_pegawai_id'          => 3,
             'status_pegawai_id'         => 2,
             'nip'                       => '200101012024011007',
             'ktp'                       => '3171010101010007',
@@ -133,6 +133,126 @@ class PegawaiSeeder extends Seeder
             'no_telpon'                 => '081234567891',
             'email_yarsi'               => 'hilalrizqi@yarsi.ac.id',
             'status'                    => 'active',
+        ]);
+
+        // SDM Yayasan 56
+        Pegawai::create([
+            'unit_kerja_id' => 1,
+            'jenis_pegawai_id' => 3,
+            'status_pegawai_id' => 1,
+            'nip' => '199001012020011999',
+            'ktp' => '3171010101900999',
+            'npwp' => '091234567812999',
+            'nama' => 'SDM Yayasan',
+            'gelar_depan' => null,
+            'gelar_belakang' => 'M.Kom',
+            'tempat_lahir' => 'Jakarta',
+            'tanggal_lahir' => '1990-01-01',
+            'tanggal_bergabung' => '2020-01-01',
+            'tanggal_habis_kontrak' => null,
+            'tanggal_pensiun' => '2055-01-01',
+            'jenis_kelamin' => 'L',
+            'alamat_ktp' => 'Jl. Letjen Suprapto, Cempaka Putih, Jakarta Pusat',
+            'alamat_domisili' => 'Jl. Letjen Suprapto, Cempaka Putih, Jakarta Pusat',
+            'no_telpon' => '081234567999',
+            'email_yarsi' => 'sdmyayasan@yarsi.ac.id',
+            'status' => 'active',
+        ]);
+
+        // SDM Univesitas 57
+        Pegawai::create([
+            'unit_kerja_id' => 5,
+            'jenis_pegawai_id' => 3,
+            'status_pegawai_id' => 1,
+            'nip' => '199001012020011888',
+            'ktp' => '3171010101900888',
+            'npwp' => '091234567812888',
+            'nama' => 'SDM Universitas',
+            'gelar_depan' => null,
+            'gelar_belakang' => 'M.Kom',
+            'tempat_lahir' => 'Jakarta',
+            'tanggal_lahir' => '1990-01-01',
+            'tanggal_bergabung' => '2020-01-01',
+            'tanggal_habis_kontrak' => null,
+            'tanggal_pensiun' => '2055-01-01',
+            'jenis_kelamin' => 'L',
+            'alamat_ktp' => 'Jl. Letjen Suprapto, Cempaka Putih, Jakarta Pusat',
+            'alamat_domisili' => 'Jl. Letjen Suprapto, Cempaka Putih, Jakarta Pusat',
+            'no_telpon' => '081234567888',
+            'email_yarsi' => 'sdmuniversitas@yarsi.ac.id',
+            'status' => 'active',
+        ]);
+
+        // Taufiq Hakim 58
+        Pegawai::create([
+            'unit_kerja_id' => 10,
+            'jenis_pegawai_id' => 3,
+            'status_pegawai_id' => 1,
+            'nip' => '199001012020011333',
+            'ktp' => '3171010101900333',
+            'npwp' => '091234567812333',
+            'nama' => 'Taufiq Hakim',
+            'gelar_depan' => null,
+            'gelar_belakang' => 'M.Kom',
+            'tempat_lahir' => 'Jakarta',
+            'tanggal_lahir' => '1990-01-01',
+            'tanggal_bergabung' => '2020-01-01',
+            'tanggal_habis_kontrak' => null,
+            'tanggal_pensiun' => '2055-01-01',
+            'jenis_kelamin' => 'L',
+            'alamat_ktp' => 'Jl. Letjen Suprapto, Cempaka Putih, Jakarta Pusat',
+            'alamat_domisili' => 'Jl. Letjen Suprapto, Cempaka Putih, Jakarta Pusat',
+            'no_telpon' => '081234567333',
+            'email_yarsi' => 'taufiq@yarsi.ac.id',
+            'status' => 'active',
+        ]);
+
+        // Wily Ahmad 59
+        Pegawai::create([
+            'unit_kerja_id' => 11,
+            'jenis_pegawai_id' => 3,
+            'status_pegawai_id' => 1,
+            'nip' => '199001012020011222',
+            'ktp' => '3171010101900222',
+            'npwp' => '091234567812222',
+            'nama' => 'Wily Ahmad',
+            'gelar_depan' => null,
+            'gelar_belakang' => 'M.Kom',
+            'tempat_lahir' => 'Jakarta',
+            'tanggal_lahir' => '1990-01-01',
+            'tanggal_bergabung' => '2020-01-01',
+            'tanggal_habis_kontrak' => null,
+            'tanggal_pensiun' => '2055-01-01',
+            'jenis_kelamin' => 'L',
+            'alamat_ktp' => 'Jl. Letjen Suprapto, Cempaka Putih, Jakarta Pusat',
+            'alamat_domisili' => 'Jl. Letjen Suprapto, Cempaka Putih, Jakarta Pusat',
+            'no_telpon' => '081234567222',
+            'email_yarsi' => 'wilyahmad@yarsi.ac.id',
+            'status' => 'active',
+        ]);
+
+        // Umam Syafiul 60
+        Pegawai::create([
+            'unit_kerja_id' => 2,
+            'jenis_pegawai_id' => 3,
+            'status_pegawai_id' => 2,
+            'nip' => '200101012024011555',
+            'ktp' => '3171010101010555',
+            'npwp' => '092345678912555',
+            'nama' => 'Umam Syafiul',
+            'gelar_depan' => null,
+            'gelar_belakang' => 'S.Kom',
+            'tempat_lahir' => 'Jakarta',
+            'tanggal_lahir' => '2001-01-01',
+            'tanggal_bergabung' => '2024-01-01',
+            'tanggal_habis_kontrak' => '2027-01-01',
+            'tanggal_pensiun' => null,
+            'jenis_kelamin' => 'L',
+            'alamat_ktp' => 'Jl. Salemba Raya, Jakarta Pusat',
+            'alamat_domisili' => 'Jl. Salemba Raya, Jakarta Pusat',
+            'no_telpon' => '081234567555',
+            'email_yarsi' => 'umamsyafiul@yarsi.ac.id',
+            'status' => 'active',
         ]);
     }
 }

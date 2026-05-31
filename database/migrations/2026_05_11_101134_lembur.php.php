@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-            Schema::create('lembur', function (Blueprint $table) {
+        Schema::create('lembur', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pegawai_id'); // pegawai yang mengajukan
             $table->foreignId('surat_perintah_lembur_id')->nullable();
@@ -30,6 +30,9 @@ return new class extends Migration
             $table->enum('status', [
                 'Menunggu Pelaksanaan',
                 'Menunggu Verifikasi Atasan',
+                'Menunggu Verifikasi Rektor',
+                'Menunggu Verifikasi SDM Universitas',
+                'Menunggu Verifikasi SDM Yayasan',
                 'Menunggu Laporan',
                 'Selesai',
                 'Ditolak'
