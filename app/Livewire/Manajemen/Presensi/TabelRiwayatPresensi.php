@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Manajemen\Presensi;
 
+use App\Exports\RiwayatPresensiExport;
 use App\Models\JenisPegawai;
+use App\Models\Pegawai;
 use App\Models\Presensi;
 use App\Models\StatusKehadiran;
 use App\Models\UnitKerja;
@@ -78,31 +80,25 @@ class TabelRiwayatPresensi extends Component
         }
     }
 
-    #[Computed]
-    public function riwayatPresensi()
+    protected function baseQuery()
     {
         $today = now()->subDay()->format('Y-m-d');
         $user = Auth::user();
 
+        // 1. Parsing Tanggal
         $filterMulai = $this->selectedPeriodeMulai
-            ? Carbon::createFromFormat(
-                'd/m/Y',
-                $this->selectedPeriodeMulai
-            )->format('Y-m-d')
+            ? Carbon::createFromFormat('d/m/Y', $this->selectedPeriodeMulai)->format('Y-m-d')
             : null;
 
         $filterSelesai = $this->selectedPeriodeSelesai
-            ? Carbon::createFromFormat(
-                'd/m/Y',
-                $this->selectedPeriodeSelesai
-            )->format('Y-m-d')
+            ? Carbon::createFromFormat('d/m/Y', $this->selectedPeriodeSelesai)->format('Y-m-d')
             : null;
 
         if ($filterSelesai && !$filterMulai) {
             $filterMulai = $filterSelesai;
         }
 
-        // Inisialisasi Base query dan join
+        // 2. Inisialisasi Base Query & Relasi
         $query = Presensi::query()
             ->join('pegawai', 'pegawai.nip', '=', 'presensi.pegawai_nip')
             ->join('unit_kerja', 'unit_kerja.id', '=', 'pegawai.unit_kerja_id')
@@ -121,7 +117,7 @@ class TabelRiwayatPresensi extends Component
                 'pegawai.unit_kerja:id,name',
             ]);
 
-        // Scoping data untuk pimpinan dan sdm universitas
+        // 3. Scoping data berdasarkan Role Auth
         if ($user->hasRole('SDM Universitas')) {
             $unitKerjaIds = UnitKerja::whereHas('unitSdm', function ($q) {
                 $q->where('name', 'SDM Universitas');
@@ -136,64 +132,45 @@ class TabelRiwayatPresensi extends Component
             $unit_id = $user->pegawai?->memimpin_unit?->id;
 
             if (!$unit_id) {
-                $query->whereNull('presensi.id'); // Kosongkan hasil jika tidak punya unit
+                $query->whereNull('presensi.id'); // Kosongkan hasil
             } else {
                 $query->where('pegawai.unit_kerja_id', $unit_id)
                     ->where('pegawai.id', '!=', $user->pegawai?->id);
             }
         }
 
-        // Return
+        // 4. Implementasi Filter
         return $query
-
-            // Default Hari Ini
-            ->when(
-                !$filterMulai && !$filterSelesai,
-                fn($q) => $q->whereDate('presensi.tanggal', $today)
-            )
-
-            // Periode Tanggal Mulai dan Selesai
-            ->when($filterMulai, function ($q) use (
-                $filterMulai,
-                $filterSelesai
-            ) {
+            // Filter Tanggal
+            ->when(!$filterMulai && !$filterSelesai, fn($q) => $q->whereDate('presensi.tanggal', $today))
+            ->when($filterMulai, function ($q) use ($filterMulai, $filterSelesai) {
                 if ($filterSelesai) {
                     $q->whereBetween('presensi.tanggal', [$filterMulai, $filterSelesai]);
-                    return;
+                } else {
+                    $q->whereDate('presensi.tanggal', $filterMulai);
                 }
-                $q->whereDate('presensi.tanggal', $filterMulai);
             })
-
-            // Filter Search
+            // Filter Search (Pencarian)
             ->when($this->search, function ($q) {
                 $q->where(function ($subQuery) {
                     $subQuery->where('pegawai.nama', 'like', '%' . $this->search . '%')
                         ->orWhere('pegawai.nip', 'like', '%' . $this->search . '%');
                 });
             })
-
-            // Filter Unit Kerja
-            ->when($this->selectedUnitKerja, function ($q) {
-                $q->where('unit_kerja.name', $this->selectedUnitKerja);
-            })
-
-            // Filter Jenis Pegawai
+            // Filter Dropdown
+            ->when($this->selectedUnitKerja, fn($q) => $q->where('unit_kerja.name', $this->selectedUnitKerja))
             ->when($this->selectedJenisPegawai, function ($q) {
-                $q->whereHas('pegawai.jenis_pegawai', function ($jenis) {
-                    $jenis->where('jenis', $this->selectedJenisPegawai);
-                });
+                $q->whereHas('pegawai.jenis_pegawai', fn($jenis) => $jenis->where('jenis', $this->selectedJenisPegawai));
             })
-
-            // Filter Status Kehadiran
             ->when($this->selectedStatusKehadiran, function ($query) {
-                $query->whereHas('statusKehadiran', function ($status) {
-                    $status->where(
-                        'status',
-                        $this->selectedStatusKehadiran
-                    );
-                });
-            })
+                $query->whereHas('statusKehadiran', fn($status) => $status->where('status', $this->selectedStatusKehadiran));
+            });
+    }
 
+    #[Computed]
+    public function riwayatPresensi()
+    {
+        return $this->baseQuery()
             ->orderBy('unit_kerja.name')
             ->orderBy('pegawai.nama')
             ->paginate(10);
@@ -245,6 +222,89 @@ class TabelRiwayatPresensi extends Component
     public function showDetailRiwayat(int $id): void
     {
         $this->dispatch('load-detail-riwayat', presensiId: $id);
+    }
+
+    public function openExportPreview(): void
+    {
+        $this->dispatch('open-export');
+    }
+
+    #[Computed]
+    public function exportPreviewData(): array
+    {
+        $data = $this->riwayatPresensi;
+        $isEmpty = $data->isEmpty();
+
+        // 1. Format Periode Presensi
+        $tanggalMulai = $this->selectedPeriodeMulai
+            ? Carbon::createFromFormat('d/m/Y', $this->selectedPeriodeMulai)->translatedFormat('d F Y')
+            : null;
+        $tanggalSelesai = $this->selectedPeriodeSelesai
+            ? Carbon::createFromFormat('d/m/Y', $this->selectedPeriodeSelesai)->translatedFormat('d F Y')
+            : null;
+
+        if ($tanggalMulai && $tanggalSelesai) {
+            $periode = $tanggalMulai . ' - ' . $tanggalSelesai;
+        } elseif ($tanggalMulai) {
+            $periode = $tanggalMulai;
+        } else {
+            $periode = 'Hari Ini (' . now()->subDay()->translatedFormat('d M Y') . ')';
+        }
+
+        // 2. Deteksi Satu Pegawai (Jika filter search aktif)
+        $singleEmployeeName = null;
+        if (!$isEmpty && !empty($this->search)) {
+            $uniqueNips = $this->baseQuery()
+                ->select('pegawai_nip')
+                ->distinct()
+                ->limit(2)
+                ->pluck('pegawai_nip');
+
+            if ($uniqueNips->count() === 1) {
+                $pegawai = Pegawai::where('nip', $uniqueNips->first())->first();
+                $singleEmployeeName = $pegawai ? $pegawai->nama : 'NIP. ' . $uniqueNips->first();
+            }
+        }
+
+        return [
+            'isEmpty'        => $isEmpty,
+            'periode'        => $periode,
+            'unit'           => $this->selectedUnitKerja ?? 'Semua Unit Kerja',
+            'jenis'          => $this->selectedJenisPegawai ?? 'Semua Jenis Pegawai',
+            'status'         => $this->selectedStatusKehadiran ?? 'Semua Status Kehadiran',
+            'singleEmployee' => $singleEmployeeName,
+        ];
+    }
+
+    public function exportData()
+    {
+        $query = $this->baseQuery();
+
+        if ($query->count() === 0) {
+            return;
+        }
+
+        // 3. Bangun nama file dinamis berdasarkan filter yang aktif
+        $preview = $this->exportPreviewData;
+        $fileNameParts = ['Riwayat_Presensi'];
+
+        // Jika filter satu pegawai terdeteksi
+        if (!empty($preview['singleEmployee'])) {
+            $fileNameParts[] = str_replace(' ', '_', $preview['singleEmployee']);
+        }
+
+        // Jika filter unit kerja aktif
+        if ($this->selectedUnitKerja) {
+            $fileNameParts[] = str_replace(' ', '_', $this->selectedUnitKerja);
+        }
+
+        // Bersihkan string periode agar aman untuk nama file (hapus spasi, kurung, garis miring)
+        $periodeAman = str_replace([' ', '(', ')', '/'], ['_', '', '', '-'], $preview['periode']);
+        $fileNameParts[] = $periodeAman;
+
+        $fileName = implode('_', $fileNameParts) . '.xlsx';
+
+        return (new RiwayatPresensiExport($query))->download($fileName);
     }
 
     public function render()

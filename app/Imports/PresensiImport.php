@@ -258,7 +258,6 @@ class PresensiImport implements
 
     public function isIzin($pegawaiNip, $tanggal)
     {
-        // query cek data izin pegawai
         return false;
     }
 

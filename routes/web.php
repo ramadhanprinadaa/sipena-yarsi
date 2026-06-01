@@ -52,12 +52,10 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::prefix('konfigurasi')->group(function () {
-        Route::middleware('role:Admin, SDM Yayasan')->group(function () {
+        Route::middleware('role:Admin,SDM Yayasan')->group(function () {
             Route::view('unit-kerja', 'config.unit-kerja')->name('konfigurasi-unit-kerja');
             Route::view('unit-sdm', 'config.unit-kerja')->name('konfigurasi-unit-sdm');
             Route::view('kalender', 'config.kalender')->name('konfigurasi-kalender');
-            Route::view('hari-libur', 'config.hari-libur')->name('konfigurasi-hari-libur');
-            Route::view('alur-persetujuan', 'config.alur-persetujuan')->name('konfigurasi-alur-persetujuan');
         });
     });
 

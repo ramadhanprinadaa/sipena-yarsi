@@ -1,4 +1,5 @@
-<div class="flex flex-col h-full lg:h-[calc(100vh-150px)] space-y-4 px-2 py-3">
+<div x-data="{ showLoading: false, openExport: false }" x-on:open-export="showLoading = false; openExport = true;"
+    class="flex flex-col h-full lg:h-[calc(100vh-150px)] space-y-4 px-2 py-3">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
         @php
@@ -37,7 +38,7 @@
             <div class="flex items-center justify-center w-9 h-9 bg-indigo-50 text-indigo-600 rounded-lg">
                 <i class="fa-solid fa-calendar-week text-md"></i>
             </div>
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-3">
                 <span class="text-xs font-bold text-slate-400 uppercase">
                     Periode Rekapitulasi
                 </span>
@@ -143,7 +144,8 @@
         <!-- Search and Export Data -->
         <div class="flex flex-wrap items-center gap-2">
             <!-- Button Export Data -->
-            <button @click=""
+            <button
+                x-on:click="showLoading = true; $wire.openExportPreview().finally(() => setTimeout(() => showLoading = false, 500))"
                 class="flex items-center px-3 h-9 justify-center cursor-pointer bg-emerald-600/90 hover:bg-emerald-700 text-white text-sm rounded-md transition whitespace-nowrap">
                 <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>
                 Export Excel
@@ -173,7 +175,7 @@
     <!-- Table -->
     <div class="table-container relative">
         <!-- Loading -->
-        <div wire:loading>
+        <div wire:loading wire:target="search, selectedUnitKerja, selectedPeriodeMulai, selectedPeriodeSelesai">
             <div
                 class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
                 <div role="status">
@@ -184,110 +186,130 @@
 
         <!-- Main Content -->
         <div class="table-wrapper overflow-x-auto">
-            <table class="table">
-                <thead class="table-header">
-                    <tr>
-                        <th scope="col" class="px-4 py-3 font-medium w-10 text-center">#</th>
-                        <th scope="col" class="px-4 py-3 font-medium w-50 text-left">
-                            <div class="truncate">Nama Pegawai</div>
-                        </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-20 text-center">
-                            <div class="truncate">Hadir</div>
-                        </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-24 text-center">
-                            <div class="truncate">Tidak Hadir</div>
-                        </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-20 text-center">
-                            <div class="truncate">Lembur</div>
-                        </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-20 text-center">
-                            <div class="truncate">Cuti</div>
-                        </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-20 text-center">
-                            <div class="truncate">Izin</div>
-                        </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-20 text-center">
-                            <div class="truncate">Sakit</div>
-                        </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-32 text-center">
-                            <div class="truncate">Total Jam Kerja</div>
-                        </th>
-                        <th scope="col" class="px-4 py-3 font-medium w-34 text-center">
-                            <div class="truncate">Total Jam Lembur</div>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($this->rekapitulasiPresensi as $index => $pegawai)
-                        <tr class="table-row">
-                            <!-- No -->
-                            <td class="px-3 py-2 text-center text-gray-500 text-sm">
-                                {{ $this->rekapitulasiPresensi->firstItem() + $index }}
-                            </td>
-
-                            <!-- Nama Pegawai -->
-                            <td class="px-4 py-2">
-                                <div class="flex flex-col min-w-0">
-                                    <span class="truncate text-sm font-semibold text-gray-800"
-                                        title="{{ $pegawai->nama }}">
-                                        {{ $pegawai->nama }}
-                                    </span>
-                                    <span class="text-[11px] text-gray-400 truncate">NIP.
-                                        {{ $pegawai->nip }}</span>
-                                </div>
-                            </td>
-
-                            <!-- Hadir -->
-                            <td class="px-3 py-2 text-center">
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100/60 text-emerald-700 border border-emerald-100">
-                                    {{ $pegawai->rekap['hadir'] }}
-                                </span>
-                            </td>
-
-                            <!-- Tidak Hadir -->
-                            <td class="px-3 py-2 text-center">
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100/60 text-red-700 border border-red-100">{{ $pegawai->rekap['tidak_hadir'] }}</span>
-                            </td>
-
-                            <!-- Lembur -->
-                            <td class="px-3 py-2 text-center text-sm font-medium text-blue-600">
-                                {{ $pegawai->rekap['lembur'] }}
-                            </td>
-
-                            <!-- Cuti -->
-                            <td class="px-3 py-2 text-center text-sm text-gray-500">
-                                {{ $pegawai->rekap['cuti'] }}
-                            </td>
-
-                            <!-- Izin -->
-                            <td class="px-3 py-2 text-center text-sm text-gray-500">
-                                {{ $pegawai->rekap['izin'] }}
-                            </td>
-
-                            <!-- Sakit -->
-                            <td class="px-3 py-2 text-center text-sm text-gray-500">
-                                {{ $pegawai->rekap['sakit'] }}
-                            </td>
-
-                            <!-- Total Kerja -->
-                            <td class="px-3 py-2 text-center">
-                                <span class="text-sm font-bold text-gray-700">
-                                    {{ $pegawai->rekap['total_jam_kerja'] }}
-                                </span>
-                            </td>
-
-                            <!-- Total Lembur -->
-                            <td class="px-3 py-2 text-center">
-                                <span class="text-sm font-bold text-indigo-600">
-                                    {{ $pegawai->rekap['total_jam_lembur'] }}
-                                </span>
-                            </td>
+            @if (!$this->baseQuery()->exists() || !$this->hasPresensiData)
+                <div class="flex flex-col items-center justify-center h-full text-center">
+                    <div class="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-calendar-minus text-2xl text-indigo-500"></i>
+                    </div>
+                    <h3 class="text-base font-semibold text-gray-700 max-w-lg">
+                        {{ $this->emptyStateMessage }}
+                    </h3>
+                    @if ($user->hasRole('SDM Universitas') || $user->hasRole('Pimpinan'))
+                        <p class="text-sm text-gray-500 mt-1 max-w-sm">
+                            Silahkan Hubungi Administrator.
+                        </p>
+                    @else
+                        <p class="text-sm text-gray-500 mt-1 max-w-sm">
+                            Silahkan Upload File Presensi.
+                        </p>
+                    @endif
+                </div>
+            @else
+                <table class="table">
+                    <thead class="table-header">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 font-medium w-10 text-center">#</th>
+                            <th scope="col" class="px-4 py-3 font-medium w-50 text-left">
+                                <div class="truncate">Nama Pegawai</div>
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-medium w-20 text-center">
+                                <div class="truncate">Hadir</div>
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-medium w-24 text-center">
+                                <div class="truncate">Tidak Hadir</div>
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-medium w-20 text-center">
+                                <div class="truncate">Lembur</div>
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-medium w-20 text-center">
+                                <div class="truncate">Cuti</div>
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-medium w-20 text-center">
+                                <div class="truncate">Izin</div>
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-medium w-20 text-center">
+                                <div class="truncate">Sakit</div>
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-medium w-32 text-center">
+                                <div class="truncate">Total Jam Kerja</div>
+                            </th>
+                            <th scope="col" class="px-4 py-3 font-medium w-34 text-center">
+                                <div class="truncate">Total Jam Lembur</div>
+                            </th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach ($this->rekapitulasiPresensi as $index => $pegawai)
+                            <tr class="table-row">
+                                <!-- No -->
+                                <td class="px-3 py-2 text-center text-gray-500 text-sm">
+                                    {{ $this->rekapitulasiPresensi->firstItem() + $index }}
+                                </td>
+
+                                <!-- Nama Pegawai -->
+                                <td class="px-4 py-2">
+                                    <div class="flex flex-col min-w-0">
+                                        <span class="truncate text-sm font-semibold text-gray-800"
+                                            title="{{ $pegawai->nama }}">
+                                            {{ $pegawai->nama }}
+                                        </span>
+                                        <span class="text-[11px] text-gray-400 truncate">NIP.
+                                            {{ $pegawai->nip }}</span>
+                                    </div>
+                                </td>
+
+                                <!-- Hadir -->
+                                <td class="px-3 py-2 text-center">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100/60 text-emerald-700 border border-emerald-100">
+                                        {{ $pegawai->rekap['hadir'] }}
+                                    </span>
+                                </td>
+
+                                <!-- Tidak Hadir -->
+                                <td class="px-3 py-2 text-center">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100/60 text-red-700 border border-red-100">{{ $pegawai->rekap['tidak_hadir'] }}</span>
+                                </td>
+
+                                <!-- Lembur -->
+                                <td class="px-3 py-2 text-center text-sm font-medium text-blue-600">
+                                    {{ $pegawai->rekap['lembur'] }}
+                                </td>
+
+                                <!-- Cuti -->
+                                <td class="px-3 py-2 text-center text-sm text-gray-500">
+                                    {{ $pegawai->rekap['cuti'] }}
+                                </td>
+
+                                <!-- Izin -->
+                                <td class="px-3 py-2 text-center text-sm text-gray-500">
+                                    {{ $pegawai->rekap['izin'] }}
+                                </td>
+
+                                <!-- Sakit -->
+                                <td class="px-3 py-2 text-center text-sm text-gray-500">
+                                    {{ $pegawai->rekap['sakit'] }}
+                                </td>
+
+                                <!-- Total Kerja -->
+                                <td class="px-3 py-2 text-center">
+                                    <span class="text-sm font-bold text-gray-700">
+                                        {{ $pegawai->rekap['total_jam_kerja'] }}
+                                    </span>
+                                </td>
+
+                                <!-- Total Lembur -->
+                                <td class="px-3 py-2 text-center">
+                                    <span class="text-sm font-bold text-indigo-600">
+                                        {{ $pegawai->rekap['total_jam_lembur'] }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
         </div>
 
         <!-- Footer & Pagination -->
@@ -339,4 +361,148 @@
             </nav>
         </div>
     </div>
+
+    <!-- Modal Confirmation for Export File -->
+    <template x-teleport="body">
+        <div x-show="showLoading || openExport" x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0" @click.self="openExport = false"
+            @keydown.escape.window="openExport = false"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md"
+            style="display: none;">
+
+            <div x-show="showLoading" class="flex flex-col items-center gap-4">
+                <div class="w-10 h-10 border-[3px] border-white/20 border-t-white rounded-full animate-spin"></div>
+                <div class="text-sm font-medium tracking-wide text-white">
+                    Memuat Data...
+                </div>
+            </div>
+
+            <div x-show="openExport" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 scale-95" @click.stop>
+
+                @php $preview = $this->exportPreviewData; @endphp
+
+                <x-modal.confirmation title="Export Data Rekapitulasi Presensi"
+                    subTitle="Konfirmasi data export rekapitulasi presensi di bawah ini."
+                    icon="fa-solid fa-file-export" iconBg="bg-emerald-500" iconShadow="shadow-emerald-200"
+                    closeAction="openExport = false">
+
+                    <div>
+                        {{-- TAMPILAN JIKA DATA KOSONG --}}
+                        @if ($preview['isEmpty'])
+                            <div
+                                class="flex flex-col items-center justify-center min-h-[calc(100vh-380px)] p-6 text-center bg-red-50/50 border border-red-100 rounded-xl">
+                                <div
+                                    class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-4 shadow-sm shadow-red-100">
+                                    <i class="fa-solid fa-triangle-exclamation text-2xl text-red-500"></i>
+                                </div>
+                                <h3 class="text-base font-bold text-red-800">Tidak Ada Data Untuk Diexport</h3>
+                                <p class="text-sm text-red-600 mt-1.5 max-w-md leading-relaxed mx-auto">
+                                    {{ $this->emptyStateMessage }}
+                                </p>
+                            </div>
+                        @else
+                            <div class="space-y-4">
+                                <p class="text-sm text-slate-500 leading-relaxed">
+                                    Silakan periksa kembali parameter filter di bawah ini sebelum mengunduh berkas
+                                    rekapitulasi presensi.
+                                </p>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                                    <div
+                                        class="sm:col-span-2 p-3.5 bg-slate-50 border border-slate-200/70 rounded-xl flex items-center gap-3">
+                                        <div
+                                            class="w-9 h-9 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                                            <i class="fa-regular fa-calendar-days text-base"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                                Periode Presensi</h4>
+                                            <p class="text-sm font-bold text-slate-700 mt-0.5">
+                                                {{ $preview['periode'] }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        class="sm:col-span-2 p-3.5 bg-slate-50 border border-slate-200/70 rounded-xl flex items-center gap-3">
+                                        <div
+                                            class="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 shrink-0">
+                                            <i class="fa-solid fa-building text-base"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                                Unit Kerja</h4>
+                                            <p class="text-sm font-semibold text-slate-700 mt-0.5 truncate"
+                                                title="{{ $preview['unit'] }}">{{ $preview['unit'] }}</p>
+                                        </div>
+                                    </div>
+
+                                    @if (!empty($preview['singleEmployee']))
+                                        <div
+                                            class="sm:col-span-2 p-3.5 bg-indigo-50/70 border border-indigo-100 rounded-xl flex items-center gap-3">
+                                            <div
+                                                class="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold shrink-0 text-xs shadow-sm uppercase">
+                                                {{ substr($preview['singleEmployee'], 0, 2) }}
+                                            </div>
+                                            <div class="min-w-0">
+                                                <h4
+                                                    class="text-xs font-semibold text-indigo-500 uppercase tracking-wider">
+                                                    Pegawai Terpilih</h4>
+                                                <p class="text-sm font-bold text-slate-800 mt-0.5 truncate"
+                                                    title="{{ $preview['singleEmployee'] }}">
+                                                    {{ $preview['singleEmployee'] }}</p>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    <x-slot:footer>
+                        <button type="button" @click="openExport = false"
+                            class="px-5 py-2 rounded-md border border-slate-200 bg-red-400/90 hover:bg-red-500 text-white transition cursor-pointer">
+                            Batal
+                        </button>
+
+                        <button type="button" {{-- Gunakan x-on:click Alpine agar bisa menunggu download & menutup modal --}}
+                            @if (!$preview['isEmpty']) x-on:click="await $wire.exportData(); openExport = false;" @endif
+                            @disabled($preview['isEmpty']) wire:loading.attr="disabled" wire:target="exportData"
+                            wire:loading.class="opacity-70 !cursor-wait scale-95"
+                            class="px-5 py-2 rounded-md border border-slate-200 transition-all duration-200 flex items-center justify-center active:scale-95
+                    {{ $preview['isEmpty']
+                        ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                        : 'bg-emerald-600/90 hover:bg-emerald-700 text-white cursor-pointer shadow-sm' }}">
+
+                            <i wire:loading.remove wire:target="exportData"
+                                class="fa-solid fa-arrow-up-right-from-square mr-2">
+                            </i>
+
+                            <svg wire:loading wire:target="exportData" class="w-4 h-4 animate-spin mr-2"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                    stroke="currentColor" stroke-width="4">
+                                </circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z">
+                                </path>
+                            </svg>
+
+                            <span wire:loading.remove wire:target="exportData">Export Data</span>
+                            <span wire:loading wire:target="exportData">Mengekspor...</span>
+                        </button>
+                    </x-slot:footer>
+
+                </x-modal.confirmation>
+            </div>
+        </div>
+    </template>
 </div>

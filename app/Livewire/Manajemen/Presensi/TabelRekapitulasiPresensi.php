@@ -2,10 +2,8 @@
 
 namespace App\Livewire\Manajemen\Presensi;
 
-use App\Models\JenisPegawai;
+use App\Exports\RekapitulasiPresensiExport;
 use App\Models\Pegawai;
-use App\Models\Presensi;
-use App\Models\StatusKehadiran;
 use App\Models\UnitKerja;
 use App\Services\StatusKehadiranService;
 use Carbon\Carbon;
@@ -70,12 +68,10 @@ class TabelRekapitulasiPresensi extends Component
         }
     }
 
-    #[Computed]
-    public function rekapitulasiPresensi()
+    protected function baseQuery()
     {
         $user = Auth::user();
 
-        // Set Periode Rekapitulasi (Default: Bulan Berjalan)
         $mulai = $this->selectedPeriodeMulai
             ? Carbon::createFromFormat('d/m/Y', $this->selectedPeriodeMulai)->startOfDay()
             : now()->startOfMonth();
@@ -84,7 +80,6 @@ class TabelRekapitulasiPresensi extends Component
             ? Carbon::createFromFormat('d/m/Y', $this->selectedPeriodeSelesai)->endOfDay()
             : now()->endOfMonth();
 
-        // Inisialisai base query
         $query = Pegawai::query()
             ->select('pegawai.*')
             ->leftJoin('unit_kerja', 'pegawai.unit_kerja_id', '=', 'unit_kerja.id')
@@ -95,41 +90,32 @@ class TabelRekapitulasiPresensi extends Component
                 'lembur' => function ($q) use ($mulai, $selesai) {
                     $q->whereBetween('tanggal_lembur', [$mulai, $selesai])
                         ->where('status', 'Disetujui');
-                }
+                },
+                'unit_kerja:id,name' // Tambahan relasi unit_kerja untuk kemudahan di Export
             ]);
 
-        // Scoping data untuk pimpinan dan sdm universitas
+        // Scoping data
         if ($user->hasRole('SDM Universitas')) {
-            $unitKerjaIds = UnitKerja::whereHas('unitSdm', function ($q) {
-                $q->where('name', 'SDM Universitas');
-            })->pluck('id');
-
+            $unitKerjaIds = UnitKerja::whereHas('unitSdm', fn($q) => $q->where('name', 'SDM Universitas'))->pluck('id');
             $query->whereIn('pegawai.unit_kerja_id', $unitKerjaIds)
                 ->where('pegawai.id', '!=', $user->pegawai?->id)
-                ->whereHas('pegawai.user.role', function ($q) {
-                    $q->where('name', '!=', 'SDM Universitas');
-                });
+                ->whereHas('pegawai.user.role', fn($q) => $q->where('name', '!=', 'SDM Universitas'));
         } elseif ($user->hasRole('Pimpinan')) {
             $unit_id = $user->pegawai?->memimpin_unit?->id;
-
             if (!$unit_id) {
-                $query->whereNull('presensi.id'); // Kosongkan hasil jika tidak punya unit
+                $query->whereNull('pegawai.id'); // Kosongkan hasil (Ubah ke pegawai.id karena tabel utama Pegawai)
             } else {
                 $query->where('pegawai.unit_kerja_id', $unit_id)
                     ->where('pegawai.id', '!=', $user->pegawai?->id);
             }
         }
 
-        // Sort berdasarkan unit kerja dan nama
-        $query->orderBy('unit_kerja.name', 'asc')
-            ->orderBy('pegawai.nama', 'asc');
+        $query->orderBy('unit_kerja.name', 'asc')->orderBy('pegawai.nama', 'asc');
 
-        // Filter Unit Kerja
         if ($this->selectedUnitKerja) {
             $query->where('unit_kerja.name', $this->selectedUnitKerja);
         }
 
-        // Filter Search
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('pegawai.nama', 'like', '%' . $this->search . '%')
@@ -137,20 +123,19 @@ class TabelRekapitulasiPresensi extends Component
             });
         }
 
+        return $query;
+    }
+
+    #[Computed]
+    public function rekapitulasiPresensi()
+    {
         // Inisialisasi base query rekapitulasi presensi
-        $pegawais = $query->paginate(10);
+        $pegawais = $this->baseQuery()->paginate(10);
 
         // Transformasi data rekapitulasi per pegawai
         $pegawais->getCollection()->transform( function ($pegawai) {
             // Inisialisasi variabel data rekapitulasi
-            $hadir = 0;
-            $tidakHadir = 0;
-            $lembur = 0;
-            $cuti = 0;
-            $izin = 0;
-            $sakit = 0;
-            $totalMenitKerja = 0;
-            $totalMenitLembur = 0;
+            $hadir = $tidakHadir = $lembur = $cuti = $izin = $sakit = $totalMenitKerja = $totalMenitLembur = 0;
 
             // Map lembur by date untuk pencarian O(1)
             $lemburByDate = $pegawai->lembur->keyBy(function ($l) {
@@ -275,17 +260,112 @@ class TabelRekapitulasiPresensi extends Component
         return "{$formatMulai} s/d {$formatSelesai}";
     }
 
-    #[Computed]
-    public function emptyStateMessage():string
+    #[Computed] // Untuk mengecek apakah data presensi pada periode terpilih sudah ada
+    public function hasPresensiData(): bool
     {
-        $mulai = $this->selectedPeriodeMulai ?: now()->startOfMonth()->format('d/m/Y');
-        $selesai = $this->selectedPeriodeSelesai ?: now()->endOfMonth()->format('d/m/Y');
+        $mulai = $this->selectedPeriodeMulai
+            ? Carbon::createFromFormat('d/m/Y', $this->selectedPeriodeMulai)->startOfDay()
+            : now()->startOfMonth();
 
-        if ($this->selectedPeriodeMulai || $this->selectedPeriodeSelesai) {
-            return "Belum ada data rekapitulasi presensi untuk periode {$mulai} - {$selesai}.";
+        $selesai = $this->selectedPeriodeSelesai
+            ? Carbon::createFromFormat('d/m/Y', $this->selectedPeriodeSelesai)->endOfDay()
+            : now()->endOfMonth();
+
+        return $this->baseQuery()
+            ->without(['presensi', 'lembur', 'unit_kerja'])
+            ->whereHas('presensi', function ($q) use ($mulai, $selesai) {
+                $q->whereBetween('tanggal', [$mulai, $selesai]);
+            })
+            ->exists();
+    }
+
+    #[Computed]
+    public function emptyStateMessage(): string
+    {
+        // 1. Cek jika pegawainya yang kosong
+        if (!$this->baseQuery()->exists()) {
+            if ($this->search) {
+                return "Pegawai dengan kata pencarian '{$this->search}' tidak ditemukan.";
+            }
+            return "Tidak ada data pegawai pada filter atau unit kerja yang dipilih.";
         }
 
-        return "Belum ada data rekapitulasi presensi untuk bulan ini (" . now()->translatedFormat('F Y') . ").";
+        // 2. Jika pegawai ada, berarti presensinya yang kosong
+        $mulai = $this->selectedPeriodeMulai
+            ? Carbon::createFromFormat('d/m/Y', $this->selectedPeriodeMulai)->translatedFormat('d F Y')
+            : now()->startOfMonth()->translatedFormat('d F Y');
+        $selesai = $this->selectedPeriodeSelesai
+            ? Carbon::createFromFormat('d/m/Y', $this->selectedPeriodeSelesai)->translatedFormat('d F Y')
+            : now()->endOfMonth()->translatedFormat('d F Y');
+
+        if ($this->selectedPeriodeMulai || $this->selectedPeriodeSelesai) {
+            return "Belum ada data rekapitulasi presensi yang terekam untuk periode: {$mulai} s/d {$selesai}.";
+        }
+
+        return "Belum ada data rekapitulasi presensi yang terekam untuk bulan " . now()->translatedFormat('F Y') . ".";
+    }
+
+    #[Computed]
+    public function exportPreviewData()
+    {
+        $isPegawaiEmpty = !$this->baseQuery()->exists();
+        $hasPresensi = $this->hasPresensiData;
+
+        // Export dianggap KOSONG (tombol mati) jika pegawai tidak ada atau presensi tidak ada
+        $isEmpty = $isPegawaiEmpty || !$hasPresensi;
+
+        $singleEmployeeName = null;
+        if (!$isPegawaiEmpty && !empty($this->search)) {
+            $uniqueNips = $this->baseQuery()
+                ->reorder() // Mencegah error SQL Strict Mode
+                ->select('pegawai.nip')
+                ->distinct()
+                ->limit(2)
+                ->pluck('pegawai.nip');
+
+            if ($uniqueNips->count() === 1) {
+                $pegawai = Pegawai::where('nip', $uniqueNips->first())->first();
+                $singleEmployeeName = $pegawai ? $pegawai->nama : 'NIP. ' . $uniqueNips->first();
+            }
+        }
+
+        return [
+            'isEmpty'        => $isEmpty,
+            'periode'        => $this->infoPeriodeAktif,
+            'unit'           => $this->selectedUnitKerja ?? 'Semua Unit Kerja',
+            'singleEmployee' => $singleEmployeeName,
+        ];
+    }
+
+    public function exportData()
+    {
+        if (!$this->baseQuery()->exists() || !$this->hasPresensiData) {
+            return;
+        }
+
+        $query = $this->baseQuery();
+        $preview = $this->exportPreviewData;
+
+        $fileNameParts = ['Rekapitulasi_Presensi'];
+
+        if (!empty($preview['singleEmployee'])) {
+            $fileNameParts[] = str_replace(' ', '_', $preview['singleEmployee']);
+        }
+        if ($this->selectedUnitKerja) {
+            $fileNameParts[] = str_replace(' ', '_', $this->selectedUnitKerja);
+        }
+
+        $periodeAman = str_replace([' ', '(', ')', '/', '—'], ['_', '', '', '-', '-'], $preview['periode']);
+        $fileNameParts[] = $periodeAman;
+
+        $fileName = implode('_', $fileNameParts) . '.xlsx';
+
+        return (new RekapitulasiPresensiExport($query))->download($fileName);
+    }
+
+    public function openExportPreview(): void
+    {
+        $this->dispatch('open-export');
     }
 
     public function render()

@@ -11,9 +11,139 @@
 @endsection
 
 @section('content')
-    <div class="bg-white/20 backdrop-blur-sm shadow-md rounded-xl p-6 min-h-[calc(100vh-157px)]">
-        <h1 class="text-2xl font-bold mb-4">Presensi</h1>
-        <p>Selamat datang di halaman presensi. Di sini Anda dapat melihat dan mengelola kehadiran Anda.</p>
+    <div x-data="{ activeTab: 'ringkasan' }" class="w-full min-h-[calc(100vh-157px)] space-y-5">
+
+        {{-- ===== HERO CARD ===== --}}
+        <div
+            class="relative bg-gradient-to-br from-teal-600 via-emerald-600 to-cyan-600 rounded-2xl shadow-lg overflow-hidden mt-2">
+            {{-- Decorative background shapes --}}
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute -top-16 -right-16 w-72 h-72 bg-white rounded-full"></div>
+                <div class="absolute -bottom-20 -left-10 w-80 h-80 bg-white rounded-full"></div>
+            </div>
+
+            <div class="relative p-6 flex flex-col md:flex-row items-center md:items-center gap-6">
+
+                {{-- Main Icon (Glassmorphism) --}}
+                <div class="shrink-0">
+                    <div
+                        class="w-20 h-20 bg-white/20 border border-white/30 backdrop-blur-md rounded-2xl flex items-center justify-center text-white shadow-inner transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                        <i class="fa-regular fa-calendar-check text-4xl drop-shadow-md"></i>
+                    </div>
+                </div>
+
+                {{-- Hero Text --}}
+                <div class="flex-1 text-center md:text-left">
+                    <h1 class="text-2xl font-extrabold text-white tracking-tight">Presensi Saya</h1>
+                    <p class="text-emerald-50 mt-1.5 text-sm max-w-xl leading-relaxed">
+                        Pantau ringkasan kehadiran, statistik keterlambatan, dan riwayat presensi harian Anda secara mandiri
+                        di sini.
+                    </p>
+                </div>
+
+                {{-- Info Badges --}}
+                <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+
+                    {{-- Badge Tanggal --}}
+                    <div
+                        class="flex items-center gap-3 px-4 py-3 min-w-[200px]
+                bg-white/10 backdrop-blur-md border border-white/20
+                rounded-xl shadow-sm">
+
+                        <div
+                            class="flex items-center justify-center shrink-0 w-10 h-10 rounded-full bg-emerald-500/40 border border-emerald-300/30">
+                            <i class="fa-regular fa-calendar-days text-lg text-white"></i>
+                        </div>
+
+                        <div class="flex flex-col min-w-0">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-emerald-100">
+                                Tanggal Hari Ini
+                            </span>
+
+                            <span class="text-sm font-bold text-white leading-tight">
+                                {{ now()->translatedFormat('l, d F Y') }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {{-- Badge Jam --}}
+                    <div
+                        class="flex items-center gap-3 px-4 py-3 min-w-[200px] bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-sm">
+
+                        <div
+                            class="flex items-center justify-center shrink-0 w-10 h-10 rounded-full bg-emerald-500/40 border border-emerald-300/30">
+                            <i class="fa-regular fa-clock text-lg text-white animate-pulse"></i>
+                        </div>
+
+                        <div class="flex flex-col">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-emerald-100">
+                                Waktu Saat Ini
+                            </span>
+
+                            <span class="text-base font-bold text-white font-mono leading-tight" x-data="{ time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }"
+                                x-init="setInterval(() => time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }), 1000)" x-text="time">
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        {{-- ===== TABS & CONTENT CONTAINER ===== --}}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+            {{-- Navigation Tabs --}}
+            <div class="border-b border-gray-200 bg-slate-50/50 px-2 sm:px-6">
+                <ul class="flex flex-wrap -mb-px text-sm font-semibold text-center text-gray-500">
+                    <li class="mr-2">
+                        <button @click="activeTab = 'ringkasan'"
+                            :class="activeTab === 'ringkasan' ?
+                                'text-teal-600 border-teal-600 bg-white shadow-[0_-2px_0_0_#0d9488_inset]' :
+                                'border-transparent hover:text-gray-700 hover:border-gray-300'"
+                            class="inline-flex items-center justify-center py-4 px-5 sm:px-6 rounded-t-lg transition-all duration-200 cursor-pointer outline-none">
+                            <i class="fa-solid fa-chart-pie mr-2.5 text-base transition-colors"
+                                :class="activeTab === 'ringkasan' ? 'text-teal-600' : 'text-gray-400'"></i>
+                            Ringkasan Presensi
+                        </button>
+                    </li>
+                    <li class="mr-2">
+                        <button @click="activeTab = 'riwayat'"
+                            :class="activeTab === 'riwayat' ?
+                                'text-teal-600 border-teal-600 bg-white shadow-[0_-2px_0_0_#0d9488_inset]' :
+                                'border-transparent hover:text-gray-700 hover:border-gray-300'"
+                            class="inline-flex items-center justify-center py-4 px-5 sm:px-6 rounded-t-lg transition-all duration-200 cursor-pointer outline-none">
+                            <i class="fa-solid fa-table-list mr-2.5 text-base transition-colors"
+                                :class="activeTab === 'riwayat' ? 'text-teal-600' : 'text-gray-400'"></i>
+                            Riwayat Presensi
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            {{-- Main Content Area --}}
+            <div class="relative p-5 sm:p-6 min-h-[400px]">
+
+                {{-- Wrapper Tab Ringkasan --}}
+                <div x-show="activeTab === 'ringkasan'" x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
+                    style="display: none;">
+
+                    <livewire:dashboard.presensi.ringkasan-presensi />
+
+                </div>
+
+                {{-- Wrapper Tab Riwayat --}}
+                <div x-show="activeTab === 'riwayat'" x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
+                    style="display: none;">
+
+                    <livewire:dashboard.presensi.riwayat-presensi />
+
+                </div>
+            </div>
+
+        </div>
     </div>
 @endsection
-
