@@ -32,4 +32,9 @@ class PresensiLog extends Model
     {
         return $this->belongsTo(ImportPresensi::class, 'import_presensi_id');
     }
+
+    public function editor()
+    {
+        return $this->belongsTo(User::class, 'edited_by');
+    }
 }

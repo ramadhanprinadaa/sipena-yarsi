@@ -27,140 +27,20 @@ class PegawaiImport implements ToCollection, WithHeadingRow
     public array $duplicates = [];
     public array $successData = [];
 
-
     /**
-     * @param Collection $collection
+     * Posisi Heading (Agar mengabaikan 7 baris keterangan di atasnya)
      */
-    public function collection(Collection $rows)
+    public function headingRow(): int
     {
-        // Get Relasi
-        $unitKerjaMap = UnitKerja::pluck('id', 'name');
-        $jenisPegawaiMap = JenisPegawai::pluck('id', 'jenis');
-        $statusPegawaiMap = StatusPegawai::pluck('id', 'status');
-
-        $this->totalRows = $rows->count();
-
-        foreach ($rows as $index => $row) {
-
-            $rowNumber = $index + 2;
-
-            $data = $row->toArray();
-
-            // Cast tipe data to string
-            $data['nik_pegawai'] = isset($data['nik_pegawai']) ? (string) $data['nik_pegawai'] : null;
-            $data['nik_ktp'] = isset($data['nik_ktp']) ? (string) $data['nik_ktp'] : null;
-            $data['npwp'] = isset($data['npwp']) ? (string) $data['npwp'] : null;
-            $data['no_telpon'] = isset($data['no_telpon']) ? (string) $data['no_telpon'] : null;
-
-            // Cek Validasi
-            $validator = Validator::make($data, $this->rules());
-            if ($validator->fails()) {
-                $this->failedRows++;
-                $this->failures[] = [
-                    'row'       => $rowNumber,
-                    'type'      => 'validation',
-                    'errors'    => $validator->errors()->all(),
-                    'data'      => $data
-                ];
-                continue;
-            }
-
-            // Cek Duplikat
-            $isDuplicateQuery = Pegawai::query()
-                ->where('nip', $row['nik_pegawai'])
-                ->orWhere('ktp', $row['nik_ktp']);
-
-            if (!empty($row['npwp'])) {
-                $isDuplicateQuery->orWhere('npwp', $row['npwp']);
-            }
-
-            $isDuplicate = $isDuplicateQuery->exists();
-            if ($isDuplicate) {
-                $this->duplicateRows++;
-                $this->failedRows++;
-
-                $this->duplicates[] = [
-                    'row'       => $rowNumber,
-                    'type'      => 'duplicate',
-                    'message'   => 'Data pegawai sudah ada',
-                    'data'      => $data,
-                ];
-                continue;
-            }
-
-            // Get Relasi ID
-            $unitKerjaId = $unitKerjaMap[$row['unit_kerja']] ?? null;
-            $jenisPegawaiId = $jenisPegawaiMap[$row['jenis_pegawai']] ?? null;
-            $statusPegawaiId = $statusPegawaiMap[$row['status_pegawai']] ?? null;
-
-            // Validasi Relasi
-            if (!$unitKerjaId || !$jenisPegawaiId || !$statusPegawaiId) {
-                $this->failedRows++;
-                $this->failures[] = [
-                    'row' => $rowNumber,
-                    'type' => 'relation',
-                    'errors' => [
-                        'Unit kerja / jenis pegawai / status pegawai tidak ditemukan'
-                    ],
-                    'data' => $data,
-                ];
-                continue;
-            }
-
-            // Insert to database
-            try {
-
-                Pegawai::create([
-                    'nama'                  => $row['nama'],
-                    'nip'                   => $row['nik_pegawai'],
-                    'ktp'                   => $row['nik_ktp'],
-                    'npwp'                  => $row['npwp'],
-                    'gelar_depan'           => $row['gelar_depan'],
-                    'gelar_belakang'        => $row['gelar_belakang'],
-                    'unit_kerja_id'         => $unitKerjaId,
-                    'jenis_pegawai_id'      => $jenisPegawaiId,
-                    'status_pegawai_id'     => $statusPegawaiId,
-                    'tempat_lahir'          => $row['tempat_lahir'],
-                    'tanggal_lahir'         => $this->transformDate($row['tanggal_lahir']),
-                    'tanggal_bergabung'     => $this->transformDate($row['tanggal_bergabung']),
-                    'tanggal_habis_kontrak' => $this->transformDate($row['tanggal_habis_kontrak']),
-                    'tanggal_pensiun'       => $this->transformDate($row['tanggal_pensiun']),
-                    'jenis_kelamin'         => $row['jenis_kelamin'],
-                    'alamat_ktp'            => $row['alamat_ktp'],
-                    'alamat_domisili'       => $row['alamat_domisili'],
-                    'no_telpon'             => $row['no_telpon'],
-                    'email_yarsi'           => $row['email_yarsi'],
-                    'status'                => $row['status'] ?? 'active',
-                ]);
-
-                $this->successRows++;
-                $this->successData[] = [
-                    'row' => $rowNumber,
-                    'nama' => $data['nama'],
-                    'nip' => $data['nik_pegawai'],
-                    'unit_kerja' => $data['unit_kerja'],
-                ];
-            } catch (\Throwable $e) {
-
-                $this->failedRows++;
-                $this->failures[] = [
-                    'row' => $rowNumber,
-                    'type' => 'system',
-                    'errors' => [$e->getMessage()],
-                    'data' => $data,
-                ];
-            }
-        }
+        return 9;
     }
 
-    private function transformDate($value, $format = 'Y-m-d')
+    private function parseDate($value, $format = 'Y-m-d')
     {
-        if (empty($value)) {
-            return null;
-        }
+        if (empty($value)) return null;
         try {
             if (is_numeric($value)) {
-                return Date::excelToDateTimeObject($value)->format($format);
+                return Carbon::instance(Date::excelToDateTimeObject($value))->format($format);
             }
             return Carbon::parse($value)->format($format);
         } catch (\Throwable $e) {
@@ -184,6 +64,145 @@ class PegawaiImport implements ToCollection, WithHeadingRow
             'alamat_ktp'            => 'nullable|string|max:255',
             'alamat_domisili'       => 'nullable|string|max:255',
         ];
+    }
+
+    public function collection(Collection $rows)
+    {
+        if ($rows->isEmpty()) return;
+
+        // Proteksi Multi-Sheet: Abaikan sheet "SETTINGS" atau yang tidak punya format biodata
+        $firstRow = $rows->first()->toArray();
+        if (!array_key_exists('nik_pegawai', $firstRow) && !array_key_exists('nama', $firstRow)) {
+            return;
+        }
+
+        $this->totalRows += $rows->count();
+
+        // 1. PRE-FETCHING DATA UNTUK MENGHEMAT MEMORI & CPU
+        // Ambil relasi foreign key
+        $unitKerjaMap = UnitKerja::pluck('id', 'name')->toArray();
+        $jenisPegawaiMap = JenisPegawai::pluck('id', 'jenis')->toArray();
+        $statusPegawaiMap = StatusPegawai::pluck('id', 'status')->toArray();
+
+        // Ambil data NIP, KTP, dan NPWP yang sudah ada di DB.
+        // Fungsi array_flip membuat pencarian (lookup) menjadi O(1) atau super instan.
+        $existingNips  = array_flip(Pegawai::pluck('nip')->filter()->toArray());
+        $existingKtps  = array_flip(Pegawai::pluck('ktp')->filter()->toArray());
+        $existingNpwps = array_flip(Pegawai::whereNotNull('npwp')->pluck('npwp')->filter()->toArray());
+
+        $newPegawais = []; // Array penampung untuk Batch Insert
+
+        foreach ($rows as $index => $row) {
+
+            $rowNumber = $index + 10;
+            $data = $row->toArray();
+
+            // Casting & Bersihkan spasi berlebih
+            $nip  = isset($data['nik_pegawai']) ? trim((string) $data['nik_pegawai']) : null;
+            $ktp  = isset($data['nik_ktp'])     ? trim((string) $data['nik_ktp'])     : null;
+            $npwp = isset($data['npwp'])        ? trim((string) $data['npwp'])        : null;
+
+            $data['nik_pegawai'] = $nip;
+            $data['nik_ktp']     = $ktp;
+            $data['npwp']        = $npwp;
+            $data['no_telpon']   = isset($data['no_telpon']) ? (string) $data['no_telpon'] : null;
+
+            // 2. Validasi Format Dasar
+            $validator = Validator::make($data, $this->rules());
+            if ($validator->fails()) {
+                $this->failedRows++;
+                $this->failures[] = [
+                    'row'     => $rowNumber,
+                    'type'    => 'validation',
+                    'message' => implode(', ', $validator->errors()->all()),
+                    'errors'  => $validator->errors()->all(),
+                    'data'    => $data
+                ];
+                continue;
+            }
+
+            // 3. Validasi Duplikat (Memori Instan)
+            $isDuplicate = false;
+            $duplicateReasons = [];
+
+            if (isset($existingNips[$nip])) {
+                $isDuplicate = true;
+                $duplicateReasons[] = 'NIP sudah terdaftar';
+            }
+            if (isset($existingKtps[$ktp])) {
+                $isDuplicate = true;
+                $duplicateReasons[] = 'KTP sudah terdaftar';
+            }
+            if (!empty($npwp) && isset($existingNpwps[$npwp])) {
+                $isDuplicate = true;
+                $duplicateReasons[] = 'NPWP sudah terdaftar';
+            }
+
+            if ($isDuplicate) {
+                $this->duplicateRows++;
+                $this->duplicates[] = [
+                    'row'     => $rowNumber,
+                    'type'    => 'duplicate',
+                    'message' => implode(' | ', $duplicateReasons),
+                    'errors'  => $duplicateReasons,
+                    'data'    => $data
+                ];
+                continue;
+            }
+
+            // Catat data ini di array lokal agar jika di file Excel yang sama ada duplikat (misal baris 9 & 10 NIP-nya sama),
+            // baris 10 akan langsung terdeteksi sebagai duplikat.
+            if ($nip) $existingNips[$nip] = true;
+            if ($ktp) $existingKtps[$ktp] = true;
+            if ($npwp) $existingNpwps[$npwp] = true;
+
+            // 4. Siapkan Array Untuk Disimpan (TIDAK langsung Insert agar hemat database)
+            try {
+                $newPegawais[] = [
+                    'nama'              => $data['nama'],
+                    'nip'               => $nip,
+                    'ktp'               => $ktp,
+                    'npwp'              => $npwp,
+                    'jenis_kelamin'     => $data['jenis_kelamin'] ?? null,
+                    'tempat_lahir'      => $data['tempat_lahir'] ?? null,
+                    'tanggal_lahir'     => $this->parseDate($data['tanggal_lahir']),
+                    'tanggal_bergabung' => $this->parseDate($data['tanggal_bergabung']),
+                    'no_telpon'         => $data['no_telpon'],
+                    'email_yarsi'       => $data['email_yarsi'] ?? null,
+                    'alamat_ktp'        => $data['alamat_ktp'] ?? null,
+                    'alamat_domisili'   => $data['alamat_domisili'] ?? null,
+                    'unit_kerja_id'     => $unitKerjaMap[$data['unit_kerja']] ?? null,
+                    'jenis_pegawai_id'  => $jenisPegawaiMap[$data['jenis_pegawai']] ?? null,
+                    'status_pegawai_id' => $statusPegawaiMap[$data['status_pegawai']] ?? null,
+                    'created_at'        => now(),
+                    'updated_at'        => now(),
+                ];
+
+                $this->successRows++;
+                $this->successData[] = [
+                    'row'        => $rowNumber,
+                    'nama'       => $data['nama'],
+                    'nip'        => $nip,
+                    'unit_kerja' => $data['unit_kerja'],
+                ];
+            } catch (\Throwable $e) {
+                $this->failedRows++;
+                $this->failures[] = [
+                    'row'     => $rowNumber,
+                    'type'    => 'system',
+                    'message' => 'Gagal format data: ' . $e->getMessage(),
+                    'errors'  => ['Gagal format data: ' . $e->getMessage()],
+                    'data'    => $data,
+                ];
+            }
+        }
+
+        // 5. BATCH INSERT KE DATABASE (Jika ada data baru yang valid)
+        if (!empty($newPegawais)) {
+            foreach (array_chunk($newPegawais, 500) as $chunk) {
+                Pegawai::insert($chunk);
+            }
+        }
     }
 
     public function getSummary()

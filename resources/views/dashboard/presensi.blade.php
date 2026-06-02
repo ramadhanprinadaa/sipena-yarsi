@@ -11,7 +11,16 @@
 @endsection
 
 @section('content')
-    <div x-data="{ activeTab: 'ringkasan' }" class="w-full min-h-[calc(100vh-157px)] space-y-5">
+    <div
+        x-data="{
+            activeTab: $persist('ringkasan'),
+            openLoadingDetailRiwayat: false,
+            openDetailRiwayat: false,
+        }"
+        @open-loading-detail-riwayat.window="openLoadingDetailRiwayat = true"
+        @open-detail-riwayat.window="openDetailRiwayat = true; openLoadingDetailRiwayat = false"
+        @close-detail-riwayat.window="openDetailRiwayat = false"
+        class="w-full min-h-[calc(100vh-157px)] space-y-5">
 
         {{-- ===== HERO CARD ===== --}}
         <div
@@ -92,7 +101,8 @@
         </div>
 
         {{-- ===== TABS & CONTENT CONTAINER ===== --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div
+            class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
             {{-- Navigation Tabs --}}
             <div class="border-b border-gray-200 bg-slate-50/50 px-2 sm:px-6">
@@ -105,7 +115,7 @@
                             class="inline-flex items-center justify-center py-4 px-5 sm:px-6 rounded-t-lg transition-all duration-200 cursor-pointer outline-none">
                             <i class="fa-solid fa-chart-pie mr-2.5 text-base transition-colors"
                                 :class="activeTab === 'ringkasan' ? 'text-teal-600' : 'text-gray-400'"></i>
-                            Ringkasan Presensi
+                            Ringkasan Kehadiran
                         </button>
                     </li>
                     <li class="mr-2">
@@ -123,7 +133,7 @@
             </div>
 
             {{-- Main Content Area --}}
-            <div class="relative p-5 sm:p-6 min-h-[400px]">
+            <div class="relative p-5">
 
                 {{-- Wrapper Tab Ringkasan --}}
                 <div x-show="activeTab === 'ringkasan'" x-transition:enter="transition ease-out duration-300"
@@ -145,5 +155,35 @@
             </div>
 
         </div>
+
+        {{-- Modal Detail Riwayat Presensi --}}
+        <template x-teleport="body">
+            <div x-show="openLoadingDetailRiwayat || openDetailRiwayat"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                @click.self="openDetailRiwayat = false"
+                @keydown.escape.window="openDetailRiwayat = false"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md"
+                style="display: none;">
+
+                <div x-show="openLoadingDetailRiwayat" class="flex flex-col items-center gap-4">
+                    <div class="w-10 h-10 border-[3px] border-white/20 border-t-white rounded-full animate-spin"></div>
+                    <div class="text-sm font-medium tracking-wide text-white">
+                        Memuat Data...
+                    </div>
+                </div>
+
+                <div x-show="openDetailRiwayat" x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                    x-transition:leave-end="opacity-0 translate-y-4 scale-95" @click.stop>
+                    <livewire:dashboard.presensi.detail-riwayat-presensi />
+                </div>
+            </div>
+        </template>
     </div>
 @endsection
