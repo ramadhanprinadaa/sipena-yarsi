@@ -5,7 +5,7 @@
 @section('breadcrumb')
     <div class="flex flex-wrap justify-center items-center space-x-2 text-sm text-gray-400 font-medium">
         <span>Manajemen</span>
-        <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i>
+        <i class="fa-solid fa-chevron-right text-xs text-gray-400"></i>
         <a wire:navigate href="{{ route('manajemen-pegawai') }}"
             class="text-indigo-600 hover:text-indigo-500 transition-colors duration-150">Pegawai</a>
     </div>

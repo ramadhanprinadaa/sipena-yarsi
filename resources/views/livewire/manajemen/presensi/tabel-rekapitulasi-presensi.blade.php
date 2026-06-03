@@ -320,40 +320,56 @@
                 <span class="text-sm font-normal text-body block w-full md:inline md:w-auto">
                     Menampilkan
                     <span
-                        class="font-semibold text-heading">{{ $this->rekapitulasiPresensi->firstItem() }}-{{ $this->rekapitulasiPresensi->lastItem() }}</span>
+                        class="font-semibold text-heading">
+                        {{ $this->hasPresensiData ? $this->rekapitulasiPresensi->firstItem() : '' }}
+                        -
+                        {{ $this->hasPresensiData ? $this->rekapitulasiPresensi->lastItem() : '' }}
+                    </span>
                     dari
-                    <span class="font-semibold text-heading">{{ $this->rekapitulasiPresensi->total() }} data</span>
+                    <span class="font-semibold text-heading">
+                        {{ $this->hasPresensiData ? $this->rekapitulasiPresensi->total() : 0 }}
+                        data
+                    </span>
                 </span>
 
                 <ul class="flex -space-x-px text-sm border border-gray-300 rounded-lg">
                     <li>
-                        <button wire:click="gotoPage(1)" @disabled($this->rekapitulasiPresensi->onFirstPage())
+                        <button wire:click="gotoPage(1)"
+                            @disabled($this->rekapitulasiPresensi->onFirstPage() || !$this->hasPresensiData)
                             class="table-pagination-btn rounded-s-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
                             <i class="fa-solid fa-angles-left text-xs"></i>
                         </button>
                     </li>
                     <li>
-                        <button wire:click="previousPage" @disabled($this->rekapitulasiPresensi->onFirstPage())
+                        <button wire:click="previousPage" @disabled($this->rekapitulasiPresensi->onFirstPage() || !$this->hasPresensiData)
                             class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
                             Previous
                         </button>
                     </li>
-                    @for ($i = max(1, $this->rekapitulasiPresensi->currentPage() - 3); $i <= min($this->rekapitulasiPresensi->lastPage(), $this->rekapitulasiPresensi->currentPage() + 3); $i++)
+                    @if(!$this->hasPresensiData)
                         <li>
-                            <button wire:click="gotoPage({{ $i }})"
-                                class="w-9 {{ $this->rekapitulasiPresensi->currentPage() == $i ? 'table-pagination-btn-active' : 'table-pagination-btn' }}">
-                                {{ $i }}
+                            <button class="table-pagination-btn-active px-3">
+                                1
                             </button>
                         </li>
-                    @endfor
+                    @else
+                        @for ($i = max(1, $this->rekapitulasiPresensi->currentPage() - 3); $i <= min($this->rekapitulasiPresensi->lastPage(), $this->rekapitulasiPresensi->currentPage() + 3); $i++)
+                            <li>
+                                <button wire:click="gotoPage({{ $i }})"
+                                    class="w-9 {{ $this->rekapitulasiPresensi->currentPage() == $i ? 'table-pagination-btn-active' : 'table-pagination-btn' }}">
+                                    {{ $i }}
+                                </button>
+                            </li>
+                        @endfor
+                    @endif
                     <li>
-                        <button wire:click="nextPage" @disabled(!$this->rekapitulasiPresensi->hasMorePages())
+                        <button wire:click="nextPage" @disabled(!$this->rekapitulasiPresensi->hasMorePages() || !$this->hasPresensiData)
                             class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
                             Next
                         </button>
                     </li>
                     <button wire:click="gotoPage({{ $this->rekapitulasiPresensi->lastPage() }})"
-                        @disabled($this->rekapitulasiPresensi->onLastPage())
+                        @disabled($this->rekapitulasiPresensi->onLastPage() || !$this->hasPresensiData)
                         class="table-pagination-btn rounded-e-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
                         <i class="fa-solid fa-angles-right text-xs"></i>
                     </button>

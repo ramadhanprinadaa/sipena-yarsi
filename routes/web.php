@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DetailPegawaiController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\ManajemenPegawaiController;
 use App\Http\Controllers\PegawaiController;
@@ -43,8 +44,8 @@ Route::middleware('auth')->group(function () {
 
         Route::middleware('role:Admin,SDM Yayasan,SDM Universitas,Rektor,Pimpinan')->group(function () {
             Route::get('pegawai', [ManajemenPegawaiController::class, 'index'])->name('manajemen-pegawai');
-            Route::livewire('pegawai/{id}', DetailPegawai::class)->name('manajemen-pegawai-detail');
-
+            // Route::livewire('pegawai/{id}', DetailPegawai::class)->name('manajemen-pegawai-detail');
+            Route::get('/pegawai/{pegawai}', [DetailPegawaiController::class, 'show'])->name('manajemen-pegawai-detail');
             Route::view('presensi', 'manajemen.presensi')->name('manajemen-presensi');
             Route::view('lembur', 'manajemen.lembur')->name('manajemen-lembur');
             Route::view('cuti', 'manajemen.cuti')->name('manajemen-cuti');

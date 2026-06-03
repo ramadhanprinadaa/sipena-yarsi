@@ -2,7 +2,8 @@
 
 namespace App\Livewire\Manajemen\Pegawai;
 
-use App\Imports\PegawaiImport;
+use App\Imports\Pegawai\PegawaiImport;
+use App\Imports\Pegawai\PegawaiImportData;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -38,9 +39,9 @@ class ImportPegawai extends Component
 
     public function import(string $filePath): array
     {
-        $import = new PegawaiImport();
+        $import = new PegawaiImportData();
         Excel::import($import, $filePath);
-        return $import->getSummary() ?? [];
+        return $import->getSummaries() ?? [];
     }
 
     public function downloadTemplate()
@@ -72,6 +73,15 @@ class ImportPegawai extends Component
             // Import Excel
             $summary = $this->import($path);
 
+            // Hitung akumulasi (total) dari seluruh sheet untuk disimpan ke Log DB
+            $totalRows = $totalSuccess = $totalFailed = $totalDuplicate = 0;
+            foreach ($summary as $sheetName => $sheetSummary) {
+                $totalRows += $sheetSummary['total_rows'] ?? 0;
+                $totalSuccess += $sheetSummary['total_success'] ?? 0;
+                $totalFailed += $sheetSummary['total_failed'] ?? 0;
+                $totalDuplicate += $sheetSummary['total_duplicate'] ?? 0;
+            }
+
             // dd($summary);
 
             // Save Log to DB
@@ -79,10 +89,10 @@ class ImportPegawai extends Component
                 'file_name'         => $filename,
                 'file_path'         => $path,
                 'imported_by'       => Auth::id(),
-                'total_rows'        => $summary['total_rows'] ?? 0,
-                'total_success'      => $summary['total_success'] ?? 0,
-                'total_failed'       => $summary['total_failed'] ?? 0,
-                'total_duplicate'    => $summary['total_duplicate'] ?? 0,
+                'total_rows'        => $totalRows,
+                'total_success'     => $totalSuccess,
+                'total_failed'      => $totalFailed,
+                'total_duplicate'   => $totalDuplicate,
                 'created_at'        => now(),
                 'updated_at'        => now(),
             ]);

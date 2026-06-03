@@ -18,8 +18,14 @@
                 <i class="fa-solid fa-user-plus text-base text-indigo-500"></i>
             </div>
             <div>
-                <h2 class="text-md font-bold text-gray-800 leading-tight tracking-tight">Form Tambah Pegawai</h2>
-                <p class="text-xs text-gray-400 leading-tight">Isi data pegawai baru secara lengkap</p>
+                <h2 class="text-md font-semibold text-slate-800 leading-tight">
+                    Form Tambah Pegawai
+                </h2>
+                <div class="flex items-center gap-2 mt-1 text-sm text-slate-500">
+                    <span>
+                        Isi data pegawai baru secara lengkap
+                    </span>
+                </div>
             </div>
         </div>
         <button

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Imports;
+namespace App\Imports\Pegawai;
 
 use App\Models\Pegawai;
 use App\Models\UnitKerja;
@@ -32,7 +32,7 @@ class PegawaiImport implements ToCollection, WithHeadingRow
      */
     public function headingRow(): int
     {
-        return 9;
+        return 10;
     }
 
     private function parseDate($value, $format = 'Y-m-d')
@@ -94,7 +94,7 @@ class PegawaiImport implements ToCollection, WithHeadingRow
 
         foreach ($rows as $index => $row) {
 
-            $rowNumber = $index + 10;
+            $rowNumber = $index + 11;
             $data = $row->toArray();
 
             // Casting & Bersihkan spasi berlebih

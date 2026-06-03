@@ -22,7 +22,7 @@
 
         <div class="flex items-center gap-4 relative z-10">
             <div class="w-10 h-10 rounded-lg {{ $iconBg }} flex items-center justify-center shadow-lg {{ $iconShadow }}">
-                <i class="{{ $icon }} text-white text-xl"></i>
+                <i class="{{ $icon }} text-white text-md"></i>
             </div>
 
             <div>

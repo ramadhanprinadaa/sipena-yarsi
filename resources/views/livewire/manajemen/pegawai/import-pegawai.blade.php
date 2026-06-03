@@ -10,9 +10,14 @@
                     <i class="fa-solid fa-cloud-arrow-down text-base text-indigo-500"></i>
                 </div>
                 <div>
-                    <h2 class="text-sm font-bold text-gray-800 leading-tight tracking-tight">Import Data Pegawai</h2>
-                    <p class="text-xs text-gray-400 leading-tight">Unggah file Excel atau CSV untuk import massal data
-                        pegawai</p>
+                    <h2 class="text-md font-semibold text-slate-800 leading-tight">
+                        Import Data Pegawai
+                    </h2>
+                    <div class="flex items-center gap-2 mt-1 text-sm text-slate-500">
+                        <span>
+                            Unggah file Excel atau CSV untuk import massal data pegawai
+                        </span>
+                    </div>
                 </div>
             </div>
             <button type="button" @click="$dispatch('close-import-modal')"
@@ -234,17 +239,20 @@
 
         <!-- Header -->
         <header class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full flex items-center justify-center bg-emerald-100">
                     <i class="fa-solid fa-circle-check text-base text-emerald-500"></i>
                 </div>
                 <div>
-                    <h2 class="text-sm font-bold text-gray-800 leading-tight tracking-tight">
+                    <h2 class="text-lg font-semibold text-slate-800 leading-tight">
                         Hasil Import Data Pegawai
                     </h2>
-                    <p class="text-xs text-gray-400 leading-tight">
-                        Ringkasan dan detail hasil upload file pegawai
-                    </p>
+                    <div class="flex items-center gap-2 mt-1 text-sm text-slate-500">
+                        <span>
+                            Ringkasan dan detail hasil upload file pegawai
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -255,213 +263,143 @@
         </header>
 
         <!-- Body -->
-        <div class="px-6 py-5 h-[70vh] flex flex-col">
+        <div wire:key="preview-body" x-data="{ activeSheet: '{{ !empty($importSummary) ? array_key_first($importSummary) : '' }}' }" class="px-6 py-5 h-[70vh] flex flex-col">
 
-            <!-- Summary Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 shrink-0">
-
-                <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
-                    <p class="text-xs text-gray-400 font-medium">Total Data</p>
-                    <h3 class="mt-1 text-2xl font-bold text-gray-800">
-                        {{ $importSummary['total_rows'] ?? 0 }}
-                    </h3>
-                </div>
-
-                <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
-                    <p class="text-xs text-emerald-500 font-medium">Berhasil</p>
-                    <h3 class="mt-1 text-2xl font-bold text-emerald-600">
-                        {{ $importSummary['total_success'] ?? 0 }}
-                    </h3>
-                </div>
-
-                <div class="rounded-2xl border border-red-100 bg-red-50 p-4">
-                    <p class="text-xs text-red-500 font-medium">Gagal</p>
-                    <h3 class="mt-1 text-2xl font-bold text-red-600">
-                        {{ $importSummary['total_failed'] ?? 0 }}
-                    </h3>
-                </div>
-
-                <div class="rounded-2xl border border-yellow-100 bg-yellow-50 p-4">
-                    <p class="text-xs text-yellow-500 font-medium">Duplikat</p>
-                    <h3 class="mt-1 text-2xl font-bold text-yellow-600">
-                        {{ $importSummary['total_duplicate'] ?? 0 }}
-                    </h3>
-                </div>
+            @if(count($importSummary) > 1)
+            <div class="flex items-center gap-4 mb-4 border-b border-gray-100 shrink-0 overflow-x-auto pb-1">
+                @foreach($importSummary as $sheetName => $summary)
+                    <button wire:key="tab-btn-{{ $sheetName }}"
+                        @click="activeSheet = '{{ $sheetName }}'"
+                        :class="activeSheet === '{{ $sheetName }}' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                        class="px-2 py-2 text-sm font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer">
+                        Sheet: {{ $sheetName }}
+                    </button>
+                @endforeach
             </div>
+            @endif
 
-            <!-- Detail Rows -->
-            <div x-data="{ tab: 'failed' }" class="mt-5 flex flex-col flex-1 min-h-0">
+            @foreach($importSummary as $sheetName => $summary)
+            <div wire:key="tab-content-{{ $sheetName }}" x-show="activeSheet === '{{ $sheetName }}'" class="flex flex-col flex-1 min-h-0" style="display: none;">
 
-                <!-- Tab Button -->
-                <div class="flex items-center gap-2 mb-3 shrink-0">
-                    <button @click="tab = 'failed'"
-                        :class="tab === 'failed'
-                            ?
-                            'bg-red-100 text-red-700' :
-                            'bg-gray-100 text-gray-500'"
-                        class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">
-                        Failed
-                        ({{ count($importSummary['failures'] ?? []) }})
-                    </button>
-                    <button @click="tab = 'duplicate'"
-                        :class="tab === 'duplicate'
-                            ?
-                            'bg-yellow-100 text-yellow-700' :
-                            'bg-gray-100 text-gray-500'"
-                        class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">
-                        Duplicate
-                        ({{ count($importSummary['duplicates'] ?? []) }})
-                    </button>
-
-                    <button @click="tab = 'success'"
-                        :class="tab === 'success'
-                            ?
-                            'bg-emerald-100 text-emerald-700' :
-                            'bg-gray-100 text-gray-500'"
-                        class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">
-                        Success
-                        ({{ count($importSummary['success_data'] ?? []) }})
-                    </button>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 shrink-0">
+                    <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                        <p class="text-xs text-gray-400 font-medium">Total Data</p>
+                        <h3 class="mt-1 text-2xl font-bold text-gray-800">{{ $summary['total_rows'] ?? 0 }}</h3>
+                    </div>
+                    <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
+                        <p class="text-xs text-emerald-500 font-medium">Berhasil</p>
+                        <h3 class="mt-1 text-2xl font-bold text-emerald-600">{{ $summary['total_success'] ?? 0 }}</h3>
+                    </div>
+                    <div class="rounded-2xl border border-red-100 bg-red-50 p-4">
+                        <p class="text-xs text-red-500 font-medium">Gagal</p>
+                        <h3 class="mt-1 text-2xl font-bold text-red-600">{{ $summary['total_failed'] ?? 0 }}</h3>
+                    </div>
+                    <div class="rounded-2xl border border-yellow-100 bg-yellow-50 p-4">
+                        <p class="text-xs text-yellow-500 font-medium">Duplikat</p>
+                        <h3 class="mt-1 text-2xl font-bold text-yellow-600">{{ $summary['total_duplicate'] ?? 0 }}</h3>
+                    </div>
                 </div>
 
-                <div class="flex-1 overflow-y-auto pr-1 min-h-0">
-                    <!-- Success Rows -->
-                    @if (!empty($importSummary['success_data']))
-                        <div class="space-y-3" x-show="tab === 'success'">
+                <div wire:key="detail-tabs-{{ $sheetName }}" x-data="{ tab: 'failed' }" class="mt-5 flex flex-col flex-1 min-h-0">
 
-                            <div class="space-y-2">
+                    <div class="flex items-center gap-2 mb-3 shrink-0">
+                        <button @click="tab = 'failed'"
+                            :class="tab === 'failed' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'"
+                            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">
+                            Failed ({{ count($summary['failures'] ?? []) }})
+                        </button>
+                        <button @click="tab = 'duplicate'"
+                            :class="tab === 'duplicate' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'"
+                            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">
+                            Duplicate ({{ count($summary['duplicates'] ?? []) }})
+                        </button>
+                        <button @click="tab = 'success'"
+                            :class="tab === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'"
+                            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">
+                            Success ({{ count($summary['success_data'] ?? []) }})
+                        </button>
+                    </div>
 
-                                @foreach ($importSummary['success_data'] as $item)
-                                    <div class="rounded-xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
+                    <div class="flex-1 overflow-y-auto pr-1 min-h-0">
+                        @if (!empty($summary['success_data']))
+                            <div class="space-y-3" x-show="tab === 'success'">
+                                <div class="space-y-2">
+                                    @foreach ($summary['success_data'] as $item)
+                                        <div wire:key="success-{{ $sheetName }}-{{ $loop->index }}" class="rounded-xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
+                                            <div class="flex items-start justify-between gap-3">
+                                                <div>
+                                                    <p class="text-sm font-semibold text-gray-800">Baris {{ $item['row'] }}</p>
+                                                    <p class="text-sm text-emerald-700 mt-1">{{ $item['nama'] ?? '-' }}</p>
+                                                    <div class="flex flex-wrap gap-2 mt-2">
+                                                        <span class="px-2 py-1 rounded-md text-[11px] font-medium bg-white border border-emerald-200 text-emerald-700">
+                                                            NIP: {{ $item['nip'] ?? '-' }}
+                                                        </span>
+                                                        <span class="px-2 py-1 rounded-md text-[11px] font-medium bg-white border border-emerald-200 text-emerald-700">
+                                                            {{ $item['unit_kerja'] ?? '-' }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <span class="px-2 py-1 rounded-md bg-emerald-100 text-emerald-700 text-[11px] font-semibold">Success</span>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
 
-                                        <div class="flex items-start justify-between gap-3">
-
-                                            <div>
-                                                <p class="text-sm font-semibold text-gray-800">
-                                                    Baris {{ $item['row'] }}
-                                                </p>
-
-                                                <p class="text-sm text-emerald-700 mt-1">
-                                                    {{ $item['nama'] ?? '-' }}
-                                                </p>
-
-                                                <div class="flex flex-wrap gap-2 mt-2">
-
-                                                    <span
-                                                        class="px-2 py-1 rounded-md text-[11px] font-medium bg-white border border-emerald-200 text-emerald-700">
-                                                        NIP: {{ $item['nip'] ?? '-' }}
-                                                    </span>
-
-                                                    <span
-                                                        class="px-2 py-1 rounded-md text-[11px] font-medium bg-white border border-emerald-200 text-emerald-700">
-                                                        {{ $item['unit_kerja'] ?? '-' }}
-                                                    </span>
-
+                        @if (!empty($summary['failures']))
+                            <div class="space-y-3" x-show="tab === 'failed'">
+                                <div class="space-y-2">
+                                    @foreach ($summary['failures'] as $failure)
+                                        <div wire:key="failed-{{ $sheetName }}-{{ $loop->index }}" class="rounded-xl border border-red-100 bg-red-50/70 px-4 py-3">
+                                            <div class="flex items-start justify-between gap-3">
+                                                <div class="flex-1">
+                                                    <div class="flex items-center gap-2">
+                                                        <p class="text-sm font-semibold text-gray-800">Baris {{ $failure['row'] }}</p>
+                                                        <span class="px-2 py-0.5 rounded-md bg-red-100 text-red-600 text-[10px] font-semibold uppercase">
+                                                            {{ $failure['type'] }}
+                                                        </span>
+                                                    </div>
+                                                    <p class="text-sm text-gray-700 mt-1">{{ $failure['data']['nama'] ?? '-' }}</p>
+                                                    <ul class="mt-3 space-y-1">
+                                                        @foreach ($failure['errors'] as $error)
+                                                            <li class="text-xs text-red-600 flex items-start gap-2">
+                                                                <i class="fa-solid fa-circle text-[6px] mt-1.5"></i>
+                                                                <span>{{ $error }}</span>
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
                                                 </div>
                                             </div>
-
-                                            <span
-                                                class="px-2 py-1 rounded-md bg-emerald-100 text-emerald-700 text-[11px] font-semibold">
-                                                Success
-                                            </span>
                                         </div>
-                                    </div>
-                                @endforeach
-
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
-                    @endif
+                        @endif
 
-                    <!-- Failed Rows -->
-                    @if (!empty($importSummary['failures']))
-                        <div class="space-y-3" x-show="tab === 'failed'">
-
-                            <div class="space-y-2">
-
-                                @foreach ($importSummary['failures'] as $failure)
-                                    <div class="rounded-xl border border-red-100 bg-red-50/70 px-4 py-3">
-
-                                        <div class="flex items-start justify-between gap-3">
-
-                                            <div class="flex-1">
-
-                                                <div class="flex items-center gap-2">
-                                                    <p class="text-sm font-semibold text-gray-800">
-                                                        Baris {{ $failure['row'] }}
-                                                    </p>
-
-                                                    <span
-                                                        class="px-2 py-0.5 rounded-md bg-red-100 text-red-600 text-[10px] font-semibold uppercase">
-                                                        {{ $failure['type'] }}
-                                                    </span>
+                        @if (!empty($summary['duplicates']))
+                            <div class="space-y-3" x-show="tab === 'duplicate'">
+                                <div class="space-y-2">
+                                    @foreach ($summary['duplicates'] as $duplicate)
+                                        <div wire:key="duplicate-{{ $sheetName }}-{{ $loop->index }}" class="rounded-xl border border-yellow-100 bg-yellow-50/70 px-4 py-3">
+                                            <div class="flex items-start justify-between gap-3">
+                                                <div>
+                                                    <p class="text-sm font-semibold text-gray-800">Baris {{ $duplicate['row'] }}</p>
+                                                    <p class="text-sm text-gray-700 mt-1">{{ $duplicate['data']['nama'] ?? '-' }}</p>
+                                                    <p class="text-xs text-yellow-700 mt-2">{{ $duplicate['message'] }}</p>
                                                 </div>
-
-                                                <p class="text-sm text-gray-700 mt-1">
-                                                    {{ $failure['data']['nama'] ?? '-' }}
-                                                </p>
-
-                                                <ul class="mt-3 space-y-1">
-
-                                                    @foreach ($failure['errors'] as $error)
-                                                        <li class="text-xs text-red-600 flex items-start gap-2">
-                                                            <i class="fa-solid fa-circle text-[6px] mt-1.5"></i>
-                                                            <span>{{ $error }}</span>
-                                                        </li>
-                                                    @endforeach
-
-                                                </ul>
-
+                                                <span class="px-2 py-1 rounded-md bg-yellow-100 text-yellow-700 text-[11px] font-semibold">Duplicate</span>
                                             </div>
-
                                         </div>
-                                    </div>
-                                @endforeach
-
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
-                    @endif
-
-                    <!-- Duplicate Rows -->
-                    @if (!empty($importSummary['duplicates']))
-                        <div class="space-y-3" x-show="tab === 'duplicate'">
-
-                            <div class="space-y-2">
-
-                                @foreach ($importSummary['duplicates'] as $duplicate)
-                                    <div class="rounded-xl border border-yellow-100 bg-yellow-50/70 px-4 py-3">
-
-                                        <div class="flex items-start justify-between gap-3">
-
-                                            <div>
-
-                                                <p class="text-sm font-semibold text-gray-800">
-                                                    Baris {{ $duplicate['row'] }}
-                                                </p>
-
-                                                <p class="text-sm text-gray-700 mt-1">
-                                                    {{ $duplicate['data']['nama'] ?? '-' }}
-                                                </p>
-
-                                                <p class="text-xs text-yellow-700 mt-2">
-                                                    {{ $duplicate['message'] }}
-                                                </p>
-
-                                            </div>
-
-                                            <span
-                                                class="px-2 py-1 rounded-md bg-yellow-100 text-yellow-700 text-[11px] font-semibold">
-                                                Duplicate
-                                            </span>
-
-                                        </div>
-                                    </div>
-                                @endforeach
-
-                            </div>
-                        </div>
-                    @endif
+                        @endif
+                    </div>
                 </div>
+
             </div>
+            @endforeach
         </div>
 
         <!-- Footer -->
