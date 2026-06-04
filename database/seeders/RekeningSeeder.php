@@ -14,13 +14,13 @@ class RekeningSeeder extends Seeder
     public function run(): void
     {
         Rekening::create([
-            'pegawai_id' => 51,
+            'pegawai_nip' => '1402022043',
             'nama_bank' => 'BRI',
             'nomor_rekening' => '1234567890',
             'nama_rekening' => 'Muhammad Ramadhan Prinada',
         ]);
         Rekening::create([
-            'pegawai_id' => 52,
+            'pegawai_nip' => '1402022044',
             'nama_bank' => 'Mandiri',
             'nomor_rekening' => '0987654321',
             'nama_rekening' => 'Annisa Putri Yuniar',

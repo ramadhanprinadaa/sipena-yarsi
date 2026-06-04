@@ -12,7 +12,8 @@ class PegawaiImportData implements WithMultipleSheets, SkipsUnknownSheets
     public function sheets(): array
     {
         $this->sheetImports['BIODATA'] = new PegawaiImport();
-        $this->sheetImports['PENDIDIKAN'] = new PendidikanImport();
+        $this->sheetImports['REKENING'] = new RekeningImport();
+        // $this->sheetImports['PENDIDIKAN'] = new PendidikanImport();
         // $this->sheetImports['KELUARGA'] = new KeluargaImport();
 
         return $this->sheetImports;
@@ -23,7 +24,6 @@ class PegawaiImportData implements WithMultipleSheets, SkipsUnknownSheets
         info("Sheet {$sheetName} was skipped");
     }
 
-    // Method untuk mengambil ringkasan hasil impor dari setiap sheet
     public function getSummaries(): array
     {
         $summaries = [];

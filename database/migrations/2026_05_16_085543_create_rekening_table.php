@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('rekening', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pegawai_id');
+            $table->foreignId('pegawai_nip')->unique();
             $table->string('nama_bank');
             $table->string('nomor_rekening')->unique();
             $table->string('nama_rekening');

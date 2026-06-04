@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Manajemen\Pegawai;
 
-use App\Imports\Pegawai\PegawaiImport;
 use App\Imports\Pegawai\PegawaiImportData;
 
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +26,8 @@ class ImportPegawai extends Component
     public bool $showResult = false;
 
     public array $importSummary = [];
+
+    public $iteration = 0;
 
     public function messages()
     {
@@ -120,8 +121,9 @@ class ImportPegawai extends Component
 
     public function resetImport()
     {
-        $this->reset('file');
+        $this->reset(['file', 'importSummary', 'errorMessage']);
         $this->resetValidation();
+        $this->iteration++;
         $this->showResult = false;
     }
 

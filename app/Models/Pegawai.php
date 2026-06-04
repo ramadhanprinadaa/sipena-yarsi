@@ -69,13 +69,23 @@ class Pegawai extends Model
         return Carbon::parse($this->tanggal_lahir)->age;
     }
 
-    public function getMasaKerjaAttribute()
+    public function getMasaKerjaAttribute(): string
     {
         if (!$this->tanggal_bergabung) {
             return '-';
         }
         $diff = $this->tanggal_bergabung->diff(now());
-        return "{$diff->m} Bulan";
+        $parts = [];
+        if ($diff->y > 0) {
+            $parts[] = "{$diff->y} Tahun";
+        }
+        if ($diff->m > 0) {
+            $parts[] = "{$diff->m} Bulan";
+        }
+        if (empty($parts)) {
+            $parts[] = 'Kurang dari 1 Bulan';
+        }
+        return implode(' ', $parts);
     }
 
     public function getJenisKelaminAttribute($value)
@@ -85,6 +95,26 @@ class Pegawai extends Model
             'P' => 'Perempuan',
             default => '-',
         };
+    }
+
+    public function getTanggalLahirFormattedAttribute()
+    {
+        return Carbon::parse($this->tanggal_lahir)->translatedFormat('d F Y');
+    }
+
+    public function getTanggalBergabungFormattedAttribute()
+    {
+        return Carbon::parse($this->tanggal_bergabung)->translatedFormat('d F Y');
+    }
+
+    public function getTanggalHabisKontrakFormattedAttribute()
+    {
+        return Carbon::parse($this->tanggal_habis_kontrak)->translatedFormat('d F Y');
+    }
+
+    public function getTanggalPensiunFormattedAttribute()
+    {
+        return Carbon::parse($this->tanggal_pensiun)->translatedFormat('d F Y');
     }
 
     public function user()
@@ -119,7 +149,7 @@ class Pegawai extends Model
 
     public function rekening()
     {
-        return $this->hasOne(Rekening::class, 'pegawai_id');
+        return $this->hasOne(Rekening::class, 'pegawai_nip', 'nip');
     }
 
     public function presensi()

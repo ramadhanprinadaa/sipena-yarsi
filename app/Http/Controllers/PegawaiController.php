@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Pegawai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -10,7 +9,15 @@ class PegawaiController extends Controller
 {
     public function pegawai()
     {
-        $pegawai = Auth::user()->pegawai()->with(['jenis_pegawai', 'unit_kerja', 'status_pegawai'])->first();
+        $user = Auth::user();
+
+        $user->load([
+            'pegawai.jenis_pegawai',
+            'pegawai.unit_kerja',
+            'pegawai.status_pegawai'
+        ]);
+
+        $pegawai = $user->pegawai;
 
         return view('dashboard.pegawai', compact('pegawai'));
     }

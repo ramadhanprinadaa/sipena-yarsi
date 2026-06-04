@@ -47,29 +47,26 @@ class RekeningImport implements ToCollection, WithHeadingRow
 
         $this->totalRows += $rows->count();
 
-        // ==========================================
-        // 1. PRE-FETCHING DATA
-        // ==========================================
-        // Ambil semua NIP valid
+        // Prefetch existing nip pegawai
         $validNips = array_flip(Pegawai::pluck('nip')->filter()->toArray());
 
-        // Ambil pemetaan Rekening (Nomor Rekening => NIP)
+        // Prefetch existing nomor rekening untuk cek duplikasi
         $existingRekening = Rekening::pluck('pegawai_nip', 'nomor_rekening')->toArray();
 
+        $upsertData = [];
         $nipsInCurrentExcel = [];
         $rekeningInCurrentExcel = [];
-        $upsertData = [];
 
         foreach ($rows as $index => $row) {
+
             $rowNumber = $index + 10;
             $data = $row->toArray();
 
+            // get data nip dan nomor rekening from file excel
             $nip = isset($data['nik_pegawai']) ? trim((string) $data['nik_pegawai']) : null;
             $noRekening = isset($data['nomor_rekening']) ? trim((string) $data['nomor_rekening']) : null;
 
-            // ==========================================
-            // 2. VALIDASI FORMAT
-            // ==========================================
+            // Validasi format dan required
             $validator = Validator::make($data, $this->rules());
             if ($validator->fails()) {
                 $this->failedRows++;
@@ -80,9 +77,7 @@ class RekeningImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            // ==========================================
-            // 3. VALIDASI RELASI PEGAWAI
-            // ==========================================
+            // Validasi NIP Pegawai harus ada di database
             if (!isset($validNips[$nip])) {
                 $this->failedRows++;
                 $this->failures[] = [
@@ -92,12 +87,9 @@ class RekeningImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            // ==========================================
-            // 4. CEK DUPLIKAT
-            // ==========================================
+            // Cek Duplikasi Apakah NIP muncul 2x di Excel
             $isDuplicate = false;
             $duplicateReasons = [];
-
             // A. Duplikat Internal (Dalam 1 file excel yg sama)
             if (isset($nipsInCurrentExcel[$nip])) {
                 $isDuplicate = true;
@@ -129,24 +121,20 @@ class RekeningImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            // ==========================================
-            // 5. SIAPKAN DATA UPSERT
-            // ==========================================
             try {
                 $upsertData[] = [
-                    'pegawai_nip'    => $nip, // Acuan unik
+                    'pegawai_nip'    => $nip,
                     'nama_bank'      => $data['nama_bank'],
                     'nomor_rekening' => $noRekening,
                     'nama_rekening'  => $data['nama_rekening'],
-                    'created_at'     => now(),
                     'updated_at'     => now(),
                 ];
 
                 $this->successRows++;
                 $this->successData[] = [
-                    'row'            => $rowNumber,
-                    'nip'            => $nip,
-                    'nama_bank'      => $data['nama_bank'],
+                    'row' => $rowNumber,
+                    'nip' => $nip,
+                    'nama_bank' => $data['nama_bank'],
                     'nomor_rekening' => $noRekening
                 ];
             } catch (\Throwable $e) {
@@ -158,15 +146,12 @@ class RekeningImport implements ToCollection, WithHeadingRow
             }
         }
 
-        // ==========================================
-        // 6. BATCH UPSERT
-        // ==========================================
         if (!empty($upsertData)) {
             foreach (array_chunk($upsertData, 500) as $chunk) {
                 Rekening::upsert(
                     $chunk,
-                    ['pegawai_nip'], // Kolom Acuan Unique
-                    ['nama_bank', 'nomor_rekening', 'nama_rekening', 'updated_at'] // Kolom yg diupdate
+                    ['pegawai_nip'],
+                    ['nama_bank', 'nomor_rekening', 'nama_rekening', 'updated_at'] // Update data jika NIP sudah ada
                 );
             }
         }

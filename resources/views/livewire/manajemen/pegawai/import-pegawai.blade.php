@@ -265,140 +265,308 @@
         <!-- Body -->
         <div wire:key="preview-body" x-data="{ activeSheet: '{{ !empty($importSummary) ? array_key_first($importSummary) : '' }}' }" class="px-6 py-5 h-[70vh] flex flex-col">
 
-            @if(count($importSummary) > 1)
-            <div class="flex items-center gap-4 mb-4 border-b border-gray-100 shrink-0 overflow-x-auto pb-1">
-                @foreach($importSummary as $sheetName => $summary)
-                    <button wire:key="tab-btn-{{ $sheetName }}"
-                        @click="activeSheet = '{{ $sheetName }}'"
-                        :class="activeSheet === '{{ $sheetName }}' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
-                        class="px-2 py-2 text-sm font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer">
-                        Sheet: {{ $sheetName }}
-                    </button>
-                @endforeach
-            </div>
+            @if (count($importSummary) > 1)
+                {{-- Sheet Tabs --}}
+                <div class="flex items-center gap-4 mb-4 border-b border-gray-100 shrink-0 overflow-x-auto pb-1">
+                    @foreach ($importSummary as $sheetName => $summary)
+                        <button wire:key="tab-btn-{{ $sheetName }}" @click="activeSheet = '{{ $sheetName }}'"
+                            :class="activeSheet === '{{ $sheetName }}' ? 'border-indigo-500 text-indigo-600' :
+                                'border-transparent text-gray-500 hover:text-gray-700'"
+                            class="px-2 py-2 text-sm font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer">
+                            Sheet: {{ $sheetName }}
+                        </button>
+                    @endforeach
+                </div>
             @endif
 
-            @foreach($importSummary as $sheetName => $summary)
-            <div wire:key="tab-content-{{ $sheetName }}" x-show="activeSheet === '{{ $sheetName }}'" class="flex flex-col flex-1 min-h-0" style="display: none;">
+            @foreach ($importSummary as $sheetName => $summary)
+                <div wire:key="tab-content-{{ $sheetName }}" x-show="activeSheet === '{{ $sheetName }}'"
+                    class="flex flex-col flex-1 min-h-0" style="display: none;">
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 shrink-0">
-                    <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
-                        <p class="text-xs text-gray-400 font-medium">Total Data</p>
-                        <h3 class="mt-1 text-2xl font-bold text-gray-800">{{ $summary['total_rows'] ?? 0 }}</h3>
-                    </div>
-                    <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
-                        <p class="text-xs text-emerald-500 font-medium">Berhasil</p>
-                        <h3 class="mt-1 text-2xl font-bold text-emerald-600">{{ $summary['total_success'] ?? 0 }}</h3>
-                    </div>
-                    <div class="rounded-2xl border border-red-100 bg-red-50 p-4">
-                        <p class="text-xs text-red-500 font-medium">Gagal</p>
-                        <h3 class="mt-1 text-2xl font-bold text-red-600">{{ $summary['total_failed'] ?? 0 }}</h3>
-                    </div>
-                    <div class="rounded-2xl border border-yellow-100 bg-yellow-50 p-4">
-                        <p class="text-xs text-yellow-500 font-medium">Duplikat</p>
-                        <h3 class="mt-1 text-2xl font-bold text-yellow-600">{{ $summary['total_duplicate'] ?? 0 }}</h3>
-                    </div>
-                </div>
-
-                <div wire:key="detail-tabs-{{ $sheetName }}" x-data="{ tab: 'failed' }" class="mt-5 flex flex-col flex-1 min-h-0">
-
-                    <div class="flex items-center gap-2 mb-3 shrink-0">
-                        <button @click="tab = 'failed'"
-                            :class="tab === 'failed' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'"
-                            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">
-                            Failed ({{ count($summary['failures'] ?? []) }})
-                        </button>
-                        <button @click="tab = 'duplicate'"
-                            :class="tab === 'duplicate' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'"
-                            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">
-                            Duplicate ({{ count($summary['duplicates'] ?? []) }})
-                        </button>
-                        <button @click="tab = 'success'"
-                            :class="tab === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'"
-                            class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">
-                            Success ({{ count($summary['success_data'] ?? []) }})
-                        </button>
+                    {{-- Summary Cards --}}
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 shrink-0">
+                        <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                            <p class="text-xs text-gray-400 font-medium">Total Data</p>
+                            <h3 class="mt-1 text-2xl font-bold text-gray-800">{{ $summary['total_rows'] ?? 0 }}</h3>
+                        </div>
+                        <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
+                            <p class="text-xs text-emerald-500 font-medium">Berhasil</p>
+                            <h3 class="mt-1 text-2xl font-bold text-emerald-600">{{ $summary['total_success'] ?? 0 }}
+                            </h3>
+                        </div>
+                        <div class="rounded-2xl border border-red-100 bg-red-50 p-4">
+                            <p class="text-xs text-red-500 font-medium">Gagal</p>
+                            <h3 class="mt-1 text-2xl font-bold text-red-600">{{ $summary['total_failed'] ?? 0 }}</h3>
+                        </div>
+                        <div class="rounded-2xl border border-yellow-100 bg-yellow-50 p-4">
+                            <p class="text-xs text-yellow-500 font-medium">Duplikat</p>
+                            <h3 class="mt-1 text-2xl font-bold text-yellow-600">{{ $summary['total_duplicate'] ?? 0 }}
+                            </h3>
+                        </div>
                     </div>
 
-                    <div class="flex-1 overflow-y-auto pr-1 min-h-0">
-                        @if (!empty($summary['success_data']))
-                            <div class="space-y-3" x-show="tab === 'success'">
-                                <div class="space-y-2">
-                                    @foreach ($summary['success_data'] as $item)
-                                        <div wire:key="success-{{ $sheetName }}-{{ $loop->index }}" class="rounded-xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
-                                            <div class="flex items-start justify-between gap-3">
-                                                <div>
-                                                    <p class="text-sm font-semibold text-gray-800">Baris {{ $item['row'] }}</p>
-                                                    <p class="text-sm text-emerald-700 mt-1">{{ $item['nama'] ?? '-' }}</p>
-                                                    <div class="flex flex-wrap gap-2 mt-2">
-                                                        <span class="px-2 py-1 rounded-md text-[11px] font-medium bg-white border border-emerald-200 text-emerald-700">
-                                                            NIP: {{ $item['nip'] ?? '-' }}
-                                                        </span>
-                                                        <span class="px-2 py-1 rounded-md text-[11px] font-medium bg-white border border-emerald-200 text-emerald-700">
-                                                            {{ $item['unit_kerja'] ?? '-' }}
-                                                        </span>
+                    {{-- Detail Tabs --}}
+                    <div wire:key="detail-tabs-{{ $sheetName }}" x-data="{ tab: 'failed' }"
+                        class="mt-5 flex flex-col flex-1 min-h-0">
+
+                        {{-- Sub Tab Navigation --}}
+                        <div class="flex items-center gap-2 mb-3 shrink-0">
+                            <button @click="tab = 'failed'"
+                                :class="tab === 'failed' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'"
+                                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">
+                                Failed ({{ count($summary['failures'] ?? []) }})
+                            </button>
+                            <button @click="tab = 'duplicate'"
+                                :class="tab === 'duplicate' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'"
+                                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">
+                                Duplicate ({{ count($summary['duplicates'] ?? []) }})
+                            </button>
+                            <button @click="tab = 'success'"
+                                :class="tab === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'"
+                                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">
+                                Success ({{ count($summary['success_data'] ?? []) }})
+                            </button>
+                        </div>
+
+                        <div class="flex-1 overflow-y-auto pr-1 min-h-0">
+                            {{-- Success Data --}}
+                            @if (!empty($summary['success_data']))
+                                <div class="space-y-3" x-show="tab === 'success'">
+                                    <div class="space-y-2">
+                                        @foreach (array_slice($summary['success_data'], 0, 10) as $success)
+                                            <div
+                                                class="p-3 hover:bg-gray-50 flex items-center justify-between transition-colors border-b border-gray-50 last:border-0">
+                                                <div class="flex items-center gap-3">
+                                                    <div
+                                                        class="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center text-green-600 text-xs font-bold shrink-0">
+                                                        {{ $success['row'] }}
+                                                    </div>
+                                                    <div>
+                                                        @php
+                                                            // Ambil NIP dan Nama secara dinamis
+                                                            $nip = $success['nip'] ?? ($success['nik_pegawai'] ?? null);
+                                                            $nama = $success['nama'] ?? null;
+
+                                                            // Ambil data spesifik lain sebagai tambahan jika nama tidak ada (misal: nama bank / jenjang)
+                                                            $specific =
+                                                                $success['nama_rekening'] ??
+                                                                ($success['nama_bank'] ??
+                                                                    ($success['tingkat_pendidikan'] ?? null));
+
+                                                            // Tentukan Judul Berdasarkan Prioritas
+                                                            if ($nip && $nama) {
+                                                                $title = $nip . ' - ' . $nama;
+                                                            } elseif ($nip && $specific) {
+                                                                $title = 'NIP: ' . $nip . ' (' . $specific . ')';
+                                                            } elseif ($nip) {
+                                                                $title = 'NIP: ' . $nip;
+                                                            } elseif ($nama) {
+                                                                $title = $nama;
+                                                            } else {
+                                                                $title = 'Data Baris ' . $success['row'];
+                                                            }
+
+                                                            // Kumpulkan sisa detail
+                                                            $details = [];
+                                                            foreach ($success as $k => $v) {
+                                                                if (
+                                                                    !in_array($k, [
+                                                                        'row',
+                                                                        'nama',
+                                                                        'nip',
+                                                                        'nik_pegawai',
+                                                                    ]) &&
+                                                                    !is_array($v) &&
+                                                                    !is_object($v)
+                                                                ) {
+                                                                    $details[] =
+                                                                        ucwords(str_replace('_', ' ', $k)) .
+                                                                        ': ' .
+                                                                        ($v ?: '-');
+                                                                }
+                                                            }
+                                                        @endphp
+                                                        <p class="text-sm font-semibold text-gray-800">
+                                                            {{ $title }}</p>
+                                                        <p class="text-xs text-gray-500 line-clamp-1 mt-0.5">
+                                                            {{ implode(' • ', $details) }}</p>
                                                     </div>
                                                 </div>
-                                                <span class="px-2 py-1 rounded-md bg-emerald-100 text-emerald-700 text-[11px] font-semibold">Success</span>
+                                                <span
+                                                    class="px-2 py-1 rounded-md bg-green-50 text-green-600 text-[11px] font-semibold shrink-0">Success</span>
                                             </div>
-                                        </div>
-                                    @endforeach
+                                        @endforeach
+                                    </div>
                                 </div>
-                            </div>
-                        @endif
+                            @endif
 
-                        @if (!empty($summary['failures']))
-                            <div class="space-y-3" x-show="tab === 'failed'">
-                                <div class="space-y-2">
-                                    @foreach ($summary['failures'] as $failure)
-                                        <div wire:key="failed-{{ $sheetName }}-{{ $loop->index }}" class="rounded-xl border border-red-100 bg-red-50/70 px-4 py-3">
-                                            <div class="flex items-start justify-between gap-3">
-                                                <div class="flex-1">
-                                                    <div class="flex items-center gap-2">
-                                                        <p class="text-sm font-semibold text-gray-800">Baris {{ $failure['row'] }}</p>
-                                                        <span class="px-2 py-0.5 rounded-md bg-red-100 text-red-600 text-[10px] font-semibold uppercase">
-                                                            {{ $failure['type'] }}
-                                                        </span>
+                            {{-- Failed Data --}}
+                            @if (!empty($summary['failures']))
+                                <div class="space-y-3" x-show="tab === 'failed'">
+                                    <div class="space-y-2">
+                                        @foreach (array_slice($summary['failures'], 0, 5) as $fail)
+                                            <div
+                                                class="p-3 hover:bg-gray-50 flex items-start justify-between gap-4 transition-colors border-b border-gray-50 last:border-0">
+                                                <div class="flex items-start gap-3">
+                                                    <div
+                                                        class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-600 text-xs font-bold shrink-0 mt-0.5">
+                                                        {{ $fail['row'] }}
                                                     </div>
-                                                    <p class="text-sm text-gray-700 mt-1">{{ $failure['data']['nama'] ?? '-' }}</p>
-                                                    <ul class="mt-3 space-y-1">
-                                                        @foreach ($failure['errors'] as $error)
-                                                            <li class="text-xs text-red-600 flex items-start gap-2">
-                                                                <i class="fa-solid fa-circle text-[6px] mt-1.5"></i>
-                                                                <span>{{ $error }}</span>
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
+                                                    <div>
+                                                        @php
+                                                            $data = $fail['data'] ?? [];
 
-                        @if (!empty($summary['duplicates']))
-                            <div class="space-y-3" x-show="tab === 'duplicate'">
-                                <div class="space-y-2">
-                                    @foreach ($summary['duplicates'] as $duplicate)
-                                        <div wire:key="duplicate-{{ $sheetName }}-{{ $loop->index }}" class="rounded-xl border border-yellow-100 bg-yellow-50/70 px-4 py-3">
-                                            <div class="flex items-start justify-between gap-3">
-                                                <div>
-                                                    <p class="text-sm font-semibold text-gray-800">Baris {{ $duplicate['row'] }}</p>
-                                                    <p class="text-sm text-gray-700 mt-1">{{ $duplicate['data']['nama'] ?? '-' }}</p>
-                                                    <p class="text-xs text-yellow-700 mt-2">{{ $duplicate['message'] }}</p>
+                                                            $nip = $data['nip'] ?? ($data['nik_pegawai'] ?? null);
+                                                            $nama = $data['nama'] ?? null;
+                                                            $specific =
+                                                                $data['nama_rekening'] ??
+                                                                ($data['nama_bank'] ??
+                                                                    ($data['tingkat_pendidikan'] ?? null));
+
+                                                            if ($nip && $nama) {
+                                                                $title = $nip . ' - ' . $nama;
+                                                            } elseif ($nip && $specific) {
+                                                                $title = 'NIP: ' . $nip . ' (' . $specific . ')';
+                                                            } elseif ($nip) {
+                                                                $title = 'NIP: ' . $nip;
+                                                            } elseif ($nama) {
+                                                                $title = $nama;
+                                                            } else {
+                                                                $title = 'Data Baris ' . $fail['row'];
+                                                            }
+
+                                                            $details = [];
+                                                            $count = 0;
+                                                            foreach ($data as $k => $v) {
+                                                                if (
+                                                                    !in_array($k, [
+                                                                        'row',
+                                                                        'nama',
+                                                                        'nip',
+                                                                        'nik_pegawai',
+                                                                    ]) &&
+                                                                    !is_array($v) &&
+                                                                    !is_object($v) &&
+                                                                    $count < 3
+                                                                ) {
+                                                                    $details[] =
+                                                                        ucwords(str_replace('_', ' ', $k)) .
+                                                                        ': ' .
+                                                                        ($v ?: '-');
+                                                                    $count++;
+                                                                }
+                                                            }
+                                                        @endphp
+
+                                                        <p class="text-sm font-semibold text-gray-800">
+                                                            {{ $title }}</p>
+                                                        <p
+                                                            class="text-xs text-red-600 mt-0.5 font-medium leading-relaxed">
+                                                            {{ $fail['message'] }}</p>
+
+                                                        <div class="mt-2 flex flex-wrap gap-1.5">
+                                                            @foreach ($details as $detail)
+                                                                <span
+                                                                    class="text-[10px] bg-red-50/50 text-red-600 px-2 py-0.5 rounded border border-red-100">
+                                                                    {{ $detail }}
+                                                                </span>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <span class="px-2 py-1 rounded-md bg-yellow-100 text-yellow-700 text-[11px] font-semibold">Duplicate</span>
+                                                <span
+                                                    class="px-2 py-1 rounded-md bg-red-50 text-red-600 text-[11px] font-semibold shrink-0 mt-0.5">Failed</span>
                                             </div>
-                                        </div>
-                                    @endforeach
+                                        @endforeach
+                                    </div>
                                 </div>
-                            </div>
-                        @endif
+                            @endif
+
+                            {{-- Duplicate Data --}}
+                            @if (!empty($summary['duplicates']))
+                                <div class="space-y-3" x-show="tab === 'duplicate'">
+                                    <div class="space-y-2">
+                                        @foreach (array_slice($summary['duplicates'], 0, 5) as $duplicate)
+                                            <div
+                                                class="p-3 hover:bg-gray-50 flex items-start justify-between gap-4 transition-colors border-b border-gray-50 last:border-0">
+                                                <div class="flex items-start gap-3">
+                                                    <div
+                                                        class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600 text-xs font-bold shrink-0 mt-0.5">
+                                                        {{ $duplicate['row'] }}
+                                                    </div>
+                                                    <div>
+                                                        @php
+                                                            $data = $duplicate['data'] ?? [];
+
+                                                            $nip = $data['nip'] ?? ($data['nik_pegawai'] ?? null);
+                                                            $nama = $data['nama'] ?? null;
+                                                            $specific =
+                                                                $data['nama_rekening'] ??
+                                                                ($data['nama_bank'] ??
+                                                                    ($data['tingkat_pendidikan'] ?? null));
+
+                                                            if ($nip && $nama) {
+                                                                $title = $nip . ' - ' . $nama;
+                                                            } elseif ($nip && $specific) {
+                                                                $title = 'NIP: ' . $nip . ' (' . $specific . ')';
+                                                            } elseif ($nip) {
+                                                                $title = 'NIP: ' . $nip;
+                                                            } elseif ($nama) {
+                                                                $title = $nama;
+                                                            } else {
+                                                                $title = 'Data Baris ' . $duplicate['row'];
+                                                            }
+
+                                                            $details = [];
+                                                            $count = 0;
+                                                            foreach ($data as $k => $v) {
+                                                                if (
+                                                                    !in_array($k, [
+                                                                        'row',
+                                                                        'nama',
+                                                                        'nip',
+                                                                        'nik_pegawai',
+                                                                    ]) &&
+                                                                    !is_array($v) &&
+                                                                    !is_object($v) &&
+                                                                    $count < 3
+                                                                ) {
+                                                                    $details[] =
+                                                                        ucwords(str_replace('_', ' ', $k)) .
+                                                                        ': ' .
+                                                                        ($v ?: '-');
+                                                                    $count++;
+                                                                }
+                                                            }
+                                                        @endphp
+
+                                                        <p class="text-sm font-semibold text-gray-800">
+                                                            {{ $title }}</p>
+                                                        <p
+                                                            class="text-xs text-yellow-700 mt-0.5 font-medium leading-relaxed">
+                                                            {{ $duplicate['message'] }}</p>
+
+                                                        <div class="mt-2 flex flex-wrap gap-1.5">
+                                                            @foreach ($details as $detail)
+                                                                <span
+                                                                    class="text-[10px] bg-yellow-50/50 text-yellow-700 px-2 py-0.5 rounded border border-yellow-200">
+                                                                    {{ $detail }}
+                                                                </span>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span
+                                                    class="px-2 py-1 rounded-md bg-yellow-50 text-yellow-700 text-[11px] font-semibold shrink-0 mt-0.5">Duplicate</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
                     </div>
-                </div>
 
-            </div>
+                </div>
             @endforeach
         </div>
 

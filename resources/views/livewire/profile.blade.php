@@ -85,9 +85,9 @@
     </div>
 
     <!-- Main Content Card -->
-    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden min-h-[calc(100vh-280px)]">
       <!-- Form Content -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-8 items-center">
 
         <!-- Left Column -->
         <div class="space-y-4">

@@ -13,14 +13,14 @@
 @section('content')
     <div
         x-data="{
-            activeTab: $persist('ringkasan'),
+            activeTab: $persist('ringkasan').as('tab_aktif_presensi'),
             openLoadingDetailRiwayat: false,
             openDetailRiwayat: false,
         }"
         @open-loading-detail-riwayat.window="openLoadingDetailRiwayat = true"
         @open-detail-riwayat.window="openDetailRiwayat = true; openLoadingDetailRiwayat = false"
         @close-detail-riwayat.window="openDetailRiwayat = false"
-        class="w-full min-h-[calc(100vh-157px)] space-y-5">
+        class="w-full space-y-4">
 
         {{-- ===== HERO CARD ===== --}}
         <div
@@ -101,8 +101,7 @@
         </div>
 
         {{-- ===== TABS & CONTENT CONTAINER ===== --}}
-        <div
-            class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
             {{-- Navigation Tabs --}}
             <div class="border-b border-gray-200 bg-slate-50/50 px-2 sm:px-6">
@@ -133,7 +132,7 @@
             </div>
 
             {{-- Main Content Area --}}
-            <div class="relative p-5">
+            <div class="relative p-5 min-h-[calc(100vh-365px)]">
 
                 {{-- Wrapper Tab Ringkasan --}}
                 <div x-show="activeTab === 'ringkasan'" x-transition:enter="transition ease-out duration-300"
