@@ -10,7 +10,7 @@ class Keluarga extends Model
     protected $table = 'keluarga';
 
     protected $fillable = [
-        'pegawai_id',
+        'pegawai_nip',
         'nama',
         'hubungan',
         'tempat_lahir',

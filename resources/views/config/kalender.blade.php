@@ -3,9 +3,9 @@
 @section('title', 'SIPENA | Kalender')
 
 @section('breadcrumb')
-    <div class="flex flex-wrap items-center space-x-2 text-sm font-medium text-gray-400">
+    <div class="flex flex-wrap items-center space-x-2 text-sm font-medium text-gray-500">
         <span>Konfigurasi</span>
-        <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i>
+        <i class="fa-solid fa-chevron-right text-xs text-gray-400"></i>
         <a wire:navigate href="{{ route('konfigurasi-kalender') }}" class="text-indigo-600 hover:text-indigo-500 transition">
             Kalender
         </a>

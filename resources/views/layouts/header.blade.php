@@ -41,7 +41,7 @@
             </button>
 
             {{-- Dropdown --}}
-            <div x-show="dropdownOpen" x-transition
+            <div x-cloak x-show="dropdownOpen" x-transition
                 class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg z-50">
                 <!-- Item -->
                 <a href="#" class="flex gap-3 px-3 py-2 hover:bg-gray-50 transition rounded-md">
@@ -52,7 +52,7 @@
 
                     <div class="flex-1">
                         <p class="text-sm text-gray-700">
-                            User baru <b>Imut Rizman</b> telah ditambahkan
+                            User baru <b>Abdur</b> telah ditambahkan
                         </p>
                         <span class="text-xs text-gray-400">
                             2 menit lalu
@@ -97,7 +97,7 @@
                     transition">
                 <i class="fa-solid fa-user text-lg"></i>
             </button>
-            <div x-show="dropdownOpen" x-transition
+            <div x-cloak x-show="dropdownOpen" x-transition
                 class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
                 <a wire:navigate href="{{ route('profile') }}"
                     class="flex items-center gap-2 px-3 py-2 text-sm rounded-t-md text-gray-700 hover:bg-gray-100">

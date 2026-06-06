@@ -6,7 +6,7 @@
     <div class="flex flex-wrap justify-center items-center space-x-2 text-sm text-gray-400 font-medium">
         <span>Dashboard</span>
         <i class="fa-solid fa-chevron-right text-xs text-gray-400"></i>
-        <a wire:navigate href="{{ route('kepegawaian') }}" class="hover:text-indigo-500">Pegawai</a>
+        <a wire:navigate href="{{ route('kepegawaian') }}" class="text-indigo-500">Pegawai</a>
     </div>
 @endsection
 
@@ -208,6 +208,10 @@
                     style="display: none;">
                     <livewire:dashboard.pegawai.detail-pegawai.keluarga :pegawai="$pegawai" />
                 </div> --}}
+
+                <div x-show="activeTab === 'keluarga'" x-cloak>
+                    <x-under-development title="Keluarga" icon="fa-people-roof" />
+                </div>
 
                 <div x-show="activeTab === 'rekening'" x-cloak>
                     <x-under-development title="Rekening & Bank" icon="fa-building-columns" />

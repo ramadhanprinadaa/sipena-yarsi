@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('keluarga', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pegawai_id')->nullable();
+            $table->foreignId('pegawai_id');
             $table->string('nama');
             $table->string('hubungan');
             $table->string('tempat_lahir');
             $table->date('tanggal_lahir');
             $table->string('pekerjaan')->nullable();
-            $table->string('no_telpon')->nullable();
             $table->string('alamat')->nullable();
+            $table->string('no_telpon')->nullable();
             $table->foreignId('updated_by')->nullable();
             $table->timestamps();
         });

@@ -7,6 +7,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>@yield ('title')</title>
 
+    <!-- To avoid glitch / bip from alpinejs -->
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
     <script defer src="https://unpkg.com/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>

@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
             StatusPegawaiSeeder::class,
             JenisPegawaiSeeder::class,
             KeluargaSeeder::class,
-            RekeningSeeder::class,
+            // RekeningSeeder::class,
             HariLiburSeeder::class,
             StatusKehadiranSeeder::class,
             PresensiSeeder::class,

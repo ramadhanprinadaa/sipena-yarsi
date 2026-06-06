@@ -42,7 +42,6 @@ class Pegawai extends Model
     ];
 
     protected $casts = [
-        'ktp' => 'encrypted',
         'tanggal_bergabung' => 'date:d/m/Y',
         'tanggal_habis_kontrak' => 'date:d/m/Y',
         'tanggal_pensiun' => 'date:d/m/Y',
@@ -149,7 +148,32 @@ class Pegawai extends Model
 
     public function rekening()
     {
-        return $this->hasOne(Rekening::class, 'pegawai_nip', 'nip');
+        return $this->hasOne(Rekening::class, 'pegawai_id', 'id');
+    }
+
+    public function riwayatKepegawaian()
+    {
+        return $this->hasMany(RiwayatKepegawaian::class);
+    }
+
+    public function riwayatKepangkatan()
+    {
+        return $this->hasMany(RiwayatKepangkatan::class);
+    }
+
+    public function riwayatPelatihan()
+    {
+        return $this->hasMany(RiwayatPelatihan::class);
+    }
+
+    public function riwayatPendidikan()
+    {
+        return $this->hasMany(RiwayatPendidikan::class);
+    }
+
+    public function riwayatTugasBelajar()
+    {
+        return $this->hasMany(RiwayatTugasBelajar::class);
     }
 
     public function presensi()

@@ -38,13 +38,13 @@
                     <span :class="sidebarToggle ? '' : 'text-xs'">Beranda</span>
                 </div>
 
-                <i x-show="sidebarToggle" :class="open.beranda ? 'rotate-90' : ''"
+                <i x-cloak x-show="sidebarToggle" :class="open.beranda ? 'rotate-90' : ''"
                     class="fa-solid fa-chevron-right text-xs transition">
                 </i>
             </button>
 
             {{-- Sub Menu --}}
-            <div x-show="sidebarToggle && open.beranda" x-transition class="ml-2 flex flex-col gap-2">
+            <div x-cloak x-show="sidebarToggle && open.beranda" x-transition class="ml-2 flex flex-col gap-2">
 
                 <a wire:navigate href="{{ route('kepegawaian') }}"
                     class="nav-link {{ request()->routeIs('kepegawaian') ? 'nav-link-active' : 'nav-link-inactive' }}">
@@ -82,7 +82,7 @@
             </div>
 
             {{-- Sub Menu Floating --}}
-            <div x-show="!sidebarToggle && floating === 'beranda'" @mouseleave="floating = null" x-transition
+            <div x-cloak x-show="!sidebarToggle && floating === 'beranda'" @mouseleave="floating = null" x-transition
                 class="absolute left-26 top-0 w-56 bg-white shadow-lg rounded-lg p-2 flex flex-col gap-1">
                 <a wire:navigate href="{{ route('kepegawaian') }}"
                     class="nav-link {{ request()->routeIs('kepegawaian') ? 'nav-link-active' : 'nav-link-inactive' }}">
@@ -144,13 +144,13 @@
                         <span :class="sidebarToggle ? '' : 'text-xs'">Manajemen</span>
                     </div>
 
-                    <i x-show="sidebarToggle" :class="open.manajemen ? 'rotate-90' : ''"
+                    <i x-cloak x-show="sidebarToggle" :class="open.manajemen ? 'rotate-90' : ''"
                         class="fa-solid fa-chevron-right text-xs transition">
                     </i>
                 </button>
 
                 {{-- Sub Menu --}}
-                <div x-show="open.manajemen && sidebarToggle" x-transition class="ml-2 flex flex-col gap-2">
+                <div x-cloak x-show="open.manajemen && sidebarToggle" x-transition class="ml-2 flex flex-col gap-2">
 
                     @if (auth()->user()->hasRole('Admin'))
                         <a wire:navigate href="{{ route('manajemen-pengguna') }}"
@@ -186,7 +186,7 @@
                 </div>
 
                 {{-- Sub Menu Floating --}}
-                <div x-show="floating === 'manajemen' && !sidebarToggle" @mouseleave="floating = null" x-transition
+                <div x-cloak x-show="floating === 'manajemen' && !sidebarToggle" @mouseleave="floating = null" x-transition
                     class="absolute left-26 top-18 w-56 bg-white shadow-lg rounded-lg p-2 flex flex-col gap-1">
                     @if (auth()->user()->hasRole('Admin'))
                         <a wire:navigate href="{{ route('manajemen-pengguna') }}"
@@ -242,13 +242,13 @@
                         <span :class="sidebarToggle ? '' : 'text-xs'">Konfigurasi</span>
                     </div>
 
-                    <i x-show="sidebarToggle" :class="open.konfigurasi ? 'rotate-90' : ''"
+                    <i x-cloak x-show="sidebarToggle" :class="open.konfigurasi ? 'rotate-90' : ''"
                         class="fa-solid fa-chevron-right text-xs transition">
                     </i>
                 </button>
 
                 {{-- Sub Menu --}}
-                <div x-show="open.konfigurasi && sidebarToggle" x-transition class="ml-2 flex flex-col gap-2">
+                <div x-cloak x-show="open.konfigurasi && sidebarToggle" x-transition class="ml-2 flex flex-col gap-2">
 
                     <a wire:navigate href="{{ route('konfigurasi-unit-kerja') }}"
                         class="nav-link {{ request()->routeIs('konfigurasi-unit-kerja') ? 'nav-link-active' : 'nav-link-inactive' }}">
@@ -263,7 +263,7 @@
                 </div>
 
                 {{-- Sub Menu Floating --}}
-                <div x-show="floating === 'konfigurasi' && !sidebarToggle" @mouseleave="floating = null" x-transition
+                <div x-cloak x-show="floating === 'konfigurasi' && !sidebarToggle" @mouseleave="floating = null" x-transition
                     class="absolute left-26 top-32 w-56 bg-white shadow-lg rounded-lg p-2 flex flex-col gap-1">
 
                     <a wire:navigate href="{{ route('konfigurasi-unit-kerja') }}"
@@ -306,7 +306,7 @@
                 <i :class="sidebarToggle ? 'text-lg' : 'text-lg'" class="fa-solid fa-user"></i>
             </div>
 
-            <div class="flex flex-col overflow-hidden" x-show="sidebarToggle" x-transition>
+            <div class="flex flex-col overflow-hidden" x-cloak x-show="sidebarToggle" x-transition>
                 <span
                     class="text-sm font-semibold truncate">{{ auth()->user()->pegawai?->nama ?? auth()->user()->username }}</span>
                 <span

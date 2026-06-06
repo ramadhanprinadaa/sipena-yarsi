@@ -1,172 +1,192 @@
-<div class="bg-white w-[720px] max-w-[95vw] h-[78vh] mx-auto rounded-xl shadow-2xl flex flex-col overflow-hidden">
+<div class="bg-white min-w-[43vw] max-w-[95vw] h-[75vh] mx-auto rounded-xl shadow-2xl flex flex-col overflow-hidden">
 
     <!-- Header -->
-    <header class="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                <i class="fa-solid fa-calendar-plus text-base text-indigo-500"></i>
-            </div>
-            <div>
-                <h2 class="text-md font-bold text-gray-800 leading-tight tracking-tight">Form Tambah Hari Libur</h2>
-                <p class="text-xs text-gray-400 leading-tight">Isi data hari libur baru secara lengkap</p>
-            </div>
+    <header class="flex items-center justify-between px-5 py-4 border-b border-slate-200 shrink-0 bg-gradient-to-r from-indigo-50 via-white to-blue-50">
+        <!-- Decoration -->
+        <div class="absolute inset-0 opacity-40 pointer-events-none">
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-indigo-200 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-200 rounded-full blur-3xl"></div>
         </div>
-        <button
-            type="button"
-            @click="$dispatch('close-add-modal')"
-            class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
+
+        <!-- Header Information -->
+        <div class="relative flex items-center gap-4">
+           <div
+               class="w-11 h-11 rounded-2xl bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-200">
+               <i class="fa-solid fa-calendar-plus text-lg text-white"></i>
+           </div>
+           <div>
+               <h2 class="text-lg font-semibold text-slate-800 leading-tight">
+                   Form Tambah Hari Libur
+               </h2>
+               <div class="flex items-center gap-2 mt-1 text-sm text-slate-500">
+                   <p class="text-xs text-gray-400 mt-0.5">
+                       Isi data hari libur baru secara lengkap
+                   </p>
+               </div>
+           </div>
+        </div>
+
+        <div class="relative flex items-center gap-2">
+            <!-- Close Button -->
+            <button type="button" @click="$dispatch('close-add-modal')" wire:loading.attr="disabled"
+                class="w-10 h-10 rounded-full hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all duration-200 cursor-pointer">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
     </header>
 
-    <!-- Form -->
-    <form wire:submit.prevent="save" class="flex flex-col flex-1 min-h-0 px-6 py-4 overflow-auto">
-
-        <!-- Content -->
-        <div class="flex-1 space-y-10">
+    <!-- Main Content -->
+    <div class="relative flex-1 overflow-y-auto overflow-x-hidden p-6">
+        <div class="space-y-4">
             <!-- Nama Hari Libur -->
             <div>
-                <div class="input-wrapper group">
-                    <input wire:model.live="form.nama_hari_libur" type="text" id="floating_nama_hari_libur" class="input-field peer" placeholder=" ">
-                    <label for="floating_nama_hari_libur" class="input-label">Nama Hari Libur</label>
-                </div>
-                @error('form.nama_hari_libur') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                <label class="block text-xs font-medium text-gray-600 mb-1">
+                    Nama Hari Libur <span class="text-red-500">*</span>
+                </label>
+                <input type="text"
+                    class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
+                    wire:model.live.debounce.500ms="form.nama_hari_libur" placeholder="cth: Hari Libur Nasional">
+                @error('form.nama_hari_libur')
+                    <div class="text-xs text-red-500 mt-1">
+                        {{ $message }}
+                    </div>
+                @enderror
             </div>
 
             <!-- Tanggal Hari Libur -->
             <div>
-                <div class="input-wrapper group relative"
-                    x-data
-                    x-init="
-                        const picker = document.getElementById('floating_tanggal');
-                        picker.addEventListener('changeDate', () => {
-                            $wire.set('form.tanggal', picker.value);
-                        });
-                    "
+                <label class="block text-xs font-medium text-gray-600 mb-1">
+                    Tanggal Hari Libur <span class="text-red-500">*</span>
+                </label>
+                <div x-data="{ picker: null }"
+                    x-init="picker = new Datepicker($refs.input, {
+                        format: 'dd/mm/yyyy',
+                        autohide: true,
+                        language: 'id'
+                    });
+
+                    $refs.input.addEventListener('changeDate', () => {
+                        $wire.set('form.tanggal', $refs.input.value);
+                    });"
+                    class="relative"
                 >
-                    <!-- Icon -->
-                    <div class="absolute inset-y-0 flex items-center ps-1 pointer-events-none z-10">
-                        <i class="fa-solid fa-calendar-days text-body text-xs"></i>
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
                     </div>
-                    <!-- Input -->
                     <input
-                        wire:model.defer="form.tanggal"
                         type="text"
-                        id="floating_tanggal"
-                        datepicker
-                        datepicker-autohide
-                        datepicker-format="dd/mm/yyyy"
-                        datepicker-language="id"
-                        placeholder=" "
-                        class="input-field peer ps-6"
-                    >
-                    <!-- Label -->
-                    <label
-                        for="floating_tanggal"
-                        class="input-label ps-6 inset-y-2 peer-focus:ps-1 peer-[:not(:placeholder-shown)]:ps-1"
-                    >
-                        Tanggal Hari Libur
-                    </label>
+                        x-ref="input"
+                        wire:model.live="form.tanggal"
+                        placeholder="Pilih Tanggal Hari Libur"
+                        class="w-full h-9 pl-9 pr-3 text-sm text-gray-700 placeholder-gray-400 border-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none focus:ring-0 transition-colors duration-200 placeholder:italic" />
+                    <button type="button" x-show="$wire.form.tanggal"
+                        @click="
+                        $wire.set('form.tanggal', null);
+                        picker.setDate({ clear: true });
+                        $refs.input.value = '';"
+                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-red-500 transition">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
                 </div>
-                @error('form.tanggal') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
             </div>
 
             <!-- Jenis Hari Libur -->
-            <div>
-                <div
-                    x-data="{ show: false, selected: @entangle('form.jenis_hari_libur').live, focus: false,}"
-                    @keydown.escape.window="show = false"
-                    class="relative input-wrapper">
-                    <!-- Trigger -->
-                    <button
-                        x-ref="trigger"
-                        type="button"
-                        @click="show = !show"
-                        @focus="focus = true"
-                        @blur="focus = false"
-                        class="input-field flex justify-between items-center cursor-pointer">
-                        <span
-                            :class="selected ? 'text-gray-900' : 'text-gray-500/90'"
-                            x-text="selected || ' '">
-                        </span>
-                        <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform duration-150"
-                            :class="show ? 'rotate-180' : ''">
-                        </i>
-                    </button>
+            <div
+                x-data="{ show: false, selected: @entangle('form.jenis_hari_libur').live }"
+                class="relative"
+                >
+                <label class="block text-xs font-medium text-gray-500 mb-1">
+                    Jenis Hari Libur <span class="text-red-500">*</span>
+                </label>
+                <button
+                    type="button"
+                    x-on:click="show = !show"
+                    class="w-full flex justify-between items-center py-2 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none text-sm cursor-pointer"
 
-                    <!-- Label -->
-                    <label
-                        @click="$refs.trigger.click(); $refs.trigger.focus()"
-                        class="input-label-btn"
-                        :class="{
-                            'input-label-btn-selected': focus || selected,
-                            'input-label-btn-focus': focus
-                        }">
-                        Jenis Hari Libur
-                    </label>
-                    <!-- Dropdown -->
-                    <div
-                        x-show="show"
-                        @click.outside="show = false"
-                        x-transition:enter="transition ease-out duration-100"
-                        x-transition:enter-start="opacity-0 -translate-y-1"
-                        x-transition:enter-end="opacity-100 translate-y-0"
-                        class="absolute mt-2 w-full bg-white border border-gray-200 rounded-md shadow-lg z-50 overflow-hidden">
-                        <ul class="text-sm py-1">
-                            @foreach ($jenisHariLibur as $item)
-                                <li>
-                                    <button type="button" @click="selected = '{{ $item }}'; show = false;"
-                                        class="w-full text-left px-3 py-2 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
-                                        {{ $item }}
-                                    </button>
-                                </li>
-                            @endforeach
-                        </ul>
+                >
+                    <span
+                        :class="selected ? 'text-gray-900' : 'text-gray-400 italic'"
+                        x-text="selected || 'Pilih Jenis Hari Libur'">
+                    </span>
+                    <i class="fa-solid fa-chevron-down text-xs text-gray-400/90"></i>
+                </button>
+                @error('form.jenis_hari_libur')
+                    <div class="text-xs text-red-500 mt-1">
+                        {{ $message }}
                     </div>
-                    @error('form.jenis_hari_libur')
-                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                    @enderror
+                @enderror
+
+                <!-- Menu Dropdown -->
+                <div x-show="show" @click.outside="show = false" x-transition
+                    class="absolute mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
+
+                    <ul class="text-sm">
+                        @foreach ($jenisHariLibur as $item)
+                            <li>
+                                <button type="button"
+                                    @click="$wire.set('form.jenis_hari_libur', '{{ $item }}'); selected = '{{ $item }}'; show = false;"
+                                    class="w-full text-left px-3 py-2 hover:bg-gray-100">
+                                    {{ $item }}
+                                </button>
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
             </div>
 
             <!-- Keterangan -->
-            <div class="">
-                <div class="input-wrapper group">
-                    <input wire:model.live="form.keterangan" type="textarea" id="floating_keterangan" class="input-field peer" placeholder=" ">
-                    <label for="floating_keterangan" class="input-label">Keterangan</label>
-                </div>
-                @error('form.keterangan') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+            <div class="relative">
+                <label class="block text-xs font-medium text-gray-600 mb-1">
+                    Keterangan
+                </label>
+                <input
+                    type="text"
+                    wire:model.live.debounce.500ms="form.keterangan"
+                    class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
+                    placeholder="cth: Hari Lahir Pancasila">
+                @error('form.keterangan')
+                    <div class="text-xs text-red-500 mt-1">
+                        {{ $message }}
+                    </div>
+                @enderror
             </div>
         </div>
-        <!-- Footer -->
-        <div class="flex justify-end gap-3 pt-6 border-t border-gray-300">
-            <button
-                type="button"
-                @click="$dispatch('close-add-modal')"
-                class="px-4 py-2 text-sm bg-red-400 hover:bg-red-500 text-white rounded-md cursor-pointer">
-                Batal
-            </button>
+    </div>
 
-            <button
-                type="submit"
-                @disabled(
+    <!-- Footer -->
+    <div class="flex justify-end gap-3 p-4 border-t border-gray-200">
+        <button
+            type="button"
+            @click="$dispatch('close-add-modal')"
+            class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md cursor-pointer transition-colors duration-150">
+            Batal
+        </button>
+        <button
+            type="button"
+            wire:click="save"
+            @disabled(
                     blank($form['nama_hari_libur']) ||
                     blank($form['tanggal']) ||
                     blank($form['jenis_hari_libur']) ||
                     $errors->any()
                 )
-                class="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-500">
+            wire:loading.attr="disabled"
+            wire:target="save"
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-md transition-colors duration-150 bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-indigo-500">
 
-                <!-- Loading spinner -->
-                <svg wire:loading wire:target="save"
-                    class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                </svg>
+            <!-- Loading spinner -->
+            <svg wire:loading wire:target="save" class="w-4 h-4 animate-spin"
+                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                    stroke-width="4">
+                </circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z">
+                </path>
+            </svg>
+            <span wire:loading.remove wire:target="save">Simpan Data</span>
+            <span wire:loading wire:target="save">Menyimpan...</span>
+        </button>
+    </div>
 
-                <span wire:loading.remove wire:target="save">Simpan Hari Libur</span>
-                <span wire:loading wire:target="save">Menyimpan...</span>
-            </button>
-        </div>
-    </form>
 </div>

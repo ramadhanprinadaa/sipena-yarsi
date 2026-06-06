@@ -48,9 +48,19 @@
                         $wire.set('selectedDate', $refs.picker.value);
                     });
                 "
+                wire:model.live="selectedDate"
                 placeholder="Pilih tanggal"
                 class="h-9 pl-9 pr-3 text-sm border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:outline-none transition"
             >
+            <button type="button"
+                x-show="$wire.selectedDate"
+                @click="
+                $wire.set('selectedDate', null);
+                picker.setDate({ clear: true });
+                $refs.input.value = '';"
+                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-red-500 transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
         </div>
     </div>
 

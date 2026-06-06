@@ -10,7 +10,7 @@ class Rekening extends Model
     protected $table = 'rekening';
 
     protected $fillable = [
-        'pegawai_nip',
+        'pegawai_id',
         'nama_bank',
         'nomor_rekening',
         'nama_rekening',
@@ -26,7 +26,6 @@ class Rekening extends Model
 
     public function pegawai()
     {
-        return $this->belongsTo(Pegawai::class, 'pegawai_nip', 'nip');
+        return $this->belongsTo(Pegawai::class, 'pegawai_id');
     }
-
 }
