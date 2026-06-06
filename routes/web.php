@@ -33,7 +33,7 @@ Route::middleware('auth')->group(function () {
         Route::view('/presensi', 'dashboard.presensi')->name('presensi');
         Route::view('/kepegawaian', 'dashboard.pegawai')->name('kepegawaian');
         Route::view('/lembur', 'dashboard.lembur')->name('lembur')->middleware('role:Admin,SDM Yayasan,SDM Universitas,Rektor,Staff,Tendik,Pimpinan');
-        Route::view('/cuti', 'dashboard.cuti')->name('cuti');
+        Route::view('/cuti', 'dashboard.cuti')->name('cuti')->middleware('role:Admin,SDM Yayasan,SDM Universitas,Rektor,Staff,Tendik,Pimpinan');
         Route::view('/surat-menyurat', 'dashboard.surat-menyurat')->name('surat-menyurat');
     });
 

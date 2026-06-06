@@ -77,12 +77,22 @@ class Pegawai extends Model
         return $this->hasMany(Lembur::class);
     }
 
-     public function suratPerintahLembur()
+    public function suratPerintahLembur()
     {
         return $this->belongsToMany(
             SuratPerintahLembur::class,
             'surat_perintah_lembur_pegawai'
         );
+    }
+
+    public function cuti()
+    {
+        return $this->hasMany(Cuti::class);
+    }
+
+    public function saldoCuti()
+    {
+        return $this->hasMany(SaldoCuti::class);
     }
 
 }

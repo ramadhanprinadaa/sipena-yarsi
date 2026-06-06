@@ -13,8 +13,10 @@ class Index extends Component
 {
 
     public $openDetail = false;
+    public $isAutoFilled = false;
     public $spls = [];
     public $lemburList = [];
+    public $lembur_items = []; // Collection untuk check status "Telah Diajukan"
     public $laporanList = [];
     public $rekapList = [];
     public $rekapSummary = [
@@ -62,6 +64,11 @@ class Index extends Component
             }
 
             $this->spls = $query->get();
+
+            // Load semua lembur yang sudah diajukan untuk check status SPL
+            $this->lembur_items = Lembur::where('pegawai_id', $user->pegawai->id)
+                ->pluck('surat_perintah_lembur_id')
+                ->toArray();
 
             // Load riwayat lembur milik pegawai user
             $lemburQuery = Lembur::where('pegawai_id', $user->pegawai->id)
@@ -150,14 +157,56 @@ class Index extends Component
         return view('livewire.dashboard.lembur.index');
     }
 
+    public function openAjukanModal($splId)
+    {
+        // Load SPL data
+        $spl = SuratPerintahLembur::find($splId);
+        
+        if (!$spl) {
+            return;
+        }
+
+        // Dispatch event ke AddLembur component untuk fill form
+        $this->dispatch('fillFormFromSpl', [
+            'splId' => $spl->id,
+            'jamMulai' => $spl->jam_mulai,
+            'jamSelesai' => $spl->jam_selesai,
+            'tanggalLembur' => $spl->tanggal_lembur,
+            'jenisHari' => $spl->jenis_hari ?? 'Hari Kerja Normal',
+            'kegiatan' => $spl->nama_kegiatan,
+            'alasan' => $spl->nama_kegiatan,
+        ]);
+        
+        $this->dispatch('open-add-pengajuan-lembur');
+    }
+
+    public function openLaporanModal($lemburId)
+    {
+        // Load Lembur data
+        $lembur = Lembur::find($lemburId);
+        $spl = SuratPerintahLembur::find($lemburId);
+        if (!$lembur) {
+            return;
+        }
+
+        // Dispatch event ke AddLaporan component untuk fill form
+        $this->dispatch('fillFormFromLembur', [
+            'lemburId' => $lembur->id,
+            'jamMulai' => $lembur->jam_mulai,
+            'jamSelesai' => $lembur->jam_selesai,
+            'deskripsiTugas' => $spl->deskripsi_tugas ?? '',
+        ]);
+        $this->dispatch('open-add-laporan-lembur');
+    }
+
     public function showDetail($lemburId) {
         $this->selectedLembur = Lembur::with([
             'suratPerintahLembur.unitKerja', 
             'pegawai.unit_kerja',
             'pegawai.user.role',
-            'laporanHasilLembur.persetujuan.approver.pegawai', 
-            'laporanHasilLembur.persetujuan.approver.role', 
-            'persetujuan.approver.pegawai', 
+            'laporanHasilLembur.persetujuan.approver.pegawai',
+            'laporanHasilLembur.persetujuan.approver.role',
+            'persetujuan.approver.pegawai',
             'persetujuan.approver.role'
             ])->find($lemburId);
         $this->openDetail = true;
@@ -301,26 +350,18 @@ class Index extends Component
         $approval = $lembur->laporanHasilLembur?->persetujuan?->sortByDesc('approved_at')->first();
 
         if (!$approval) {
-            return $this->initialApprovalStatusFor($lembur);
+            return $this->initialLaporanApprovalStatusFor($lembur);
         }
 
         if ($approval->status === 'Ditolak') {
             return 'Ditolak';
         }
 
-        if ($approval->status === 'Disetujui' && $approval->role_approval === 'Pimpinan') {
-            return $this->sdmVerificationStatus($lembur);
-        }
-
-        if ($approval->status === 'Disetujui' && $approval->role_approval === 'Rektor') {
-            return 'Menunggu Verifikasi SDM Universitas';
-        }
-
         if ($approval->status === 'Disetujui') {
             return 'Disetujui';
         }
 
-        return $this->initialApprovalStatusFor($lembur);
+        return $this->initialLaporanApprovalStatusFor($lembur);
     }
 
     private function initialApprovalStatusFor(Lembur $lembur): string
@@ -343,6 +384,30 @@ class Index extends Component
         }
 
         return 'Menunggu Verifikasi Atasan';
+    }
+
+    private function initialLaporanApprovalStatusFor(Lembur $lembur): string
+    {
+        $role = $lembur->pegawai?->user?->role?->name;
+        $unitSdmId = (int) $lembur->pegawai?->unit_kerja?->unit_sdm_id;
+
+        if (!in_array($role, ['Pimpinan', 'Rektor', 'SDM Universitas', 'SDM Yayasan'])) {
+            return $unitSdmId === 1
+                ? 'Menunggu Verifikasi SDM Yayasan'
+                : 'Menunggu Verifikasi SDM Universitas';
+        }
+
+        if ($role === 'Pimpinan') {
+            return $unitSdmId === 1
+                ? 'Menunggu Verifikasi SDM Yayasan'
+                : 'Menunggu Verifikasi SDM Universitas';
+        }
+
+        if (in_array($role, ['Rektor', 'SDM Universitas'])) {
+            return 'Menunggu Verifikasi SDM Yayasan';
+        }
+
+        return 'Menunggu Verifikasi SDM Yayasan';
     }
 
     private function sdmVerificationStatus(Lembur $lembur): string

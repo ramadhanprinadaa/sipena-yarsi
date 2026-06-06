@@ -12,6 +12,7 @@ use Illuminate\Validation\ValidationException;
 class AddLembur extends Component
 {
     public $open = false;
+    public $isAutoFilled = false;
     public $availableSPLs = [];
     
     public $form = [
@@ -78,14 +79,27 @@ class AddLembur extends Component
 
     #[On('open-add-pengajuan-lembur')]
     public function open() {
-        $this->resetForm();
-        $this->loadAvailableSPLs();
+        // $this->resetForm();
+        // $this->loadAvailableSPLs();
         $this->open = true;
+    }
+
+    #[On('fillFormFromSpl')]
+    public function fillFormFromSpl($data)
+    {
+        $this->form['surat_perintah_lembur_id'] = $data['splId'];
+        $this->form['jam_mulai'] = $data['jamMulai'];
+        $this->form['jam_selesai'] = $data['jamSelesai'];
+        $this->form['tanggal_lembur'] = $data['tanggalLembur'];
+        $this->form['jenis_hari'] = $data['jenisHari'];
+        $this->form['kegiatan'] = $data['kegiatan'];
+        $this->isAutoFilled = true;
     }
 
     public function close()
     {
         $this->resetForm();
+        $this->isAutoFilled = false;
         $this->open = false;
     }
 

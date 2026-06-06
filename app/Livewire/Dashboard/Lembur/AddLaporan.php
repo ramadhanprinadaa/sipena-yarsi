@@ -15,12 +15,14 @@ class AddLaporan extends Component
 {
 
     public $open = false;
+    public $isAutoFilled = false;
     public $availableLembur = [];
 
     public $form = [
         'lembur_id' => '',
         'jam_mulai' => '',
         'jam_selesai' => '',
+        'kegiatan' => '',
         'hasil_pekerjaan' => '',
     ];
 
@@ -77,13 +79,24 @@ class AddLaporan extends Component
 
     #[On('open-add-laporan-lembur')]
     public function open() {
-        $this->resetForm();
-        $this->loadAvailableLembur();
+        // $this->resetForm();
+        // $this->loadAvailableLembur();
         $this->open = true;
+    }
+
+    #[On('fillFormFromLembur')]
+    public function fillFormFromLembur($data)
+    {
+        $this->form['lembur_id'] = $data['lemburId'];
+        $this->form['jam_mulai'] = $data['jamMulai'] ?? '';
+        $this->form['jam_selesai'] = $data['jamSelesai'] ?? '';
+        $this->form['hasil_pekerjaan'] = $data['deskripsiTugas'] ?? '';
+        $this->isAutoFilled = true;
     }
 
     public function close() {
         $this->resetForm();
+        $this->isAutoFilled = false;
         $this->open = false;
     }
 
@@ -93,6 +106,7 @@ class AddLaporan extends Component
             'lembur_id' => '',
             'jam_mulai' => '',
             'jam_selesai' => '',
+            'kegiatan' => '',
             'hasil_pekerjaan' => '',
         ];
     }
