@@ -1,4 +1,4 @@
-<div class="flex-1 flex flex-col gap-4 min-h-0">
+<div class="flex-1 flex flex-col gap-4 h-full">
             {{-- Tabs Navigation --}}
             @php
                 $userRole = auth()->user()->role->name ?? null;
@@ -118,7 +118,7 @@
 
                 {{-- TAB 1: Surat Perintah Lembur (SPL) - Only Pimpinan --}}
                 @if(in_array('spl', $allowedTabs))
-                <div x-show="activeTab === 'spl'" class="flex flex-col space-y-4 h-full min-h-0">
+                <div x-show="activeTab === 'spl'" class="flex flex-col space-y-4 h-full">
 
                     <!-- Filter & Search -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -137,7 +137,7 @@
                     </div>
 
                     <!-- Table -->
-                    <div class="flex flex-col flex-1 min-h-0 overflow-hidden bg-[#F5F7FA]/50 border border-gray-200 rounded-[20px] shadow-sm">
+                    <div class="flex flex-col flex-1 overflow-hidden bg-[#F5F7FA]/50 border border-gray-200 rounded-[20px] shadow-sm h-96">
                         <div class="flex-1 overflow-y-auto no-scrollbar">
                             <table class="min-w-full text-sm">
                                 <!-- Header -->

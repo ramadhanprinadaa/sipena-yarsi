@@ -365,11 +365,13 @@ class Index extends Component
         }
 
         if ($role === 'SDM Universitas') {
-            return $lembur->status === 'Menunggu Verifikasi SDM Universitas';
+            return $lembur->status === 'Menunggu Verifikasi SDM Universitas'
+                && $this->requesterRole($lembur) === 'Rektor';
         }
 
         if ($role === 'SDM Yayasan') {
-            return $lembur->status === 'Menunggu Verifikasi SDM Yayasan';
+            return $lembur->status === 'Menunggu Verifikasi SDM Yayasan'
+                && in_array($this->requesterRole($lembur), ['Pimpinan', 'SDM Universitas']);
         }
 
         return false;
@@ -383,25 +385,27 @@ class Index extends Component
 
         $role = Auth::user()->role->name ?? '';
         $approvalStatus = $this->getLaporanApprovalStatus($lembur);
-
-        if ($role === 'Pimpinan') {
-            return $approvalStatus === 'Menunggu Verifikasi Atasan'
-                && $lembur->pegawai?->unit_kerja_id === Auth::user()->pegawai?->unit_kerja_id
-                && !in_array($this->requesterRole($lembur), ['Pimpinan', 'Rektor', 'SDM Universitas', 'SDM Yayasan']);
-        }
-
-        if ($role === 'Rektor') {
-            return $approvalStatus === 'Menunggu Verifikasi Rektor'
-                && $this->requesterRole($lembur) === 'Pimpinan'
-                && (int) $lembur->pegawai?->unit_kerja?->unit_sdm_id === 2;
-        }
+        $requesterRole = $this->requesterRole($lembur);
 
         if ($role === 'SDM Universitas') {
-            return $approvalStatus === 'Menunggu Verifikasi SDM Universitas';
+            return $approvalStatus === 'Menunggu Verifikasi SDM Universitas'
+                && (
+                    (!in_array($requesterRole, ['Pimpinan', 'Rektor', 'SDM Universitas', 'SDM Yayasan'])
+                        && (int) $lembur->pegawai?->unit_kerja?->unit_sdm_id === 2)
+                    || ($requesterRole === 'Pimpinan'
+                        && (int) $lembur->pegawai?->unit_kerja?->unit_sdm_id === 2)
+                );
         }
 
         if ($role === 'SDM Yayasan') {
-            return $approvalStatus === 'Menunggu Verifikasi SDM Yayasan';
+            return $approvalStatus === 'Menunggu Verifikasi SDM Yayasan'
+                && (
+                    (!in_array($requesterRole, ['Pimpinan', 'Rektor', 'SDM Universitas', 'SDM Yayasan'])
+                        && (int) $lembur->pegawai?->unit_kerja?->unit_sdm_id === 1)
+                    || ($requesterRole === 'Pimpinan'
+                        && (int) $lembur->pegawai?->unit_kerja?->unit_sdm_id === 1)
+                    || in_array($requesterRole, ['Rektor', 'SDM Universitas'])
+                );
         }
 
         return false;
@@ -411,16 +415,6 @@ class Index extends Component
     {
         if ($action !== 'approve') {
             return 'Ditolak';
-        }
-
-        $role = Auth::user()->role->name ?? '';
-
-        if ($role === 'Pimpinan') {
-            return $this->sdmVerificationStatus($lembur);
-        }
-
-        if ($role === 'Rektor') {
-            return 'Menunggu Verifikasi SDM Universitas';
         }
 
         return 'Menunggu Pelaksanaan';
@@ -446,6 +440,30 @@ class Index extends Component
         }
 
         return 'Menunggu Verifikasi Atasan';
+    }
+
+    private function initialLaporanApprovalStatusFor(Lembur $lembur): string
+    {
+        $role = $this->requesterRole($lembur);
+        $unitSdmId = (int) $lembur->pegawai?->unit_kerja?->unit_sdm_id;
+
+        if (!in_array($role, ['Pimpinan', 'Rektor', 'SDM Universitas', 'SDM Yayasan'])) {
+            return $unitSdmId === 1
+                ? 'Menunggu Verifikasi SDM Yayasan'
+                : 'Menunggu Verifikasi SDM Universitas';
+        }
+
+        if ($role === 'Pimpinan') {
+            return $unitSdmId === 1
+                ? 'Menunggu Verifikasi SDM Yayasan'
+                : 'Menunggu Verifikasi SDM Universitas';
+        }
+
+        if (in_array($role, ['Rektor', 'SDM Universitas'])) {
+            return 'Menunggu Verifikasi SDM Yayasan';
+        }
+
+        return 'Menunggu Verifikasi SDM Yayasan';
     }
 
     private function requesterRole(Lembur $lembur): ?string
@@ -483,26 +501,18 @@ class Index extends Component
         $approval = $lembur->laporanHasilLembur?->persetujuan?->sortByDesc('approved_at')->first();
 
         if (!$approval) {
-            return $this->initialApprovalStatusFor($lembur);
+            return $this->initialLaporanApprovalStatusFor($lembur);
         }
 
         if ($approval->status === 'Ditolak') {
             return 'Ditolak';
         }
 
-        if ($approval->status === 'Disetujui' && $approval->role_approval === 'Pimpinan') {
-            return $this->sdmVerificationStatus($lembur);
-        }
-
-        if ($approval->status === 'Disetujui' && $approval->role_approval === 'Rektor') {
-            return 'Menunggu Verifikasi SDM Universitas';
-        }
-
         if ($approval->status === 'Disetujui') {
             return 'Disetujui';
         }
 
-        return $this->initialApprovalStatusFor($lembur);
+        return $this->initialLaporanApprovalStatusFor($lembur);
     }
 
     public function getApproverLabel(Lembur $lembur, string $type = 'latest'): string

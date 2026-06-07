@@ -91,6 +91,7 @@
                                         <th class="px-4 py-3 text-left font-semibold">Kegiatan</th>
                                         <th class="px-4 py-3 text-left font-semibold">Jam Lembur</th>
                                         <th class="px-4 py-3 text-center font-semibold">Status</th>
+                                        <th class="px-4 py-3 text-center font-semibold">Aksi</th>
                                     </tr>
                                 </thead>
                                 <!-- Body -->
@@ -102,12 +103,26 @@
                                             <td class="px-4 py-4 text-gray-600">{{ $spl->nama_kegiatan }}</td>
                                             <td class="px-4 py-4 text-gray-600">{{ $spl->jam_mulai }} - {{ $spl->jam_selesai }}</td>
                                             <td class="px-4 py-4 text-center">
-                                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">{{ $spl->status }}</span>
+                                                @php
+                                                    $hasLembur = in_array($spl->id, $lembur_items);
+                                                    $statusText = $hasLembur ? 'Telah Diajukan' : 'Belum Diajukan';
+                                                    $statusBg = $hasLembur ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
+                                                @endphp
+                                                <span class="px-3 py-1 {{ $statusBg }} rounded-full text-xs font-semibold">{{ $statusText }}</span>
+                                            </td>
+                                            <td class="px-4 py-4 text-center">
+                                                @if(!$hasLembur)
+                                                    <button type="button" wire:click="openAjukanModal({{ $spl->id }})" class="px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition cursor-pointer">
+                                                        <i class="fa-solid fa-paper-plane mr-1"></i>Ajukan
+                                                    </button>
+                                                @else
+                                                    <span class="text-gray-400 text-xs">Sudah Diajukan</span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="px-4 py-4 text-center text-gray-500">Tidak ada SPL yang tersedia</td>
+                                            <td colspan="6" class="px-4 py-4 text-center text-gray-500">Tidak ada SPL yang tersedia</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -157,6 +172,12 @@
                                 <!-- Body -->
                                 <tbody class="divide-y divide-[#878787]/30">
                                     @forelse($lemburList as $lembur)
+                                        @php
+                                            $tanggalLembur = \Carbon\Carbon::parse($lembur->tanggal_lembur);
+                                            $now = \Carbon\Carbon::now();
+                                            $canAddLaporan = $now >= $tanggalLembur;
+                                            $hasLaporan = $lembur->laporanHasilLembur ? true : false;
+                                        @endphp
                                         <tr class="hover:bg-[#F5F7FA]/50 transition">
                                             <td class="px-4 py-4 font-medium text-gray-700">{{ \Carbon\Carbon::parse($lembur->tanggal_lembur)->format('d M Y') }}</td>
                                             <td class="px-4 py-4 text-gray-600">{{ $lembur->jenis_hari }}</td>
@@ -167,9 +188,17 @@
                                             </td>
                                             <td class="px-4 py-4 text-gray-600">{{ $this->getApproverLabel($lembur, 'pengajuan') }}</td>
                                             <td class="px-4 py-4 text-center">
-                                                <button type="button" wire:click="showDetail({{ $lembur->id }})" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition cursor-pointer">
-                                                    Detail
-                                                </button>
+                                                @if($canAddLaporan && !$hasLaporan)
+                                                    <button type="button" wire:click="openLaporanModal({{ $lembur->id }})" class="px-3 py-1.5 text-xs font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition cursor-pointer">
+                                                        <i class="fa-solid fa-file-export mr-1"></i>Laporan
+                                                    </button>
+                                                @elseif($hasLaporan)
+                                                    <button type="button" wire:click="showDetail({{ $lembur->id }})" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition cursor-pointer">
+                                                        Detail
+                                                    </button>
+                                                @else
+                                                    <span class="text-gray-400 text-xs">Belum Waktunya</span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @empty
@@ -354,55 +383,3 @@
 </div>
 
 
-@section('formCards')
-    <div  class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-full">
-
-        {{-- Form Pengajuan Lembur Card --}}
-        <div class="bg-[linear-gradient(135deg,_#8187FF_0%,_#7DB5FF_50%,_#D1A6FF_100%)] rounded-[20px] p-8 flex flex-col justify-center min-h-48 gap-8 shadow-lg hover:shadow-xl transition">
-            <h2 class="text-[45px] font-bold bg-[linear-gradient(90deg,_#FFA58E_0%,_#DBFFEE_50%,_#70FFEE_100%)] bg-clip-text text-transparent mb-2 max-w-[420px]">Form Pengajuan Lembur</h2>
-            <button
-                @click="$dispatch('open-add-pengajuan-lembur')"
-                class="flex items-center justify-between gap-3 px-6 py-3 border-2 border-white/75 rounded-lg text-white font-semibold hover:bg-white/20 cursor-pointer transition duration-300">
-                <span>Ajukan Lembur</span>
-                <!-- Arrow Gradient -->
-                <svg width="120" height="20" viewBox="0 0 120 20" fill="none">
-                    <defs>
-                        <linearGradient id="gradArrow" x1="0" y1="0" x2="120" y2="0" gradientUnits="userSpaceOnUse">
-                            <stop offset="0%" stop-color="#59FFE3"/>
-                            <stop offset="44%" stop-color="#C3FFF5"/>
-                        </linearGradient>
-                    </defs>
-                    <!-- Line -->
-                    <line x1="0" y1="10" x2="100" y2="10" stroke="url(#gradArrow)" stroke-width="3" stroke-linecap="round"/>
-                    <!-- Arrow Head -->
-                    <path d="M95 3 L105 10 L95 17" stroke="url(#gradArrow)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </button>
-        </div>
-
-        {{-- Form Laporan Lembur Card --}}
-        <div class="bg-[linear-gradient(135deg,_#8187FF_0%,_#7DB5FF_50%,_#D1A6FF_100%)] rounded-[20px] p-8 flex flex-col justify-center min-h-48 gap-8 shadow-lg hover:shadow-xl transition">
-            <h2 class="text-[45px] font-bold bg-[linear-gradient(90deg,_#FFFDCE_0%,_#EDA3FF_40%,_#9CFFFA_85%)] bg-clip-text text-transparent mb-2 max-w-[420px]">Form Laporan Lembur</h2>
-            <button
-                @click="$dispatch('open-add-laporan-lembur')"
-                class="flex items-center justify-between gap-3 px-6 py-3 border-2 border-white/75 rounded-lg text-white font-semibold hover:bg-white/20 cursor-pointer transition duration-300">
-                <span>Ajukan Laporan</span>
-                <!-- Arrow Gradient -->
-                <svg width="120" height="20" viewBox="0 0 120 20" fill="none">
-                    <defs>
-                        <linearGradient id="gradArrow" x1="0" y1="0" x2="120" y2="0" gradientUnits="userSpaceOnUse">
-                            <stop offset="0%" stop-color="#59FFE3"/>
-                            <stop offset="44%" stop-color="#C3FFF5"/>
-                        </linearGradient>
-                    </defs>
-                    <!-- Line -->
-                    <line x1="0" y1="10" x2="100" y2="10" stroke="url(#gradArrow)" stroke-width="3" stroke-linecap="round"/>
-                    <!-- Arrow Head -->
-                    <path d="M95 3 L105 10 L95 17" stroke="url(#gradArrow)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </button>
-        </div>
-
-
-    </div>
-@endsection

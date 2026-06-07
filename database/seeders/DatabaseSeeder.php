@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             HariLiburSeeder::class,
             StatusKehadiranSeeder::class,
             PresensiSeeder::class,
+            JenisCutiSeeder::class,
         ]);
     }
 }

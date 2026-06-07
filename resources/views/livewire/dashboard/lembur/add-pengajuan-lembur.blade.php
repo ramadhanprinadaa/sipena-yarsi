@@ -1,9 +1,8 @@
+
 <div>
     @if($open)
         {{-- MODAL: Form Pengajuan Lembur --}}
         <div
-            x-show="showModalPengajuan"
-            x-transition.opacity
             class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
             x-data="{
                 filePengajuan: null,
@@ -59,8 +58,6 @@
 
             <!-- Modal Box -->
             <div
-                @click.away="showModalPengajuan = false"
-                x-transition.scale
                 class="w-full max-w-2xl max-h-[85vh] bg-white rounded-[20px] shadow-2xl border border-gray-200 flex flex-col"
             >
                 <!-- Header -->
@@ -80,12 +77,17 @@
                         <!-- Surat Perintah Lembur -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Surat Perintah Lembur</label>
-                            <select wire:model.live="form.surat_perintah_lembur_id" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
-                                <option value="">-- Pilih SPL --</option>
+                            <select
+                                wire:model.live="form.surat_perintah_lembur_id"
+                                {{ $isAutoFilled ? 'disabled' : '' }}
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition {{ $isAutoFilled ? 'bg-gray-50 cursor-not-allowed' : '' }}">
                                 @foreach($availableSPLs as $spl)
                                     <option value="{{ $spl['id'] }}">{{ $spl['nomor'] }} - {{ $spl['kegiatan'] }}</option>
                                 @endforeach
                             </select>
+                            @if($isAutoFilled)
+                                <p class="text-xs text-blue-600 mt-1"><i class="fa-solid fa-info-circle mr-1"></i>Data SPL dipilih otomatis dari aksi</p>
+                            @endif
                             @error('form.surat_perintah_lembur_id')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
