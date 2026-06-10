@@ -2,71 +2,141 @@
 
 namespace App\Imports\Pegawai;
 
-use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\ToCollection;
+use App\Models\JenjangPendidikan;
+use App\Models\Pegawai;
+use App\Models\RiwayatPendidikan;
+use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Concerns\Importable;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
+use Maatwebsite\Excel\Concerns\SkipsFailures;
+use Maatwebsite\Excel\Concerns\SkipsOnFailure;
+use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithBatchInserts;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithSkipDuplicates;
+use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Events\BeforeSheet;
 
-class PendidikanImport implements ToCollection, WithHeadingRow
+class PendidikanImport implements ToModel, WithHeadingRow, WithValidation, WithBatchInserts, WithChunkReading, WithSkipDuplicates, SkipsOnFailure, SkipsEmptyRows, WithEvents
 {
-    public int $totalRows = 0;
-    public int $successRows = 0;
-    public int $failedRows = 0;
-    public int $duplicateRows = 0;
+    use Importable, SkipsFailures;
 
-    public array $failures = [];
-    public array $duplicates = [];
-    public array $successData = [];
+    private array $pegawaiMap = [];
+    private array $jenjangPendidikanMap = [];
+    private ?int $userId;
+
+    public int $totalRows = 0;
+
+    // Handle data id pegawai yang barus saja di import
+    public function registerEvents(): array
+    {
+        return [
+            BeforeSheet::class => function (BeforeSheet $event) {
+                $this->loadData();
+            },
+        ];
+    }
+
+    public function loadData()
+    {
+        $this->pegawaiMap = Pegawai::pluck('id', 'nip')->toArray();
+        $this->jenjangPendidikanMap = JenjangPendidikan::pluck('id', 'kode')->toArray();
+    }
+
+    public function __construct($userId = null)
+    {
+        $this->userId = $userId ?? Auth::id();
+    }
+
+    public function prepareForValidation($data, $index)
+    {
+        $this->totalRows++;
+        // Jika user menginput 's1', ubah otomatis secara sistem menjadi 'S1'
+        if (isset($data['jenjang_pendidikan'])) {
+            $data['jenjang_pendidikan'] = strtoupper(trim($data['jenjang_pendidikan']));
+        }
+
+        // Bersihkan juga tahun seperti yang dibahas sebelumnya
+        if (isset($data['tahun_masuk'])) {
+            $data['tahun_masuk'] = trim($data['tahun_masuk']);
+        }
+        if (isset($data['tahun_lulus'])) {
+            $data['tahun_lulus'] = trim($data['tahun_lulus']);
+        }
+
+        return $data;
+    }
+
+    public function model(array $row)
+    {
+        return new RiwayatPendidikan([
+            'pegawai_id'            => $this->pegawaiMap[$row['nik_pegawai']] ?? null,
+            'jenjang_pendidikan_id' => $this->jenjangPendidikanMap[$row['jenjang_pendidikan']] ?? null,
+            'tahun_masuk'           => $row['tahun_masuk'] ?? null,
+            'tahun_lulus'           => $row['tahun_lulus'] ?? null,
+            'file_ijazah'           => null,
+            'file_path'             => null,
+            'updated_by'            => $this->userId,
+        ]);
+    }
+
+    public function rules(): array
+    {
+        return [
+            'nik_pegawai'        => ['required', 'string', 'exists:pegawai,nip'],
+            'jenjang_pendidikan' => ['required', 'string', 'exists:jenjang_pendidikan,kode'],
+            'tahun_masuk'        => ['nullable', 'integer', 'digits:4'],
+            'tahun_lulus'        => ['nullable', 'integer', 'digits:4'],
+        ];
+    }
+
+    public function customValidationAttributes(): array
+    {
+        return [
+            'nik_pegawai'        => 'NIP / NIK Pegawai',
+            'jenjang_pendidikan' => 'Jenjang Pendidikan',
+            'tahun_masuk'        => 'Tahun Masuk',
+            'tahun_lulus'        => 'Tahun Lulus',
+        ];
+    }
+
+    public function customValidationMessages(): array
+    {
+        return [
+            // NIP / NIK Pegawai
+            'nik_pegawai.required' => 'NIP / NIK Pegawai kosong / tidak diisi.',
+            'nik_pegawai.string'   => 'NIP / NIK Pegawai tidak berupa teks yang valid.',
+            'nik_pegawai.exists'   => 'NIP / NIK Pegawai tidak ditemukan pada data referensi sistem.',
+
+            // Jenjang Pendidikan
+            'jenjang_pendidikan.required' => 'Jenjang Pendidikan kosong / tidak diisi.',
+            'jenjang_pendidikan.string'   => 'Jenjang Pendidikan tidak berupa teks yang valid.',
+            'jenjang_pendidikan.exists'   => 'Jenjang Pendidikan tidak ditemukan pada data referensi sistem.',
+
+            // Tahun Masuk
+            'tahun_masuk.integer'   => 'Tahun Masuk tidak menggunakan format tahun yang valid.',
+            'tahun_masuk.digits'    => 'Tahun Masuk tidak menggunakan format tahun yang valid 4 digit.',
+
+            // Tahun Lulus
+            'tahun_lulus.integer'   => 'Tahun Lulus tidak menggunakan format tahun yang valid.',
+            'tahun_lulus.digits'    => 'Tahun Lulus tidak menggunakan format tahun yang valid 4 digit.',
+        ];
+    }
 
     public function headingRow(): int
     {
-        return 9; // Menyamakan posisi heading baris ke-9
+        return 9;
     }
 
-    public function collection(Collection $rows)
+    public function batchSize(): int
     {
-        foreach ($rows as $index => $row) {
-            $rowNumber = $this->headingRow() + $index + 1;
-
-            // Filter baris kosong
-            if (empty($row['nip']) && empty($row['tingkat_pendidikan'])) {
-                continue;
-            }
-
-            $this->totalRows++;
-
-            // Contoh simulasi validasi sederhana
-            if (empty($row['nip']) || empty($row['tingkat_pendidikan'])) {
-                $this->failedRows++;
-                $this->failures[] = [
-                    'row'    => $rowNumber,
-                    'type'   => 'validation',
-                    'errors' => ['Kolom NIP dan Tingkat Pendidikan wajib diisi.'],
-                    'data'   => $row->toArray(),
-                ];
-                continue;
-            }
-
-            // Jika valid, masukkan ke sukses
-            $this->successRows++;
-            $this->successData[] = [
-                'row'        => $rowNumber,
-                'nip'        => $row['nip'],
-                'nama'       => $row['nama'] ?? '-', // Untuk display nama pegawai di UI
-                'unit_kerja' => $row['tingkat_pendidikan'] . ' - ' . ($row['institusi'] ?? '-'),
-            ];
-        }
+        return 1000;
     }
 
-    public function getSummary()
+    public function chunkSize(): int
     {
-        return [
-            'total_rows'      => $this->totalRows,
-            'total_success'   => $this->successRows,
-            'total_failed'    => $this->failedRows,
-            'total_duplicate' => $this->duplicateRows,
-            'failures'        => $this->failures,
-            'duplicates'      => $this->duplicates,
-            'success_data'    => $this->successData,
-        ];
+        return 1000;
     }
 }

@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('pegawai', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('unit_kerja_id')->nullable();
             $table->foreignId('jenis_pegawai_id')->nullable(); // kontrak / tetap
             $table->foreignId('status_pegawai_id')->nullable();
+            $table->foreignId('unit_kerja_id')->nullable();
+            $table->string('unit_bagian')->nullable();
             $table->string('nip')->unique();
             $table->string('ktp')->unique();
             $table->string('npwp')->unique()->nullable();

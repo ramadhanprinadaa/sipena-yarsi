@@ -13,20 +13,19 @@
 @section('content')
     <div class="flex flex-col h-full min-h-0">
 
-        <div class="flex justify-between mb-8">
+        {{-- <div class="flex justify-between mb-8">
             <div class="flex flex-col gap-2">
                 <h1 class="text-2xl font-bold">Cuti</h1>
                 <p  class="text-sm text-gray-800">Selamat datang di halaman cuti. Di sini Anda dapat melihat dan mengelola informasi cuti Anda.</p>
             </div>
-        </div>
+        </div> --}}
 
         <div class="flex-1 flex flex-col gap-4 min-h-0">
 
-        <livewire:dashboard.cuti.index/>
-        <livewire:dashboard.cuti.add-cuti/>
-        <livewire:dashboard.cuti.edit-cuti/>
-        <livewire:dashboard.cuti.delete-cuti/>
-
+            <livewire:dashboard.cuti.index/>
+            <livewire:dashboard.cuti.add-cuti/>
+            <livewire:dashboard.cuti.edit-cuti/>
+            <livewire:dashboard.cuti.delete-cuti/>
 
         </div>
     </div>

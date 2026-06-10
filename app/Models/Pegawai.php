@@ -15,9 +15,10 @@ class Pegawai extends Model
 
     protected $fillable = [
         'id',
-        'unit_kerja_id',
         'jenis_pegawai_id',
         'status_pegawai_id',
+        'unit_kerja_id',
+        'unit_bagian',
         'nip',
         'ktp',
         'npwp',
@@ -143,7 +144,7 @@ class Pegawai extends Model
 
     public function keluarga()
     {
-        return $this->hasMany(Keluarga::class, 'pegawai_id');
+        return $this->hasMany(Keluarga::class, 'pegawai_id', 'id');
     }
 
     public function rekening()

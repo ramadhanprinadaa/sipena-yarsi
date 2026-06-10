@@ -20,6 +20,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'id',
         'username',
         'pegawai_id',
         'pimpinan_id',
@@ -77,6 +78,16 @@ class User extends Authenticatable
     public function import_pegawai()
     {
         return $this->hasMany(ImportPegawai::class, 'imported_by');
+    }
+
+    public function editKeluarga()
+    {
+        return $this->hasMany(Keluarga::class, 'updated_by');
+    }
+
+    public function editRiwayatPendidikan()
+    {
+        return $this->hasMany(RiwayatPendidikan::class, 'updated_by');
     }
 
     public function arsipFile()

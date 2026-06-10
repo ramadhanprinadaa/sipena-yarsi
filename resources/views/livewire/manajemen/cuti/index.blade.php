@@ -3,7 +3,7 @@
             @php
                 $userRole = auth()->user()->role->name ?? null;
                 $allowedTabs = [];
-                
+
                 switch($userRole) {
                     case 'Admin':
                         $allowedTabs = ['riwayat', 'rekap'];
@@ -26,8 +26,8 @@
                         $defaultTab = 'riwayat';
                 }
             @endphp
-            
-            <div x-data="{ 
+
+            <div x-data="{
                 activeTab: '{{ $defaultTab }}',
                 showModal: false,
                 activeButtonWidth: 0,
@@ -44,28 +44,28 @@
                         this.activeButtonLeft = activeBtn.offsetLeft;
                     }
                 }
-            }" 
-            @load="updateUnderline()" 
+            }"
+            @load="updateUnderline()"
             class="flex flex-col gap-4 min-h-0">
                 <div class="relative border-b border-gray-200">
-                    <div class="flex gap-2">            
+                    <div class="flex gap-2">
                         {{-- Riwayat Cuti - All allowed roles --}}
                         @if(in_array('riwayat', $allowedTabs))
-                            <button 
+                            <button
                                 x-ref="btnRiwayat"
-                                @click="activeTab = 'riwayat'; $nextTick(() => updateUnderline())" 
-                                :class="activeTab === 'riwayat' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'" 
+                                @click="activeTab = 'riwayat'; $nextTick(() => updateUnderline())"
+                                :class="activeTab === 'riwayat' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'"
                                 class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
                                 <i class="fa-solid fa-history mr-2"></i>Riwayat Pengajuan Cuti
                             </button>
                         @endif
-                        
+
                         {{-- Rekapitulasi - Admin & SDM Yayasan --}}
                         @if(in_array('rekap', $allowedTabs))
-                            <button 
+                            <button
                                 x-ref="btnRekap"
-                                @click="activeTab = 'rekap'; $nextTick(() => updateUnderline())" 
-                                :class="activeTab === 'rekap' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'" 
+                                @click="activeTab = 'rekap'; $nextTick(() => updateUnderline())"
+                                :class="activeTab === 'rekap' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'"
                                 class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
                                 <i class="fa-solid fa-chart-bar mr-2"></i>Rekapitulasi
                             </button>
@@ -73,7 +73,7 @@
                     </div>
 
                     <!-- Smooth Underline Indicator -->
-                    <div 
+                    <div
                         :style="{ left: activeButtonLeft + 'px', width: activeButtonWidth + 'px' }"
                         class="absolute bottom-0 h-0.5 translate-y-0.5 bg-indigo-600 transition-all duration-500 ease-out"
                     ></div>
@@ -103,9 +103,9 @@
                                 </div>
                             </div>
                         </div>
-                            
+
                         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-end w-full md:w-auto">
-                             
+
                             <div class="relative w-48">
                                 <select wire:model.live="filterRiwayatJenis" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
                                     <option value="">Jenis Cuti</option>
@@ -136,7 +136,7 @@
                     <!-- Table -->
                     <div class="flex flex-col flex-1 min-h-0 overflow-hidden bg-[#F5F7FA]/50 border border-gray-200 rounded-[20px] shadow-sm">
                         <div class="flex-1 overflow-y-auto no-scrollbar">
-                            <table class="min-w-full text-sm">
+                            <table class="min-w-full text-sm rounded-md">
                                 <!-- Header -->
                                 <thead class="bg-[#F5F7FA] text-gray-600 text-xs uppercase tracking-wider sticky top-0">
                                     <tr>
@@ -184,7 +184,7 @@
                                                 @if($this->canApprove($cuti))
                                                     <button wire:click="openApprovalConfirmation('approve', {{ $cuti->id }})" class="px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-600 rounded-[10px] hover:bg-blue-600/10 transition mr-1 cursor-pointer">Setujui</button>
                                                     <button wire:click="openApprovalConfirmation('reject', {{ $cuti->id }})" class="px-3 py-1.5 text-xs font-medium text-red-600 border border-red-600 rounded-[10px] hover:bg-red-600/10 transition cursor-pointer">Tolak</button>
-                                                    <button  type="button" wire:click="$dispatch('openDetailModal', {{ $cuti->id }})" class="px-3 py-1.5 text-xs font-medium text-pink-500 border border-pink-500 rounded-[10px] hover:bg-pink-600/10 transition cursor-pointer">Detail </button>
+                                                    <button  type="button" wire:click="$dispatch('openDetailModal', { cutiId: {{ $cuti->id }} })" class="px-3 py-1.5 text-xs font-medium text-pink-500 border border-pink-500 rounded-[10px] hover:bg-pink-600/10 transition cursor-pointer">Detail </button>
                                                 @else
                                                     <button  type="button" wire:click="$dispatch('openDetailModal', { cutiId: {{ $cuti->id }} })" class="px-3 py-1.5 text-xs font-medium text-pink-500 border border-pink-500 rounded-[10px] hover:bg-pink-600/10 transition cursor-pointer">Detail </button>
                                                 @endif
@@ -220,7 +220,7 @@
                                 <input type="date" wire:model.live="filterRekapEndDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400">
                             </div>
                         </div>
-                        
+
                         <button wire:click="exportRekapExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-green-500 hover:bg-green-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
                             <i class="fa-solid fa-download mr-2"></i> Export Excel
                         </button>

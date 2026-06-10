@@ -10,9 +10,9 @@ class Keluarga extends Model
     protected $table = 'keluarga';
 
     protected $fillable = [
-        'pegawai_nip',
+        'pegawai_id',
+        'jenis_keluarga_id',
         'nama',
-        'hubungan',
         'tempat_lahir',
         'tanggal_lahir',
         'pekerjaan',
@@ -22,7 +22,7 @@ class Keluarga extends Model
     ];
 
     protected $casts = [
-        'tanggal_lahir' => 'date:d/m/Y'
+        'tanggal_lahir' => 'date'
     ];
 
     protected function nama(): Attribute
@@ -36,5 +36,15 @@ class Keluarga extends Model
     public function pegawai()
     {
         return $this->belongsTo(Pegawai::class, 'pegawai_id');
+    }
+
+    public function jenisKeluarga()
+    {
+        return $this->belongsTo(JenisKeluarga::class, 'jenis_keluarga_id', 'id');
+    }
+
+    public function editor()
+    {
+        return $this->belongsTo(User::class, 'updated_by', 'id');
     }
 }

@@ -2,192 +2,219 @@
 
 namespace App\Livewire\Manajemen\Pegawai;
 
+use App\Models\JenisPegawai;
+use App\Models\JenjangPendidikan;
+use App\Models\Pegawai;
+use App\Models\StatusPegawai;
+use App\Models\UnitKerja;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Session;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Pegawai;
-use App\Models\UnitKerja;
-use Livewire\Attributes\On;
 
 class TabelPegawai extends Component
 {
     use WithPagination;
     protected string $paginationTheme = 'tailwind';
 
-    public $unit_kerja;
-    public $unit_kerja_universitas;
+    public array $unitKerja;
+    public array $unitKerjaUniversitas;
+    public array $jenisPegawai;
+    public array $jenjangPendidikan;
+    public array $statusPegawai;
 
     // Filter
-    public $selectedUnitKerja;
-    public $selectedJabatan;
-    public $selectedGelar;
-    public $selectedStatus;
-    public $selectedMasaKerja;
+    #[Session]
+    public ?string $selectedUnitKerja = null;
+    #[Session]
+    public ?string $selectedJabatan = null;
+    #[Session]
+    public ?string $selectedJenjangPendidikan = null;
+    #[Session]
+    public ?string $selectedJenisPegawai = null;
+    #[Session]
+    public ?string $selectedStatusPegawai = null;
+    #[Session]
+    public ?string $selectedStatusAktif = null;
 
     // Search
+    #[Session]
     public $search = '';
 
-    public $sortField = null;
-    public $sortDirection = 'asc';
+    // Filter Urutan Data
+    #[Session]
+    public ?string $sortField = null;
+    #[Session]
+    public ?string $sortDirection = 'asc';
 
     #[On('refresh-table')]
-    public function refreshTable(): void {}
+    public function refreshTable(): void
+    {
+        $this->resetPage();
+    }
 
     public function mount()
     {
-        $this->unit_kerja = UnitKerja::with('unitSdm')->orderBy('name', 'asc')->get();
-        $this->unit_kerja_universitas = UnitKerja::with('unitSdm')
-            ->whereHas('unitSdm', function ($query) {
-                $query->where('name', 'SDM Universitas');
+        $this->unitKerja = UnitKerja::orderBy('name')
+            ->pluck('name')
+            ->toArray();
+
+        $this->unitKerjaUniversitas = UnitKerja::query()
+            ->whereHas('unitSdm', function ($q) {
+                $q->where('name', 'SDM Universitas');
             })
-            ->get();
+            ->orderBy('name')
+            ->pluck('name')
+            ->toArray();
+
+        $this->jenisPegawai = JenisPegawai::pluck('jenis')->toArray();
+        $this->jenjangPendidikan = JenjangPendidikan::pluck('kode')->toArray();
+        $this->statusPegawai = StatusPegawai::pluck('status')->toArray();
     }
 
-    public function render()
+    public function updated(string $property): void
+    {
+        if (in_array($property, [
+            'search',
+            'selectedUnitKerja',
+            'selectedJabatan',
+            'selectedJenisPegawai',
+            'selectedJenjangPendidikan',
+            'selectedStatusPegawai',
+            'selectedStatusAktif',
+        ])) {
+            $this->resetPage();
+        }
+    }
+
+    public function baseQuery()
     {
         $user = Auth::user();
 
-        $pegawai = Pegawai::query()
+        // 1. Inisialisasi Base Query & Eager Loading
+        $query = Pegawai::query()
+            ->select([
+                'pegawai.id',
+                'pegawai.unit_kerja_id',
+                'pegawai.jenis_pegawai_id',
+                'pegawai.status_pegawai_id',
+                'pegawai.nip',
+                'pegawai.nama',
+                'pegawai.status',
+                'pegawai.tanggal_bergabung',
+                'pegawai.tanggal_habis_kontrak',
+                'pegawai.tanggal_pensiun',
+            ])
             ->leftJoin('unit_kerja', 'pegawai.unit_kerja_id', '=', 'unit_kerja.id')
-            ->select('pegawai.*');
+            ->with([
+                'unit_kerja:id,name',
+                'jenis_pegawai:id,jenis',
+                'status_pegawai:id,status',
+                'memimpin_unit',
+            ]);
 
-        if ($this->sortField === 'unit_kerja') {
-            $pegawai->orderBy('unit_kerja.name', $this->sortDirection)
-                ->orderBy('pegawai.nama', 'asc');
-        } elseif ($this->sortField) {
-            $pegawai->orderBy($this->sortField, $this->sortDirection);
-        } else {
-            $pegawai->orderBy('unit_kerja.name', 'asc')
-                ->orderBy('pegawai.nama', 'asc');
-        }
-
+        // 2. Scoping data berdasarkan Role Auth
         if ($user->hasRole('SDM Universitas')) {
-
             $unitKerjaIds = UnitKerja::whereHas('unitSdm', function ($q) {
                 $q->where('name', 'SDM Universitas');
             })->pluck('id');
 
-            $pegawai->whereIn('pegawai.unit_kerja_id', $unitKerjaIds)
-                ->where('pegawai.id', '!=', $user->pegawai->id)
-                ->whereHas('user.role', function ($q) {
-                    $q->where('name', '!=', 'SDM Universitas');
-                });
-        }
-
-        if ($user->hasRole('Pimpinan')) {
+            $query->whereIn('pegawai.unit_kerja_id', $unitKerjaIds);
+                // ->where('pegawai.id', '!=', $user->pegawai?->id);
+        } elseif ($user->hasRole('Pimpinan')) {
             $unit_id = $user->pegawai?->memimpin_unit?->id;
+
             if (!$unit_id) {
-                $pegawai->whereRaw('1 = 0');
+                $query->whereNull('pegawai.id');
             } else {
-                $pegawai->where('pegawai.unit_kerja_id', $unit_id)
-                    ->where('pegawai.id', '!=', $user->pegawai->id);
+                $query->where('pegawai.unit_kerja_id', $unit_id);
+                // ->where('pegawai.id', '!=', $user->pegawai?->id);
             }
         }
 
-        if ($this->selectedUnitKerja) {
-            $pegawai->where('pegawai.unit_kerja_id', $this->selectedUnitKerja);
-        }
+        // 3. Implementasi Filter
+        return $query
 
-        if ($this->selectedJabatan) {
-            if ($this->selectedJabatan === 'Pimpinan') {
-                $pegawai->whereHas('memimpin_unit');
-            }
-            if ($this->selectedJabatan === 'Pegawai') {
-                $pegawai->whereDoesntHave('memimpin_unit');
-            }
-        }
-
-        if ($this->selectedGelar) {
-            if ($this->selectedGelar === 'Sarjana') {
-                $pegawai->where('pegawai.gelar_belakang', 'like', 'S.%');
-            }
-            if ($this->selectedGelar === 'Magister') {
-                $pegawai->where('pegawai.gelar_belakang', 'like', 'M.%');
-            }
-            if ($this->selectedGelar === 'Doktor') {
-                $pegawai->where(function ($q) {
-                    $q->where('pegawai.gelar_depan', 'like', 'Dr%')
-                        ->orWhere('pegawai.gelar_belakang', 'like', 'Dr%');
+            // Search
+            ->when($this->search, function ($q) {
+                $q->where(function ($subQuery) {
+                    $subQuery->where('pegawai.nama', 'like', '%' . $this->search . '%')
+                        ->orWhere('pegawai.nip', 'like', '%' . $this->search . '%');
                 });
-            }
-            if ($this->selectedGelar === 'Professor') {
-                $pegawai->where('pegawai.gelar_depan', 'like', 'Prof%');
-            }
-        }
+            })
 
-        if ($this->selectedStatus) {
-            $pegawai->where('pegawai.status', $this->selectedStatus);
-        }
+            // Filter Unit Kerja
+            ->when($this->selectedUnitKerja, fn($q) => $q->where('unit_kerja.name', $this->selectedUnitKerja))
 
-        if ($this->selectedMasaKerja) {
+            // Filter Jenis Pegawai
+            ->when($this->selectedJenisPegawai, function ($q) {
+                $q->whereHas('jenis_pegawai', fn($jenis) => $jenis->where('jenis', $this->selectedJenisPegawai));
+            })
 
-            if ($this->selectedMasaKerja == '0-2 Tahun') {
-                $pegawai->whereBetween('pegawai.tanggal_bergabung', [
-                    now()->subYears(2),
-                    now()->subYears(0)
-                ]);
-            }
+            // Filter Status Pegawai
+            ->when($this->selectedStatusPegawai, function ($q) {
+                $q->whereHas('status_pegawai', function ($sub) {
+                    $sub->where('status', $this->selectedStatusPegawai);
+                });
+            })
 
-            if ($this->selectedMasaKerja == '2-5 Tahun') {
-                $pegawai->whereBetween('pegawai.tanggal_bergabung', [
-                    now()->subYears(5),
-                    now()->subYears(2)
-                ]);
-            }
+            // Filter Status Aktif
+            ->when($this->selectedStatusAktif, fn($q) => $q->where('pegawai.status', $this->selectedStatusAktif))
 
-            if ($this->selectedMasaKerja == '5-10 Tahun') {
-                $pegawai->whereBetween('pegawai.tanggal_bergabung', [
-                    now()->subYears(10),
-                    now()->subYears(5)
-                ]);
-            }
+            // Filter Jabatan (Pimpinan / Pegawai)
+            ->when($this->selectedJabatan, function ($q) {
+                if ($this->selectedJabatan === 'Pimpinan') {
+                    $q->whereHas('memimpin_unit');
+                } elseif ($this->selectedJabatan === 'Pegawai') {
+                    $q->whereDoesntHave('memimpin_unit');
+                }
+            })
 
-            if ($this->selectedMasaKerja == '> 10 Tahun') {
-                $pegawai->where('pegawai.tanggal_bergabung', '<=', now()->subYears(10));
-            }
-        }
-
-        if ($this->search) {
-            $pegawai->where(function ($q) {
-                $q->where('pegawai.nip', 'like', '%' . $this->search . '%')
-                    ->orWhere('pegawai.nama', 'like', '%' . $this->search . '%');
+            // Filter Jenjang Pendidikan
+            ->when($this->selectedJenjangPendidikan, function ($q) {
+                $q->whereHas('riwayatPendidikan', function ($sub) {
+                    $sub->whereHas('jenjangPendidikan', function ($jjg) {
+                        $jjg->where('kode', $this->selectedJenjangPendidikan);
+                    });
+                });
             });
+    }
+
+    #[Computed]
+    public function pegawai()
+    {
+        return $this->baseQuery()
+            ->when($this->sortField, function ($query) {
+                if ($this->sortField === 'unit_kerja') {
+                    $query->orderBy('unit_kerja.name', $this->sortDirection)
+                        ->orderBy('pegawai.nama', 'asc');
+                } elseif ($this->sortField === 'tanggal_berakhir') { // sort tanggal berakhir
+                    $query->orderByRaw("COALESCE(pegawai.tanggal_habis_kontrak, pegawai.tanggal_pensiun) {$this->sortDirection}");
+                } else {
+                    $query->orderBy($this->sortField, $this->sortDirection);
+                }
+            }, function ($query) {
+                // Default Sorting
+                $query->orderBy('unit_kerja.name', 'asc')
+                    ->orderBy('pegawai.nama', 'asc');
+            })
+            ->paginate(10);
+    }
+
+    #[Computed]
+    public function emptyStateMessage(): string
+    {
+        if ($this->search) {
+            return "Tidak ditemukan data pegawai dengan kata kunci '{$this->search}'.";
         }
 
-        return view('livewire.manajemen.pegawai.tabel-pegawai', [
-            'pegawai' => $pegawai->paginate(10),
-            'unit_kerja' => $this->unit_kerja
-        ]);
-    }
+        if ($this->selectedUnitKerja || $this->selectedJabatan || $this->selectedJenisPegawai || $this->selectedStatus || $this->selectedJenjangPendidikan) {
+            return "Belum ada data pegawai yang sesuai dengan filter yang Anda terapkan.";
+        }
 
-    public function updatedSelectedUnitKerja()
-    {
-        $this->resetPage();
-    }
-
-    public function updatedSelectedJabatan()
-    {
-        $this->resetPage();
-    }
-
-    public function updatedSelectedGelar()
-    {
-        $this->resetPage();
-    }
-
-    public function updatedSelectedStatus()
-    {
-        $this->resetPage();
-    }
-
-    public function updatedSelectedMasaKerja()
-    {
-        $this->resetPage();
-    }
-
-    public function updatedSearch()
-    {
-        $this->resetPage();
+        return "Belum ada data pegawai yang terdaftar.";
     }
 
     public function sortBy($field)
@@ -201,13 +228,19 @@ class TabelPegawai extends Component
         $this->sortField = $field;
         $this->resetPage();
     }
+
     public function sortIcon($field)
     {
         if ($this->sortField !== $field) {
-            return 'fa-sort-up';
+            return 'fa-sort-up text-gray-300'; // Sesuaikan dengan class styling Anda
         }
         return $this->sortDirection === 'asc'
             ? 'fa-sort-down'
             : 'fa-sort-up';
+    }
+
+    public function render()
+    {
+        return view('livewire.manajemen.pegawai.tabel-pegawai');
     }
 }

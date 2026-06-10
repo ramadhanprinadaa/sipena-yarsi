@@ -4,169 +4,115 @@ namespace App\Imports\Pegawai;
 
 use App\Models\Pegawai;
 use App\Models\Rekening;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\Importable;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
+use Maatwebsite\Excel\Concerns\SkipsFailures;
+use Maatwebsite\Excel\Concerns\SkipsOnFailure;
+use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithBatchInserts;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithSkipDuplicates;
+use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Events\BeforeSheet;
 
-class RekeningImport implements ToCollection, WithHeadingRow
+class RekeningImport implements ToModel, WithHeadingRow, WithValidation, WithBatchInserts, WithChunkReading, WithSkipDuplicates, SkipsOnFailure, SkipsEmptyRows, WithEvents
 {
-    public int $totalRows = 0;
-    public int $successRows = 0;
-    public int $failedRows = 0;
-    public int $duplicateRows = 0;
+    use Importable, SkipsFailures;
 
-    public array $failures = [];
-    public array $duplicates = [];
-    public array $successData = [];
+    private array $pegawaiMap = [];
+
+    public int $totalRows = 0;
+
+    // Handle data id pegawai yang barus saja di import
+    public function registerEvents(): array
+    {
+        return [
+            BeforeSheet::class => function (BeforeSheet $event) {
+                $this->loadData();
+            },
+        ];
+    }
+
+    public function loadData()
+    {
+        $this->pegawaiMap = Pegawai::pluck('id', 'nip')->toArray();
+    }
+
+    public function prepareForValidation($data, $index)
+    {
+        $this->totalRows++;
+        return $data;
+    }
+
+    public function model(array $row)
+    {
+        return new Rekening([
+            'pegawai_id'        => $this->pegawaiMap[$row['nik_pegawai']] ?? null,
+            'nama_bank'         => $row['nama_bank'],
+            'nomor_rekening'    => $row['nomor_rekening'],
+            'nama_rekening'     => $row['nama_rekening'],
+        ]);
+    }
+
+    public function rules(): array
+    {
+        return [
+            'nik_pegawai'       => ['required', 'string', 'exists:pegawai,nip'],
+            'nama_bank'         => ['required', 'string'],
+            'nomor_rekening'    => ['required', 'string', 'unique:rekening,nomor_rekening'],
+            'nama_rekening'     => ['required', 'string'],
+        ];
+    }
+
+    public function customValidationAttributes(): array
+    {
+        return [
+            'nik_pegawai'       => 'NIP / NIK Pegawai',
+            'nama_bank'         => 'Nama Bank',
+            'nomor_rekening'    => 'Nomor Rekening',
+            'nama_rekening'     => 'Nama Rekening',
+        ];
+    }
+
+    public function customValidationMessages(): array
+    {
+        return [
+            'nik_pegawai.required' => 'NIP / NIK Pegawai kosong / tidak diisi.',
+            'nik_pegawai.string'   => 'NIP / NIK Pegawai tidak berupa teks yang valid.',
+            'nik_pegawai.exists'   => 'NIP / NIK Pegawai tidak ditemukan pada data referensi sistem.',
+
+            'nama_bank.required' => 'Nama Bank kosong / tidak diisi.',
+            'nama_bank.string' => 'Nama Bank tidak berupa teks yang valid.',
+
+            'nomor_rekening.required' => 'Nomor Rekening kosong / tidak diisi.',
+            'nomor_rekening.string' => 'Nomor Rekening tidak berupa teks yang valid.',
+            'nomor_rekening.unique' => 'Nomor Rekening sudah terdaftar pada sistem.',
+
+            'nama_rekening.required' => 'Nama Rekening kosong / tidak diisi.',
+            'nama_rekening.string' => 'Nama Rekening tidak berupa teks yang valid.',
+
+            // Default Validation Messages
+            '*.required' => ':attribute kosong / tidak diisi.',
+            '*.exists'   => ':attribute tidak ditemukan pada data referensi sistem.',
+            '*.unique'   => ':attribute sudah terdaftar pada sistem.',
+            '*.string'   => ':attribute tidak berupa teks yang valid.',
+        ];
+    }
 
     public function headingRow(): int
     {
         return 9;
     }
 
-    public function rules()
+    public function batchSize(): int
     {
-        return [
-            'nik_pegawai'    => 'required|string',
-            'nama_bank'      => 'required|string|max:100',
-            'nomor_rekening' => 'required|string|max:50',
-            'nama_rekening'  => 'required|string|max:255',
-        ];
+        return 1000;
     }
 
-    public function collection(Collection $rows)
+    public function chunkSize(): int
     {
-        if ($rows->isEmpty()) return;
-
-        // Proteksi Sheet
-        $firstRow = $rows->first()->toArray();
-        if (!array_key_exists('nomor_rekening', $firstRow) && !array_key_exists('nik_pegawai', $firstRow)) {
-            return;
-        }
-
-        $this->totalRows += $rows->count();
-
-        // Prefetch existing nip pegawai
-        $validNips = array_flip(Pegawai::pluck('nip')->filter()->toArray());
-
-        // Prefetch existing nomor rekening untuk cek duplikasi
-        $existingRekening = Rekening::pluck('pegawai_nip', 'nomor_rekening')->toArray();
-
-        $upsertData = [];
-        $nipsInCurrentExcel = [];
-        $rekeningInCurrentExcel = [];
-
-        foreach ($rows as $index => $row) {
-
-            $rowNumber = $index + 10;
-            $data = $row->toArray();
-
-            // get data nip dan nomor rekening from file excel
-            $nip = isset($data['nik_pegawai']) ? trim((string) $data['nik_pegawai']) : null;
-            $noRekening = isset($data['nomor_rekening']) ? trim((string) $data['nomor_rekening']) : null;
-
-            // Validasi format dan required
-            $validator = Validator::make($data, $this->rules());
-            if ($validator->fails()) {
-                $this->failedRows++;
-                $this->failures[] = [
-                    'row'     => $rowNumber,
-                    'message' => implode(', ', $validator->errors()->all()),
-                ];
-                continue;
-            }
-
-            // Validasi NIP Pegawai harus ada di database
-            if (!isset($validNips[$nip])) {
-                $this->failedRows++;
-                $this->failures[] = [
-                    'row'     => $rowNumber,
-                    'message' => "Pegawai dengan NIP/NIK {$nip} tidak ditemukan di database.",
-                ];
-                continue;
-            }
-
-            // Cek Duplikasi Apakah NIP muncul 2x di Excel
-            $isDuplicate = false;
-            $duplicateReasons = [];
-            // A. Duplikat Internal (Dalam 1 file excel yg sama)
-            if (isset($nipsInCurrentExcel[$nip])) {
-                $isDuplicate = true;
-                $duplicateReasons[] = "NIP {$nip} muncul lebih dari satu kali di file ini.";
-            } else {
-                $nipsInCurrentExcel[$nip] = true;
-            }
-
-            if (isset($rekeningInCurrentExcel[$noRekening])) {
-                $isDuplicate = true;
-                $duplicateReasons[] = "Nomor Rekening {$noRekening} muncul lebih dari satu kali di file ini.";
-            } else {
-                $rekeningInCurrentExcel[$noRekening] = true;
-            }
-
-            // B. Duplikat Database (Nomor rekening dipakai orang lain)
-            if (isset($existingRekening[$noRekening]) && $existingRekening[$noRekening] !== $nip) {
-                $isDuplicate = true;
-                $pemilikAsli = $existingRekening[$noRekening];
-                $duplicateReasons[] = "Nomor Rekening {$noRekening} sudah digunakan oleh NIP {$pemilikAsli}.";
-            }
-
-            if ($isDuplicate) {
-                $this->duplicateRows++;
-                $this->duplicates[] = [
-                    'row'     => $rowNumber,
-                    'message' => implode(' | ', $duplicateReasons),
-                ];
-                continue;
-            }
-
-            try {
-                $upsertData[] = [
-                    'pegawai_nip'    => $nip,
-                    'nama_bank'      => $data['nama_bank'],
-                    'nomor_rekening' => $noRekening,
-                    'nama_rekening'  => $data['nama_rekening'],
-                    'updated_at'     => now(),
-                ];
-
-                $this->successRows++;
-                $this->successData[] = [
-                    'row' => $rowNumber,
-                    'nip' => $nip,
-                    'nama_bank' => $data['nama_bank'],
-                    'nomor_rekening' => $noRekening
-                ];
-            } catch (\Throwable $e) {
-                $this->failedRows++;
-                $this->failures[] = [
-                    'row'     => $rowNumber,
-                    'message' => 'System error: ' . $e->getMessage(),
-                ];
-            }
-        }
-
-        if (!empty($upsertData)) {
-            foreach (array_chunk($upsertData, 500) as $chunk) {
-                Rekening::upsert(
-                    $chunk,
-                    ['pegawai_nip'],
-                    ['nama_bank', 'nomor_rekening', 'nama_rekening', 'updated_at'] // Update data jika NIP sudah ada
-                );
-            }
-        }
-    }
-
-    public function getSummary()
-    {
-        return [
-            'total_rows'         => $this->totalRows,
-            'total_success'      => $this->successRows,
-            'total_failed'       => $this->failedRows,
-            'total_duplicate'    => $this->duplicateRows,
-            'failures'           => $this->failures,
-            'duplicates'         => $this->duplicates,
-            'success_data'       => $this->successData,
-        ];
+        return 1000;
     }
 }

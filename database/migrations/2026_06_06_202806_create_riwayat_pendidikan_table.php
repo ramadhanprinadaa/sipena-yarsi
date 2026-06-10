@@ -14,11 +14,12 @@ return new class extends Migration
         Schema::create('riwayat_pendidikan', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pegawai_id');
-            $table->string('jenjang_pendidikan');
-            $table->string('file_ijazah');
-            $table->string('file_path');
-            $table->unsignedSmallInteger('tahun_masuk');
-            $table->unsignedSmallInteger('tahun_lulus');
+            $table->foreignId('jenjang_pendidikan_id');
+            $table->unsignedSmallInteger('tahun_masuk')->nullable();
+            $table->unsignedSmallInteger('tahun_lulus')->nullable();
+            $table->string('file_ijazah')->nullable();
+            $table->string('file_path')->nullable();
+            $table->foreignId('updated_by');
             $table->timestamps();
         });
     }

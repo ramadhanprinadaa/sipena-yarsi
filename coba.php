@@ -1,187 +1,292 @@
 <?php
 
-namespace App\Imports\Pegawai;
+namespace App\Livewire\Manajemen\Pegawai;
 
+use App\Exports\DataPegawaiExport; // Sesuaikan dengan nama class Export Anda
+use App\Models\JenisPegawai;
+use App\Models\JenjangPendidikan;
 use App\Models\Pegawai;
-use App\Models\Rekening;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use App\Models\UnitKerja;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Session;
+use Livewire\Component;
+use Livewire\WithPagination;
 
-class RekeningImport implements ToCollection, WithHeadingRow
+class TabelPegawai2 extends Component
 {
-    public int $totalRows = 0;
-    public int $successRows = 0;
-    public int $failedRows = 0;
-    public int $duplicateRows = 0;
+    use WithPagination;
+    protected string $paginationTheme = 'tailwind';
 
-    public array $failures = [];
-    public array $duplicates = [];
-    public array $successData = [];
+    public array $unitKerja;
+    public array $unitKerjaUniversitas;
+    public array $jenisPegawai;
+    public array $jenjangPendidikan;
 
-    public function headingRow(): int
+    // Filter Baru
+    #[Session]
+    public ?string $selectedUnitKerja = null;
+    #[Session]
+    public ?string $selectedJabatan = null;
+    #[Session]
+    public ?string $selectedJenjangPendidikan = null;
+    #[Session]
+    public ?string $selectedJenisPegawai = null;
+    #[Session]
+    public ?string $selectedStatus = null;
+
+    // Search
+    #[Session]
+    public $search = '';
+
+    // Filter Urutan Data
+    #[Session]
+    public ?string $sortField = null;
+    #[Session]
+    public ?string $sortDirection = 'asc';
+
+    #[On('refresh-table')]
+    public function refreshTable(): void
     {
-        return 9;
+        $this->resetPage();
     }
 
-    public function rules()
+    public function mount()
     {
+        $this->unitKerja = UnitKerja::orderBy('name')
+            ->pluck('name')
+            ->toArray();
+
+        $this->unitKerjaUniversitas = UnitKerja::query()
+            ->whereHas('unitSdm', function ($q) {
+                $q->where('name', 'SDM Universitas');
+            })
+            ->orderBy('name')
+            ->pluck('name')
+            ->toArray();
+
+        $this->jenisPegawai = JenisPegawai::pluck('jenis')->toArray();
+        $this->jenjangPendidikan = JenjangPendidikan::pluck('kode')->toArray();
+    }
+
+    public function updated(string $property): void
+    {
+        if (in_array($property, [
+            'search',
+            'selectedUnitKerja',
+            'selectedJabatan',
+            'selectedJenisPegawai',
+            'selectedJenjangPendidikan',
+            'selectedStatus',
+        ])) {
+            $this->resetPage();
+        }
+    }
+
+    protected function baseQuery()
+    {
+        $user = Auth::user();
+
+        // 1. Inisialisasi Base Query & Eager Loading (Hemat Memory & Query)
+        $query = Pegawai::query()
+            ->select([
+                'pegawai.id',
+                'pegawai.unit_kerja_id',
+                'pegawai.jenis_pegawai_id',
+                'pegawai.status_pegawai_id',
+                'pegawai.nip',
+                'pegawai.nama',
+                'pegawai.status',
+                'pegawai.tanggal_habis_kontrak',
+            ])
+            ->leftJoin('unit_kerja', 'pegawai.unit_kerja_id', '=', 'unit_kerja.id')
+            ->with([
+                'unit_kerja:id,name',
+                'jenis_pegawai:id,jenis',
+                'memimpin_unit'
+            ]);
+
+        // 2. Scoping data berdasarkan Role Auth
+        if ($user->hasRole('SDM Universitas')) {
+            $unitKerjaIds = UnitKerja::whereHas('unitSdm', function ($q) {
+                $q->where('name', 'SDM Universitas');
+            })->pluck('id');
+
+            $query->whereIn('pegawai.unit_kerja_id', $unitKerjaIds)
+                // ->where('pegawai.id', '!=', $user->pegawai?->id)
+                ->whereHas('user.role', function ($q) {
+                    $q->where('name', '!=', 'SDM Universitas');
+                });
+        } elseif ($user->hasRole('Pimpinan')) {
+            $unit_id = $user->pegawai?->memimpin_unit?->id;
+
+            if (!$unit_id) {
+                $query->whereNull('pegawai.id');
+            } else {
+                $query->where('pegawai.unit_kerja_id', $unit_id);
+                    // ->where('pegawai.id', '!=', $user->pegawai?->id);
+            }
+        }
+
+        // 3. Implementasi Filter Baru
+        return $query
+            // Pencarian
+            ->when($this->search, function ($q) {
+                $q->where(function ($subQuery) {
+                    $subQuery->where('pegawai.nama', 'like', '%' . $this->search . '%')
+                        ->orWhere('pegawai.nip', 'like', '%' . $this->search . '%');
+                });
+            })
+            // Filter Unit Kerja (Menggunakan relasi join untuk efisiensi)
+            ->when($this->selectedUnitKerja, fn($q) => $q->where('unit_kerja.name', $this->selectedUnitKerja))
+            // Filter Jenis Pegawai
+            ->when($this->selectedJenisPegawai, function ($q) {
+                $q->whereHas('jenis_pegawai', fn($jenis) => $jenis->where('jenis', $this->selectedJenisPegawai));
+            })
+            // Filter Status
+            ->when($this->selectedStatus, fn($q) => $q->where('pegawai.status', $this->selectedStatus))
+            // Filter Jabatan (Pimpinan / Pegawai)
+            ->when($this->selectedJabatan, function ($q) {
+                if ($this->selectedJabatan === 'Pimpinan') {
+                    $q->whereHas('memimpin_unit');
+                } elseif ($this->selectedJabatan === 'Pegawai') {
+                    $q->whereDoesntHave('memimpin_unit');
+                }
+            })
+            // Filter Jenjang Pendidikan
+            ->when($this->selectedJenjangPendidikan, function ($q) {
+                $q->whereHas('riwayatPendidikan', function ($sub) {
+                    $sub->whereHas('jenjangPendidikan', function ($jjg) {
+                        $jjg->where('kode', $this->selectedJenjangPendidikan);
+                    });
+                });
+            });
+    }
+
+    #[Computed]
+    public function pegawai()
+    {
+        return $this->baseQuery()
+            ->when($this->sortField, function ($query) {
+                if ($this->sortField === 'unit_kerja') {
+                    $query->orderBy('unit_kerja.name', $this->sortDirection)
+                        ->orderBy('pegawai.nama', 'asc');
+                } else {
+                    $query->orderBy($this->sortField, $this->sortDirection);
+                }
+            }, function ($query) {
+                // Default Sorting
+                $query->orderBy('unit_kerja.name', 'asc')
+                    ->orderBy('pegawai.nama', 'asc');
+            })
+            ->paginate(10);
+    }
+
+    #[Computed]
+    public function emptyStateMessage(): string
+    {
+        if ($this->search) {
+            return "Tidak ditemukan data pegawai dengan kata kunci '{$this->search}'.";
+        }
+
+        if ($this->selectedUnitKerja || $this->selectedJabatan || $this->selectedJenisPegawai || $this->selectedStatus || $this->selectedJenjangPendidikan) {
+            return "Belum ada data pegawai yang sesuai dengan filter yang Anda terapkan.";
+        }
+
+        return "Belum ada data pegawai yang terdaftar.";
+    }
+
+    // --- Export Logic ---
+
+    public function openExportPreview(): void
+    {
+        $this->dispatch('open-export');
+    }
+
+    #[Computed]
+    public function exportPreviewData(): array
+    {
+        $data = $this->pegawai;
+        $isEmpty = $data->isEmpty();
+
+        // Deteksi Satu Pegawai (Jika filter search spesifik NIP/Nama)
+        $singleEmployeeName = null;
+        if (!$isEmpty && !empty($this->search)) {
+            $uniqueNips = $this->baseQuery()
+                ->select('pegawai.nip')
+                ->distinct()
+                ->limit(2)
+                ->pluck('nip');
+
+            if ($uniqueNips->count() === 1) {
+                $pegawai = Pegawai::where('nip', $uniqueNips->first())->first();
+                $singleEmployeeName = $pegawai ? $pegawai->nama : 'NIP. ' . $uniqueNips->first();
+            }
+        }
+
         return [
-            'nik_pegawai'    => 'required|string',
-            'nama_bank'      => 'required|string|max:100',
-            'nomor_rekening' => 'required|string|max:50',
-            'nama_rekening'  => 'required|string|max:255',
+            'isEmpty'        => $isEmpty,
+            'unit'           => $this->selectedUnitKerja ?? 'Semua Unit Kerja',
+            'jabatan'        => $this->selectedJabatan ?? 'Semua Jabatan',
+            'jenis'          => $this->selectedJenisPegawai ?? 'Semua Jenis Pegawai',
+            'pendidikan'     => $this->selectedJenjangPendidikan ?? 'Semua Jenjang Pendidikan',
+            'status'         => $this->selectedStatus ?? 'Semua Status',
+            'singleEmployee' => $singleEmployeeName,
         ];
     }
 
-    public function collection(Collection $rows)
+    public function exportData()
     {
-        if ($rows->isEmpty()) return;
+        $query = $this->baseQuery();
 
-        // Proteksi Sheet
-        $firstRow = $rows->first()->toArray();
-        if (!array_key_exists('nomor_rekening', $firstRow) && !array_key_exists('nik_pegawai', $firstRow)) {
+        if ($query->count() === 0) {
             return;
         }
 
-        $this->totalRows += $rows->count();
+        $preview = $this->exportPreviewData;
+        $fileNameParts = ['Data_Pegawai'];
 
-        // ==========================================
-        // 1. PRE-FETCHING DATA
-        // ==========================================
-        // Ambil semua NIP valid
-        $validNips = array_flip(Pegawai::pluck('nip')->filter()->toArray());
-
-        // Ambil pemetaan Rekening (Nomor Rekening => NIP)
-        $existingRekening = Rekening::pluck('pegawai_nip', 'nomor_rekening')->toArray();
-
-        $nipsInCurrentExcel = [];
-        $rekeningInCurrentExcel = [];
-        $upsertData = [];
-
-        foreach ($rows as $index => $row) {
-            $rowNumber = $index + 10;
-            $data = $row->toArray();
-
-            $nip = isset($data['nik_pegawai']) ? trim((string) $data['nik_pegawai']) : null;
-            $noRekening = isset($data['nomor_rekening']) ? trim((string) $data['nomor_rekening']) : null;
-
-            // ==========================================
-            // 2. VALIDASI FORMAT
-            // ==========================================
-            $validator = Validator::make($data, $this->rules());
-            if ($validator->fails()) {
-                $this->failedRows++;
-                $this->failures[] = [
-                    'row'     => $rowNumber,
-                    'message' => implode(', ', $validator->errors()->all()),
-                ];
-                continue;
-            }
-
-            // ==========================================
-            // 3. VALIDASI RELASI PEGAWAI
-            // ==========================================
-            if (!isset($validNips[$nip])) {
-                $this->failedRows++;
-                $this->failures[] = [
-                    'row'     => $rowNumber,
-                    'message' => "Pegawai dengan NIP/NIK {$nip} tidak ditemukan di database.",
-                ];
-                continue;
-            }
-
-            // ==========================================
-            // 4. CEK DUPLIKAT
-            // ==========================================
-            $isDuplicate = false;
-            $duplicateReasons = [];
-
-            // A. Duplikat Internal (Dalam 1 file excel yg sama)
-            if (isset($nipsInCurrentExcel[$nip])) {
-                $isDuplicate = true;
-                $duplicateReasons[] = "NIP {$nip} muncul lebih dari satu kali di file ini.";
-            } else {
-                $nipsInCurrentExcel[$nip] = true;
-            }
-
-            if (isset($rekeningInCurrentExcel[$noRekening])) {
-                $isDuplicate = true;
-                $duplicateReasons[] = "Nomor Rekening {$noRekening} muncul lebih dari satu kali di file ini.";
-            } else {
-                $rekeningInCurrentExcel[$noRekening] = true;
-            }
-
-            // B. Duplikat Database (Nomor rekening dipakai orang lain)
-            if (isset($existingRekening[$noRekening]) && $existingRekening[$noRekening] !== $nip) {
-                $isDuplicate = true;
-                $pemilikAsli = $existingRekening[$noRekening];
-                $duplicateReasons[] = "Nomor Rekening {$noRekening} sudah digunakan oleh NIP {$pemilikAsli}.";
-            }
-
-            if ($isDuplicate) {
-                $this->duplicateRows++;
-                $this->duplicates[] = [
-                    'row'     => $rowNumber,
-                    'message' => implode(' | ', $duplicateReasons),
-                ];
-                continue;
-            }
-
-            // ==========================================
-            // 5. SIAPKAN DATA UPSERT
-            // ==========================================
-            try {
-                $upsertData[] = [
-                    'pegawai_nip'    => $nip, // Acuan unik
-                    'nama_bank'      => $data['nama_bank'],
-                    'nomor_rekening' => $noRekening,
-                    'nama_rekening'  => $data['nama_rekening'],
-                    'created_at'     => now(),
-                    'updated_at'     => now(),
-                ];
-
-                $this->successRows++;
-                $this->successData[] = [
-                    'row'            => $rowNumber,
-                    'nip'            => $nip,
-                    'nama_bank'      => $data['nama_bank'],
-                    'nomor_rekening' => $noRekening
-                ];
-            } catch (\Throwable $e) {
-                $this->failedRows++;
-                $this->failures[] = [
-                    'row'     => $rowNumber,
-                    'message' => 'System error: ' . $e->getMessage(),
-                ];
-            }
+        // Nama file dinamis
+        if (!empty($preview['singleEmployee'])) {
+            $fileNameParts[] = str_replace(' ', '_', $preview['singleEmployee']);
+        }
+        if ($this->selectedUnitKerja) {
+            $fileNameParts[] = str_replace(' ', '_', $this->selectedUnitKerja);
         }
 
-        // ==========================================
-        // 6. BATCH UPSERT
-        // ==========================================
-        if (!empty($upsertData)) {
-            foreach (array_chunk($upsertData, 500) as $chunk) {
-                Rekening::upsert(
-                    $chunk,
-                    ['pegawai_nip'], // Kolom Acuan Unique
-                    ['nama_bank', 'nomor_rekening', 'nama_rekening', 'updated_at'] // Kolom yg diupdate
-                );
-            }
-        }
+        $fileName = implode('_', $fileNameParts) . '.xlsx';
+
+        // Pastikan Anda sudah membuat class exportnya (misal: DataPegawaiExport)
+        return (new DataPegawaiExport($query))->download($fileName);
     }
 
-    public function getSummary()
+    // --- Sorting Logic ---
+
+    public function sortBy($field)
     {
-        return [
-            'total_rows'         => $this->totalRows,
-            'total_success'      => $this->successRows,
-            'total_failed'       => $this->failedRows,
-            'total_duplicate'    => $this->duplicateRows,
-            'failures'           => $this->failures,
-            'duplicates'         => $this->duplicates,
-            'success_data'       => $this->successData,
-        ];
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortDirection = 'asc';
+        }
+
+        $this->sortField = $field;
+        $this->resetPage();
+    }
+
+    public function sortIcon($field)
+    {
+        if ($this->sortField !== $field) {
+            return 'fa-sort-up text-gray-300'; // Sesuaikan dengan class styling Anda
+        }
+        return $this->sortDirection === 'asc'
+            ? 'fa-sort-down'
+            : 'fa-sort-up';
+    }
+
+    public function render()
+    {
+        return view('livewire.manajemen.pegawai.tabel-pegawai');
     }
 }

@@ -123,19 +123,16 @@ class TabelRiwayatPresensi extends Component
                 $q->where('name', 'SDM Universitas');
             })->pluck('id');
 
-            $query->whereIn('pegawai.unit_kerja_id', $unitKerjaIds)
-                ->where('pegawai.id', '!=', $user->pegawai?->id)
-                ->whereHas('pegawai.user.role', function ($q) {
-                    $q->where('name', '!=', 'SDM Universitas');
-                });
+            $query->whereIn('pegawai.unit_kerja_id', $unitKerjaIds);
+            // ->where('pegawai.id', '!=', $user->pegawai?->id);
         } elseif ($user->hasRole('Pimpinan')) {
             $unit_id = $user->pegawai?->memimpin_unit?->id;
 
             if (!$unit_id) {
-                $query->whereNull('presensi.id'); // Kosongkan hasil
+                $query->whereNull('pegawai.id');
             } else {
-                $query->where('pegawai.unit_kerja_id', $unit_id)
-                    ->where('pegawai.id', '!=', $user->pegawai?->id);
+                $query->where('pegawai.unit_kerja_id', $unit_id);
+                // ->where('pegawai.id', '!=', $user->pegawai?->id);
             }
         }
 

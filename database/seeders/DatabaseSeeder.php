@@ -22,12 +22,12 @@ class DatabaseSeeder extends Seeder
             UnitKerjaSeeder::class,
             StatusPegawaiSeeder::class,
             JenisPegawaiSeeder::class,
-            KeluargaSeeder::class,
-            // RekeningSeeder::class,
             HariLiburSeeder::class,
             StatusKehadiranSeeder::class,
             PresensiSeeder::class,
             JenisCutiSeeder::class,
+            JenisKeluargaSeeder::class,
+            JenjangPendidikanSeeder::class,
         ]);
     }
 }

@@ -64,10 +64,15 @@
                     </div>
 
                     <!-- Button Add Pegawai & Import -->
-                    <div class="flex gap-2">
+                    <div class="flex flex-none flex-wrap gap-2">
+                        <button @click=""
+                            class="flex items-center px-3 w-35 h-10 justify-center cursor-pointer bg-emerald-600 hover:bg-emerald-800 text-white text-sm rounded-md transition">
+                            <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>
+                            Export Excel
+                        </button>
                         <button @click="openImportModal = true"
-                            class="flex items-center px-3 h-10 justify-center cursor-pointer bg-emerald-600 hover:bg-emerald-800 text-white text-sm rounded-md transition">
-                            <i class="fa-solid fa-upload mr-2"></i>
+                            class="flex items-center px-3 w-35 h-10 justify-center cursor-pointer bg-sky-600 hover:bg-sky-800 text-white text-sm rounded-md transition">
+                            <i class="fa-solid fa-cloud-arrow-up mr-2"></i>
                             Import Excel
                         </button>
                         <button @click="openAddModal = true"
@@ -100,7 +105,7 @@
                     x-transition:leave="transition ease-in duration-150"
                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                     x-transition:leave-end="opacity-0 translate-y-4 scale-95" @click.stop>
-                    <livewire:manajemen.pegawai.import-pegawai />
+                    <livewire:manajemen.pegawai.impor-pegawai />
                 </div>
             </div>
         </template>
