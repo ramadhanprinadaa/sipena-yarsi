@@ -1,6 +1,4 @@
-<div
-    x-data="{ showLoading: false, openExport: false }"
-    x-on:open-export="showLoading = false; openExport = true;"
+<div x-data="{ showLoading: false, openExport: false }" x-on:open-export="showLoading = false; openExport = true;"
     class="flex flex-col h-full lg:h-[calc(100vh-150px)] space-y-4 px-2 py-3">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-3">
@@ -43,7 +41,7 @@
             <!-- Button Export Data -->
             <button
                 x-on:click="showLoading = true; $wire.openExportPreview().finally(() => setTimeout(() => showLoading = false, 500))"
-                class="flex items-center px-3 h-9 self-center justify-center cursor-pointer bg-emerald-600/90 hover:bg-emerald-700 text-white text-sm rounded-md transition">
+                class="flex items-center px-3 h-10 self-center justify-center cursor-pointer bg-emerald-600/90 hover:bg-emerald-700 text-white text-sm rounded-md transition">
                 <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>
                 Export Excel
             </button>
@@ -205,7 +203,7 @@
                 </div>
                 <input type="text" x-ref="input" wire:model.live="selectedPeriodeMulai"
                     placeholder="Pilih Periode Tanggal"
-                    class="w-full h-9 pl-9 pr-3 text-sm border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition" />
+                    class="w-full h-10 pl-9 pr-3 text-sm border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition" />
                 <button type="button" x-show="$wire.selectedPeriodeMulai"
                     @click="
                     $wire.set('selectedPeriodeMulai', null);
@@ -231,7 +229,7 @@
                 </div>
                 <input type="text" x-ref="input" wire:model.live="selectedPeriodeSelesai"
                     placeholder="Pilih Periode Selesai"
-                    class="w-full h-9 pl-9 pr-3 text-sm border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition" />
+                    class="w-full h-10 pl-9 pr-3 text-sm border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition" />
                 <button type="button" x-show="$wire.selectedPeriodeSelesai"
                     @click="
                     $wire.set('selectedPeriodeSelesai', null);
@@ -420,14 +418,10 @@
 
     <!-- Modal Confirmation for Export File -->
     <template x-teleport="body">
-        <div x-show="showLoading || openExport"
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @click.self="openExport = false"
+        <div x-show="showLoading || openExport" x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0" @click.self="openExport = false"
             @keydown.escape.window="openExport = false"
             class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md"
             style="display: none;">
@@ -448,81 +442,102 @@
 
                 @php $preview = $this->exportPreviewData; @endphp
 
-                <x-modal.confirmation
-                    title="Export Data Riwayat Presensi"
-                    subTitle="Konfirmasi data export riwayat presensi di bawah ini."
-                    icon="fa-solid fa-file-export"
-                    iconBg="bg-emerald-500"
-                    iconShadow="shadow-emerald-200"
-                    closeAction="openExport = false">
+                <x-modal.confirmation title="Export Data Riwayat Presensi"
+                    subTitle="Konfirmasi data export riwayat presensi di bawah ini." icon="fa-solid fa-file-export"
+                    iconBg="bg-emerald-500" iconShadow="shadow-emerald-200" closeAction="openExport = false">
 
                     <div>
-                        @if($preview['isEmpty'])
-                            <div class="flex flex-col items-center justify-center min-h-[calc(100vh-380px)] p-6 text-center bg-red-50/50 border border-red-100 rounded-xl">
-                                <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-4 shadow-sm shadow-red-100">
+                        @if ($preview['isEmpty'])
+                            <div
+                                class="flex flex-col items-center justify-center min-h-[calc(100vh-450px)] p-6 text-center bg-red-50/50 border border-red-100 rounded-xl">
+                                <div
+                                    class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-4 shadow-sm shadow-red-100">
                                     <i class="fa-solid fa-triangle-exclamation text-2xl text-red-500"></i>
                                 </div>
                                 <h3 class="text-base font-bold text-red-800">Tidak Ada Data Untuk Diexport</h3>
-                                <p class="text-sm text-red-600 mt-1.5 max-w-[280px] leading-relaxed mx-auto">
+                                <p class="text-sm text-red-600 mt-1.5 max-w-[70vw] leading-relaxed mx-auto">
                                     {{ $this->emptyStateMessage }}
                                 </p>
                             </div>
                         @else
                             <div class="space-y-4">
                                 <p class="text-sm text-slate-500 leading-relaxed">
-                                    Silakan periksa kembali parameter filter di bawah ini sebelum mengunduh berkas riwayat presensi.
+                                    Silakan periksa kembali parameter filter di bawah ini sebelum mengunduh berkas
+                                    riwayat presensi.
                                 </p>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-                                    <div class="sm:col-span-2 p-3.5 bg-slate-50 border border-slate-200/70 rounded-xl flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                                    <div
+                                        class="sm:col-span-2 p-3.5 bg-slate-50 border border-slate-200/70 rounded-xl flex items-center gap-3">
+                                        <div
+                                            class="w-9 h-9 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
                                             <i class="fa-regular fa-calendar-days text-base"></i>
                                         </div>
                                         <div>
-                                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Periode Presensi</h4>
-                                            <p class="text-sm font-bold text-slate-700 mt-0.5">{{ $preview['periode'] }}</p>
+                                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                                Periode Presensi</h4>
+                                            <p class="text-sm font-bold text-slate-700 mt-0.5">
+                                                {{ $preview['periode'] }}</p>
                                         </div>
                                     </div>
 
-                                    <div class="p-3.5 bg-slate-50 border border-slate-200/70 rounded-xl flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 shrink-0">
+                                    <div
+                                        class="p-3.5 bg-slate-50 border border-slate-200/70 rounded-xl flex items-center gap-3">
+                                        <div
+                                            class="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 shrink-0">
                                             <i class="fa-solid fa-building text-base"></i>
                                         </div>
                                         <div class="min-w-0">
-                                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Unit Kerja</h4>
-                                            <p class="text-sm font-semibold text-slate-700 mt-0.5 truncate" title="{{ $preview['unit'] }}">{{ $preview['unit'] }}</p>
+                                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                                Unit Kerja</h4>
+                                            <p class="text-sm font-semibold text-slate-700 mt-0.5 truncate"
+                                                title="{{ $preview['unit'] }}">{{ $preview['unit'] }}</p>
                                         </div>
                                     </div>
 
-                                    <div class="p-3.5 bg-slate-50 border border-slate-200/70 rounded-xl flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 shrink-0">
+                                    <div
+                                        class="p-3.5 bg-slate-50 border border-slate-200/70 rounded-xl flex items-center gap-3">
+                                        <div
+                                            class="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 shrink-0">
                                             <i class="fa-solid fa-user-tie text-base"></i>
                                         </div>
                                         <div class="min-w-0">
-                                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Jenis Pegawai</h4>
-                                            <p class="text-sm font-semibold text-slate-700 mt-0.5 truncate" title="{{ $preview['jenis'] }}">{{ $preview['jenis'] }}</p>
+                                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                                Jenis Pegawai</h4>
+                                            <p class="text-sm font-semibold text-slate-700 mt-0.5 truncate"
+                                                title="{{ $preview['jenis'] }}">{{ $preview['jenis'] }}</p>
                                         </div>
                                     </div>
 
-                                    <div class="p-3.5 bg-slate-50 border border-slate-200/70 rounded-xl flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0">
+                                    <div
+                                        class="p-3.5 bg-slate-50 border border-slate-200/70 rounded-xl flex items-center gap-3">
+                                        <div
+                                            class="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0">
                                             <i class="fa-solid fa-user-check text-base"></i>
                                         </div>
                                         <div class="min-w-0">
-                                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Status Kehadiran</h4>
-                                            <p class="text-sm font-semibold text-slate-700 mt-0.5 truncate" title="{{ $preview['status'] }}">{{ $preview['status'] }}</p>
+                                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                                Status Kehadiran</h4>
+                                            <p class="text-sm font-semibold text-slate-700 mt-0.5 truncate"
+                                                title="{{ $preview['status'] }}">{{ $preview['status'] }}</p>
                                         </div>
                                     </div>
 
-                                    @if($preview['singleEmployee'])
-                                        <div class="sm:col-span-2 p-3.5 bg-indigo-50/70 border border-indigo-100 rounded-xl flex items-center gap-3">
-                                            <div class="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold shrink-0 text-xs shadow-sm uppercase">
+                                    @if ($preview['singleEmployee'])
+                                        <div
+                                            class="sm:col-span-2 p-3.5 bg-indigo-50/70 border border-indigo-100 rounded-xl flex items-center gap-3">
+                                            <div
+                                                class="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold shrink-0 text-xs shadow-sm uppercase">
                                                 {{ substr($preview['singleEmployee'], 0, 2) }}
                                             </div>
                                             <div class="min-w-0">
-                                                <h4 class="text-xs font-semibold text-indigo-500 uppercase tracking-wider">Pegawai Terpilih</h4>
-                                                <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" title="{{ $preview['singleEmployee'] }}">{{ $preview['singleEmployee'] }}</p>
+                                                <h4
+                                                    class="text-xs font-semibold text-indigo-500 uppercase tracking-wider">
+                                                    Pegawai Terpilih</h4>
+                                                <p class="text-sm font-bold text-slate-800 mt-0.5 truncate"
+                                                    title="{{ $preview['singleEmployee'] }}">
+                                                    {{ $preview['singleEmployee'] }}</p>
                                             </div>
                                         </div>
                                     @endif
@@ -539,17 +554,10 @@
                         </button>
 
                         <button type="button"
-
-                            @if(!$preview['isEmpty'])
-                                wire:click="exportData"
-                                x-on:click="await $wire.exportData(); setTimeout(() => openExport = false, 800)"
-                            @endif
-                            @disabled($preview['isEmpty'])
-
-                            wire:loading.attr="disabled"
-                            wire:target="exportData"
+                            @if (!$preview['isEmpty']) wire:click="exportData"
+                                x-on:click="await $wire.exportData(); setTimeout(() => openExport = false, 800)" @endif
+                            @disabled($preview['isEmpty']) wire:loading.attr="disabled" wire:target="exportData"
                             wire:loading.class="opacity-70 !cursor-wait"
-
                             class="px-5 py-2 rounded-md border border-slate-200 transition flex items-center justify-center
                                 {{ $preview['isEmpty']
                                     ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
@@ -562,8 +570,8 @@
                             <!-- Loading spinner -->
                             <svg wire:loading wire:target="exportData" class="w-4 h-4 animate-spin mr-2"
                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                    stroke-width="4">
+                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                    stroke="currentColor" stroke-width="4">
                                 </circle>
                                 <path class="opacity-75" fill="currentColor"
                                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z">

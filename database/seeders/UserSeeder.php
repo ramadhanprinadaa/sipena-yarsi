@@ -15,80 +15,72 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = [
-            [
-                'role_id' => 1,
-                'username' => 'admin',
-                'email' => 'admin@gmail.com',
-                'password' => Hash::make('password')
-            ],
-            [
-                'role_id' => 2,
-                'pegawai_id' => 56,
-                'username' => 'sdm.yayasan',
-                'email' => 'sdmyayasan@gmail.com',
-                'password' => Hash::make('password')
-            ],
-            [
-                'role_id' => 3,
-                'pegawai_id' => 57,
-                'username' => 'sdm.universitas',
-                'email' => 'sdmuniversitas@gmail.com',
-                'password' => Hash::make('password')
-            ],
-            [
-                'role_id' => 5,
-                'pegawai_id' => 51,
-                'username' => 'ramadhan.prinada',
-                'email' => 'ramadhanprinada@gmail.com',
-                'password' => Hash::make('password')
-            ],
-            [
-                'role_id' => 7,
-                'pegawai_id' => 52,
-                'username' => 'annisa.putri',
-                'email' => 'annisaputri@gmail.com',
-                'password' => Hash::make('password')
-            ],
-            [
-                'role_id' => 6,
-                'pegawai_id' => 53,
-                'username' => 'rafly.eryan',
-                'email' => 'raflyeryan@gmail.com',
-                'password' => Hash::make('password')
-            ],
-            [
-                'role_id' => 6,
-                'pegawai_id' => 54,
-                'username' => 'agus.widayat',
-                'email' => 'aguswidayat@gmail.com',
-                'password' => Hash::make('password')
-            ],
-            [
-                'role_id' => 5,
-                'pegawai_id' => 55,
-                'username' => 'hilal.akbar',
-                'email' => 'hilalakbar@gmail.com',
-                'password' => Hash::make('password')
-            ],
-            [
-                'role_id' => 5,
-                'pegawai_id' => 59,
-                'username' => 'wily.ahmad',
-                'email' => 'wilyahmad@gmail.com',
-                'password' => Hash::make('password')
-            ],
-            [
-                'role_id' => 5,
-                'pegawai_id' => 60,
-                'username' => 'umam.syafiul',
-                'email' => 'umamsyafiul@gmail.com',
-                'password' => Hash::make('password')
-            ],
-        ];
-
-        foreach ($user as $key => $value) {
-            User::create($value);
-        }
+        // Admin
+        User::create([
+            'id' => 1,
+            'username' => 'admin',
+            'role_id' => 1,
+            'email' => 'admin@gmail.com',
+            'password' => Hash::make('password'),
+            'status' => 'active',
+        ]);
+        // SDM Yayasan
+        User::create([
+            'id' => 2,
+            'username' => 'sdm.yayasan',
+            'pegawai_id' => 54,
+            'role_id' => 2,
+            'email' => 'sdmyayasan@gmail.com',
+            'password' => Hash::make('password'),
+            'status' => 'active',
+        ]);
+        // SDM Universitas
+        User::create([
+            'id' => 3,
+            'username' => 'sdm.universitas',
+            'pegawai_id' => 55,
+            'role_id' => 3,
+            'email' => 'sdmuniversitas@gmail.com',
+            'password' => Hash::make('password'),
+            'status' => 'active',
+        ]);
+        // Rektor
+        User::create([
+            'id' => 4,
+            'username' => 'rektor',
+            'role_id' => 4,
+            'email' => 'rektor@gmail.com',
+            'password' => Hash::make('password'),
+            'status' => 'active',
+        ]);
+        // Pimpinan / Muhammad Ramadhan Prinada
+        User::create([
+            'id' => 5,
+            'username' => 'muhammad.prinada',
+            'pegawai_id' => 51,
+            'role_id' => 5,
+            'email' => 'ramadhan@gmail.com',
+            'password' => Hash::make('password'),
+            'status' => 'active',
+        ]);
+        // Staff / Annisa Putri
+        User::create([
+            'id' => 6,
+            'username' => 'annisa.putri',
+            'pegawai_id' => 52,
+            'role_id' => 6,
+            'email' => 'annisa@gmail.com',
+            'password' => Hash::make('password'),
+            'status' => 'active',
+        ]);
+        // Dosen
+        User::create([
+            'id' => 7,
+            'username' => 'hilal.akbar',
+            'role_id' => 7,
+            'email' => 'akbar@gmail.com',
+            'password' => Hash::make('password'),
+            'status' => 'active',
+        ]);
     }
 }

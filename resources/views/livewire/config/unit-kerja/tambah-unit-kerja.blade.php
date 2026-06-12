@@ -1,7 +1,8 @@
 <div class="relative bg-white min-w-2xl min-h-[68vh] mx-auto rounded-2xl shadow-2xl flex flex-col overflow-hidden">
 
     <!-- Header -->
-    <header class="flex items-center justify-between px-5 py-4 border-b border-slate-200 shrink-0 bg-gradient-to-r from-indigo-50 via-white to-blue-50">
+    <header
+        class="flex items-center justify-between px-5 py-4 border-b border-slate-200 shrink-0 bg-gradient-to-r from-indigo-50 via-white to-blue-50">
 
         <!-- Decoration -->
         <div class="absolute inset-0 opacity-40 pointer-events-none">
@@ -57,9 +58,7 @@
             </div>
 
             <!-- Unit SDM -->
-            <div
-                x-data="{ show: false, selected: @entangle('form.unit_sdm_id').live }"
-                class="relative">
+            <div x-data="{ show: false, selected: @entangle('form.unit_sdm_id').live }" class="relative">
                 <label class="block text-xs font-medium text-gray-500 mb-1">
                     Unit SDM <span class="text-red-500">*</span>
                 </label>
@@ -109,7 +108,8 @@
                 <div class="flex gap-2">
                     <input type="text"
                         class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
-                        wire:model.live.debounce.500ms="pimpinanSearch" placeholder="Cari dan Pilih dari Daftar Pegawai yang Tersedia">
+                        wire:model.live.debounce.500ms="pimpinanSearch"
+                        placeholder="Cari dan Pilih dari Daftar Pegawai yang Tersedia">
                     @if ($form['pimpinan_id'])
                         <button wire:click="removePimpinan" type="button"
                             class="mt-1 px-3 hover:bg-red-50 rounded border border-red-200 cursor-pointer">
@@ -128,9 +128,7 @@
                     <div
                         class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg w-full max-h-48 overflow-y-auto z-50">
                         @foreach ($pimpinanResults as $pimpinan)
-                            <button
-                                type="button"
-                                wire:click="selectPimpinan({{ $pimpinan->id }})"
+                            <button type="button" wire:click="selectPimpinan({{ $pimpinan->id }})"
                                 class="w-full text-left px-3 py-2 hover:bg-indigo-50
                                 transition border-b last:border-b-0">
                                 <div class="text-sm font-medium text-gray-700">
@@ -153,7 +151,8 @@
                 <div class="flex gap-2">
                     <input type="text"
                         class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
-                        wire:model.live.debounce.400ms="unitIndukSearch" placeholder="Cari dan Pilih dari Unit Induk yang Tersedia">
+                        wire:model.live.debounce.400ms="unitIndukSearch"
+                        placeholder="Cari dan Pilih dari Unit Induk yang Tersedia">
                     @if ($form['unit_induk_id'])
                         <button wire:click="removeUnitInduk" type="button"
                             class="mt-1 px-3 hover:bg-red-50 rounded border border-red-200 cursor-pointer">
@@ -186,31 +185,20 @@
 
     <!-- Footer -->
     <div class="flex justify-end gap-3 p-4 border-t border-gray-200">
-        <button
-            type="button"
-            @click="$dispatch('close-modal')"
+        <button type="button" @click="$dispatch('close-modal')"
             class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md cursor-pointer transition-colors duration-150">
             Batal
         </button>
-        <button
-            type="button"
+        <button type="button"
             x-on:click="showLoading = true; $wire.save().finally(() => setTimeout(() => showLoading = false, 500))"
-            @disabled(
-                    blank($form['nama_unit']) ||
-                    blank($form['unit_sdm_id']) ||
-                    $errors->any()
-                )
-            wire:loading.attr="disabled"
-            wire:target="save"
+            @disabled(blank($form['nama_unit']) || blank($form['unit_sdm_id']) || $errors->any()) wire:loading.attr="disabled" wire:target="save"
             class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-md transition-colors duration-150 bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-indigo-500">
             <!-- Loading spinner -->
-            <svg wire:loading wire:target="save" class="w-4 h-4 animate-spin"
-                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                    stroke-width="4">
+            <svg wire:loading wire:target="save" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg"
+                fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
                 </circle>
-                <path class="opacity-75" fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z">
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z">
                 </path>
             </svg>
             <span wire:loading.remove wire:target="save">Simpan Data</span>

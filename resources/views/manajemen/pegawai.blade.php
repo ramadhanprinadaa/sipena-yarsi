@@ -65,7 +65,7 @@
 
                     <!-- Button Add Pegawai & Import -->
                     <div class="flex flex-none flex-wrap gap-2">
-                        <button @click=""
+                        <button @click="$dispatch('export-table')"
                             class="flex items-center px-3 w-35 h-10 justify-center cursor-pointer bg-emerald-600 hover:bg-emerald-800 text-white text-sm rounded-md transition">
                             <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>
                             Export Excel

@@ -8,28 +8,21 @@ use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Cell\DefaultValueBinder;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
-use PhpOffice\PhpSpreadsheet\Cell\DefaultValueBinder;
-use PhpOffice\PhpSpreadsheet\Cell\Cell;
-use PhpOffice\PhpSpreadsheet\Cell\DataType;
 
-class RiwayatPresensiExport extends DefaultValueBinder implements
-    FromQuery,
-    WithHeadings,
-    WithMapping,
-    WithStyles,
-    ShouldAutoSize,
-    WithColumnFormatting,
-    WithCustomValueBinder
+class PegawaiExport extends DefaultValueBinder implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithColumnFormatting, WithCustomValueBinder
 {
     use Exportable;
 
@@ -37,7 +30,7 @@ class RiwayatPresensiExport extends DefaultValueBinder implements
 
     public function __construct(Builder $query)
     {
-        $this->query = $query;
+        $this->query = $query->with(['riwayatPendidikan.jenjangPendidikan', 'unit_kerja', 'jenis_pegawai', 'status_pegawai', 'memimpin_unit']);
     }
 
     public function query()
@@ -51,23 +44,50 @@ class RiwayatPresensiExport extends DefaultValueBinder implements
             'NIP',
             'Nama Pegawai',
             'Unit Kerja',
-            'Tanggal',
-            'Jam Masuk',
-            'Jam Keluar',
-            'Status Kehadiran'
+            'Jenis Pegawai',
+            'Status Pegawai',
+            'Pendidikan Terakhir',
+            'Jabatan',
+            'Tanggal Bergabung',
+            'Tanggal Habis Kontrak / Pensiun',
+            'Status Aktif',
         ];
     }
 
-    public function map($presensi): array
+    public function map($pegawai): array
     {
+        // Get Pendidikan Terakhir
+        $pendidikanTerakhir = $pegawai->riwayatPendidikan->sortByDesc(function ($riwayat) {
+            return $riwayat->jenjangPendidikan->urutan ?? 0;
+        })->first();
+        $kodePendidikan = $pendidikanTerakhir?->jenjangPendidikan?->kode ?? '-';
+
+        // Get Tanggal Berakhir
+        $tanggalBerakhir = '-';
+        if (!empty($pegawai->tanggal_habis_kontrak)) {
+            $tanggalBerakhir = Carbon::parse($pegawai->tanggal_habis_kontrak)->translatedFormat('d M Y');
+        } elseif (!empty($pegawai->tanggal_pensiun)) {
+            $tanggalBerakhir = Carbon::parse($pegawai->tanggal_pensiun)->translatedFormat('d M Y');
+        }
+
+        // Get Jabatan
+        $jabatan = $pegawai->memimpin_unit ? 'Pimpinan' : 'Pegawai';
+
+        // Get Status Aktif
+        $statusAktif = $pegawai->status === 'active' ? 'Aktif' : 'Tidak Aktif';
+
         return [
-            $presensi->pegawai_nip,
-            $presensi->pegawai->nama ?? '-',
-            $presensi->pegawai->unit_kerja->name ?? '-',
-            Carbon::parse($presensi->tanggal)->translatedFormat('l, d F Y'),
-            $presensi->jam_masuk ? Carbon::parse($presensi->jam_masuk)->format('H:i') : '-',
-            $presensi->jam_keluar ? Carbon::parse($presensi->jam_keluar)->format('H:i') : '-',
-            $presensi->statusKehadiran->status ?? '-',
+            $pegawai->nip ?? '-',
+            $pegawai->nama ?? '-',
+            $pegawai->unit_kerja?->name ?? '-',
+            $pegawai->jenis_pegawai?->jenis ?? '-',
+            $pegawai->status_pegawai?->status ?? '-',
+            $kodePendidikan,
+            $jabatan,
+            $pegawai->tanggal_bergabung ? Carbon::parse($pegawai->tanggal_bergabung)->translatedFormat('d M Y') : '-',
+            $tanggalBerakhir,
+            $statusAktif
+
         ];
     }
 
@@ -75,15 +95,12 @@ class RiwayatPresensiExport extends DefaultValueBinder implements
     {
         return [
             'A' => NumberFormat::FORMAT_TEXT,
-            'E' => NumberFormat::FORMAT_TEXT,
-            'F' => NumberFormat::FORMAT_TEXT,
-            'G' => NumberFormat::FORMAT_TEXT,
         ];
     }
 
     public function bindValue(Cell $cell, $value)
     {
-        $textColumns = ['A', 'E', 'F', 'G'];
+        $textColumns = ['A'];
 
         if (in_array($cell->getColumn(), $textColumns)) {
             $cell->setValueExplicit($value, DataType::TYPE_STRING);

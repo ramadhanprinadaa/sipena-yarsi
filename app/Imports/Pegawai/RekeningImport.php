@@ -4,6 +4,7 @@ namespace App\Imports\Pegawai;
 
 use App\Models\Pegawai;
 use App\Models\Rekening;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
@@ -22,7 +23,7 @@ class RekeningImport implements ToModel, WithHeadingRow, WithValidation, WithBat
     use Importable, SkipsFailures;
 
     private array $pegawaiMap = [];
-
+    private ?int $userId;
     public int $totalRows = 0;
 
     // Handle data id pegawai yang barus saja di import
@@ -40,6 +41,11 @@ class RekeningImport implements ToModel, WithHeadingRow, WithValidation, WithBat
         $this->pegawaiMap = Pegawai::pluck('id', 'nip')->toArray();
     }
 
+    public function __construct($userId = null)
+    {
+        $this->userId = $userId ?? Auth::id();
+    }
+
     public function prepareForValidation($data, $index)
     {
         $this->totalRows++;
@@ -53,6 +59,7 @@ class RekeningImport implements ToModel, WithHeadingRow, WithValidation, WithBat
             'nama_bank'         => $row['nama_bank'],
             'nomor_rekening'    => $row['nomor_rekening'],
             'nama_rekening'     => $row['nama_rekening'],
+            'updated_by'        => $this->userId,
         ]);
     }
 

@@ -2,17 +2,20 @@
 
 namespace App\Livewire\Manajemen\Pegawai;
 
+use App\Exports\PegawaiExport;
 use App\Models\JenisPegawai;
 use App\Models\JenjangPendidikan;
 use App\Models\Pegawai;
 use App\Models\StatusPegawai;
 use App\Models\UnitKerja;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TabelPegawai extends Component
 {
@@ -112,6 +115,7 @@ class TabelPegawai extends Component
                 'unit_kerja:id,name',
                 'jenis_pegawai:id,jenis',
                 'status_pegawai:id,status',
+                'riwayatPendidikan.jenjangPendidikan',
                 'memimpin_unit',
             ]);
 
@@ -122,7 +126,7 @@ class TabelPegawai extends Component
             })->pluck('id');
 
             $query->whereIn('pegawai.unit_kerja_id', $unitKerjaIds);
-                // ->where('pegawai.id', '!=', $user->pegawai?->id);
+            // ->where('pegawai.id', '!=', $user->pegawai?->id);
         } elseif ($user->hasRole('Pimpinan')) {
             $unit_id = $user->pegawai?->memimpin_unit?->id;
 
@@ -190,8 +194,11 @@ class TabelPegawai extends Component
                 if ($this->sortField === 'unit_kerja') {
                     $query->orderBy('unit_kerja.name', $this->sortDirection)
                         ->orderBy('pegawai.nama', 'asc');
-                } elseif ($this->sortField === 'tanggal_berakhir') { // sort tanggal berakhir
-                    $query->orderByRaw("COALESCE(pegawai.tanggal_habis_kontrak, pegawai.tanggal_pensiun) {$this->sortDirection}");
+                } elseif ($this->sortField === 'tanggal_berakhir') {
+                    // sort tanggal berakhir
+                    $query->orderByRaw("COALESCE(pegawai.tanggal_habis_kontrak, pegawai.tanggal_pensiun) IS NULL")
+                        ->orderByRaw("COALESCE(pegawai.tanggal_habis_kontrak, pegawai.tanggal_pensiun) {$this->sortDirection}")
+                        ->orderBy('pegawai.id', 'asc');
                 } else {
                     $query->orderBy($this->sortField, $this->sortDirection);
                 }
@@ -210,7 +217,7 @@ class TabelPegawai extends Component
             return "Tidak ditemukan data pegawai dengan kata kunci '{$this->search}'.";
         }
 
-        if ($this->selectedUnitKerja || $this->selectedJabatan || $this->selectedJenisPegawai || $this->selectedStatus || $this->selectedJenjangPendidikan) {
+        if ($this->selectedUnitKerja || $this->selectedJabatan || $this->selectedJenisPegawai || $this->selectedStatusAktif || $this->selectedJenjangPendidikan) {
             return "Belum ada data pegawai yang sesuai dengan filter yang Anda terapkan.";
         }
 
@@ -232,11 +239,97 @@ class TabelPegawai extends Component
     public function sortIcon($field)
     {
         if ($this->sortField !== $field) {
-            return 'fa-sort-up text-gray-300'; // Sesuaikan dengan class styling Anda
+            return 'fa-sort-up text-gray-300';
         }
         return $this->sortDirection === 'asc'
             ? 'fa-sort-down'
             : 'fa-sort-up';
+    }
+
+    #[On('export-table')]
+    public function openExportPreview(): void
+    {
+        $this->dispatch('open-export');
+    }
+
+    #[Computed]
+    public function exportPreviewData(): array
+    {
+        $data = $this->pegawai;
+        $isEmpty = $data->isEmpty();
+
+        return [
+            'isEmpty'        => $isEmpty,
+            'unit'           => $this->selectedUnitKerja ?? 'Semua Unit Kerja',
+            'pendidikan'     => $this->selectedJenjangPendidikan ?? 'Semua Jenjang Pendidikan',
+            'jabatan'        => $this->selectedJabatan ?? 'Semua Jabatan',
+            'jenis'          => $this->selectedJenisPegawai ?? 'Semua Jenis Pegawai',
+            'status_pegawai' => $this->selectedStatusPegawai ?? 'Semua Status Pegawai',
+            'status_aktif'   => $this->selectedStatusAktif ?? 'Semua Status Aktif',
+
+        ];
+    }
+
+    public function exportData()
+    {
+        $query = $this->baseQuery();
+
+        if ($query->count() === 0) {
+            return;
+        }
+
+        // Get Sort Urutan Data
+        if ($this->sortField) {
+            if ($this->sortField === 'unit_kerja') {
+                $query->orderBy('unit_kerja.name', $this->sortDirection)
+                    ->orderBy('pegawai.nama', 'asc');
+            } elseif ($this->sortField === 'tanggal_berakhir') {
+                $query->orderByRaw("COALESCE(pegawai.tanggal_habis_kontrak, pegawai.tanggal_pensiun) IS NULL")
+                    ->orderByRaw("COALESCE(pegawai.tanggal_habis_kontrak, pegawai.tanggal_pensiun) {$this->sortDirection}")
+                    ->orderBy('pegawai.id', 'asc');
+            } else {
+                $query->orderBy($this->sortField, $this->sortDirection);
+            }
+        } else {
+            $query->orderBy('unit_kerja.name', 'asc')
+                ->orderBy('pegawai.nama', 'asc');
+        }
+
+        // Set Nama File Dasar
+        $fileNameParts = ['Data_Pegawai'];
+
+        // 2. Set Filter
+        if ($this->selectedUnitKerja) {
+            $fileNameParts[] = Str::slug($this->selectedUnitKerja, '_');
+        }
+
+        if ($this->selectedJenjangPendidikan) {
+            $fileNameParts[] = Str::slug($this->selectedJenjangPendidikan, '_');
+        }
+
+        if ($this->selectedJenisPegawai) {
+            $fileNameParts[] = Str::slug($this->selectedJenisPegawai, '_');
+        }
+
+        if ($this->selectedJabatan) {
+            $fileNameParts[] = Str::slug($this->selectedJabatan, '_');
+        }
+
+        if ($this->selectedStatusPegawai) {
+            $fileNameParts[] = Str::slug($this->selectedStatusPegawai, '_');
+        }
+
+        if ($this->selectedStatusAktif) {
+            $fileNameParts[] = Str::slug($this->selectedStatusAktif, '_');
+        }
+
+        // Set Timestamp (Waktu) di akhir agar file tidak tertimpa/duplikat
+        $fileNameParts[] = now()->format('Ymd_His');
+
+        // Gabungkan menjadi 1 nama file
+        $fileName = implode('_', $fileNameParts) . '.xlsx';
+
+        return (new PegawaiExport($query))->download($fileName);
     }
 
     public function render()

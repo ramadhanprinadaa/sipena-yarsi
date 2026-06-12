@@ -63,35 +63,11 @@ class PegawaiSeeder extends Seeder
             'status'                  => 'active',
         ]);
 
-        // Rafly Eryan Azis 53
+        // Agus Widayat 53
         Pegawai::create([
             'unit_kerja_id'             => 10,
             'jenis_pegawai_id'          => 2,
             'status_pegawai_id'         => 2,
-            'nip'                       => '200101012024011001',
-            'ktp'                       => '3171010101010002',
-            'npwp'                      => '092345678912345',
-            'nama'                      => 'Rafly Eryan',
-            'gelar_depan'               => null,
-            'gelar_belakang'            => 'S.Kom',
-            'tempat_lahir'              => 'Jakarta',
-            'tanggal_lahir'             => '2001-01-01',
-            'tanggal_bergabung'         => '2024-01-01',
-            'tanggal_habis_kontrak'     => '2027-01-01',
-            'tanggal_pensiun'           => null,
-            'jenis_kelamin'             => 'L',
-            'alamat_ktp'                => 'Jl. Salemba Raya, Jakarta Pusat',
-            'alamat_domisili'           => 'Jl. Salemba Raya, Jakarta Pusat',
-            'no_telpon'                 => '081234567891',
-            'email_yarsi'               => 'raflyeryan@yarsi.ac.id',
-            'status'                    => 'active',
-        ]);
-
-        // Agus Widayat 54
-        Pegawai::create([
-            'unit_kerja_id'             => 10,
-            'jenis_pegawai_id'          => 2,
-            'status_pegawai_id'         => 1,
             'nip'                       => '531142102011',
             'ktp'                       => '3171010101010004',
             'npwp'                      => '3171010101010004',
@@ -111,31 +87,7 @@ class PegawaiSeeder extends Seeder
             'status'                    => 'active',
         ]);
 
-        // Hilal Rizqi Akbar 55
-        Pegawai::create([
-            'unit_kerja_id'             => 11,
-            'jenis_pegawai_id'          => 3,
-            'status_pegawai_id'         => 2,
-            'nip'                       => '200101012024011007',
-            'ktp'                       => '3171010101010007',
-            'npwp'                      => '092345678912347',
-            'nama'                      => 'Hilal Rizqi Akbar',
-            'gelar_depan'               => null,
-            'gelar_belakang'            => 'S.Kom',
-            'tempat_lahir'              => 'Jakarta',
-            'tanggal_lahir'             => '2001-01-01',
-            'tanggal_bergabung'         => '2024-01-01',
-            'tanggal_habis_kontrak'     => '2027-01-01',
-            'tanggal_pensiun'           => null,
-            'jenis_kelamin'             => 'L',
-            'alamat_ktp'                => 'Jl. Salemba Raya, Jakarta Pusat',
-            'alamat_domisili'           => 'Jl. Salemba Raya, Jakarta Pusat',
-            'no_telpon'                 => '081234567891',
-            'email_yarsi'               => 'hilalrizqi@yarsi.ac.id',
-            'status'                    => 'active',
-        ]);
-
-        // SDM Yayasan 56
+        // SDM Yayasan 54
         Pegawai::create([
             'unit_kerja_id' => 1,
             'jenis_pegawai_id' => 3,
@@ -159,7 +111,7 @@ class PegawaiSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        // SDM Univesitas 57
+        // SDM Univesitas 55
         Pegawai::create([
             'unit_kerja_id' => 5,
             'jenis_pegawai_id' => 3,

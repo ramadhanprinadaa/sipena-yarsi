@@ -24,7 +24,7 @@
                     <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
                 </div>
                 <input type="text" x-ref="input" wire:model.live="selectedPeriodeMulai" placeholder="Dari Tanggal"
-                    class="w-full h-9 pl-9 pr-3 text-sm border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition" />
+                    class="w-full h-10 pl-9 pr-3 text-bs border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition" />
                 <button type="button" x-show="$wire.selectedPeriodeMulai"
                     @click="
                     $wire.set('selectedPeriodeMulai', null);
@@ -48,8 +48,8 @@
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
                 </div>
-                <input type="text" x-ref="input" placeholder="Dari Tanggal"
-                    class="w-full h-9 pl-9 pr-3 text-sm border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition" />
+                <input type="text" x-ref="input" placeholder="Sampai Tanggal"
+                    class="w-full h-10 pl-9 pr-3 text-base border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition" />
                 <button type="button" x-show="$wire.selectedPeriodeSelesai"
                     @click="
                     $wire.set('selectedPeriodeSelesai', null);

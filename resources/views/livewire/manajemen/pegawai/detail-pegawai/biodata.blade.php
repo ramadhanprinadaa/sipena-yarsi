@@ -1,17 +1,16 @@
 <div class="space-y-6">
-    <div class="flex items-center justify-between bg-white rounded-md shadow-md border border-indigo-100 p-5">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-md bg-indigo-50 flex items-center justify-center text-indigo-600">
-                <i class="fa-solid fa-address-card text-xl"></i>
-            </div>
-            <div>
-                <h2 class="text-xl font-bold text-gray-800">Biodata Pegawai</h2>
-                <p class="text-xs text-gray-500">Informasi personal dan identitas kependudukan</p>
-            </div>
+
+    <!-- Header -->
+    <div class="flex items-center justify-between bg-white rounded-md shadow-md border border-indigo-100 border-t-4 border-t-indigo-500 p-5">
+
+        <!-- Header Information -->
+        <div>
+            <h3 class="text-xl font-bold text-gray-800">Biodata Pegawai</h3>
+            <p class="text-sm text-gray-500 mt-0.5">
+                <i class="fa-solid fa-id-card-clip mr-1.5 text-indigo-500"></i>
+                Informasi personal dan identitas kependudukan
+            </p>
         </div>
-        <button class="px-4 py-2 text-sm font-medium bg-indigo-50 text-indigo-600 rounded-md hover:bg-indigo-600 hover:text-white transition-colors duration-200 shadow-sm cursor-pointer">
-            <i class="fa-solid fa-pen-to-square mr-1.5"></i> Edit Biodata
-        </button>
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">

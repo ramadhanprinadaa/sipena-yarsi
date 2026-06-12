@@ -14,6 +14,7 @@ class Rekening extends Model
         'nama_bank',
         'nomor_rekening',
         'nama_rekening',
+        'updated_by'
     ];
 
     protected function namaRekening(): Attribute
@@ -27,5 +28,10 @@ class Rekening extends Model
     public function pegawai()
     {
         return $this->belongsTo(Pegawai::class, 'pegawai_id');
+    }
+
+    public function editor()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

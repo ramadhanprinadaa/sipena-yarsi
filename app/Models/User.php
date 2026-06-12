@@ -25,10 +25,9 @@ class User extends Authenticatable
         'pegawai_id',
         'pimpinan_id',
         'role_id',
-        'name',
         'email',
         'password',
-        'status'
+        'status',
     ];
 
     /**
@@ -43,7 +42,7 @@ class User extends Authenticatable
 
     protected $attributes = [
         'status' => 'active',
-        'role_id' => 8
+        'role_id' => 7
     ];
 
     /**
@@ -83,6 +82,11 @@ class User extends Authenticatable
     public function editKeluarga()
     {
         return $this->hasMany(Keluarga::class, 'updated_by');
+    }
+
+    public function editRekening()
+    {
+        return $this->hasMany(Rekening::class, 'updated_by');
     }
 
     public function editRiwayatPendidikan()

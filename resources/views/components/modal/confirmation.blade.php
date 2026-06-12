@@ -7,6 +7,7 @@
     'confirmText' => 'Simpan',
     'confirmColor' => 'bg-emerald-600/90 hover:bg-emerald-700',
     'confirmAction' => '', // Aksi untuk Livewire/Alpine (contoh: wire:click="save")
+    'cancelColor' => 'bg-red-400/90 hover:bg-red-500',
     'cancelText' => 'Batal',
     'closeAction' => 'open = false', // Aksi alpine untuk menutup modal
 ])
@@ -54,7 +55,7 @@
             {{ $footer }}
         @else
             <button type="button" x-on:click="{{ $closeAction }}"
-                class="px-5 py-2 rounded-md border border-slate-200 bg-red-400/90 hover:bg-red-500 text-white transition cursor-pointer">
+                class="px-5 py-2 rounded-md border border-slate-200 {{ $cancelColor }} text-white transition cursor-pointer">
                 {{ $cancelText }}
             </button>
             <button type="button" {!! $confirmAction !!}

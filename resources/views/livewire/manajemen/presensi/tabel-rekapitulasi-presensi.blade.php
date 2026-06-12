@@ -69,7 +69,7 @@
                 </div>
                 <input type="text" x-ref="input" wire:model.live="selectedPeriodeMulai"
                     placeholder="Pilih Periode Mulai"
-                    class="w-full h-9 pl-9 pr-3 text-sm border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition" />
+                    class="w-full h-10 pl-9 pr-3 text-sm border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition" />
                 <button type="button" x-show="$wire.selectedPeriodeMulai"
                     @click="
                     $wire.set('selectedPeriodeMulai', null);
@@ -95,7 +95,7 @@
                 </div>
                 <input type="text" x-ref="input" wire:model.live="selectedPeriodeSelesai"
                     placeholder="Pilih Periode Selesai"
-                    class="w-full h-9 pl-9 pr-3 text-sm border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition" />
+                    class="w-full h-10 pl-9 pr-3 text-sm border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition" />
                 <button type="button" x-show="$wire.selectedPeriodeSelesai"
                     @click="
                     $wire.set('selectedPeriodeSelesai', null);
@@ -161,7 +161,7 @@
             <!-- Button Export Data -->
             <button
                 x-on:click="showLoading = true; $wire.openExportPreview().finally(() => setTimeout(() => showLoading = false, 500))"
-                class="flex items-center px-3 h-9 justify-center cursor-pointer bg-emerald-600/90 hover:bg-emerald-700 text-white text-sm rounded-md transition whitespace-nowrap">
+                class="flex items-center px-3 h-10 justify-center cursor-pointer bg-emerald-600/90 hover:bg-emerald-700 text-white text-sm rounded-md transition whitespace-nowrap">
                 <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>
                 Export Excel
             </button>
@@ -428,7 +428,7 @@
                         {{-- TAMPILAN JIKA DATA KOSONG --}}
                         @if ($preview['isEmpty'])
                             <div
-                                class="flex flex-col items-center justify-center min-h-[calc(100vh-380px)] p-6 text-center bg-red-50/50 border border-red-100 rounded-xl">
+                                class="flex flex-col items-center justify-center min-h-[calc(100vh-450px)] p-6 text-center bg-red-50/50 border border-red-100 rounded-xl">
                                 <div
                                     class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-4 shadow-sm shadow-red-100">
                                     <i class="fa-solid fa-triangle-exclamation text-2xl text-red-500"></i>

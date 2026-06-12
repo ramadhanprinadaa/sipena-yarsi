@@ -130,6 +130,7 @@ class ImporPegawai extends Component
 
         $this->showResult = true;
         $this->reset('file');
+        $this->dispatch('refresh-table');
     }
 
     public function setActiveTab($tab)
@@ -148,7 +149,6 @@ class ImporPegawai extends Component
     public function close()
     {
         $this->resetImport();
-        $this->dispatch('refresh-table');
     }
 
     public function render()

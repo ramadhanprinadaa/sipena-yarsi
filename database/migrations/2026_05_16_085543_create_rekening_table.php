@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('nama_bank');
             $table->string('nomor_rekening')->unique();
             $table->string('nama_rekening');
+            $table->foreignId('updated_by');
             $table->timestamps();
         });
     }

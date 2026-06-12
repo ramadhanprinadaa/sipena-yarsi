@@ -16,7 +16,7 @@
 @section('content')
     <div
         x-data="{
-            activeTab: $persist('biodata').as('tab_aktif_detail_pegawai'),
+            activeTab: $persist('biodata').as('tab_aktif_detail_pegawai_manajemen'),
         }"
         class="flex flex-col space-y-3">
 
@@ -195,6 +195,7 @@
 
             {{-- Main Content Area --}}
             <div class="relative p-5 min-h-[calc(100vh-395px)]">
+
                 {{-- Wrapper Tab Biodata --}}
                 <div x-show="activeTab === 'biodata'" x-cloak
                     x-transition:enter="transition ease-out duration-300"
@@ -203,21 +204,31 @@
                     style="display: none;">
                     <livewire:manajemen.pegawai.detail-pegawai.biodata :pegawai="$pegawai" />
                 </div>
+
                 {{-- Wrapper Tab Keluarga --}}
                 <div x-show="activeTab === 'keluarga'" x-cloak
                     x-transition:enter="transition ease-out duration-300"
                     x-transition:enter-start="opacity-0 translate-y-4"
                     x-transition:enter-end="opacity-100 translate-y-0"
                     style="display: none;">
-                    <livewire:manajemen.pegawai.detail-pegawai.keluarga :pegawai="$pegawai" />
+                    <livewire:manajemen.pegawai.detail-pegawai.keluarga.keluarga :pegawai_id="$pegawai->id" />
                 </div>
 
-                <div x-show="activeTab === 'rekening'" x-cloak>
-                    <x-under-development title="Rekening & Bank" icon="fa-building-columns" />
+                {{-- Wrapper Tab Rekening --}}
+                <div x-show="activeTab === 'rekening'" x-cloak
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    style="display: none;">
+                    <livewire:manajemen.pegawai.detail-pegawai.rekening :pegawai_id="$pegawai->id" />
                 </div>
 
-                <div x-show="activeTab === 'pendidikan'" x-cloak>
-                    <x-under-development title="Riwayat Pendidikan" icon="fa-graduation-cap" />
+                <div x-show="activeTab === 'pendidikan'" x-cloak
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    style="display: none;">
+                    <livewire:manajemen.pegawai.detail-pegawai.pendidikan :pegawai_id="$pegawai->id" />
                 </div>
 
                 <div x-show="activeTab === 'kepegawaian'" x-cloak>

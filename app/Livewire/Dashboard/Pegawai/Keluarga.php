@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Livewire\Manajemen\Pegawai\DetailPegawai;
+namespace App\Livewire\Dashboard\Pegawai;
 
 use App\Models\JenisKeluarga;
 use App\Models\Keluarga as KeluargaModel;
-use App\Models\Pegawai;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
@@ -17,7 +16,8 @@ class Keluarga extends Component
     protected string $paginationTheme = 'tailwind';
 
     public array $hubunganKeluarga;
-    public Pegawai $pegawai;
+    public ?int $pegawai_id = null;
+    public ?string $nama_pegawai = null;
 
     // Filter
     #[Session]
@@ -39,9 +39,9 @@ class Keluarga extends Component
         $this->resetPage();
     }
 
-    public function mount(Pegawai $pegawai)
+    public function mount(?int $pegawai_id = null)
     {
-        $this->pegawai = $pegawai;
+        $this->pegawai_id = $pegawai_id;
         $this->hubunganKeluarga = JenisKeluarga::pluck('jenis')->toArray();
     }
 
@@ -57,7 +57,6 @@ class Keluarga extends Component
 
     public function baseQuery()
     {
-        // Optimasi: Membatasi select kolom (Hemat Memori) & Eager Loading (Hemat Query)
         $query = KeluargaModel::query()
             ->select([
                 'keluarga.id',
@@ -69,8 +68,12 @@ class Keluarga extends Component
                 'keluarga.pekerjaan',
                 'keluarga.no_telpon'
             ])
-            ->where('keluarga.pegawai_id', $this->pegawai->id)
-            ->with(['jenis_keluarga:id,jenis']);
+            ->where('keluarga.pegawai_id', $this->pegawai_id)
+            ->with(['jenisKeluarga:id,jenis']);
+
+        if ($this->pegawai_id === null) {
+            return $query->whereRaw('1 = 0');
+        }
 
         // Search by name
         if (!empty($this->search)) {
@@ -79,7 +82,7 @@ class Keluarga extends Component
 
         // Filter by Jenis Keluarga
         if (!empty($this->selectedHubungan)) {
-            $query->whereHas('jenis_keluarga', function ($q) {
+            $query->whereHas('jenisKeluarga', function ($q) {
                 $q->where('jenis', $this->selectedHubungan);
             });
         }
@@ -94,13 +97,7 @@ class Keluarga extends Component
 
         // Logika Sorting
         if ($this->sortField) {
-            if ($this->sortField === 'jenis_keluarga') {
-                // Sorting berdasarkan tabel relasi dengan Join agar tetap dalam eksekusi DB Level
-                $query->join('jenis_keluarga', 'keluarga.jenis_keluarga_id', '=', 'jenis_keluarga.id')
-                    ->orderBy('jenis_keluarga.jenis', $this->sortDirection);
-            } else {
-                $query->orderBy('keluarga.' . $this->sortField, $this->sortDirection);
-            }
+            $query->orderBy('keluarga.' . $this->sortField, $this->sortDirection);
         } else {
             $query->orderBy('keluarga.tanggal_lahir', 'asc');
         }
@@ -111,9 +108,17 @@ class Keluarga extends Component
     #[Computed]
     public function emptyStateMessage(): string
     {
-        if (!empty($this->search) || !empty($this->selectedHubungan)) {
-            return "Data keluarga tidak ditemukan untuk pencarian atau filter yang dipilih.";
+        if ($this->pegawai_id === null) {
+            return "Akun Anda belum tertaut dengan data pegawai manapun.";
         }
+
+        if ($this->search) {
+            return "Tidak ditemukan data keluarga dengan kata kunci '{$this->search}'.";
+        }
+        if (!empty($this->selectedHubungan)) {
+            return "Data keluarga tidak ditemukan untuk filter yang dipilih.";
+        }
+
         return "Belum ada data keluarga pegawai yang terdaftar.";
     }
 
@@ -132,10 +137,15 @@ class Keluarga extends Component
     public function sortIcon($field)
     {
         if ($this->sortField !== $field) {
-            return 'fa-sort text-gray-300';
+            return 'fa-sort-up text-gray-300';
         }
         return $this->sortDirection === 'asc'
-            ? 'fa-sort-up text-indigo-500'
-            : 'fa-sort-down text-indigo-500';
+            ? 'fa-sort-down'
+            : 'fa-sort-up';
+    }
+
+    public function render()
+    {
+        return view('livewire.dashboard.pegawai.keluarga');
     }
 }

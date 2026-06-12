@@ -88,6 +88,11 @@
                         <i class="fa-solid fa-xmark text-sm"></i>
                     </button>
                 </div>
+                @error('form.tanggal')
+                    <div class="text-xs text-red-500 mt-1">
+                        {{ $message }}
+                    </div>
+                @enderror
             </div>
 
             <!-- Jenis Hari Libur -->

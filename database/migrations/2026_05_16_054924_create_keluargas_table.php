@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('no_telpon')->nullable();
             $table->foreignId('updated_by')->nullable();
             $table->unique(['pegawai_id', 'jenis_keluarga_id', 'nama', 'tanggal_lahir']);
+            $table->softDeletes();
             $table->timestamps();
         });
     }
