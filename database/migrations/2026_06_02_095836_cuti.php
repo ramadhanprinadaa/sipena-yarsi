@@ -25,6 +25,7 @@ return new class extends Migration
         $table->integer('saldo_cuti_sebelum')->nullable();
         $table->integer('saldo_cuti_sesudah')->nullable();
         $table->string('dokumen_pendukung')->nullable();
+        $table->enum('metode_potongan', ['potong_cuti', 'potong_gaji'])->nullable();
         $table->text('keterangan')->nullable();
         $table->enum('status', [
             'pending_atasan',
@@ -33,8 +34,8 @@ return new class extends Migration
             'pending_sdm_yayasan',
             'disetujui',
             'ditolak'
-        ])->default('pending_atasan');
-        $table->timestamps();
+            ])->default('pending_atasan');
+            $table->timestamps();
         });
     }
 

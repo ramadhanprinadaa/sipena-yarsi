@@ -164,7 +164,7 @@ class PegawaiSeeder extends Seeder
                 'gelar_belakang' => 'S.Kom',
                 'tempat_lahir' => 'Jakarta',
                 'tanggal_lahir' => '2001-01-01',
-                'tanggal_bergabung' => '2024-01-01',
+                'tanggal_bergabung' => '2012-01-01',
                 'tanggal_habis_kontrak' => '2027-01-01',
                 'tanggal_pensiun' => null,
                 'jenis_kelamin' => 'L',

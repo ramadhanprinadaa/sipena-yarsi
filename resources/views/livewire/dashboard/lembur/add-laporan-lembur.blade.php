@@ -4,7 +4,9 @@
         <div 
             class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
             x-data="{ 
+                filePengajuan: null,
                 fileLaporan: null,
+                dragOverPengajuan: false,
                 dragOverLaporan: false,
                 formatFileSize(bytes) {
                     if (bytes === 0) return '0 Bytes';
@@ -17,34 +19,27 @@
                     const ext = fileName.split('.').pop().toLowerCase();
                     const iconMap = {
                         'pdf': 'fa-file-pdf text-red-500',
-                        'doc': 'fa-file-word text-blue-500',
-                        'docx': 'fa-file-word text-blue-500',
-                        'xls': 'fa-file-excel text-green-500',
-                        'xlsx': 'fa-file-excel text-green-500',
-                        'ppt': 'fa-file-powerpoint text-orange-500',
-                        'pptx': 'fa-file-powerpoint text-orange-500',
                         'jpg': 'fa-file-image text-purple-500',
                         'jpeg': 'fa-file-image text-purple-500',
                         'png': 'fa-file-image text-purple-500',
-                        'gif': 'fa-file-image text-purple-500',
-                        'zip': 'fa-file-archive text-yellow-600',
-                        'rar': 'fa-file-archive text-yellow-600',
-                        'txt': 'fa-file-lines text-gray-500'
                     };
                     return iconMap[ext] || 'fa-file text-gray-500';
                 },
-                handleFileLaporan(e, form = 'laporan') {
+                handleFilePengajuan(e, form = 'pengajuan') {
                     e.preventDefault();
                     e.stopPropagation();
+                    if (form === 'pengajuan') this.dragOverPengajuan = false;
                     if (form === 'laporan') this.dragOverLaporan = false;
                     
                     const files = e.dataTransfer?.files || e.target?.files;
                     if (files && files.length > 0) {
                         const file = files[0];
+                        if (form === 'pengajuan') this.filePengajuan = file;
                         if (form === 'laporan') this.fileLaporan = file;
                     }
                 },
-                removeFile(form = 'laporan') {
+                removeFile(form = 'pengajuan') {
+                    if (form === 'pengajuan') this.filePengajuan = null;
                     if (form === 'laporan') this.fileLaporan = null;
                 }
             }"
@@ -110,6 +105,57 @@
                             </div>
                         </div>
 
+                        <!-- Upload Dokumen -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Dokumen</label>
+                            
+                            <!-- Drag & Drop Area (Before File Selected) -->
+                            <div x-show="!filePengajuan"
+                                @dragover.prevent="dragOverPengajuan = true"
+                                @dragleave.prevent="dragOverPengajuan = false"
+                                @drop.prevent="handleFilePengajuan($event, 'pengajuan')"
+                                :class="dragOverPengajuan ? 'border-[#2B76FF] bg-[#2B76FF]/10 shadow-lg' : 'border-gray-300 hover:border-[#2B76FF] hover:bg-[#2B76FF]/5'"
+                                class="border-2 border-dashed rounded-lg p-8 text-center transition cursor-pointer">
+                                <input type="file" wire:model="dokumen_laporan"
+                                    class="hidden" 
+                                    @change="handleFilePengajuan($event, 'pengajuan')"
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    x-ref="inputPengajuan">
+                                <div @click="$refs.inputPengajuan.click()" class="cursor-pointer">
+                                    <i class="fa-solid fa-cloud-arrow-up text-3xl mb-2 block transition" :class="dragOverPengajuan ? 'text-[#2B76FF] scale-110' : 'text-gray-400'"></i>
+                                    <p class="text-sm font-medium" :class="dragOverPengajuan ? 'text-[#2B76FF]' : 'text-gray-500'">Klik atau drag file kesini</p>
+                                </div>
+                            </div>
+                            
+                            <!-- File Selected Display -->
+                            <div x-show="filePengajuan" class="border-2 border-green-200 bg-green-50 rounded-lg p-4 transition">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3 flex-1">
+                                        <!-- File Icon -->
+                                        <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+                                            <i class="fa-solid" :class="getFileIcon(filePengajuan?.name || '')"></i>
+                                        </div>
+                                        <!-- File Info -->
+                                        <div class="min-w-0">
+                                            <p class="flex break-all text-sm font-semibold text-gray-800" x-text="filePengajuan?.name"></p>
+                                            <p class="text-xs text-gray-600" x-text="formatFileSize(filePengajuan?.size || 0)"></p>
+                                        </div>
+                                    </div>
+                                    <!-- Remove Button -->
+                                    <button @click="removeFile('pengajuan')"
+                                        class="ml-2 p-2 text-red-500 hover:bg-red-100 cursor-pointer rounded-lg transition flex-shrink-0">
+                                        <i class="fa-solid fa-trash text-sm"></i>
+                                    </button>
+                                </div>
+                                <!-- Progress Bar -->
+                                <div class="mt-3 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-[#2B76FF] to-[#7B61FF] rounded-full w-full animation-pulse"></div>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Format: PDF, JPG, JPEG, PNG. Maksimal 2 MB.</p>
+                            @error('dokumen_laporan') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                        </div>
+                    
                         <!-- Hasil Pekerjaan -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Hasil Pekerjaan</label>

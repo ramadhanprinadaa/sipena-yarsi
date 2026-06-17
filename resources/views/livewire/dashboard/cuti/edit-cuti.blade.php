@@ -120,59 +120,116 @@
                                     </div>
                                 @endif
 
-                                <!-- Upload Dokumen -->
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Dokumen</label>
-                                    
-                                    <!-- Drag & Drop Area (Before File Selected) -->
-                                    <div x-show="!filePengajuan"
-                                        @dragover.prevent="dragOverPengajuan = true"
-                                        @dragleave.prevent="dragOverPengajuan = false"
-                                        @drop.prevent="handleFilePengajuan($event, 'pengajuan')"
-                                        :class="dragOverPengajuan ? 'border-[#2B76FF] bg-[#2B76FF]/10 shadow-lg' : 'border-gray-300 hover:border-[#2B76FF] hover:bg-[#2B76FF]/5'"
-                                        class="border-2 border-dashed rounded-lg p-8 text-center transition cursor-pointer">
-                                        <input type="file" wire:model="dokumen_pendukung"
-                                            class="hidden" 
-                                            @change="handleFilePengajuan($event, 'pengajuan')"
-                                            accept=".pdf,.jpg,.jpeg,.png"
-                                            x-ref="inputPengajuan">
-                                        <div @click="$refs.inputPengajuan.click()" class="cursor-pointer">
-                                            <i class="fa-solid fa-cloud-arrow-up text-3xl mb-2 block transition" :class="dragOverPengajuan ? 'text-[#2B76FF] scale-110' : 'text-gray-400'"></i>
-                                            <p class="text-sm font-medium" :class="dragOverPengajuan ? 'text-[#2B76FF]' : 'text-gray-500'">Klik atau drag file kesini</p>
-                                        </div>
+                                {{-- Opsi Izin Sakit --}}
+                                @if($jenis_cuti_id == 4)
+                                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                                    <label class="block text-sm font-semibold text-amber-800 mb-3">Opsi Pemotongan Izin Sakit</label>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <label class="relative flex items-center p-3 border-2 rounded-xl cursor-pointer transition"
+                                            :class="$wire.metode_potongan === 'potong_gaji' ? 'border-[#2B76FF] bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'">
+                                            <input type="radio" wire:model.live="metode_potongan" value="potong_gaji" class="w-4 h-4 text-[#2B76FF] focus:ring-[#2B76FF]">
+                                            <div class="ml-3">
+                                                <p class="text-sm font-bold text-gray-800">Potong Gaji</p>
+                                                <p class="text-[10px] text-gray-500">Gaji akan dipotong sesuai ketentuan</p>
+                                            </div>
+                                        </label>
+                                        <label class="relative flex items-center p-3 border-2 rounded-xl cursor-pointer transition"
+                                            :class="$wire.metode_potongan === 'potong_cuti' ? 'border-[#2B76FF] bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'">
+                                            <input type="radio" wire:model.live="metode_potongan" value="potong_cuti" class="w-4 h-4 text-[#2B76FF] focus:ring-[#2B76FF]">
+                                            <div class="ml-3">
+                                                <p class="text-sm font-bold text-gray-800">Potong Saldo Cuti</p>
+                                                <p class="text-[10px] text-gray-500">Memotong sisa saldo cuti anda</p>
+                                            </div>
+                                        </label>
                                     </div>
-                                    
-                                    <!-- File Selected Display -->
-                                    <div x-show="filePengajuan" class="border-2 border-green-200 bg-green-50 rounded-lg p-4 transition">
-                                        <div class="flex items-center justify-between">
-                                            <div class="flex items-center gap-3 flex-1">
-                                                <!-- File Icon -->
-                                                <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
-                                                    <i class="fa-solid" :class="getFileIcon(filePengajuan?.name || '')"></i>
-                                                </div>
-                                                <!-- File Info -->
-                                                <div class="min-w-0">
-                                                    <p class="text-sm font-semibold text-gray-800 truncate" x-text="filePengajuan?.name"></p>
-                                                    <p class="text-xs text-gray-600" x-text="formatFileSize(filePengajuan?.size || 0)"></p>
+                                    @error('metode_potongan') <p class="text-xs text-red-500 mt-2">{{ $message }}</p> @enderror
+                                </div>
+                                @endif
+
+                                @if($jenis_cuti_id == 4)
+                                {{-- Input Dokumen Pendukung --}}
+                                <div class="col-span-2 mt-4">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Dokumen Pendukung <span class="text-xs font-normal text-gray-500">(Opsional, Max: 2MB. Format: PDF, JPG, PNG)</span>
+                                    </label>
+
+                                    {{-- Indikator File Lama --}}
+                                    @if($dokumen_lama)
+                                        <div class="mb-3 flex items-center justify-between p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                                            <div class="flex items-center gap-3">
+                                                <i class="fa-solid fa-file-invoice text-blue-500 text-xl"></i>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-700">Dokumen Saat Ini</p>
+                                                    <a href="{{ Storage::url($dokumen_lama) }}" target="_blank" class="text-xs text-[#2B76FF] hover:underline font-semibold">
+                                                        Lihat Dokumen
+                                                    </a>
                                                 </div>
                                             </div>
-                                            <!-- Remove Button -->
-                                            <button @click="removeFile('pengajuan')"
-                                                class="ml-2 p-2 text-red-500 hover:bg-red-100 cursor-pointer rounded-lg transition flex-shrink-0">
-                                                <i class="fa-solid fa-trash text-sm"></i>
-                                            </button>
+                                            <span class="text-xs text-gray-500 bg-white px-2 py-1 rounded-md border border-gray-200">Telah Diunggah</span>
                                         </div>
-                                        <!-- Progress Bar -->
-                                        <div class="mt-3 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                            <div class="h-full bg-gradient-to-r from-[#2B76FF] to-[#7B61FF] rounded-full w-full animation-pulse"></div>
+                                    @endif
+
+                                    {{-- Area Drag & Drop File Baru --}}
+                                    <div 
+                                        @dragover.prevent="dragOverPengajuan = true"
+                                        @dragleave.prevent="dragOverPengajuan = false"
+                                        @drop="handleFilePengajuan($event, 'pengajuan')"
+                                        class="relative border-2 border-dashed rounded-xl p-6 transition-all duration-200"
+                                        :class="{
+                                            'border-[#2B76FF] bg-blue-50': dragOverPengajuan,
+                                            'border-gray-300 bg-gray-50 hover:border-[#2B76FF]': !dragOverPengajuan
+                                        }"
+                                    >
+                                        <input 
+                                            type="file" 
+                                            wire:model="dokumen_pendukung" 
+                                            @change="handleFilePengajuan($event, 'pengajuan')"
+                                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                            accept=".pdf,.jpg,.jpeg,.png"
+                                        >
+
+                                        <div class="text-center">
+                                            <template x-if="!filePengajuan">
+                                                <div class="space-y-2">
+                                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2 text-[#2B76FF]">
+                                                        <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
+                                                    </div>
+                                                    <p class="text-sm font-medium text-gray-700">
+                                                        {{ $dokumen_lama ? 'Tarik & Lepas file baru di sini untuk menimpa' : 'Tarik & Lepas file di sini atau klik untuk memilih' }}
+                                                    </p>
+                                                    <p class="text-xs text-gray-500">Maksimal 2MB</p>
+                                                </div>
+                                            </template>
+
+                                            <template x-if="filePengajuan">
+                                                <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm relative z-20">
+                                                    <div class="flex items-center space-x-3 overflow-hidden">
+                                                        <i :class="getFileIcon(filePengajuan.name)" class="text-2xl"></i>
+                                                        <div class="text-left overflow-hidden">
+                                                            <p class="text-sm font-medium text-gray-700 truncate max-w-[200px]" x-text="filePengajuan.name"></p>
+                                                            <p class="text-xs text-gray-500" x-text="formatFileSize(filePengajuan.size)"></p>
+                                                        </div>
+                                                    </div>
+                                                    <button 
+                                                        type="button" 
+                                                        @click.prevent="removeFile('pengajuan'); $wire.set('dokumen_pendukung', null)" 
+                                                        class="text-red-500 hover:text-red-700 transition"
+                                                    >
+                                                        <i class="fa-solid fa-xmark text-lg"></i>
+                                                    </button>
+                                                </div>
+                                            </template>
+                                        </div>
+
+                                        <div wire:loading wire:target="dokumen_pendukung" class="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-xl z-10">
+                                            <i class="fa-solid fa-circle-notch fa-spin text-2xl text-[#2B76FF] mb-2"></i>
+                                            <span class="text-sm font-medium text-[#2B76FF]">Mengunggah...</span>
                                         </div>
                                     </div>
-                                    @if($dokumen_lama)
-                                        <p class="text-xs text-gray-500 mt-2">Dokumen saat ini: {{ basename($dokumen_lama) }}</p>
-                                    @endif
-                                    <p class="text-xs text-gray-500 mt-2">Format: PDF, JPG, JPEG, PNG. Maksimal 2 MB.</p>
+                                    
                                     @error('dokumen_pendukung') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                                 </div>
+                                @endif
 
                                 <!-- Kegiatan -->
                                 <div>

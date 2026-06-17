@@ -12,7 +12,8 @@ class LaporanHasilLembur extends Model
         'lembur_id',
         'jam_mulai',
         'jam_selesai',
-        'hasil_pekerjaan'
+        'hasil_pekerjaan',
+        'file_laporan'
     ];
 
     public function lembur()

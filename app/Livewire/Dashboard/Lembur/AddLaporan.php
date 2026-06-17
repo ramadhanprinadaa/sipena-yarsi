@@ -9,14 +9,19 @@ use App\Models\LaporanHasilLembur;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Livewire\WithFileUploads;
+
 
 
 class AddLaporan extends Component
 {
 
+    use WithFileUploads;
+
     public $open = false;
     public $isAutoFilled = false;
     public $availableLembur = [];
+    public $dokumen_laporan = null;
 
     public $form = [
         'lembur_id' => '',
@@ -80,7 +85,7 @@ class AddLaporan extends Component
     #[On('open-add-laporan-lembur')]
     public function open() {
         // $this->resetForm();
-        // $this->loadAvailableLembur();
+        $this->loadAvailableLembur();
         $this->open = true;
     }
 
@@ -118,6 +123,7 @@ class AddLaporan extends Component
             'form.jam_mulai' => 'required',
             'form.jam_selesai' => 'required',
             'form.hasil_pekerjaan' => 'required|string',
+            'dokumen_laporan' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         $user = Auth::user();
@@ -136,12 +142,17 @@ class AddLaporan extends Component
 
         $this->validateOvertimeRules($lembur);
 
+        $filePath = $this->dokumen_laporan
+            ? $this->dokumen_laporan->store('lembur/dokumen', 'public')
+            : null;
+
         // Create LaporanHasilLembur record
         LaporanHasilLembur::create([
             'lembur_id' => $this->form['lembur_id'],
             'jam_mulai' => $this->form['jam_mulai'],
             'jam_selesai' => $this->form['jam_selesai'],
             'hasil_pekerjaan' => $this->form['hasil_pekerjaan'],
+            'file_laporan' => $filePath,
         ]);
 
         // Emit event untuk refresh data

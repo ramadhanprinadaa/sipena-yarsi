@@ -2,8 +2,6 @@
 @if($open)     
         {{-- MODAL: Form Pengajuan Cuti --}}
         <div x-data="{ 
-            showModalPengajuan: false,
-            showModalLaporan: false,
             filePengajuan: null,
             fileLaporan: null,
             dragOverPengajuan: false,
@@ -19,19 +17,9 @@
                 const ext = fileName.split('.').pop().toLowerCase();
                 const iconMap = {
                     'pdf': 'fa-file-pdf text-red-500',
-                    'doc': 'fa-file-word text-blue-500',
-                    'docx': 'fa-file-word text-blue-500',
-                    'xls': 'fa-file-excel text-green-500',
-                    'xlsx': 'fa-file-excel text-green-500',
-                    'ppt': 'fa-file-powerpoint text-orange-500',
-                    'pptx': 'fa-file-powerpoint text-orange-500',
                     'jpg': 'fa-file-image text-purple-500',
                     'jpeg': 'fa-file-image text-purple-500',
                     'png': 'fa-file-image text-purple-500',
-                    'gif': 'fa-file-image text-purple-500',
-                    'zip': 'fa-file-archive text-yellow-600',
-                    'rar': 'fa-file-archive text-yellow-600',
-                    'txt': 'fa-file-lines text-gray-500'
                 };
                 return iconMap[ext] || 'fa-file text-gray-500';
             },
@@ -120,6 +108,32 @@
                                     @error('jam_selesai') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                                 </div>
                             </div>
+                        @endif
+
+                        {{-- Opsi Izin Sakit --}}
+                        @if($jenis_cuti_id == 4)
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                            <label class="block text-sm font-semibold text-amber-800 mb-3">Opsi Pemotongan Izin Sakit</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <label class="relative flex items-center p-3 border-2 rounded-xl cursor-pointer transition"
+                                    :class="$wire.metode_potongan === 'potong_gaji' ? 'border-[#2B76FF] bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'">
+                                    <input type="radio" wire:model.live="metode_potongan" value="potong_gaji" class="w-4 h-4 text-[#2B76FF] focus:ring-[#2B76FF]">
+                                    <div class="ml-3">
+                                        <p class="text-sm font-bold text-gray-800">Potong Gaji</p>
+                                        <p class="text-[10px] text-gray-500">Gaji akan dipotong sesuai ketentuan</p>
+                                    </div>
+                                </label>
+                                <label class="relative flex items-center p-3 border-2 rounded-xl cursor-pointer transition"
+                                    :class="$wire.metode_potongan === 'potong_cuti' ? 'border-[#2B76FF] bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'">
+                                    <input type="radio" wire:model.live="metode_potongan" value="potong_cuti" class="w-4 h-4 text-[#2B76FF] focus:ring-[#2B76FF]">
+                                    <div class="ml-3">
+                                        <p class="text-sm font-bold text-gray-800">Potong Saldo Cuti</p>
+                                        <p class="text-[10px] text-gray-500">Memotong sisa saldo cuti anda</p>
+                                    </div>
+                                </label>
+                            </div>
+                            @error('metode_potongan') <p class="text-xs text-red-500 mt-2">{{ $message }}</p> @enderror
+                        </div>
                         @endif
 
                         <!-- Upload Dokumen -->

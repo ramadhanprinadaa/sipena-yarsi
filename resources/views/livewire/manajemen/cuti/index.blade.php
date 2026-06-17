@@ -81,7 +81,7 @@
 
                 {{-- TAB 1: Riwayat Cuti - All allowed roles --}}
                 @if(in_array('riwayat', $allowedTabs))
-                <div x-show="activeTab === 'riwayat'" class="flex flex-col space-y-4 h-full min-h-0">
+                <div x-show="activeTab === 'riwayat'" class="flex flex-col space-y-4 min-h-[65vh]">
 
                     <!-- Filter & Search -->
                     <div class="flex gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -134,27 +134,77 @@
                     </div>
 
                     <!-- Table -->
-                    <div class="flex flex-col flex-1 min-h-0 overflow-hidden bg-[#F5F7FA]/50 border border-gray-200 rounded-[20px] shadow-sm">
-                        <div class="flex-1 overflow-y-auto no-scrollbar">
-                            <table class="min-w-full text-sm">
+                    <div class="table-container relative">
+                        
+                        <!-- Loading -->
+                        <div wire:loading>
+                            <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
+                                <div role="status">
+                                    <x-ui.spinner />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div class="table-wrapper">
+                            <table class="table">
+                                
                                 <!-- Header -->
-                                <thead class="bg-[#F5F7FA] text-gray-600 text-xs uppercase tracking-wider sticky top-0">
+                                <thead class="table-header">
                                     <tr>
-                                        <th class="px-4 py-3 text-left font-semibold">Nama Pegawai</th>
-                                        <th class="px-4 py-3 text-center font-semibold">NIP</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Tanggal Pengajuan</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Tanggal Mulai - Selesai</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Jenis Cuti</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Jumlah Hari Cuti</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Sisa Saldo Cuti</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Status</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Aksi</th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Nama Pegawai</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">NIP</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Tanggal Pengajuan</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex justify-center gap-2">
+                                                <span class="truncate items-center">Tanggal Mulai & Tanggal Selesai</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex justify-center gap-2">
+                                                <span class="truncate items-center">Jenis Cuti</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="truncate">Jumlah Hari Cuti</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="truncate">Sisa Saldo Cuti</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="truncate">Status</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="truncate">Aksi</span>
+                                            </div>
+                                        </th>
+                                        
                                     </tr>
                                 </thead>
+                                
                                 <!-- Body -->
                                 <tbody class="divide-y divide-[#878787]/30">
                                     @forelse($cutiList as $cuti)
-                                        <tr class="hover:bg-[#F5F7FA]/50 transition">
+                                        <tr class="table-row hover:bg-[#F5F7FA]/50 transition">
                                             <td class="px-4 py-4 font-medium text-gray-700">{{ $cuti->pegawai->nama }}</td>
                                             <td class="px-4 py-4 text-center text-gray-600">{{ $cuti->pegawai->nip }}</td>
                                             <td class="px-4 py-4 text-center text-gray-600">{{ $cuti->created_at->translatedFormat('d F Y') }}</td>
@@ -184,7 +234,7 @@
                                                 @if($this->canApprove($cuti))
                                                     <button wire:click="openApprovalConfirmation('approve', {{ $cuti->id }})" class="px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-600 rounded-[10px] hover:bg-blue-600/10 transition mr-1 cursor-pointer">Setujui</button>
                                                     <button wire:click="openApprovalConfirmation('reject', {{ $cuti->id }})" class="px-3 py-1.5 text-xs font-medium text-red-600 border border-red-600 rounded-[10px] hover:bg-red-600/10 transition cursor-pointer">Tolak</button>
-                                                    <button  type="button" wire:click="$dispatch('openDetailModal', {{ $cuti->id }})" class="px-3 py-1.5 text-xs font-medium text-pink-500 border border-pink-500 rounded-[10px] hover:bg-pink-600/10 transition cursor-pointer">Detail </button>
+                                                    <button  type="button" wire:click="$dispatch('openDetailModal', { cutiId: {{ $cuti->id }} })" class="px-3 py-1.5 text-xs font-medium text-pink-500 border border-pink-500 rounded-[10px] hover:bg-pink-600/10 transition cursor-pointer">Detail </button>
                                                 @else
                                                     <button  type="button" wire:click="$dispatch('openDetailModal', { cutiId: {{ $cuti->id }} })" class="px-3 py-1.5 text-xs font-medium text-pink-500 border border-pink-500 rounded-[10px] hover:bg-pink-600/10 transition cursor-pointer">Detail </button>
                                                 @endif
@@ -196,18 +246,74 @@
                                         </tr>
                                     @endforelse
                                 </tbody>
+
                             </table>
                         </div>
-                        <div class="px-4 py-2 bg-gray-100 border-t border-gray-200 text-sm">
-                            Menampilkan {{ $cutiList->count() }} pengajuan cuti
-                        </div>
+
+                            <!-- Footer & Pagination -->
+                            <div class="text-body bg-neutral-secondary-medium border-t border-default-medium rounded-md">
+
+                                <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between px-4 py-2" aria-label="Table navigation">
+                                    <span class="text-sm font-normal text-body block w-full md:inline md:w-auto">
+                                        Menampilkan
+                                        <span class="font-semibold text-heading">{{ $cutiList->firstItem() }}-{{ $cutiList->lastItem() }}</span> dari
+                                        <span class="font-semibold text-heading">{{ $cutiList->total() }} Cuti</span>
+                                    </span>
+
+                                    <ul class="flex -space-x-px text-sm border border-gray-300 rounded-lg">
+                                        <li>
+                                            <button
+                                                wire:click="gotoPage(1)"
+                                                @disabled($cutiList->onFirstPage())
+                                                class="table-pagination-btn rounded-s-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                                                >
+                                                <i class="fa-solid fa-angles-left text-xs"></i>
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button
+                                                wire:click="previousPage"
+                                                @disabled($cutiList->onFirstPage())
+                                                class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                                                Previous
+                                            </button>
+                                        </li>
+                                        @for ($i = max(1, $cutiList->currentPage() - 3);
+                                            $i <= min($cutiList->lastPage(), $cutiList->currentPage() + 3);
+                                            $i++)
+                                            <li>
+                                                <button
+                                                    wire:click="gotoPage({{ $i }})"
+                                                    class="w-9 {{ $cutiList->currentPage() == $i ? 'table-pagination-btn-active' : 'table-pagination-btn' }}">
+                                                    {{ $i }}
+                                                </button>
+                                            </li>
+                                        @endfor
+                                        <li>
+                                            <button
+                                                wire:click="nextPage"
+                                                @disabled(!$cutiList->hasMorePages())
+                                                class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                                                Next
+                                            </button>
+                                        </li>
+                                        <button
+                                            wire:click="gotoPage({{ $cutiList->lastPage() }})"
+                                            @disabled($cutiList->onLastPage())
+                                            class="table-pagination-btn rounded-e-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                            <i class="fa-solid fa-angles-right text-xs"></i>
+                                        </button>
+                                    </ul>
+                                </nav>
+                            </div>
                     </div>
                 </div>
                 @endif
 
                 {{-- TAB 2: Rekapitulasi Cuti - All allowed roles --}}
                 @if(in_array('rekap', $allowedTabs))
-                <div x-show="activeTab === 'rekap'" class="flex flex-col space-y-4 h-full min-h-0">
+                <div x-show="activeTab === 'rekap'" class="flex flex-col space-y-4 h-full min-h-[65vh]">
 
                     <!-- Filter & Search -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -227,26 +333,55 @@
                     </div>
 
                     <!-- Table -->
-                    <div class="flex flex-col flex-1 min-h-0 overflow-hidden bg-[#F5F7FA]/50 border border-gray-200 rounded-[20px] shadow-sm">
-                        <div class="flex-1 overflow-y-auto no-scrollbar">
-                            <table class="min-w-full text-sm">
+                    <div class="table-container relative">
+                        
+                        <!-- Loading -->
+                        <div wire:loading>
+                            <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
+                                <div role="status">
+                                    <x-ui.spinner />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div class="table-wrapper">
+                            <table class="table">
+                                
                                 <!-- Header -->
-                                <thead class="bg-[#F5F7FA] text-gray-600 text-xs uppercase tracking-wider sticky top-0">
+                                <thead class="table-header">
                                     <tr>
-                                        <th class="px-4 py-3 text-left font-semibold">Nama Pegawai</th>
-                                        <th class="px-4 py-3 text-left font-semibold">NIP</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Jumlah Cuti Digunakan</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Sisa Saldo Cuti</th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Nama Pegawai</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">NIP</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Jumlah Cuti Digunakan</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex justify-between gap-2 breaks-all">
+                                                <span class="truncate items-center">Sisa Saldo Cuti</span>
+                                            </div>
+                                        </th>
                                     </tr>
                                 </thead>
+                                
                                 <!-- Body -->
                                 <tbody class="divide-y divide-[#878787]/30">
                                     @forelse($rekapList as $item)
-                                        <tr class="hover:bg-[#F5F7FA]/50 transition">
-                                            <td class="px-4 py-4 font-medium text-gray-700">{{ $item['nama'] }}</td>
-                                            <td class="px-4 py-4 text-gray-600">{{ $item['nip'] }}</td>
-                                            <td class="px-4 py-4 text-center text-gray-600">{{ $item['jumlah_cuti'] }} hari</td>
-                                            <td class="px-4 py-4 text-center text-gray-600">{{ $item['sisa_saldo_cuti'] ?? 0 }} hari</td>
+                                        <tr class="table-row hover:bg-[#F5F7FA]/50 transition">
+                                            <td class="px-4 py-4 font-medium text-gray-700">{{ $item->pegawai->nama }}</td>
+                                            <td class="px-4 py-4 text-gray-600">{{ $item->pegawai->nip }}</td>
+                                            <td class="px-4 py-4 text-gray-600">{{ $item->jumlah_cuti }} hari</td>
+                                            <td class="px-4 py-4 text-gray-600">{{ $item->sisa_saldo_cuti ?? 0 }} hari</td>
                                         </tr>
                                     @empty
                                         <tr>
@@ -254,11 +389,67 @@
                                         </tr>
                                     @endforelse
                                 </tbody>
+
                             </table>
                         </div>
-                        <div class="px-4 py-2 bg-gray-100 border-t border-gray-200 text-sm">
-                            Menampilkan {{ $rekapList->count() }} pegawai dalam rekap.
-                        </div>
+
+                            <!-- Footer & Pagination -->
+                            <div class="text-body bg-neutral-secondary-medium border-t border-default-medium rounded-md">
+
+                                <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between px-4 py-2" aria-label="Table navigation">
+                                    <span class="text-sm font-normal text-body block w-full md:inline md:w-auto">
+                                        Menampilkan
+                                        <span class="font-semibold text-heading">{{ $rekapList->firstItem() }}-{{ $rekapList->lastItem() }}</span> dari
+                                        <span class="font-semibold text-heading">{{ $rekapList->total() }} Cuti</span>
+                                    </span>
+
+                                    <ul class="flex -space-x-px text-sm border border-gray-300 rounded-lg">
+                                        <li>
+                                            <button
+                                                wire:click="gotoPage(1)"
+                                                @disabled($rekapList->onFirstPage())
+                                                class="table-pagination-btn rounded-s-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                                                >
+                                                <i class="fa-solid fa-angles-left text-xs"></i>
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button
+                                                wire:click="previousPage"
+                                                @disabled($rekapList->onFirstPage())
+                                                class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                                                Previous
+                                            </button>
+                                        </li>
+                                        @for ($i = max(1, $rekapList->currentPage() - 3);
+                                            $i <= min($rekapList->lastPage(), $rekapList->currentPage() + 3);
+                                            $i++)
+                                            <li>
+                                                <button
+                                                    wire:click="gotoPage({{ $i }})"
+                                                    class="w-9 {{ $rekapList->currentPage() == $i ? 'table-pagination-btn-active' : 'table-pagination-btn' }}">
+                                                    {{ $i }}
+                                                </button>
+                                            </li>
+                                        @endfor
+                                        <li>
+                                            <button
+                                                wire:click="nextPage"
+                                                @disabled(!$rekapList->hasMorePages())
+                                                class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                                                Next
+                                            </button>
+                                        </li>
+                                        <button
+                                            wire:click="gotoPage({{ $rekapList->lastPage() }})"
+                                            @disabled($rekapList->onLastPage())
+                                            class="table-pagination-btn rounded-e-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                            <i class="fa-solid fa-angles-right text-xs"></i>
+                                        </button>
+                                    </ul>
+                                </nav>
+                            </div>
                     </div>
                 </div>
                 @endif

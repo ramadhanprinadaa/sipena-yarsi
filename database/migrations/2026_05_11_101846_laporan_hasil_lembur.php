@@ -17,6 +17,7 @@ return new class extends Migration
             $table->time('jam_mulai');
             $table->time('jam_selesai');
             $table->text('hasil_pekerjaan');
+            $table->string('file_laporan');
             $table->timestamps();
         });
     }

@@ -66,7 +66,7 @@
                 </div>
 
                 {{-- TAB 1: Surat Perintah Lembur (SPL) --}}
-                <div x-show="activeTab === 'spl'" class="flex flex-col space-y-4 h-full min-h-0">
+                <div x-show="activeTab === 'spl'" class="flex flex-col space-y-4 min-h-[65vh]">
 
                     <!-- Filter & Search -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -80,24 +80,62 @@
                     </div>
 
                     <!-- Table -->
-                    <div class="flex flex-col flex-1 min-h-0 overflow-hidden bg-[#F5F7FA]/50 border border-gray-200 rounded-[20px] shadow-sm">
-                        <div class="flex-1 overflow-y-auto no-scrollbar">
-                            <table class="min-w-full text-sm">
+                    <div class="table-container relative">
+                        
+                        <!-- Loading -->
+                        <div wire:loading>
+                            <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
+                                <div role="status">
+                                    <x-ui.spinner />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div class="table-wrapper">
+                            <table class="table">
+                                
                                 <!-- Header -->
-                                <thead class="bg-[#F5F7FA] text-gray-600 text-xs uppercase tracking-wider sticky top-0">
+                                <thead class="table-header">
                                     <tr>
-                                        <th class="px-4 py-3 text-left font-semibold">Nomor Surat</th>
-                                        <th class="px-4 py-3 text-left font-semibold">Tanggal Lembur</th>
-                                        <th class="px-4 py-3 text-left font-semibold">Kegiatan</th>
-                                        <th class="px-4 py-3 text-left font-semibold">Jam Lembur</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Status</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Aksi</th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Nomor Surat</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Tanggal Lembur</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex justify-between gap-2">
+                                                <span class="truncate items-center">Nama Kegiatan</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex justify-between gap-2">
+                                                <span class="truncate items-center">Jam Mulai & Jam Selesai</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="truncate">Status</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="truncate">Aksi</span>
+                                            </div>
+                                        </th>
+                                        
                                     </tr>
                                 </thead>
+                                
                                 <!-- Body -->
                                 <tbody class="divide-y divide-[#878787]/30">
                                     @forelse($spls as $spl)
-                                        <tr class="hover:bg-[#F5F7FA]/50 transition">
+                                        <tr class="table-row hover:bg-[#F5F7FA]/50 transition">
                                             <td class="px-4 py-4 font-medium text-gray-700">{{ $spl->nomor_surat }}</td>
                                             <td class="px-4 py-4 text-gray-600">{{ \Carbon\Carbon::parse($spl->tanggal_lembur)->format('d M Y') }}</td>
                                             <td class="px-4 py-4 text-gray-600">{{ $spl->nama_kegiatan }}</td>
@@ -126,16 +164,72 @@
                                         </tr>
                                     @endforelse
                                 </tbody>
+
                             </table>
                         </div>
-                        <div class="px-4 py-2 bg-gray-100 border-t border-gray-200 text-sm">
-                            No data available
-                        </div>
+
+                            <!-- Footer & Pagination -->
+                            <div class="text-body bg-neutral-secondary-medium border-t border-default-medium rounded-md">
+
+                                <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between px-4 py-2" aria-label="Table navigation">
+                                    <span class="text-sm font-normal text-body block w-full md:inline md:w-auto">
+                                        Menampilkan
+                                        <span class="font-semibold text-heading">{{ $spls->firstItem() }}-{{ $spls->lastItem() }}</span> dari
+                                        <span class="font-semibold text-heading">{{ $spls->total() }} Lembur</span>
+                                    </span>
+
+                                    <ul class="flex -space-x-px text-sm border border-gray-300 rounded-lg">
+                                        <li>
+                                            <button
+                                                wire:click="gotoPage(1)"
+                                                @disabled($spls->onFirstPage())
+                                                class="table-pagination-btn rounded-s-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                                                >
+                                                <i class="fa-solid fa-angles-left text-xs"></i>
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button
+                                                wire:click="previousPage"
+                                                @disabled($spls->onFirstPage())
+                                                class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                                                Previous
+                                            </button>
+                                        </li>
+                                        @for ($i = max(1, $spls->currentPage() - 3);
+                                            $i <= min($spls->lastPage(), $spls->currentPage() + 3);
+                                            $i++)
+                                            <li>
+                                                <button
+                                                    wire:click="gotoPage({{ $i }})"
+                                                    class="w-9 {{ $spls->currentPage() == $i ? 'table-pagination-btn-active' : 'table-pagination-btn' }}">
+                                                    {{ $i }}
+                                                </button>
+                                            </li>
+                                        @endfor
+                                        <li>
+                                            <button
+                                                wire:click="nextPage"
+                                                @disabled(!$spls->hasMorePages())
+                                                class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                                                Next
+                                            </button>
+                                        </li>
+                                        <button
+                                            wire:click="gotoPage({{ $spls->lastPage() }})"
+                                            @disabled($spls->onLastPage())
+                                            class="table-pagination-btn rounded-e-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                            <i class="fa-solid fa-angles-right text-xs"></i>
+                                        </button>
+                                    </ul>
+                                </nav>
+                            </div>
                     </div>
                 </div>
 
                 {{-- TAB 2: Riwayat Lembur --}}
-                <div x-show="activeTab === 'riwayat'" class="flex flex-col space-y-4 h-full min-h-0">
+                <div x-show="activeTab === 'riwayat'" class="flex flex-col space-y-4 min-h-[65vh]">
 
                     <!-- Filter & Search -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -154,21 +248,57 @@
                     </div>
 
                     <!-- Table -->
-                    <div class="flex flex-col flex-1 min-h-0 overflow-hidden bg-[#F5F7FA]/50 border border-gray-200 rounded-[20px] shadow-sm">
-                        <div class="flex-1 overflow-y-auto no-scrollbar">
-                            <table class="min-w-full text-sm">
+                    <div class="table-container relative">
+                        
+                        <!-- Loading -->
+                        <div wire:loading>
+                            <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
+                                <div role="status">
+                                    <x-ui.spinner />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div class="table-wrapper">
+                            <table class="table">
+                                
                                 <!-- Header -->
-                                <thead class="bg-[#F5F7FA] text-gray-600 text-xs uppercase tracking-wider sticky top-0">
+                                <thead class="table-header">
                                     <tr>
-                                        <th class="px-4 py-3 text-left font-semibold">Tanggal Lembur</th>
-                                        <th class="px-4 py-3 text-left font-semibold">Jenis Hari</th>
-                                        <th class="px-4 py-3 text-left font-semibold">Jam Mulai</th>
-                                        <th class="px-4 py-3 text-left font-semibold">Jam Selesai</th>
-                                        <th class="px-4 py-3 text-left font-semibold">Status</th>
-                                        <th class="px-4 py-3 text-left font-semibold">Disetujui Oleh</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Aksi</th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Tanggal Lembur</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Jenis Hari</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Jam Mulai</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Jam Selesai</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="truncate">Status</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="truncate">Aksi</span>
+                                            </div>
+                                        </th>
                                     </tr>
                                 </thead>
+                                
                                 <!-- Body -->
                                 <tbody class="divide-y divide-[#878787]/30">
                                     @forelse($lemburList as $lembur)
@@ -178,15 +308,14 @@
                                             $canAddLaporan = $now >= $tanggalLembur;
                                             $hasLaporan = $lembur->laporanHasilLembur ? true : false;
                                         @endphp
-                                        <tr class="hover:bg-[#F5F7FA]/50 transition">
+                                        <tr class="table-row hover:bg-[#F5F7FA]/50 transition">
                                             <td class="px-4 py-4 font-medium text-gray-700">{{ \Carbon\Carbon::parse($lembur->tanggal_lembur)->format('d M Y') }}</td>
                                             <td class="px-4 py-4 text-gray-600">{{ $lembur->jenis_hari }}</td>
                                             <td class="px-4 py-4 text-gray-600">{{ $lembur->jam_mulai }}</td>
                                             <td class="px-4 py-4 text-gray-600">{{ $lembur->jam_selesai }}</td>
-                                            <td class="px-4 py-4">
+                                            <td class="flex justify-center px-4 py-4">
                                                 <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">{{ $this->getStatusLembur($lembur) }}</span>
                                             </td>
-                                            <td class="px-4 py-4 text-gray-600">{{ $this->getApproverLabel($lembur, 'pengajuan') }}</td>
                                             <td class="px-4 py-4 text-center">
                                                 @if($canAddLaporan && !$hasLaporan)
                                                     <button type="button" wire:click="openLaporanModal({{ $lembur->id }})" class="px-3 py-1.5 text-xs font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition cursor-pointer">
@@ -203,45 +332,141 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7" class="px-4 py-4 text-center text-gray-500">Tidak ada riwayat lembur</td>
+                                            <td colspan="6" class="px-4 py-4 text-center text-gray-500">Tidak ada riwayat lembur</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
+
                             </table>
                         </div>
-                        <div class="px-4 py-2 bg-gray-100 border-t border-gray-200 text-sm">
-                            No data available
-                        </div>
+
+                            <!-- Footer & Pagination -->
+                            <div class="text-body bg-neutral-secondary-medium border-t border-default-medium rounded-md">
+
+                                <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between px-4 py-2" aria-label="Table navigation">
+                                    <span class="text-sm font-normal text-body block w-full md:inline md:w-auto">
+                                        Menampilkan
+                                        <span class="font-semibold text-heading">{{ $lemburList->firstItem() }}-{{ $lemburList->lastItem() }}</span> dari
+                                        <span class="font-semibold text-heading">{{ $lemburList->total() }} Lembur</span>
+                                    </span>
+
+                                    <ul class="flex -space-x-px text-sm border border-gray-300 rounded-lg">
+                                        <li>
+                                            <button
+                                                wire:click="gotoPage(1)"
+                                                @disabled($lemburList->onFirstPage())
+                                                class="table-pagination-btn rounded-s-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                                                >
+                                                <i class="fa-solid fa-angles-left text-xs"></i>
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button
+                                                wire:click="previousPage"
+                                                @disabled($lemburList->onFirstPage())
+                                                class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                                                Previous
+                                            </button>
+                                        </li>
+                                        @for ($i = max(1, $lemburList->currentPage() - 3);
+                                            $i <= min($lemburList->lastPage(), $lemburList->currentPage() + 3);
+                                            $i++)
+                                            <li>
+                                                <button
+                                                    wire:click="gotoPage({{ $i }})"
+                                                    class="w-9 {{ $lemburList->currentPage() == $i ? 'table-pagination-btn-active' : 'table-pagination-btn' }}">
+                                                    {{ $i }}
+                                                </button>
+                                            </li>
+                                        @endfor
+                                        <li>
+                                            <button
+                                                wire:click="nextPage"
+                                                @disabled(!$lemburList->hasMorePages())
+                                                class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                                                Next
+                                            </button>
+                                        </li>
+                                        <button
+                                            wire:click="gotoPage({{ $lemburList->lastPage() }})"
+                                            @disabled($lemburList->onLastPage())
+                                            class="table-pagination-btn rounded-e-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                            <i class="fa-solid fa-angles-right text-xs"></i>
+                                        </button>
+                                    </ul>
+                                </nav>
+                            </div>
                     </div>
                 </div>
 
                 {{-- TAB 3: Laporan Lembur --}}
-                <div x-show="activeTab === 'laporan'" class="flex flex-col space-y-4 h-full min-h-0">
+                <div x-show="activeTab === 'laporan'" class="flex flex-col space-y-4 min-h-[65vh]">
 
-                    <div class="flex flex-col flex-1 min-h-0 overflow-hidden bg-[#F5F7FA]/50 border border-gray-200 rounded-[20px] shadow-sm">
-                        <div class="flex-1 overflow-y-auto no-scrollbar">
-                            <table class="min-w-full text-sm">
-                                <thead class="bg-[#F5F7FA] text-gray-600 text-xs uppercase tracking-wider sticky top-0">
+                    <!-- Table -->
+                    <div class="table-container relative">
+                        
+                        <!-- Loading -->
+                        <div wire:loading>
+                            <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
+                                <div role="status">
+                                    <x-ui.spinner />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div class="table-wrapper">
+                            <table class="table">
+                                
+                                <!-- Header -->
+                                <thead class="table-header">
                                     <tr>
-                                        <th class="px-4 py-3 text-left font-semibold">Tanggal Lembur</th>
-                                        <th class="px-4 py-3 text-left font-semibold">Tanggal & Jam Aktual</th>
-                                        <th class="px-4 py-3 text-left font-semibold">Hasil Pekerjaan</th>
-                                        <th class="px-4 py-3 text-left font-semibold">Status</th>
-                                        <th class="px-4 py-3 text-left font-semibold">Catatan</th>
-                                        <th class="px-4 py-3 text-left font-semibold">Disetujui Oleh</th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-40">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Tanggal Lembur</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Jam Aktual</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Hasil Pekerjaan</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Catatan</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Disetujui Oleh</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="truncate">Status</span>
+                                            </div>
+                                        </th>
+                                        
                                     </tr>
                                 </thead>
+                                
                                 <tbody class="divide-y divide-[#878787]/30">
                                     @forelse($laporanList as $lembur)
-                                        <tr class="hover:bg-[#F5F7FA]/50 transition">
+                                        <tr class="table-row hover:bg-[#F5F7FA]/50 transition">
                                             <td class="px-4 py-4 font-medium text-gray-700">{{ \Carbon\Carbon::parse($lembur->tanggal_lembur)->format('d M Y') }}</td>
                                             <td class="px-4 py-4 text-gray-600">{{ \Carbon\Carbon::parse($lembur->tanggal_lembur)->format('d M Y') }} | {{ $lembur->laporanHasilLembur->jam_mulai ?? '-' }} - {{ $lembur->laporanHasilLembur->jam_selesai ?? '-' }}</td>
                                             <td class="px-4 py-4 text-gray-600">{{ $lembur->laporanHasilLembur->hasil_pekerjaan ?? '-' }}</td>
-                                            <td class="px-4 py-4">
-                                                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">{{ $this->getLaporanStatus($lembur) }}</span>
-                                            </td>
                                             <td class="px-4 py-4 text-gray-600">{{ $this->getApprovalCatatan($lembur, 'laporan') }}</td>
                                             <td class="px-4 py-4 text-gray-600">{{ $this->getApproverLabel($lembur, 'laporan') }}</td>
+                                            <td class="flex justify-center px-4 py-4">
+                                                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">{{ $this->getLaporanStatus($lembur) }}</span>
+                                            </td>
                                         </tr>
                                     @empty
                                         <tr>
@@ -249,11 +474,67 @@
                                         </tr>
                                     @endforelse
                                 </tbody>
+
                             </table>
                         </div>
-                        <div class="px-4 py-2 bg-gray-100 border-t border-gray-200 text-sm">
-                            No data available
-                        </div>
+
+                            <!-- Footer & Pagination -->
+                            <div class="text-body bg-neutral-secondary-medium border-t border-default-medium rounded-md">
+
+                                <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between px-4 py-2" aria-label="Table navigation">
+                                    <span class="text-sm font-normal text-body block w-full md:inline md:w-auto">
+                                        Menampilkan
+                                        <span class="font-semibold text-heading">{{ $laporanList->firstItem() }}-{{ $laporanList->lastItem() }}</span> dari
+                                        <span class="font-semibold text-heading">{{ $laporanList->total() }} Laporan Lembur</span>
+                                    </span>
+
+                                    <ul class="flex -space-x-px text-sm border border-gray-300 rounded-lg">
+                                        <li>
+                                            <button
+                                                wire:click="gotoPage(1)"
+                                                @disabled($laporanList->onFirstPage())
+                                                class="table-pagination-btn rounded-s-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                                                >
+                                                <i class="fa-solid fa-angles-left text-xs"></i>
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button
+                                                wire:click="previousPage"
+                                                @disabled($laporanList->onFirstPage())
+                                                class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                                                Previous
+                                            </button>
+                                        </li>
+                                        @for ($i = max(1, $laporanList->currentPage() - 3);
+                                            $i <= min($laporanList->lastPage(), $laporanList->currentPage() + 3);
+                                            $i++)
+                                            <li>
+                                                <button
+                                                    wire:click="gotoPage({{ $i }})"
+                                                    class="w-9 {{ $laporanList->currentPage() == $i ? 'table-pagination-btn-active' : 'table-pagination-btn' }}">
+                                                    {{ $i }}
+                                                </button>
+                                            </li>
+                                        @endfor
+                                        <li>
+                                            <button
+                                                wire:click="nextPage"
+                                                @disabled(!$laporanList->hasMorePages())
+                                                class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                                                Next
+                                            </button>
+                                        </li>
+                                        <button
+                                            wire:click="gotoPage({{ $laporanList->lastPage() }})"
+                                            @disabled($laporanList->onLastPage())
+                                            class="table-pagination-btn rounded-e-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                            <i class="fa-solid fa-angles-right text-xs"></i>
+                                        </button>
+                                    </ul>
+                                </nav>
+                            </div>
                     </div>
                 </div>
 

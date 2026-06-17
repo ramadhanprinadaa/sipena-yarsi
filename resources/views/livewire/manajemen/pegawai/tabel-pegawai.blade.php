@@ -229,7 +229,7 @@
                         <li>
                             <button @click="selected='&gt; 10 Tahun'; open=false" class="dropdown-item" wire:click="$set('selectedMasaKerja', '> 10 Tahun')">
                                 &gt; 10 Tahun
-                            </button>
+                            </button>   
                         </li>
                     </ul>
                 </div>

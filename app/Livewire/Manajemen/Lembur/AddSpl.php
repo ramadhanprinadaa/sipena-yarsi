@@ -123,7 +123,7 @@ class AddSpl extends Component
     public function save()
     {
         $this->validate([
-            'form.nomor_surat' => 'required|string|max:255',
+            'form.nomor_surat' => 'required|unique:surat_perintah_lembur,nomor_surat|string|max:255',
             'form.unit_kerja' => 'required|string|max:255',
             'form.tanggal_dibuat' => 'required|date',
             'form.nama_kegiatan' => 'required|string|max:255',

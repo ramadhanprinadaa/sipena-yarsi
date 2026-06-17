@@ -11,8 +11,6 @@ use Livewire\Component;
 
 class Index extends Component
 {
-    public $cutiList = [];
-    public $rekapList = [];
     public $jenisCutiList = [];
 
     public $filterRiwayatSearch = '';
@@ -37,52 +35,8 @@ class Index extends Component
 
     public function loadData()
     {
-        $cutiQuery = Cuti::with(['pegawai.unit_kerja', 'pegawai.user.role', 'jenisCuti', 'approvals.approver.pegawai', 'approvals.approver.role']);
-        $this->applyCutiScope($cutiQuery);
+        
 
-        if ($this->filterRiwayatDate) {
-            $cutiQuery->whereDate('tanggal_mulai', $this->filterRiwayatDate);
-        }
-
-        if ($this->filterRiwayatJenis) {
-            $cutiQuery->where('jenis_cuti_id', $this->filterRiwayatJenis);
-        }
-
-        if ($this->filterRiwayatStatus) {
-            $cutiQuery->where('status', $this->filterRiwayatStatus);
-        }
-
-        if ($this->filterRiwayatSearch) {
-            $cutiQuery->whereHas('pegawai', function ($query) {
-                $query->where('nama', 'like', '%' . $this->filterRiwayatSearch . '%')
-                    ->orWhere('nip', 'like', '%' . $this->filterRiwayatSearch . '%');
-            });
-        }
-
-        $this->cutiList = $cutiQuery->orderBy('created_at', 'desc')->get();
-
-        $rekapQuery = Cuti::with(['pegawai.unit_kerja', 'jenisCuti'])
-            ->where('status', 'disetujui');
-        $this->applyCutiScope($rekapQuery);
-        $this->applyRekapPeriodFilter($rekapQuery);
-
-        $this->rekapList = $rekapQuery->get()
-            ->groupBy('pegawai_id')
-            ->map(function ($items) {
-                $first = $items->first();
-                $saldo = SaldoCuti::where('pegawai_id', $first->pegawai_id)
-                    ->where('tahun', now()->year)
-                    ->first();
-
-                return [
-                    'nama' => $first->pegawai->nama ?? '-',
-                    'nip' => $first->pegawai->nip ?? '-',
-                    'jumlah_cuti' => $items->sum('jumlah_hari_cuti'),
-                    'jumlah_jam' => $items->sum('jumlah_jam'),
-                    'sisa_saldo' => $saldo->sisa_cuti ?? '-',
-                ];
-            })
-            ->values();
     }
 
     private function scopedUnitKerjaIds(): ?array
@@ -280,7 +234,29 @@ class Index extends Component
 
     public function exportRiwayatExcel()
     {
-        $data = collect($this->cutiList);
+        $cutiQuery = Cuti::with(['pegawai.unit_kerja', 'pegawai.user.role', 'jenisCuti', 'approvals.approver.pegawai', 'approvals.approver.role']);
+        $this->applyCutiScope($cutiQuery);
+
+        if ($this->filterRiwayatDate) {
+            $cutiQuery->whereDate('tanggal_mulai', $this->filterRiwayatDate);
+        }
+
+        if ($this->filterRiwayatJenis) {
+            $cutiQuery->where('jenis_cuti_id', $this->filterRiwayatJenis);
+        }
+
+        if ($this->filterRiwayatStatus) {
+            $cutiQuery->where('status', $this->filterRiwayatStatus);
+        }
+
+        if ($this->filterRiwayatSearch) {
+            $cutiQuery->whereHas('pegawai', function ($query) {
+                $query->where('nama', 'like', '%' . $this->filterRiwayatSearch . '%')
+                    ->orWhere('nip', 'like', '%' . $this->filterRiwayatSearch . '%');
+            });
+        }
+
+        $data = $cutiQuery->get();
         $filename = 'Riwayat_Pengajuan_Cuti_' . date('Y-m-d_H-i-s') . '.xlsx';
 
         return response()->streamDownload(function () use ($data) {
@@ -322,7 +298,37 @@ class Index extends Component
 
     public function exportRekapExcel()
     {
-        $data = collect($this->rekapList);
+
+        $rekapQuery = Cuti::with(['pegawai.unit_kerja', 'jenisCuti'])
+            ->where('status', 'disetujui');
+        $this->applyCutiScope($rekapQuery);
+        $this->applyRekapPeriodFilter($rekapQuery);
+
+        if ($this->filterRekapStartDate) {
+            $rekapQuery->whereDate('tanggal_mulai', '>=', $this->filterRekapStartDate);
+        }
+
+        if ($this->filterRekapEndDate) {
+            $rekapQuery->whereDate('tanggal_selesai', '<=', $this->filterRekapEndDate);
+        }
+
+        $data = $rekapQuery->get()
+            ->groupBy('pegawai_id')
+            ->map(function ($items) {
+                $first = $items->first();
+                $saldo = SaldoCuti::where('pegawai_id', $first->pegawai_id)
+                    ->where('tahun', now()->year)
+                    ->first();
+                return [
+                    'nama' => $first->pegawai->nama ?? '-',
+                    'nip' => $first->pegawai->nip ?? '-',
+                    'jumlah_cuti' => $items->sum('jumlah_hari_cuti'),
+                    'jumlah_jam' => $items->sum('jumlah_jam'),
+                    'sisa_saldo' => $saldo->sisa_cuti ?? '-',
+                ];
+            })
+            ->values();
+
         $filename = 'Rekap_Cuti_' . date('Y-m-d_H-i-s') . '.xlsx';
 
         return response()->streamDownload(function () use ($data) {
@@ -367,7 +373,62 @@ class Index extends Component
 
     public function render()
     {
+        //Load Data Cuti Pegawai
+        $cutiQuery = Cuti::with(['pegawai.unit_kerja', 'pegawai.user.role', 'jenisCuti', 'approvals.approver.pegawai', 'approvals.approver.role']);
+        $this->applyCutiScope($cutiQuery);
+
+        if ($this->filterRiwayatDate) {
+            $cutiQuery->whereDate('tanggal_mulai', $this->filterRiwayatDate);
+        }
+
+        if ($this->filterRiwayatJenis) {
+            $cutiQuery->where('jenis_cuti_id', $this->filterRiwayatJenis);
+        }
+
+        if ($this->filterRiwayatStatus) {
+            $cutiQuery->where('status', $this->filterRiwayatStatus);
+        }
+
+        if ($this->filterRiwayatSearch) {
+            $cutiQuery->whereHas('pegawai', function ($query) {
+                $query->where('nama', 'like', '%' . $this->filterRiwayatSearch . '%')
+                    ->orWhere('nip', 'like', '%' . $this->filterRiwayatSearch . '%');
+            });
+        }
+
+        //Load Data Rekapitulasi Pegawai
+        $rekapQuery = Cuti::with(['pegawai.unit_kerja', 'jenisCuti'])
+            ->where('status', 'disetujui');
+            
+        $this->applyCutiScope($rekapQuery);
+        $this->applyRekapPeriodFilter($rekapQuery);
+
+        // $this->rekapList = $rekapQuery->get()
+        //     ->groupBy('pegawai_id')
+        //     ->map(function ($items) {
+        //         $first = $items->first();
+        //         $saldo = SaldoCuti::where('pegawai_id', $first->pegawai_id)
+        //             ->where('tahun', now()->year)
+        //             ->first();
+
+        //         return [
+        //             'nama' => $first->pegawai->nama ?? '-',
+        //             'nip' => $first->pegawai->nip ?? '-',
+        //             'jumlah_cuti' => $items->sum('jumlah_hari_cuti'),
+        //             'jumlah_jam' => $items->sum('jumlah_jam'),
+        //             'sisa_saldo' => $saldo->sisa_cuti ?? '-',
+        //         ];
+        //     })
+        //     ->values();
+
         return view('livewire.manajemen.cuti.index', [
+            'cutiList' => $cutiQuery->orderBy('created_at', 'desc')->paginate(10),
+            'rekapList' => $rekapQuery->select('pegawai_id')
+                            ->selectRaw('SUM(jumlah_hari_cuti) as jumlah_cuti')
+                            ->selectRaw('SUM(jumlah_jam) as jumlah_jam')
+                            ->with('pegawai')
+                            ->groupBy('pegawai_id')
+                            ->paginate(10),
             'allowedTabs' => $this->allowedTabs,
         ]);
     }
