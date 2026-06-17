@@ -28,12 +28,27 @@ class EditCuti extends Component
     public $dokumen_pendukung;
     public $dokumen_lama = '';
     public $keterangan = '';
+    public $metode_potongan = null;
 
     #[On('openModalEdit')]
     public function open($id = null)
     {
         $this->resetForm();
-        $this->jenisCutiList = JenisCuti::orderBy('id')->get();
+
+        $pegawai = Auth::user()?->pegawai;
+        $masaKerjaBulan = $pegawai->tanggal_bergabung
+            ? Carbon::parse($pegawai->tanggal_bergabung)->diffInMonths(Carbon::today())
+            : 0;
+        $serviceYear = floor($masaKerjaBulan / 12) + 1;
+
+        $query = JenisCuti::orderBy('id');
+        if (in_array($serviceYear, [7, 8])) {
+            $query->where('id', '!=', 1);
+        } else {
+            $query->where('id', '!=', 2);
+        }
+        $this->jenisCutiList = $query->get();
+
         $this->cutiId = $id;
 
         $cuti = Cuti::where('pegawai_id', Auth::user()?->pegawai?->id)->findOrFail($id);
@@ -50,6 +65,7 @@ class EditCuti extends Component
         $this->jam_selesai = $cuti->jam_selesai ? Carbon::parse($cuti->jam_selesai)->format('H:i') : '';
         $this->dokumen_lama = $cuti->dokumen_pendukung;
         $this->keterangan = $cuti->keterangan;
+        $this->metode_potongan = $cuti->metode_potongan;
         $this->open = true;
     }
 
@@ -70,6 +86,8 @@ class EditCuti extends Component
         }
 
         $jenisCuti = JenisCuti::find($this->jenis_cuti_id);
+
+        // 1. Validasi
         $this->validate($this->rules($jenisCuti), [], $this->attributes());
 
         $tanggalMulai = Carbon::parse($this->tanggal_mulai);
@@ -82,20 +100,41 @@ class EditCuti extends Component
         }
 
         $saldo = $this->getSaldoCuti($pegawai);
+        $isPotongCutiSakit = ($jenisCuti->id == 4 && $this->metode_potongan === 'potong_cuti');
+        $harusPotongSaldo = $jenisCuti->memotong_saldo || $isPotongCutiSakit;
+
         $saldoSebelum = $saldo?->sisa_cuti ?? null;
-        $saldoSesudah = $jenisCuti->memotong_saldo && $jumlahHari
+        $saldoSesudah = $harusPotongSaldo && $jumlahHari
             ? max(0, ($saldoSebelum ?? 0) - $jumlahHari)
             : $saldoSebelum;
 
-        $filePath = $cuti->dokumen_pendukung;
-        if ($this->dokumen_pendukung) {
-            if ($filePath) {
+        // 2. Logic File Upload & Penghapusan Otomatis
+        $filePath = $this->dokumen_lama;
+
+        // Cek apakah jenis cuti yang dipilih SEKARANG butuh surat/dokumen
+        if (!$jenisCuti->butuh_surat_dokter) {
+            // Jika TIDAK butuh, tapi sebelumnya punya dokumen lama, hapus dari storage!
+            if ($filePath && Storage::disk('public')->exists($filePath)) {
                 Storage::disk('public')->delete($filePath);
             }
 
-            $filePath = $this->dokumen_pendukung->store('cuti/dokumen', 'public');
+            // Kosongkan path agar kolom database diperbarui menjadi null
+            $filePath = null;
+            $this->dokumen_lama = null; // Reset property Livewire
+            $this->dokumen_pendukung = null;
+        } else {
+            // Jika BUTUH dokumen, cek apakah user mengunggah file baru
+            if ($this->dokumen_pendukung) {
+                // Hapus dokumen lama untuk diganti yang baru
+                if ($filePath && Storage::disk('public')->exists($filePath)) {
+                    Storage::disk('public')->delete($filePath);
+                }
+                // Simpan dokumen baru
+                $filePath = $this->dokumen_pendukung->store('cuti/dokumen', 'public');
+            }
         }
 
+        // 3. Update database
         $cuti->update([
             'jenis_cuti_id' => $jenisCuti->id,
             'tanggal_mulai' => $this->tanggal_mulai,
@@ -106,9 +145,9 @@ class EditCuti extends Component
             'jumlah_jam' => $jumlahJam,
             'saldo_cuti_sebelum' => $saldoSebelum,
             'saldo_cuti_sesudah' => $saldoSesudah,
-            'dokumen_pendukung' => $filePath,
+            'dokumen_pendukung' => $filePath, // Akan bernilai null jika jenis cuti tidak butuh dokumen
             'keterangan' => $this->keterangan,
-            'status' => $this->initialStatusFor($pegawai),
+            'metode_potongan' => ($jenisCuti->id == 4) ? $this->metode_potongan : null,
         ]);
 
         $this->dispatch('cuti-updated');
@@ -117,7 +156,12 @@ class EditCuti extends Component
 
     private function rules(?JenisCuti $jenisCuti): array
     {
-        $fileRule = ($jenisCuti?->butuh_surat_dokter && !$this->dokumen_lama ? 'required' : 'nullable') . '|file|mimes:pdf,jpg,jpeg,png|max:2048';
+        // 4. Logic Validation: Dokumen hanya WAJIB jika jenis cuti butuh surat,
+        // DAN pegawai belum pernah punya dokumen lama di pengajuan ini.
+        $isDokumenRequired = $jenisCuti?->butuh_surat_dokter && empty($this->dokumen_lama);
+        $fileRule = $isDokumenRequired
+            ? 'required|file|mimes:pdf,jpg,jpeg,png|max:2048'
+            : 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
 
         return [
             'jenis_cuti_id' => ['required', 'exists:jenis_cuti,id'],
@@ -127,14 +171,40 @@ class EditCuti extends Component
             'jam_selesai' => [$jenisCuti?->dihitung_per_jam ? 'required' : 'nullable', 'date_format:H:i', 'after:jam_mulai'],
             'dokumen_pendukung' => $fileRule,
             'keterangan' => ['required', 'string', 'min:5', 'max:1000'],
+            'metode_potongan' => ['nullable', 'in:potong_gaji,potong_cuti'],
         ];
     }
-
     private function passesBusinessRules(Pegawai $pegawai, JenisCuti $jenisCuti, ?int $jumlahHari, ?int $jumlahJam, int $ignoreId): bool
     {
         $masaKerjaBulan = $pegawai->tanggal_bergabung
             ? Carbon::parse($pegawai->tanggal_bergabung)->diffInMonths(Carbon::today())
             : 0;
+
+        // 1. --- VALIDASI OVERLAP TANGGAL CUTI (Khusus Edit) ---
+        $overlapQuery = Cuti::where('pegawai_id', $pegawai->id)
+            ->where('status', '!=', 'ditolak')
+            ->where('tanggal_mulai', '<=', $this->tanggal_selesai)
+            ->where('tanggal_selesai', '>=', $this->tanggal_mulai);
+
+        // Kecualikan ID cuti yang sedang diedit agar tidak bertabrakan dengan dirinya sendiri
+        if ($ignoreId) {
+            $overlapQuery->where('id', '!=', $ignoreId);
+        }
+
+        if ($overlapQuery->exists()) {
+            $this->addError('tanggal_mulai', 'Anda sudah memiliki pengajuan/riwayat cuti pada periode tanggal tersebut.');
+            $this->addError('tanggal_selesai', 'Periode bertabrakan dengan cuti lain.');
+            return false;
+        }
+
+        // Validasi Minimal Hari Pengajuan
+        if ($jenisCuti->minimal_hari_pengajuan) {
+            $diffDays = Carbon::today()->diffInDays(Carbon::parse($this->tanggal_mulai), false);
+            if ($diffDays < $jenisCuti->minimal_hari_pengajuan) {
+                $this->addError('tanggal_mulai', "Pengajuan jenis ini minimal dilakukan {$jenisCuti->minimal_hari_pengajuan} hari sebelum tanggal mulai.");
+                return false;
+            }
+        }
 
         if ($jenisCuti->minimal_masa_kerja_bulan && $masaKerjaBulan < $jenisCuti->minimal_masa_kerja_bulan) {
             $this->addError('jenis_cuti_id', 'Masa kerja belum memenuhi syarat jenis cuti ini.');
@@ -214,7 +284,8 @@ class EditCuti extends Component
             }
         }
 
-        if ($jenisCuti->memotong_saldo && ($this->getSaldoCuti($pegawai)?->sisa_cuti ?? 0) < $jumlahHari) {
+        $isPotongCutiSakit = ($jenisCuti->id == 4 && $this->metode_potongan === 'potong_cuti');
+        if (($jenisCuti->memotong_saldo || $isPotongCutiSakit) && ($this->getSaldoCuti($pegawai)?->sisa_cuti ?? 0) < $jumlahHari) {
             $this->addError('tanggal_selesai', 'Sisa saldo cuti tidak mencukupi.');
             return false;
         }
@@ -261,7 +332,7 @@ class EditCuti extends Component
 
     private function resetForm(): void
     {
-        $this->reset(['cutiId', 'jenis_cuti_id', 'tanggal_mulai', 'tanggal_selesai', 'jam_mulai', 'jam_selesai', 'dokumen_pendukung', 'dokumen_lama', 'keterangan']);
+        $this->reset(['cutiId', 'jenis_cuti_id', 'tanggal_mulai', 'tanggal_selesai', 'jam_mulai', 'jam_selesai', 'dokumen_pendukung', 'dokumen_lama', 'keterangan', 'metode_potongan']);
         $this->resetErrorBag();
     }
 

@@ -127,17 +127,17 @@ class AddLembur extends Component
             'form.tanggal_lembur' => 'required|date',
         ]);
 
-        $spl = SuratPerintahLembur::find($this->form['surat_perintah_lembur_id']);
-        if (!$spl) {
-            $this->addError('form.surat_perintah_lembur_id', 'SPL tidak ditemukan.');
-            return;
-        }
+        // $spl = SuratPerintahLembur::find($this->form['surat_perintah_lembur_id']);
+        // if (!$spl) {
+        //     $this->addError('form.surat_perintah_lembur_id', 'SPL tidak ditemukan.');
+        //     return;
+        // }
 
-        $this->form['kegiatan'] = $spl->nama_kegiatan;
-        $this->form['jam_mulai'] = $spl->jam_mulai;
-        $this->form['jam_selesai'] = $spl->jam_selesai;
-        $this->form['jenis_hari'] = $spl->jenis_hari;
-        $this->form['tanggal_lembur'] = $spl->tanggal_lembur;
+        // $this->form['kegiatan'] = $spl->nama_kegiatan;
+        // $this->form['jam_mulai'] = $spl->jam_mulai;
+        // $this->form['jam_selesai'] = $spl->jam_selesai;
+        // $this->form['jenis_hari'] = $spl->jenis_hari;
+        // $this->form['tanggal_lembur'] = $spl->tanggal_lembur;
 
         $this->validateOvertimeRules();
 
@@ -147,15 +147,15 @@ class AddLembur extends Component
             return;
         }
 
-        $alreadySubmitted = Lembur::where('pegawai_id', $user->pegawai->id)
-            ->where('surat_perintah_lembur_id', $this->form['surat_perintah_lembur_id'])
-            ->exists();
+        // $alreadySubmitted = Lembur::where('pegawai_id', $user->pegawai->id)
+        //     ->where('surat_perintah_lembur_id', $this->form['surat_perintah_lembur_id'])
+        //     ->exists();
 
-        if ($alreadySubmitted) {
-            $this->addError('form.surat_perintah_lembur_id', 'Anda sudah mengajukan lembur untuk SPL ini.');
-            $this->loadAvailableSPLs();
-            return;
-        }
+        // if ($alreadySubmitted) {
+        //     $this->addError('form.surat_perintah_lembur_id', 'Anda sudah mengajukan lembur untuk SPL ini.');
+        //     $this->loadAvailableSPLs();
+        //     return;
+        // }
 
         $lembur = new Lembur([
             'pegawai_id' => $user->pegawai->id,
@@ -167,7 +167,8 @@ class AddLembur extends Component
             'alasan_lembur' => $this->form['kegiatan'],
         ]);
         $lembur->setRelation('pegawai', $user->pegawai->loadMissing(['unit_kerja', 'user.role']));
-        $lembur->status = $this->initialApprovalStatusFor($lembur);
+        $lembur->status = 'Menunggu Pelaksanaan';
+        // $lembur->status = $this->initialApprovalStatusFor($lembur);
         $lembur->save();
 
         // Emit event untuk refresh data
@@ -217,25 +218,26 @@ class AddLembur extends Component
         return ($hour * 60) + $minute;
     }
 
-    private function initialApprovalStatusFor(Lembur $lembur): string
-    {
-        $role = $lembur->pegawai?->user?->role?->name;
-        $unitSdmId = (int) $lembur->pegawai?->unit_kerja?->unit_sdm_id;
+    // private function initialApprovalStatusFor(Lembur $lembur): string
+    // {
+    //     $role = $lembur->pegawai?->user?->role?->name;
+    //     $unitSdmId = (int) $lembur->pegawai?->unit_kerja?->unit_sdm_id;
 
-        if ($role === 'Pimpinan') {
-            return $unitSdmId === 1
-                ? 'Menunggu Verifikasi SDM Yayasan'
-                : 'Menunggu Verifikasi Rektor';
-        }
+    //     if ($role === 'Pimpinan') {
+    //         return $unitSdmId === 1
+    //             ? 'Menunggu Verifikasi SDM Yayasan'
+    //             : 'Menunggu Verifikasi Rektor';
+    //     }
 
-        if ($role === 'Rektor') {
-            return 'Menunggu Verifikasi SDM Universitas';
-        }
+    //     if ($role === 'Rektor') {
+    //         return 'Menunggu Verifikasi SDM Universitas';
+    //     }
 
-        if ($role === 'SDM Universitas') {
-            return 'Menunggu Verifikasi SDM Yayasan';
-        }
+    //     if ($role === 'SDM Universitas') {
+    //         return 'Menunggu Verifikasi SDM Yayasan';
+    //     }
 
-        return 'Menunggu Verifikasi Atasan';
-    }
+    //     return 'Menunggu Verifikasi Atasan';
+    // }
+
 }

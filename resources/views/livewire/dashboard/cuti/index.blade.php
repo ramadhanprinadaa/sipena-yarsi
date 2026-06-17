@@ -1,5 +1,5 @@
             {{-- Tabs Navigation --}}
-            <div x-data="{ 
+            <div x-data="{
                 activeTab: 'riwayat',
                 activeButtonWidth: 0,
                 activeButtonLeft: 0,
@@ -14,37 +14,37 @@
                         this.activeButtonLeft = activeBtn.offsetLeft;
                     }
                 }
-            }" 
-            @load="updateUnderline()" 
+            }"
+            @load="updateUnderline()"
             class="flex flex-col gap-4 min-h-0">
                 <div class="relative border-b border-gray-200">
                     <div class="flex gap-2">
                         <!-- Riwayat Cuti -->
-                        <button 
+                        <button
                             x-ref="btnRiwayat"
-                            @click="activeTab = 'riwayat'; $nextTick(() => updateUnderline())" 
-                            :class="activeTab === 'riwayat' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'" 
+                            @click="activeTab = 'riwayat'; $nextTick(() => updateUnderline())"
+                            :class="activeTab === 'riwayat' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'"
                             class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
                             <i class="fa-solid fa-history mr-2"></i>Riwayat Cuti
                         </button>
                         <!-- Rekapitulasi -->
-                        <button 
+                        <button
                             x-ref="btnRekapitulasi"
-                            @click="activeTab = 'rekapitulasi'; $nextTick(() => updateUnderline())" 
-                            :class="activeTab === 'rekapitulasi' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'" 
+                            @click="activeTab = 'rekapitulasi'; $nextTick(() => updateUnderline())"
+                            :class="activeTab === 'rekapitulasi' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'"
                             class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
                             <i class="fa-solid fa-chart-bar mr-2"></i>Rekapitulasi
                         </button>
                     </div>
                     <!-- Smooth Underline Indicator -->
-                    <div 
+                    <div
                         :style="{ left: activeButtonLeft + 'px', width: activeButtonWidth + 'px' }"
                         class="absolute bottom-0 h-0.5 translate-y-0.5 bg-indigo-600 transition-all duration-500 ease-out"
                     ></div>
                 </div>
 
                 {{-- TAB 1: Riwayat Cuti --}}
-                <div x-show="activeTab === 'riwayat'" class="flex flex-col space-y-4 h-full min-h-0">
+                <div x-show="activeTab === 'riwayat'" class="flex flex-col space-y-4 min-h-[65vh]">
 
                     <!-- Filter  -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -72,36 +72,96 @@
 
                         </div>
 
-                        <!-- Button -->
-                        <button wire:click="exportRiwayatExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-green-500 hover:bg-green-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
-                            <!-- Icon -->
-                            <i class="fa-solid fa-download mr-2"></i> Export Excel
-                        </button>
+                        <!-- Button  -->
+                        <div class="flex items-center gap-3">
+
+                            <!-- Ajukan Cuti Button -->
+                            <button @click="$dispatch('open-modal-add')" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-blue-500 hover:bg-blue-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
+                                <!-- Icon -->
+                                <i class="fa-solid fa-add mr-2"></i> Ajukan Cuti
+                            </button>
+
+                            <!-- Export Button -->
+                            <button wire:click="exportRiwayatExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-green-500 hover:bg-green-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
+                                <!-- Icon -->
+                                <i class="fa-solid fa-download mr-2"></i> Export Excel
+                            </button>
+
+                        </div>
 
                     </div>
 
                     <!-- Table -->
-                    <div class="flex flex-col flex-1 min-h-0 overflow-hidden bg-[#F5F7FA]/50 border border-gray-200 rounded-[20px] shadow-sm">
-                        <div class="flex-1 overflow-y-auto no-scrollbar">
-                            <table class="min-w-full text-sm">
+                    <div class="table-container relative">
+
+                        <!-- Loading -->
+                        <div wire:loading>
+                            <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
+                                <div role="status">
+                                    <x-ui.spinner />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div class="table-wrapper">
+                            <table class="table">
+
                                 <!-- Header -->
-                                <thead class="bg-[#F5F7FA] text-gray-600 text-xs uppercase tracking-wider sticky top-0">
+                                <thead class="table-header">
                                     <tr>
-                                        <th class="px-4 py-3 text-left font-semibold">Tanggal Pengajuan</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Tanggal Mulai</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Tanggal Selesai</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Jenis Cuti</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Jumlah Hari Cuti</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Sisa Saldo Cuti</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Status</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Keterangan</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Aksi</th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Tanggal Pengajuan</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Tanggal Mulai</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate">Tanggal Selesai</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="truncate">Jenis Cuti</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="truncate">Jumlah Hari</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="truncate">Sisa Saldo Cuti</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="truncate">Status</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="truncate">Keterangan</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span class="truncate">Aksi</span>
+                                            </div>
+                                        </th>
                                     </tr>
                                 </thead>
+
                                 <!-- Body -->
                                 <tbody class="divide-y divide-[#878787]/30">
                                     @forelse($cutiList as $cuti)
-                                        <tr class="hover:bg-[#F5F7FA]/50 transition">
+                                        <tr class="table-row hover:bg-[#F5F7FA]/50 transition">
                                             <td class="px-4 py-4 font-medium text-gray-700">{{ \Carbon\Carbon::parse($cuti->tanggal_pengajuan)->translatedFormat('d F Y') }}</td>
                                             <td class="px-4 py-4 text-center text-gray-600">{{ \Carbon\Carbon::parse($cuti->tanggal_mulai)->translatedFormat('d F Y') }}</td>
                                             <td class="px-4 py-4 text-center text-gray-600">{{ \Carbon\Carbon::parse($cuti->tanggal_selesai)->translatedFormat('d F Y') }}</td>
@@ -123,7 +183,7 @@
                                                         Hapus
                                                     </button>
                                                 @else
-                                                    <span class="text-xs text-gray-400">-</span>
+                                                    <span class="text-xs text-gray-400">Tidak ada aksi</span>
                                                 @endif
                                             </td>
                                         </tr>
@@ -133,125 +193,206 @@
                                         </tr>
                                     @endforelse
                                 </tbody>
+
                             </table>
                         </div>
-                        <div class="px-4 py-2 bg-gray-100 border-t border-gray-200 text-sm">
-                            {{ count($cutiList) }} data
-                        </div>
+
+                            <!-- Footer & Pagination -->
+                            <div class="text-body bg-neutral-secondary-medium border-t border-default-medium rounded-md">
+
+                                <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between px-4 py-2" aria-label="Table navigation">
+                                    <span class="text-sm font-normal text-body block w-full md:inline md:w-auto">
+                                        Menampilkan
+                                        <span class="font-semibold text-heading">{{ $cutiList->firstItem() }}-{{ $cutiList->lastItem() }}</span> dari
+                                        <span class="font-semibold text-heading">{{ $cutiList->total() }} Lembur</span>
+                                    </span>
+
+                                    <ul class="flex -space-x-px text-sm border border-gray-300 rounded-lg">
+                                        <li>
+                                            <button
+                                                wire:click="gotoPage(1)"
+                                                @disabled($cutiList->onFirstPage())
+                                                class="table-pagination-btn rounded-s-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                                                >
+                                                <i class="fa-solid fa-angles-left text-xs"></i>
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button
+                                                wire:click="previousPage"
+                                                @disabled($cutiList->onFirstPage())
+                                                class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                                                Previous
+                                            </button>
+                                        </li>
+                                        @for ($i = max(1, $cutiList->currentPage() - 3);
+                                            $i <= min($cutiList->lastPage(), $cutiList->currentPage() + 3);
+                                            $i++)
+                                            <li>
+                                                <button
+                                                    wire:click="gotoPage({{ $i }})"
+                                                    class="w-9 {{ $cutiList->currentPage() == $i ? 'table-pagination-btn-active' : 'table-pagination-btn' }}">
+                                                    {{ $i }}
+                                                </button>
+                                            </li>
+                                        @endfor
+                                        <li>
+                                            <button
+                                                wire:click="nextPage"
+                                                @disabled(!$cutiList->hasMorePages())
+                                                class="table-pagination-btn px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                                                Next
+                                            </button>
+                                        </li>
+                                        <button
+                                            wire:click="gotoPage({{ $cutiList->lastPage() }})"
+                                            @disabled($cutiList->onLastPage())
+                                            class="table-pagination-btn rounded-e-lg px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                            <i class="fa-solid fa-angles-right text-xs"></i>
+                                        </button>
+                                    </ul>
+                                </nav>
+                            </div>
                     </div>
                 </div>
 
                 {{-- TAB 2: Rekapitulasi Cuti --}}
                 <div x-show="activeTab === 'rekapitulasi'" class="flex flex-col space-y-4 h-full min-h-0">
 
-                    <!-- Filter  -->
-                    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
+                    <!-- Filter & Export -->
+                    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 
-                        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-end">
-                            
+                        <div class="flex flex-col gap-3 md:flex-row md:items-center">
                             <div class="flex flex-wrap gap-3">
-                                <input type="date" wire:model.live="filterRekapStartDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                                <input type="date" wire:model.live="filterRekapEndDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                                <input type="date" wire:model.live="filterRekapStartDate" class="w-48 h-10 px-3 text-sm bg-white border-2 border-indigo-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition cursor-pointer hover:border-indigo-400">
+                                <input type="date" wire:model.live="filterRekapEndDate" class="w-48 h-10 px-3 text-sm bg-white border-2 border-indigo-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition cursor-pointer hover:border-indigo-400">
                             </div>
 
                             <div class="relative w-48">
-                                <div class="w-48 h-10 px-3 text-sm bg-white border border-gray-200 rounded-[10px] flex items-center text-gray-500">
+                                <div class="w-48 h-10 px-3 text-sm bg-indigo-50 border-2 border-indigo-100 rounded-[10px] flex items-center text-indigo-600 font-medium">
+                                    <i class="fa-solid fa-calendar-check mr-2"></i>
                                     {{ $filterRekapStartDate || $filterRekapEndDate ? 'Periode aktif' : 'Semua periode' }}
                                 </div>
                             </div>
                         </div>
 
                         <!-- Button -->
-                        <button wire:click="exportRekapExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-green-500 hover:bg-green-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
+                        <button wire:click="exportRekapExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 hover:shadow-xl text-white text-sm font-semibold rounded-[10px] transition duration-300 ease-in-out transform hover:scale-105">
                             <!-- Icon -->
                             <i class="fa-solid fa-download mr-2"></i> Export Excel
                         </button>
 
                     </div>
 
-                    <!-- Table -->
-                    <div class="flex flex-col flex-1 min-h-0 overflow-hidden bg-[#F5F7FA]/50 border border-gray-200 rounded-[20px] shadow-sm">
-                        <div class="flex-1 overflow-y-auto no-scrollbar">
-                            <table class="min-w-full text-sm">
-                                <!-- Header -->
-                                <thead class="bg-[#F5F7FA] text-gray-600 text-xs uppercase tracking-wider sticky top-0">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left font-semibold">Tanggal Pengajuan</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Tanggal Mulai</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Tanggal Selesai</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Jenis Cuti</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Jumlah Hari Cuti</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Sisa Saldo Cuti</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Status</th>
-                                        <th class="px-4 py-3 text-center font-semibold">Keterangan</th>
-                                    </tr>
-                                </thead>
-                                <!-- Body -->
-                                <tbody class="divide-y divide-[#878787]/30">
-                                    @forelse($rekapList as $cuti)
-                                        <tr class="hover:bg-[#F5F7FA]/50 transition">
-                                            <td class="px-4 py-4 font-medium text-gray-700">{{ \Carbon\Carbon::parse($cuti->tanggal_pengajuan)->translatedFormat('d F Y') }}</td>
-                                            <td class="px-4 py-4 text-center text-gray-600">{{ \Carbon\Carbon::parse($cuti->tanggal_mulai)->translatedFormat('d F Y') }}</td>
-                                            <td class="px-4 py-4 text-center text-gray-600">{{ \Carbon\Carbon::parse($cuti->tanggal_selesai)->translatedFormat('d F Y') }}</td>
-                                            <td class="px-4 py-4 text-center text-gray-600">{{ $cuti->jenisCuti->nama ?? '-' }}</td>
-                                            <td class="px-4 py-4 text-center text-gray-600">{{ $cuti->jenisCuti?->dihitung_per_jam ? (($cuti->jumlah_jam ?? 0) . ' Jam') : (($cuti->jumlah_hari_cuti ?? 0) . ' Hari') }}</td>
-                                            <td class="px-4 py-4 text-center text-gray-600">{{ $cuti->saldo_cuti_sesudah ?? '-' }} Hari</td>
-                                            <td class="px-4 py-4 text-center">
-                                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">Disetujui</span>
-                                            </td>
-                                            <td class="px-4 py-4 text-center text-gray-600">{{ $cuti->keterangan }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="8" class="px-4 py-8 text-center text-gray-500">No data available</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                    <!-- Stats Cards Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="group relative bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-600 rounded-[16px] p-5 shadow-lg hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 overflow-hidden border border-white/20">
+                            <div class="relative z-10 flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs font-semibold text-white/80 uppercase">Total Cuti</p>
+                                    <h4 class="text-3xl font-black text-white mt-1">{{ $rekapSummary['cuti_terpakai_total'] }}</h4>
+                                    <p class="text-[10px] text-white/60 mt-1 font-medium">Hari disetujui</p>
+                                </div>
+                                <div class="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+                                    <i class="fa-solid fa-umbrella-beach text-2xl text-white"></i>
+                                </div>
+                            </div>
                         </div>
-                        <div class="px-4 py-2 bg-gray-100 border-t border-gray-200 text-sm">
-                            {{ count($rekapList) }} data
+                        <div class="group relative bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 rounded-[16px] p-5 shadow-lg hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 overflow-hidden border border-white/20">
+                            <div class="relative z-10 flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs font-semibold text-white/80 uppercase">Sisa Saldo</p>
+                                    <h4 class="text-3xl font-black text-white mt-1">{{ $rekapSummary['sisa_saldo'] }}</h4>
+                                    <p class="text-[10px] text-white/60 mt-1 font-medium">Hak tersedia</p>
+                                </div>
+                                <div class="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+                                    <i class="fa-solid fa-wallet text-2xl text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="group relative bg-gradient-to-br from-amber-400 via-orange-500 to-red-500 rounded-[16px] p-5 shadow-lg hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 overflow-hidden border border-white/20">
+                            <div class="relative z-10 flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs font-semibold text-white/80 uppercase">Cuti Tahunan</p>
+                                    <h4 class="text-3xl font-black text-white mt-1">{{ $rekapSummary['cuti_terpakai_tahunan'] }}</h4>
+                                    <p class="text-[10px] text-white/60 mt-1 font-medium">Hari terpakai</p>
+                                </div>
+                                <div class="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+                                    <i class="fa-solid fa-calendar-days text-2xl text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="group relative bg-gradient-to-br from-purple-500 via-pink-600 to-rose-600 rounded-[16px] p-5 shadow-lg hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 overflow-hidden border border-white/20">
+                            <div class="relative z-10 flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs font-semibold text-white/80 uppercase">Besar/Melahirkan</p>
+                                    <h4 class="text-3xl font-black text-white mt-1">{{ $rekapSummary['cuti_terpakai_besar'] + $rekapSummary['cuti_terpakai_melahirkan'] }}</h4>
+                                    <p class="text-[10px] text-white/60 mt-1 font-medium">Total penggunaan</p>
+                                </div>
+                                <div class="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+                                    <i class="fa-solid fa-heart-pulse text-2xl text-white"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>      
+
+                    <!-- Data Cards List -->
+                    <div class="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-3">
+                        @forelse($rekapList as $cuti)
+                            <div class="relative group bg-gradient-to-r from-white via-indigo-50/30 to-white border-2 border-indigo-100 hover:border-indigo-400 rounded-[16px] p-5 shadow-md hover:shadow-xl transition duration-300 overflow-hidden">
+                                <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-indigo-500/5 to-indigo-500/0 opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none"></div>
+                                <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div class="flex items-start gap-4">
+                                        <div class="bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl p-3.5 text-white flex-shrink-0 shadow-lg group-hover:scale-110 transition duration-300">
+                                            <i class="fa-solid {{ $cuti->jenisCuti?->dihitung_per_jam ? 'fa-clock' : 'fa-plane-departure' }} text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-lg font-bold text-gray-800">{{ \Carbon\Carbon::parse($cuti->tanggal_mulai)->translatedFormat('d M') }} - {{ \Carbon\Carbon::parse($cuti->tanggal_selesai)->translatedFormat('d M Y') }}</span>
+                                                <span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-wider rounded-md">{{ $cuti->jenisCuti->nama ?? '-' }}</span>
+                                            </div>
+                                            <div class="mt-1 flex items-center gap-4 text-xs font-medium text-gray-500">
+                                                <span><i class="fa-solid fa-file-signature mr-1.5 text-indigo-400"></i>Diajukan: {{ \Carbon\Carbon::parse($cuti->tanggal_pengajuan)->translatedFormat('d M Y') }}</span>
+                                                <span><i class="fa-solid fa-chart-line mr-1.5 text-emerald-400"></i>Sisa Saldo: {{ $cuti->saldo_cuti_sesudah ?? '-' }} Hari</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="text-right hidden md:block">
+                                            <p class="text-[10px] font-bold text-gray-400 uppercase">Durasi Cuti</p>
+                                            <p class="text-xl font-black text-indigo-600">{{ $cuti->jenisCuti?->dihitung_per_jam ? (($cuti->jumlah_jam ?? 0) . ' Jam') : (($cuti->jumlah_hari_cuti ?? 0) . ' Hari') }}</p>
+                                        </div>
+                                        <div class="h-10 w-[1px] bg-gray-200 hidden md:block mx-2"></div>
+                                        <span class="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold shadow-sm border border-emerald-200">
+                                            <i class="fa-solid fa-circle-check mr-1.5"></i>Disetujui
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pl-16">
+                                    <div class="bg-gray-50 rounded-xl p-3 border border-gray-100 group-hover:bg-white transition duration-300">
+                                        <p class="text-sm text-gray-600 italic"><i class="fa-solid fa-quote-left mr-2 text-indigo-300"></i>{{ $cuti->keterangan }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-[16px] p-12 text-center">
+                                <div class="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fa-solid fa-folder-open text-3xl text-gray-400"></i>
+                                </div>
+                                <p class="text-gray-500 font-bold">Tidak ada data rekapitulasi cuti dalam periode ini</p>
+                                <p class="text-gray-400 text-xs mt-1">Coba ubah filter tanggal untuk melihat data lainnya</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
             </div>
-
-@section('formCards')
-    <div x-data="{ 
-    }" class="grid grid-cols-1 gap-4 max-w-full">
-        
-        {{-- Form Pengajuan Cuti Card --}}
-        <div class="bg-[linear-gradient(135deg,_#8187FF_0%,_#7DB5FF_50%,_#D1A6FF_100%)] rounded-[20px] p-8 flex flex-col min-h-24 gap-8 shadow-lg hover:shadow-xl transition">
-            <h2 class="text-[45px] font-bold bg-[linear-gradient(90deg,_#FFA58E_0%,_#DBFFEE_50%,_#70FFEE_100%)] bg-clip-text text-transparent mb-2 max-w-[360px]">Form Pengajuan Cuti</h2>
-            <button 
-                @click="$dispatch('open-modal-add')"
-                class="flex items-center justify-between gap-3 px-6 py-3 border-2 border-white/75 rounded-lg text-white font-semibold hover:bg-white/20 cursor-pointer transition duration-300">
-                <span>Ajukan Cuti</span>
-                <!-- Arrow Gradient -->
-                <svg width="120" height="20" viewBox="0 0 120 20" fill="none">
-                    <defs>
-                        <linearGradient id="gradArrow" x1="0" y1="0" x2="120" y2="0" gradientUnits="userSpaceOnUse">
-                            <stop offset="0%" stop-color="#59FFE3"/>
-                            <stop offset="44%" stop-color="#C3FFF5"/>
-                        </linearGradient>
-                    </defs>
-                    <!-- Line -->
-                    <line x1="0" y1="10" x2="100" y2="10" stroke="url(#gradArrow)" stroke-width="3" stroke-linecap="round"/>
-                    <!-- Arrow Head -->
-                    <path d="M95 3 L105 10 L95 17" stroke="url(#gradArrow)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>            
-            </button>
-        </div>
-
-        
-    </div>
-@endsection
 
 @section('CardsCuti')
 
     {{-- Saldo Cuti Cards --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                
+
                 {{-- Card 1: Sisa Saldo Cuti --}}
                 <div class="bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600 rounded-[20px] p-6 shadow-lg">
                     <div class="flex items-start justify-between mb-4">
@@ -289,7 +430,7 @@
                                 <div class="bg-blue-400 h-2 rounded-full" style="width: {{ ($rekapSummary['cuti_terpakai_tahunan']) > 0 ? min(100, ($rekapSummary['cuti_terpakai_tahunan'] / 12) * 100) : 0 }}%"></div>
                             </div>
                         </div>
-                        
+
                         {{-- Cuti Besar --}}
                         <div>
                             <div class="flex justify-between items-center mb-1">
@@ -311,7 +452,7 @@
                                 <div class="bg-pink-400 h-2 rounded-full" style="width: {{ ($rekapSummary['cuti_terpakai_melahirkan']) > 0 ? min(100, ($rekapSummary['cuti_terpakai_melahirkan'] / 90) * 100) : 0 }}%"></div>
                             </div>
                         </div>
-                        
+
                     </div>
                 </div>
 

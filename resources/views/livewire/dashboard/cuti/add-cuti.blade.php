@@ -1,9 +1,7 @@
 <div>
-@if($open)     
+@if($open)
         {{-- MODAL: Form Pengajuan Cuti --}}
-        <div x-data="{ 
-            showModalPengajuan: false,
-            showModalLaporan: false,
+        <div x-data="{
             filePengajuan: null,
             fileLaporan: null,
             dragOverPengajuan: false,
@@ -19,19 +17,9 @@
                 const ext = fileName.split('.').pop().toLowerCase();
                 const iconMap = {
                     'pdf': 'fa-file-pdf text-red-500',
-                    'doc': 'fa-file-word text-blue-500',
-                    'docx': 'fa-file-word text-blue-500',
-                    'xls': 'fa-file-excel text-green-500',
-                    'xlsx': 'fa-file-excel text-green-500',
-                    'ppt': 'fa-file-powerpoint text-orange-500',
-                    'pptx': 'fa-file-powerpoint text-orange-500',
                     'jpg': 'fa-file-image text-purple-500',
                     'jpeg': 'fa-file-image text-purple-500',
                     'png': 'fa-file-image text-purple-500',
-                    'gif': 'fa-file-image text-purple-500',
-                    'zip': 'fa-file-archive text-yellow-600',
-                    'rar': 'fa-file-archive text-yellow-600',
-                    'txt': 'fa-file-lines text-gray-500'
                 };
                 return iconMap[ext] || 'fa-file text-gray-500';
             },
@@ -40,7 +28,7 @@
                 e.stopPropagation();
                 if (form === 'pengajuan') this.dragOverPengajuan = false;
                 if (form === 'laporan') this.dragOverLaporan = false;
-                
+
                 const files = e.dataTransfer?.files || e.target?.files;
                 if (files && files.length > 0) {
                     const file = files[0];
@@ -55,7 +43,7 @@
         }" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
 
             <!-- Modal Box -->
-            <div 
+            <div
                 class="w-full max-w-2xl max-h-[85vh] bg-white rounded-[20px] shadow-2xl border border-gray-200 flex flex-col"
             >
                 <!-- Header -->
@@ -72,7 +60,7 @@
                 <div class="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[#2B76FF]/50 scrollbar-track-gray-100">
                     <div class="p-6 space-y-4">
 
-                        
+
 
                         {{-- Row: Tanggal Mulai & Selesai --}}
                         <div class="grid grid-cols-3 gap-4">
@@ -122,11 +110,37 @@
                             </div>
                         @endif
 
+                        {{-- Opsi Izin Sakit --}}
+                        @if($jenis_cuti_id == 4)
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                            <label class="block text-sm font-semibold text-amber-800 mb-3">Opsi Pemotongan Izin Sakit</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <label class="relative flex items-center p-3 border-2 rounded-xl cursor-pointer transition"
+                                    :class="$wire.metode_potongan === 'potong_gaji' ? 'border-[#2B76FF] bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'">
+                                    <input type="radio" wire:model.live="metode_potongan" value="potong_gaji" class="w-4 h-4 text-[#2B76FF] focus:ring-[#2B76FF]">
+                                    <div class="ml-3">
+                                        <p class="text-sm font-bold text-gray-800">Potong Gaji</p>
+                                        <p class="text-[10px] text-gray-500">Gaji akan dipotong sesuai ketentuan</p>
+                                    </div>
+                                </label>
+                                <label class="relative flex items-center p-3 border-2 rounded-xl cursor-pointer transition"
+                                    :class="$wire.metode_potongan === 'potong_cuti' ? 'border-[#2B76FF] bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'">
+                                    <input type="radio" wire:model.live="metode_potongan" value="potong_cuti" class="w-4 h-4 text-[#2B76FF] focus:ring-[#2B76FF]">
+                                    <div class="ml-3">
+                                        <p class="text-sm font-bold text-gray-800">Potong Saldo Cuti</p>
+                                        <p class="text-[10px] text-gray-500">Memotong sisa saldo cuti anda</p>
+                                    </div>
+                                </label>
+                            </div>
+                            @error('metode_potongan') <p class="text-xs text-red-500 mt-2">{{ $message }}</p> @enderror
+                        </div>
+                        @endif
+
                         <!-- Upload Dokumen -->
                         @if($selectedJenis?->butuh_surat_dokter)
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Dokumen</label>
-                            
+
                             <!-- Drag & Drop Area (Before File Selected) -->
                             <div x-show="!filePengajuan"
                                 @dragover.prevent="dragOverPengajuan = true"
@@ -135,7 +149,7 @@
                                 :class="dragOverPengajuan ? 'border-[#2B76FF] bg-[#2B76FF]/10 shadow-lg' : 'border-gray-300 hover:border-[#2B76FF] hover:bg-[#2B76FF]/5'"
                                 class="border-2 border-dashed rounded-lg p-8 text-center transition cursor-pointer">
                                 <input type="file" wire:model="dokumen_pendukung"
-                                    class="hidden" 
+                                    class="hidden"
                                     @change="handleFilePengajuan($event, 'pengajuan')"
                                     accept=".pdf,.jpg,.jpeg,.png"
                                     x-ref="inputPengajuan">
@@ -144,7 +158,7 @@
                                     <p class="text-sm font-medium" :class="dragOverPengajuan ? 'text-[#2B76FF]' : 'text-gray-500'">Klik atau drag file kesini</p>
                                 </div>
                             </div>
-                            
+
                             <!-- File Selected Display -->
                             <div x-show="filePengajuan" class="border-2 border-green-200 bg-green-50 rounded-lg p-4 transition">
                                 <div class="flex items-center justify-between">
@@ -189,8 +203,8 @@
                 <!-- Footer Button -->
                 <div class="px-6 py-4 bg-white border-t border-gray-200 rounded-b-[20px] flex-shrink-0">
                     <button wire:click="save" wire:loading.attr="disabled" wire:target="save,dokumen_pendukung"
-                        class="w-full py-3 rounded-lg text-white font-semibold 
-                            bg-gradient-to-r from-[#2B76FF] via-[#7B61FF] to-[#FF00CC]  
+                        class="w-full py-3 rounded-lg text-white font-semibold
+                            bg-gradient-to-r from-[#2B76FF] via-[#7B61FF] to-[#FF00CC]
                             hover:shadow-lg cursor-pointer transition duration-300">
                         <span wire:loading.remove wire:target="save">Ajukan Cuti</span>
                         <span wire:loading wire:target="save">Mengirim...</span>

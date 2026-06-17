@@ -14,10 +14,7 @@ class Index extends Component
 
     public $openDetail = false;
     public $isAutoFilled = false;
-    public $spls = [];
-    public $lemburList = [];
     public $lembur_items = []; // Collection untuk check status "Telah Diajukan"
-    public $laporanList = [];
     public $rekapList = [];
     public $rekapSummary = [
         'hari' => 0,
@@ -48,60 +45,6 @@ class Index extends Component
     public function loadData()
     {
         $this->syncDueLemburStatuses();
-
-        $user = Auth::user();
-        if ($user->pegawai) {
-            // Load SPL yang diterbitkan dan pegawai user termasuk di dalamnya
-            $query = SuratPerintahLembur::where('status', 'Diterbitkan')
-                ->whereHas('pegawai', function ($query) use ($user) {
-                    $query->where('pegawai.id', $user->pegawai->id);
-                })
-                ->with(['pegawai', 'unitKerja']);
-
-            // Apply date filter untuk SPL
-            if ($this->filterSplDate) {
-                $query->whereDate('tanggal_lembur', $this->filterSplDate);
-            }
-
-            $this->spls = $query->get();
-
-            // Load semua lembur yang sudah diajukan untuk check status SPL
-            $this->lembur_items = Lembur::where('pegawai_id', $user->pegawai->id)
-                ->pluck('surat_perintah_lembur_id')
-                ->toArray();
-
-            // Load riwayat lembur milik pegawai user
-            $lemburQuery = Lembur::where('pegawai_id', $user->pegawai->id)
-                ->with(['suratPerintahLembur', 'pegawai.unit_kerja', 'pegawai.user.role', 'laporanHasilLembur.persetujuan.approver.pegawai', 'laporanHasilLembur.persetujuan.approver.role', 'persetujuan.approver.pegawai', 'persetujuan.approver.role']);
-
-            // Apply date filter untuk Riwayat Lembur
-            if ($this->filterRiwayatDate) {
-                $lemburQuery->whereDate('tanggal_lembur', $this->filterRiwayatDate);
-            }
-
-            $this->lemburList = $lemburQuery->get();
-
-            $this->laporanList = Lembur::where('pegawai_id', $user->pegawai->id)
-                ->whereHas('laporanHasilLembur')
-                ->with(['suratPerintahLembur', 'pegawai.unit_kerja', 'pegawai.user.role', 'laporanHasilLembur.persetujuan.approver.pegawai', 'laporanHasilLembur.persetujuan.approver.role', 'persetujuan.approver.pegawai', 'persetujuan.approver.role'])
-                ->orderBy('updated_at', 'desc')
-                ->get();
-
-            $rekapQuery = Lembur::where('pegawai_id', $user->pegawai->id)
-                ->with(['suratPerintahLembur', 'laporanHasilLembur']);
-
-            $this->applyRekapPeriodFilter($rekapQuery);
-
-            $rekapList = $rekapQuery->orderBy('tanggal_lembur', 'desc')->get();
-
-            $this->rekapList = $rekapList;
-            $this->rekapSummary = [
-                'hari' => $rekapList->count(),
-                'total_jam' => $rekapList->sum(fn($lembur) => $this->durationInHours($lembur->jam_mulai, $lembur->jam_selesai)),
-                'selesai' => $rekapList->where('status', 'Selesai')->count(),
-                'menunggu' => $rekapList->filter(fn($lembur) => !in_array($lembur->status, ['Selesai', 'Ditolak']))->count(),
-            ];
-        }
     }
 
     private function applyRekapPeriodFilter($query): void
@@ -154,7 +97,73 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.dashboard.lembur.index');
+
+        $user = Auth::user();
+
+        $query = SuratPerintahLembur::query()->where('id', 0);
+        $lemburQuery = Lembur::query()->where('id', 0);
+
+
+        if ($user->pegawai) {
+            // Load SPL yang diterbitkan dan pegawai user termasuk di dalamnya
+            $query = SuratPerintahLembur::where('status', 'Diterbitkan')
+                ->whereHas('pegawai', function ($query) use ($user) {
+                    $query->where('pegawai.id', $user->pegawai->id);
+                })
+                ->with(['pegawai', 'unitKerja']);
+
+            // Apply date filter untuk SPL
+            if ($this->filterSplDate) {
+                $query->whereDate('tanggal_lembur', $this->filterSplDate);
+            }
+
+            // Load semua lembur yang sudah diajukan untuk check status SPL
+            $this->lembur_items = Lembur::where('pegawai_id', $user->pegawai->id)
+                ->pluck('surat_perintah_lembur_id')
+                ->toArray();
+
+            // Load Riwayat Lembur Milik Pegawai
+            $lemburQuery = Lembur::where('pegawai_id', $user->pegawai->id)
+                ->with(['suratPerintahLembur', 'pegawai.unit_kerja', 'pegawai.user.role', 'laporanHasilLembur.persetujuan.approver.pegawai', 'laporanHasilLembur.persetujuan.approver.role', 'persetujuan.approver.pegawai', 'persetujuan.approver.role']);
+
+            // Apply date filter untuk Riwayat Lembur
+            if ($this->filterRiwayatDate) {
+                $lemburQuery->whereDate('tanggal_lembur', $this->filterRiwayatDate);
+            }
+
+            //Load Laporan Lembur Milik Pegawai
+            // $this->laporanList = Lembur::where('pegawai_id', $user->pegawai->id)
+            //     ->whereHas('laporanHasilLembur')
+            //     ->with(['suratPerintahLembur', 'pegawai.unit_kerja', 'pegawai.user.role', 'laporanHasilLembur.persetujuan.approver.pegawai', 'laporanHasilLembur.persetujuan.approver.role', 'persetujuan.approver.pegawai', 'persetujuan.approver.role'])
+            //     ->orderBy('updated_at', 'desc')
+            //     ->get();
+
+            //Load Rekapitulasi Milik Pegawai
+            $rekapQuery = Lembur::where('pegawai_id', $user->pegawai->id)
+                ->with(['suratPerintahLembur', 'laporanHasilLembur']);
+
+            $this->applyRekapPeriodFilter($rekapQuery);
+
+            $rekapList = $rekapQuery->orderBy('tanggal_lembur', 'desc')->get();
+
+            $this->rekapList = $rekapList;
+            $this->rekapSummary = [
+                'hari' => $rekapList->count(),
+                'total_jam' => $rekapList->sum(fn($lembur) => $this->durationInHours($lembur->jam_mulai, $lembur->jam_selesai)),
+                'selesai' => $rekapList->where('status', 'Selesai')->count(),
+                'menunggu' => $rekapList->filter(fn($lembur) => !in_array($lembur->status, ['Selesai', 'Ditolak']))->count(),
+            ];
+        }
+
+        return view('livewire.dashboard.lembur.index', [
+            'spls' => $query->paginate(10),
+            'lemburList' => $lemburQuery->paginate(10),
+            'laporanList' => Lembur::where('pegawai_id', $user?->pegawai?->id ?? 0)
+                ->whereHas('laporanHasilLembur')
+                ->with(['suratPerintahLembur', 'pegawai.unit_kerja', 'pegawai.user.role', 'laporanHasilLembur.persetujuan.approver.pegawai', 'laporanHasilLembur.persetujuan.approver.role', 'persetujuan.approver.pegawai', 'persetujuan.approver.role'])
+                ->orderBy('updated_at', 'desc')
+                ->paginate(10)
+        ]);
     }
 
     public function openAjukanModal($splId)
@@ -395,14 +404,14 @@ class Index extends Component
 
         if (!in_array($role, ['Pimpinan', 'Rektor', 'SDM Universitas', 'SDM Yayasan'])) {
             return $unitSdmId === 1
-                ? 'Menunggu Verifikasi SDM Yayasan'
-                : 'Menunggu Verifikasi SDM Universitas';
+                ? 'Menunggu Verifikasi Atasan'
+                : 'Menunggu Verifikasi Atasan';
         }
 
         if ($role === 'Pimpinan') {
             return $unitSdmId === 1
                 ? 'Menunggu Verifikasi SDM Yayasan'
-                : 'Menunggu Verifikasi SDM Universitas';
+                : 'Menunggu Verifikasi Rektor';
         }
 
         if (in_array($role, ['Rektor', 'SDM Universitas'])) {
@@ -434,17 +443,17 @@ class Index extends Component
             return $nama . ' (' . $role . ')';
         }
 
-        $approvals = $lembur->persetujuan ?? collect();
+        // // $approvals = $lembur->persetujuan ?? collect();
 
-        if ($type === 'pengajuan' && $lembur->laporanHasilLembur) {
-            $approvals = $approvals->where('approved_at', '<', $lembur->laporanHasilLembur->created_at);
-        }
+        // // if ($type === 'pengajuan' && $lembur->laporanHasilLembur) {
+        // //     $approvals = $approvals->where('approved_at', '<', $lembur->laporanHasilLembur->created_at);
+        // // }
 
-        $approval = $approvals->sortByDesc('approved_at')->first();
+        // // $approval = $approvals->sortByDesc('approved_at')->first();
 
-        if (!$approval || !$approval->approver) {
-            return '-';
-        }
+        // if (!$approval || !$approval->approver) {
+        //     return '-';
+        // }
 
         $nama = $approval->approver->pegawai->nama ?? $approval->approver->name ?? $approval->approver->username ?? '-';
         $role = $approval->role_approval ?? $approval->approver->role->name ?? '-';

@@ -40,6 +40,9 @@
                                                 type="text" placeholder="SPL/2023/X/089"
                                                 wire:model="form.nomor_surat"
                                                 class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
+                                                @error('form.nomor_surat')
+                                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                             <div>
                                                 <label class="block text-xs font-semibold text-gray-700 mb-2">Unit Kerja</label>
@@ -54,6 +57,9 @@
                                             <input type="date"
                                                 wire:model="form.tanggal_dibuat"
                                                 class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
+                                                @error('form.tanggal_dibuat')
+                                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                                @enderror
                                         </div>
                                     </div>
 
@@ -67,13 +73,19 @@
                                             <label class="block text-xs font-semibold text-gray-700 mb-2">Nama Kegiatan</label>
                                             <input type="text" placeholder="Contoh: Menyelesaikan Fitur SIPENA"
                                                 wire:model="form.nama_kegiatan"
-                                                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition mb-4">
+                                                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
+                                                @error('form.nama_kegiatan')
+                                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                                @enderror
                                         </div>
-                                        <div>
+                                        <div class="mt-4">
                                             <label class="block text-xs font-semibold text-gray-700 mb-2">Deskripsi Tugas</label>
                                             <textarea placeholder="Tuliskan rincian tugas yang harus diselesaikan..."
                                                 wire:model="form.deskripsi_tugas"
                                                 class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition h-24 resize-none scrollbar-thin scrollbar-thumb-[#2B76FF]/40 scrollbar-track-gray-50"></textarea>
+                                            @error('form.deskripsi_tugas')
+                                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
 
@@ -206,6 +218,9 @@
                                                 </div>
                                                 @endforeach
                                             </div>
+                                            @error('selectedEmployees')
+                                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                         @endif
                                     </div>
@@ -231,4 +246,4 @@
                         </div>
                     </div>
                 @endif
-</div>
+</div>    

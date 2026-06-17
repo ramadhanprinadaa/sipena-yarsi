@@ -12,6 +12,7 @@ class Cuti extends Model
         'pegawai_id',
         'jenis_cuti_id',
         'tanggal_pengajuan',
+        'metode_potongan',
         'tanggal_mulai',
         'tanggal_selesai',
         'jam_mulai',

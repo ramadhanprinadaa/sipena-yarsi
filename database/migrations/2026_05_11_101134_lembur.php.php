@@ -29,14 +29,14 @@ return new class extends Migration
 
             $table->enum('status', [
                 'Menunggu Pelaksanaan',
-                'Menunggu Verifikasi Atasan',
-                'Menunggu Verifikasi Rektor',
-                'Menunggu Verifikasi SDM Universitas',
-                'Menunggu Verifikasi SDM Yayasan',
+                // 'Menunggu Verifikasi Atasan',
+                // 'Menunggu Verifikasi Rektor',
+                // 'Menunggu Verifikasi SDM Universitas',
+                // 'Menunggu Verifikasi SDM Yayasan',
                 'Menunggu Laporan',
                 'Selesai',
                 'Ditolak'
-            ])->default('Menunggu Verifikasi Atasan');
+            ])->default('Menunggu Pelaksanaan');
 
             $table->timestamps();
         });

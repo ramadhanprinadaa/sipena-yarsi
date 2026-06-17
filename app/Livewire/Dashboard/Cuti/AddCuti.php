@@ -25,12 +25,27 @@ class AddCuti extends Component
     public $jam_selesai = '';
     public $dokumen_pendukung;
     public $keterangan = '';
+    public $metode_potongan = null;
 
     #[On('open-modal-add')]
     public function open()
     {
         $this->resetForm();
-        $this->jenisCutiList = JenisCuti::orderBy('id')->get();
+
+        $pegawai = Auth::user()?->pegawai;
+        $masaKerjaBulan = $pegawai->tanggal_bergabung
+            ? Carbon::parse($pegawai->tanggal_bergabung)->diffInMonths(Carbon::today())
+            : 0;
+        $serviceYear = floor($masaKerjaBulan / 12) + 1;
+
+        $query = JenisCuti::orderBy('id');
+        if (in_array($serviceYear, [7, 8])) {
+            $query->where('id', '!=', 1); // Cuti Tahunan tidak ada jika periode Cuti Besar
+        } else {
+            $query->where('id', '!=', 2); // Cuti Besar tidak ada jika bukan periodenya
+        }
+
+        $this->jenisCutiList = $query->get();
         $this->open = true;
     }
 
@@ -62,8 +77,13 @@ class AddCuti extends Component
         }
 
         $saldo = $this->getSaldoCuti($pegawai);
+
+        // Logic Potong Cuti untuk Izin Sakit
+        $isPotongCutiSakit = ($jenisCuti->id == 4 && $this->metode_potongan === 'potong_cuti');
+        $harusPotongSaldo = $jenisCuti->memotong_saldo || $isPotongCutiSakit;
+
         $saldoSebelum = $saldo?->sisa_cuti ?? null;
-        $saldoSesudah = $jenisCuti->memotong_saldo && $jumlahHari
+        $saldoSesudah = $harusPotongSaldo && $jumlahHari
             ? max(0, ($saldoSebelum ?? 0) - $jumlahHari)
             : $saldoSebelum;
 
@@ -81,6 +101,7 @@ class AddCuti extends Component
             'jam_selesai' => $jenisCuti->dihitung_per_jam ? $this->jam_selesai : null,
             'jumlah_hari_cuti' => $jumlahHari,
             'jumlah_jam' => $jumlahJam,
+            'metode_potongan' => ($jenisCuti->id == 4) ? $this->metode_potongan : null,
             'saldo_cuti_sebelum' => $saldoSebelum,
             'saldo_cuti_sesudah' => $saldoSesudah,
             'dokumen_pendukung' => $filePath,
@@ -104,6 +125,7 @@ class AddCuti extends Component
             'jam_selesai' => [$jenisCuti?->dihitung_per_jam ? 'required' : 'nullable', 'date_format:H:i', 'after:jam_mulai'],
             'dokumen_pendukung' => $fileRule,
             'keterangan' => ['required', 'string', 'min:5', 'max:1000'],
+            'metode_potongan' => ['nullable', 'in:potong_gaji,potong_cuti'],
         ];
     }
 
@@ -112,6 +134,28 @@ class AddCuti extends Component
         $masaKerjaBulan = $pegawai->tanggal_bergabung
             ? Carbon::parse($pegawai->tanggal_bergabung)->diffInMonths(Carbon::today())
             : 0;
+
+        // 1. --- VALIDASI OVERLAP TANGGAL CUTI ---
+        $isOverlap = Cuti::where('pegawai_id', $pegawai->id)
+            ->where('status', '!=', 'ditolak') // Abaikan cuti yang ditolak
+            ->where('tanggal_mulai', '<=', $this->tanggal_selesai)
+            ->where('tanggal_selesai', '>=', $this->tanggal_mulai)
+            ->exists();
+
+        if ($isOverlap) {
+            $this->addError('tanggal_mulai', 'Anda sudah memiliki pengajuan/riwayat cuti pada periode tanggal tersebut.');
+            $this->addError('tanggal_selesai', 'Periode bertabrakan dengan cuti lain.');
+            return false;
+        }
+
+        // Validasi Minimal Hari Pengajuan
+        if ($jenisCuti->minimal_hari_pengajuan) {
+            $diffDays = Carbon::today()->diffInDays(Carbon::parse($this->tanggal_mulai), false);
+            if ($diffDays < $jenisCuti->minimal_hari_pengajuan) {
+                $this->addError('tanggal_mulai', "Pengajuan jenis ini minimal dilakukan {$jenisCuti->minimal_hari_pengajuan} hari sebelum tanggal mulai.");
+                return false;
+            }
+        }
 
         if ($jenisCuti->minimal_masa_kerja_bulan && $masaKerjaBulan < $jenisCuti->minimal_masa_kerja_bulan) {
             $this->addError('jenis_cuti_id', 'Masa kerja belum memenuhi syarat jenis cuti ini.');
@@ -127,6 +171,7 @@ class AddCuti extends Component
             return true;
         }
 
+        //Cuti Besar Rules
         if ($jenisCuti->id === 2) {
             $serviceYear = floor($masaKerjaBulan / 12) + 1;
             if (!in_array($serviceYear, [7, 8])) {
@@ -155,12 +200,12 @@ class AddCuti extends Component
                 return false;
             }
         }
-
+        //Rules Maksimal Cuti
         if ($jenisCuti->maksimal_hari && $jumlahHari > $jenisCuti->maksimal_hari) {
             $this->addError('tanggal_selesai', 'Jumlah hari melebihi maksimal cuti yang diperbolehkan.');
             return false;
         }
-
+        //Rules Perbulan
         if ($jenisCuti->maksimal_hari_per_bulan) {
             $terpakaiBulanIni = Cuti::where('pegawai_id', $pegawai->id)
                 ->where('jenis_cuti_id', $jenisCuti->id)
@@ -174,7 +219,7 @@ class AddCuti extends Component
                 return false;
             }
         }
-
+        //Rules Cuti Izin Menikah dan Ibadah Haji
         if ($jenisCuti->sekali_seumur_kerja) {
             $pernahMengajukan = Cuti::where('pegawai_id', $pegawai->id)
                 ->where('jenis_cuti_id', $jenisCuti->id)
@@ -187,7 +232,8 @@ class AddCuti extends Component
             }
         }
 
-        if ($jenisCuti->memotong_saldo) {
+        $isPotongCutiSakit = ($jenisCuti->id == 4 && $this->metode_potongan === 'potong_cuti');
+        if ($jenisCuti->memotong_saldo || $isPotongCutiSakit) {
             $saldo = $this->getSaldoCuti($pegawai);
 
             if (($saldo?->sisa_cuti ?? 0) < $jumlahHari) {
@@ -238,7 +284,7 @@ class AddCuti extends Component
 
     private function resetForm(): void
     {
-        $this->reset(['jenis_cuti_id', 'tanggal_mulai', 'tanggal_selesai', 'jam_mulai', 'jam_selesai', 'dokumen_pendukung', 'keterangan']);
+        $this->reset(['jenis_cuti_id', 'tanggal_mulai', 'tanggal_selesai', 'jam_mulai', 'jam_selesai', 'dokumen_pendukung', 'keterangan', 'metode_potongan']);
         $this->resetErrorBag();
     }
 
@@ -252,6 +298,7 @@ class AddCuti extends Component
             'jam_selesai' => 'jam selesai',
             'dokumen_pendukung' => 'dokumen pendukung',
             'keterangan' => 'alasan cuti',
+            'metode_potongan' => 'opsi potongan'
         ];
     }
 

@@ -200,14 +200,14 @@
                 </div>
 
                 {{-- ── Right Column ── --}}
-                <div class="space-y-4">
+                <div class="space-y-4 flex flex-col">
 
                     {{-- Dokumen Pendukung --}}
                     <p class="text-[10px] font-bold tracking-widest uppercase text-slate-400">Dokumen Pendukung</p>
 
                     @if($selectedCuti->dokumen_pendukung)
-                        <div class="bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 rounded-2xl p-4">
-                            <div class="flex items-center justify-between mb-3">
+                        <div class="bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 rounded-2xl p-4 h-full flex flex-col gap-4">
+                            <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-3">
                                     <div class="w-11 h-11 rounded-xl bg-amber-400 flex items-center justify-center flex-shrink-0">
                                         @if(Str::endsWith($selectedCuti->dokumen_pendukung, ['.jpg', '.jpeg', '.png']))
@@ -228,28 +228,42 @@
                                 </div>
                             </div>
 
+                            <div class="flex w-full h-full">
                             @if(Str::endsWith($selectedCuti->dokumen_pendukung, ['.pdf']))
                                 <iframe
                                     src="{{ asset('storage/' . $selectedCuti->dokumen_pendukung) }}"
-                                    class="w-full rounded-xl border border-amber-200"
+                                    class="w-full h-full rounded-xl border border-amber-200"
                                 ></iframe>
                             @elseif(Str::endsWith($selectedCuti->dokumen_pendukung, ['.jpg', '.jpeg', '.png']))
                                 <img
                                     src="{{ asset('storage/' . $selectedCuti->dokumen_pendukung) }}"
                                     alt="Dokumen Pendukung"
-                                    class="w-full h-72 object-contain rounded-xl border border-amber-200 bg-white"
+                                    class="w-full h-full object-contain rounded-xl border border-amber-200 bg-white"
                                 />
                             @else
                                 <p class="text-sm text-amber-700">Pratinjau tidak tersedia.</p>
                             @endif
-                            <a
-                                    href="{{ asset('storage/' . $selectedCuti->dokumen_pendukung) }}"
-                                    target="_blank"
-                                    class="w-full h-10 mt-3 rounded-xl bg-amber-400 hover:bg-amber-500 transition-colors flex items-center justify-center"
-                            >
-                                    <i class="fa-solid fa-download text-white"></i>
-                                    <span class="ml-2 text-sm font-semibold text-white">Preview Dokumen</span>
-                            </a>
+                            </div>
+
+                            <div class="flex h-15 gap-3">
+                                <a
+                                        href="{{ asset('storage/' . $selectedCuti->dokumen_pendukung) }}"
+                                        target="_blank"
+                                        class="w-full h-full rounded-xl bg-amber-400 hover:bg-amber-500 transition-colors flex items-center justify-center"
+                                >
+                                        <i class="fa-solid fa-eye text-white"></i>
+                                        <span class="ml-2 text-sm font-semibold text-white">Preview Dokumen</span>
+                                </a>
+                                <a
+                                        href="{{ asset('storage/' . $selectedCuti->dokumen_pendukung) }}"
+                                        download="{{ basename($selectedCuti->dokumen_pendukung) }}"
+                                        class="w-full h-full rounded-xl bg-amber-400 hover:bg-amber-500 transition-colors flex items-center justify-center"
+                                >
+                                        <i class="fa-solid fa-download text-white"></i>
+                                        <span class="ml-2 text-sm font-semibold text-white">Unduh Dokumen</span>
+                                </a>
+                            </div>
+
                         </div>
                     @else
                         <div class="bg-slate-50 h-110 flex items-center justify-center border border-dashed border-slate-300 rounded-2xl p-6 text-center">
@@ -258,7 +272,7 @@
                         </div>
                     @endif
 
-                    
+
 
                 </div>
             </div>
