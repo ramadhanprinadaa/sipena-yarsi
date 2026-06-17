@@ -224,7 +224,7 @@ class BiodataImport implements ToModel, WithHeadingRow, WithValidation, WithBatc
 
     public function batchSize(): int
     {
-        return 2;
+        return 1000;
     }
 
     public function chunkSize(): int

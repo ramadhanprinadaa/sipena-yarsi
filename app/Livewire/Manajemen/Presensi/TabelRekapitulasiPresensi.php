@@ -89,7 +89,8 @@ class TabelRekapitulasiPresensi extends Component
                 },
                 'lembur' => function ($q) use ($mulai, $selesai) {
                     $q->whereBetween('tanggal_lembur', [$mulai, $selesai])
-                        ->where('status', 'Disetujui');
+                        ->where('status', 'Selesai')
+                        ->with('laporan');
                 },
                 'unit_kerja:id,name' // Tambahan relasi unit_kerja untuk kemudahan di Export
             ]);
@@ -136,7 +137,7 @@ class TabelRekapitulasiPresensi extends Component
         $pegawais = $this->baseQuery()->paginate(10);
 
         // Transformasi data rekapitulasi per pegawai
-        $pegawais->getCollection()->transform( function ($pegawai) {
+        $pegawais->getCollection()->transform(function ($pegawai) {
             // Inisialisasi variabel data rekapitulasi
             $hadir = $tidakHadir = $lembur = $cuti = $izin = $sakit = $totalMenitKerja = $totalMenitLembur = 0;
 
@@ -173,15 +174,55 @@ class TabelRekapitulasiPresensi extends Component
 
                 // B. Hitung Menit Aktual Harian
                 $menitKerjaHariIni = 0;
+                $pmStart = null;
+                $pmEnd = null;
+
                 if ($presensi->jam_masuk && $presensi->jam_keluar) {
                     $masuk = Carbon::parse($presensi->jam_masuk);
                     $keluar = Carbon::parse($presensi->jam_keluar);
                     $menitKerjaHariIni = $masuk->diffInMinutes($keluar);
+
+                    // Variabel untuk menghitung irisan (overlap) dengan jam lembur
+                    $pmStart = Carbon::parse($tanggalStr . ' ' . $masuk->format('H:i:s'));
+                    $pmEnd = Carbon::parse($tanggalStr . ' ' . $keluar->format('H:i:s'));
+                    if ($pmEnd->lessThan($pmStart)) $pmEnd->addDay();
                 }
 
                 // C. Logika Lembur & Jam Kerja
-                $isLemburDisetujui = $lemburByDate->has($tanggalStr);
-                $dataLembur = $isLemburDisetujui ? $lemburByDate->get($tanggalStr) : null;
+                $isLemburSelesai = $lemburByDate->has($tanggalStr);
+                $dataLembur = $isLemburSelesai ? $lemburByDate->get($tanggalStr) : null;
+
+                $durasiLemburMenit = 0;
+                $totalMenitEfektif = $menitKerjaHariIni; // Secara default adalah total presensi
+
+                if ($isLemburSelesai) {
+                    // Ambil jam lembur dari Laporan (jika ada), jika tidak gunakan jam di pengajuan lembur
+                    $jamMulaiLembur = $dataLembur->laporan ? $dataLembur->laporan->jam_mulai : $dataLembur->jam_mulai;
+                    $jamSelesaiLembur = $dataLembur->laporan ? $dataLembur->laporan->jam_selesai : $dataLembur->jam_selesai;
+
+                    $lStart = Carbon::parse($tanggalStr . ' ' . $jamMulaiLembur);
+                    $lEnd = Carbon::parse($tanggalStr . ' ' . $jamSelesaiLembur);
+                    if ($lEnd->lessThan($lStart)) $lEnd->addDay(); // Handle lembur lintas hari
+
+                    $durasiLemburMenit = $lStart->diffInMinutes($lEnd);
+
+                    // Kalkulasi Total Menit Efektif untuk mencegah perhitungan ganda
+                    if ($pmStart && $pmEnd) {
+                        $overlapStart = $pmStart->max($lStart);
+                        $overlapEnd = $pmEnd->min($lEnd);
+
+                        $overlapMinutes = 0;
+                        if ($overlapStart->lessThan($overlapEnd)) {
+                            $overlapMinutes = $overlapStart->diffInMinutes($overlapEnd);
+                        }
+
+                        // Total waktu gabungan = Waktu Presensi + Waktu Laporan Lembur - Irisan Waktu
+                        $totalMenitEfektif = $menitKerjaHariIni + $durasiLemburMenit - $overlapMinutes;
+                    } else {
+                        // Jika presensi kosong (misal disetujui hadir manual), pakai durasi laporan
+                        $totalMenitEfektif = $durasiLemburMenit;
+                    }
+                }
 
                 $isWeekend = Carbon::parse($presensi->tanggal)->isWeekend();
                 $isHariLibur = $statusId == StatusKehadiranService::LEMBUR || $isWeekend || ($dataLembur && in_array($dataLembur->jenis_hari, ['Hari Libur', 'Libur Nasional']));
@@ -191,10 +232,10 @@ class TabelRekapitulasiPresensi extends Component
 
                 // Hitung hanya jika status diakui sebagai kerja/lembur
                 if (in_array($statusId, [
-                        StatusKehadiranService::HADIR_NORMAL,
-                        StatusKehadiranService::HADIR_KURANG_JAM,
-                        StatusKehadiranService::LEMBUR
-                    ])) {
+                    StatusKehadiranService::HADIR_NORMAL,
+                    StatusKehadiranService::HADIR_KURANG_JAM,
+                    StatusKehadiranService::LEMBUR
+                ])) {
 
                     if (!$isHariLibur) {
                         // --- HARI BIASA ---
@@ -202,15 +243,17 @@ class TabelRekapitulasiPresensi extends Component
                         $menitKerjaReguler = min($menitKerjaHariIni, 480);
                         $totalMenitKerja += $menitKerjaReguler;
 
-                        // Hitung lembur jika disetujui & jam kerja tembus 8 jam (Hadir Normal)
-                        if ($isLemburDisetujui && $menitKerjaHariIni > 480) {
-                            // Batas maksimal lembur hari biasa = 2 jam (120 menit)
-                            $menitLemburValidHariIni = min(($menitKerjaHariIni - 480), 120);
+                        // PERBAIKAN: Hitung lembur jika status selesai & Total Menit Efektif > 8 jam
+                        if ($isLemburSelesai && $totalMenitEfektif > 480) {
+                            $kelebihanMenit = $totalMenitEfektif - 480;
+
+                            // Batas maksimal lembur hari biasa = 2 jam (120 menit).
+                            $menitLemburValidHariIni = min($kelebihanMenit, 120);
                             $totalMenitLembur += $menitLemburValidHariIni;
                         }
                     } else {
                         // --- HARI LIBUR / WEEKEND ---
-                        if ($isLemburDisetujui) {
+                        if ($isLemburSelesai) {
                             // Seluruh jam kerja dihitung lembur, maksimal 5 jam (300 menit)
                             $menitLemburValidHariIni = min($menitKerjaHariIni, 300);
                             $totalMenitLembur += $menitLemburValidHariIni;

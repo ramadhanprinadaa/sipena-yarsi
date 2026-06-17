@@ -13,11 +13,11 @@ class PegawaiSeeder extends Seeder
      */
     public function run(): void
     {
-        Pegawai::factory()->count(50)->create();
+        // Pegawai::factory()->count(50)->create();
 
-        // Muhammad Ramadhan Prinada 51
+        // Muhammad Ramadhan Prinada 1
         Pegawai::create([
-            'unit_kerja_id'           => 10,
+            'unit_kerja_id'           => 5,
             'jenis_pegawai_id'        => 3,
             'status_pegawai_id'       => 1,
             'nip'                     => '1402022043',
@@ -39,7 +39,7 @@ class PegawaiSeeder extends Seeder
             'status'                  => 'active',
         ]);
 
-        // Annisa Putri 52
+        // Annisa Putri 2
         Pegawai::create([
             'unit_kerja_id'           => 2,
             'jenis_pegawai_id'        => 4,
@@ -63,9 +63,9 @@ class PegawaiSeeder extends Seeder
             'status'                  => 'active',
         ]);
 
-        // Agus Widayat 53
+        // Agus Widayat 3
         Pegawai::create([
-            'unit_kerja_id'             => 10,
+            'unit_kerja_id'             => 5,
             'jenis_pegawai_id'          => 2,
             'status_pegawai_id'         => 2,
             'nip'                       => '531142102011',
@@ -87,9 +87,9 @@ class PegawaiSeeder extends Seeder
             'status'                    => 'active',
         ]);
 
-        // SDM Yayasan 54
+        // SDM Yayasan 4
         Pegawai::create([
-            'unit_kerja_id' => 1,
+            'unit_kerja_id' => 8,
             'jenis_pegawai_id' => 3,
             'status_pegawai_id' => 1,
             'nip' => '199001012020011999',
@@ -111,9 +111,9 @@ class PegawaiSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        // SDM Univesitas 55
+        // SDM Univesitas 5
         Pegawai::create([
-            'unit_kerja_id' => 5,
+            'unit_kerja_id' => 8,
             'jenis_pegawai_id' => 3,
             'status_pegawai_id' => 1,
             'nip' => '199001012020011888',
@@ -133,6 +133,30 @@ class PegawaiSeeder extends Seeder
             'no_telpon' => '081234567888',
             'email_yarsi' => 'sdmuniversitas@yarsi.ac.id',
             'status' => 'active',
+        ]);
+
+        // Hilal Akbar 6
+        Pegawai::create([
+            'unit_kerja_id'             => 5,
+            'jenis_pegawai_id'          => 2,
+            'status_pegawai_id'         => 2,
+            'nip'                       => '1402022023',
+            'ktp'                       => '3172031011030002',
+            'npwp'                      => null,
+            'nama'                      => 'Hilal Rizqi Akbar',
+            'gelar_depan'               => null,
+            'gelar_belakang'            => null,
+            'tempat_lahir'              => 'Jakarta',
+            'tanggal_lahir'             => '2003-11-10',
+            'tanggal_bergabung'         => '2022-09-12',
+            'tanggal_habis_kontrak'     => '2032-09-12',
+            'tanggal_pensiun'           => null,
+            'jenis_kelamin'             => 'L',
+            'alamat_ktp'                => 'Kelapa Gading, Jakarta Utara',
+            'alamat_domisili'           => 'Kelapa Gading, Jakarta Utara',
+            'no_telpon'                 => '081317425875',
+            'email_yarsi'               => 'hilal.rizqi@yarsi.ac.id',
+            'status'                    => 'active',
         ]);
     }
 }

@@ -106,9 +106,7 @@
                 <button
                     type="button"
                     x-on:click="show = !show"
-                    class="w-full flex justify-between items-center py-2 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none text-sm cursor-pointer"
-
-                >
+                    class="w-full flex justify-between items-center py-2 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none text-sm cursor-pointer">
                     <span
                         :class="selected ? 'text-gray-900' : 'text-gray-400 italic'"
                         x-text="selected || 'Pilih Jenis Hari Libur'">
