@@ -161,7 +161,7 @@ class Index extends Component
 
         $saldo = SaldoCuti::firstOrCreate(
             ['pegawai_id' => $cuti->pegawai_id, 'tahun' => now()->year],
-            ['hak_cuti' => 12, 'cuti_terpakai' => 0, 'sisa_cuti' => 12]
+            ['hak_cuti' => 2, 'cuti_terpakai' => 0, 'sisa_cuti' => 2]
         );
 
         $saldo->update([

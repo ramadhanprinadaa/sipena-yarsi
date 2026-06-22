@@ -123,7 +123,7 @@
                     autohide: true,
                     language: 'id'
                 });
-
+                
                 $refs.input.addEventListener('changeDate', () => {
                     $wire.set('form.tanggal_lahir', $refs.input.value);
                 });" class="relative">
@@ -204,7 +204,11 @@
         </button>
         <button type="button"
             x-on:click="showLoading = true; $wire.update().finally(() => setTimeout(() => showLoading = false, 500))"
-            @disabled(blank($form['nama']) || blank($form['tanggal_lahir']) || blank($form['jenis_keluarga_id']) || $errors->any() || !$this->isDirty) wire:loading.attr="disabled" wire:target="update"
+            @disabled(blank($form['nama']) ||
+                    blank($form['tanggal_lahir']) ||
+                    blank($form['jenis_keluarga_id']) ||
+                    $errors->any() ||
+                    !$this->isDirty) wire:loading.attr="disabled" wire:target="update"
             class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-md transition-colors duration-150 bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-indigo-500">
             <!-- Loading spinner -->
             <svg wire:loading wire:target="update" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg"

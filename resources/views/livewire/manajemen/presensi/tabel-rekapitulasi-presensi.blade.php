@@ -1,5 +1,5 @@
 <div x-data="{ showLoading: false, openExport: false }" x-on:open-export="showLoading = false; openExport = true;"
-    class="flex flex-col h-full lg:h-[calc(100vh-150px)] space-y-4 px-2 py-3">
+    class="flex flex-col h-full lg:h-[calc(100vh-150px)] px-2 py-3">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
         @php
@@ -188,7 +188,7 @@
     </div>
 
     <!-- Table -->
-    <div class="table-container relative">
+    <div class="table-container relative mt-4">
         <!-- Loading -->
         <div wire:loading wire:target="search, selectedUnitKerja, selectedPeriodeMulai, selectedPeriodeSelesai">
             <div

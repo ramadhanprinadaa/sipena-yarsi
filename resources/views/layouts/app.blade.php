@@ -43,7 +43,7 @@
         </aside>
 
         {{-- Right Content --}}
-        <div :class="sidebarToggle ? 'ml-64' : 'ml-26'" class="flex-1 flex flex-col gap-4 min-w-0 overflow-x-hidden">
+        <div :class="sidebarToggle ? 'ml-64' : 'ml-28'" class="flex-1 flex flex-col gap-4 min-w-0 overflow-x-hidden">
 
             {{-- Section --}}
             <div class="flex items-center gap-2 fixed top-24 z-30">

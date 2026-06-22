@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('saldo_cuti', function (Blueprint $table) {
+        Schema::create('sumber_daya', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pegawai_id');
-            $table->year('tahun');
-            $table->integer('hak_cuti');
-            $table->integer('cuti_terpakai');
-            $table->integer('sisa_cuti');
+            $table->string('judul');
+            $table->string('file_name');
+            $table->string('file_path');
+            $table->string('extension');
+            $table->string('mime_type');
+            $table->foreignId('uploaded_by');
             $table->timestamps();
         });
     }
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('saldo_cuti');
+        Schema::dropIfExists('sumber_daya');
     }
 };

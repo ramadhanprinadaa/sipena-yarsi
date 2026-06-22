@@ -191,7 +191,8 @@
         </button>
         <button type="button"
             x-on:click="showLoading = true; $wire.save().finally(() => setTimeout(() => showLoading = false, 500))"
-            @disabled(blank($form['nama_unit']) || blank($form['unit_sdm_id']) || $errors->any()) wire:loading.attr="disabled" wire:target="save"
+            @disabled(blank($form['nama_unit']) || blank($form['unit_sdm_id']) || $errors->any())
+            wire:loading.attr="disabled" wire:target="save"
             class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-md transition-colors duration-150 bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-indigo-500">
             <!-- Loading spinner -->
             <svg wire:loading wire:target="save" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg"

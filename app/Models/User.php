@@ -94,6 +94,11 @@ class User extends Authenticatable
         return $this->hasMany(RiwayatPendidikan::class, 'updated_by');
     }
 
+    public function sumberDaya()
+    {
+        return $this->hasMany(SumberDaya::class, 'uploaded_by');
+    }
+
     public function arsipFile()
     {
         return $this->hasMany(ArsipFile::class, 'uploaded_by', 'id');

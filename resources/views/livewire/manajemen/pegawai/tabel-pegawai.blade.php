@@ -1,5 +1,5 @@
 <div x-data="{ showLoading: false, openExport: false }" x-on:open-export="showLoading = false; openExport = true;"
-    class="flex flex-col space-y-4 h-[calc(100vh-280px)]">
+    class="flex flex-col h-[calc(100vh-280px)]">
 
     <!-- Filter & Search -->
     <div class="flex items-center justify-between gap-2">
@@ -247,7 +247,7 @@
     </div>
 
     <!-- Table -->
-    <div class="table-container relative">
+    <div class="table-container relative mt-4">
 
         <!-- Loading -->
         <div wire:loading wire:target="">
@@ -260,7 +260,7 @@
         </div>
 
         <!-- Main Content -->
-        <div class="table-wrapper">
+        <div class="table-wrapper overflow-auto flex-1">
             @if ($this->pegawai->isEmpty())
                 <!-- Empty State -->
                 <div class="flex flex-col items-center justify-center h-full text-center">
