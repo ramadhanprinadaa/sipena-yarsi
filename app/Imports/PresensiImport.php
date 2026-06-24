@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Models\HariLibur;
 use App\Models\ImportPresensi;
+use App\Models\Lembur;
 use App\Models\Pegawai;
 use App\Models\Presensi;
 use App\Models\PresensiLog;
@@ -246,13 +247,16 @@ class PresensiImport implements
         return self::HADIR_KURANG_JAM;
     }
 
+    public function isLemburHariBiasa(string $pegawaiNip, string $tanggal) {}
+
+    public function isLemburHariLibur(string $pegawaiNip, string $tanggal) {}
+
     public function isCuti($pegawaiNip, $tanggal, $jamMasuk, $jamKeluar, $attendanceStatus)
     {
-        // cek sementara
+        // cek sementara, jika pada file import terdapat keteranagan cuti, maka ditandai cuti
         if ($pegawaiNip && $tanggal && !$jamMasuk && !$jamKeluar && $attendanceStatus === 'CUTI') {
             return true;
         }
-        // query cek data cuti pegawai
         return false;
     }
 
@@ -263,7 +267,6 @@ class PresensiImport implements
 
     public function isSakit($pegawaiNip, $tanggal)
     {
-        // query cek data sakit pegawai
         return false;
     }
 
@@ -278,7 +281,7 @@ class PresensiImport implements
         return in_array($tanggal, $this->hariLiburList);
     }
 
-    protected function recordError(string $message, int $rowNumber) : void
+    protected function recordError(string $message, int $rowNumber): void
     {
         if (!isset($this->importErrors[$message])) {
 

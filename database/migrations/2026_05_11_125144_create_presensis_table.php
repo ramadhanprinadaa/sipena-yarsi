@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::create('presensi', function (Blueprint $table) {
             $table->id();
-            $table->string('pegawai_nip');
-            $table->foreign('pegawai_nip')->references('nip')->on('pegawai');
+            $table->foreignId('pegawai_id');
 
             $table->date('tanggal');
             $table->time('jam_masuk')->nullable();
@@ -26,7 +25,9 @@ return new class extends Migration
             $table->foreignId('created_by')->nullable();
             $table->foreignId('updated_by')->nullable();
 
-            $table->unique(['pegawai_nip', 'tanggal']);
+            // $table->unique(['pegawai_nip', 'tanggal']);
+            $table->unique(['pegawai_id', 'tanggal']);
+
             $table->timestamps();
         });
     }

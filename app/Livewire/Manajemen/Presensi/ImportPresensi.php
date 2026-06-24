@@ -2,16 +2,14 @@
 
 namespace App\Livewire\Manajemen\Presensi;
 
-use App\Imports\PresensiImport;
-
+use App\Imports\PresensiImpor;
 use App\Models\ImportPresensi as ImportPresensiModel;
-
+use App\Models\Presensi;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Livewire\Attributes\On;
-use Livewire\Attributes\Validate;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -22,9 +20,8 @@ class ImportPresensi extends Component
     #[Validate('required|file|mimes:xlsx,xls,csv,ods,tsv|max:10240')]
     public $file;
 
-    public ?string $errorMessage = null;
-
     public bool $showResult = false;
+    public ?string $errorMessage = null;
 
     public function messages()
     {
@@ -55,45 +52,96 @@ class ImportPresensi extends Component
     public function import()
     {
         $this->validate();
+
         $originalFileName = pathinfo($this->file->getClientOriginalName(), PATHINFO_FILENAME);
         $extension = $this->file->getClientOriginalExtension();
         $filename = $originalFileName . '_' . time() . '.' . $extension;
         $filepath = $this->file->storeAs('imports/presensi', $filename);
 
+        // 1. Buat record awal di database
         $importPresensi = ImportPresensiModel::create([
             'file_name'       => $filename,
             'file_path'       => $filepath,
             'imported_by'     => Auth::id(),
-            'total_rows'      => null,
-            'total_success'   => null,
-            'total_failed'    => null,
-            'total_duplicate' => null,
-            'total_updated'   => null,
-            'total_skipped'   => null,
-            'error_summary'   => null,
         ]);
 
-        Excel::import(
-            new PresensiImport($importPresensi),
-            $filepath
-        );
+        try {
+            $importInstance = new PresensiImpor($importPresensi, Auth::id());
+            Excel::import($importInstance, $filepath);
 
-        return $importPresensi;
+            // Get data kegagalan validasi (Failures)
+            $failures = $importInstance->failures();
+            $total_failed = count($failures);
+
+            // Get Error Summary
+            $errorSummary = [];
+            foreach ($failures as $failure) {
+                $row = $failure->row();
+                foreach ($failure->errors() as $errorMessage) {
+                    if (!isset($errorSummary[$errorMessage])) {
+                        $errorSummary[$errorMessage] = [
+                            'message' => $errorMessage,
+                            'count' => 0,
+                            'rows' => []
+                        ];
+                    }
+
+                    // Increment count dan masukkan baris jika belum ada di array
+                    $errorSummary[$errorMessage]['count']++;
+                    if (!in_array($row, $errorSummary[$errorMessage]['rows'])) {
+                        $errorSummary[$errorMessage]['rows'][] = $row;
+                    }
+                }
+            }
+            $errorSummary = array_values($errorSummary);
+
+            // Kalkulasi Data Sukses
+            $querySukses = Presensi::where('last_import_presensi_id', $importPresensi->id);
+            $total_success = $querySukses->count();
+
+            $importTimestamp = $importPresensi->created_at;
+            $total_created = (clone $querySukses)
+                ->whereColumn('created_at', 'updated_at')
+                ->where('created_at', '>=', $importTimestamp)
+                ->count();
+
+            $total_updated = $total_success - $total_created;
+            $total_skipped = 0;
+            $total_rows = $total_success + $total_failed;
+
+            // Update Record Import
+            $importPresensi->update([
+                'periode_mulai'   => $importInstance->getPeriodeMulai(),
+                'periode_selesai' => $importInstance->getPeriodeSelesai(),
+                'total_rows'      => $total_rows,
+                'total_created'   => $total_created,
+                'total_updated'   => $total_updated,
+                'total_failed'    => $total_failed,
+                'total_skipped'   => $total_skipped,
+                'error_summary'   => $total_failed > 0 ? $errorSummary : null,
+            ]);
+
+            return $importPresensi;
+
+        } catch (\Exception $e) {
+            $importPresensi->update([
+                'error_summary' => [['message' => 'System Error: ' . $e->getMessage(), 'count' => 1, 'rows' => []]]
+            ]);
+            Storage::delete($filepath);
+            throw $e;
+        }
     }
 
     public function save()
     {
-        $this->validate();
         try {
             $importRecord = $this->import();
             $this->dispatch('refresh-table-import');
             $this->dispatch('load-detail-import', fileId: $importRecord->id);
             $this->dispatch('open-loading-detail-import');
-
         } catch (\Throwable $e) {
-            $this->errorMessage = $e->getMessage();
+            $this->errorMessage = "Terjadi kesalahan sistem: " . $e->getMessage();
         }
-
         $this->resetImport();
     }
 

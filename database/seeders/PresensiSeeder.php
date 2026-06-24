@@ -14,7 +14,7 @@ class PresensiSeeder extends Seeder
     public function run(): void
     {
         Presensi::create([
-            'pegawai_nip' => '1402022043',
+            'pegawai_id' => '1',
             'tanggal' => '2023-05-11',
             'jam_masuk' => '09:00:00',
             'jam_keluar' => '16:00:00',

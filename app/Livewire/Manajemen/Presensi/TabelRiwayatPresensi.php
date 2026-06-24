@@ -100,11 +100,11 @@ class TabelRiwayatPresensi extends Component
 
         // 2. Inisialisasi Base Query & Relasi
         $query = Presensi::query()
-            ->join('pegawai', 'pegawai.nip', '=', 'presensi.pegawai_nip')
+            ->join('pegawai', 'pegawai.id', '=', 'presensi.pegawai_id')
             ->join('unit_kerja', 'unit_kerja.id', '=', 'pegawai.unit_kerja_id')
             ->select([
                 'presensi.id',
-                'presensi.pegawai_nip',
+                'presensi.pegawai_id',
                 'presensi.tanggal',
                 'presensi.jam_masuk',
                 'presensi.jam_keluar',
@@ -112,7 +112,7 @@ class TabelRiwayatPresensi extends Component
             ])
             ->with([
                 'statusKehadiran:id,status,warna',
-                'pegawai:nip,nama,jenis_pegawai_id,unit_kerja_id',
+                'pegawai:id,nip,nama,jenis_pegawai_id,unit_kerja_id',
                 'pegawai.jenis_pegawai:id,jenis',
                 'pegawai.unit_kerja:id,name',
             ]);
@@ -251,15 +251,15 @@ class TabelRiwayatPresensi extends Component
         // 2. Deteksi Satu Pegawai (Jika filter search aktif)
         $singleEmployeeName = null;
         if (!$isEmpty && !empty($this->search)) {
-            $uniqueNips = $this->baseQuery()
-                ->select('pegawai_nip')
+            $uniquePegawaiIds = $this->baseQuery()
+                ->select('presensi.pegawai_id')
                 ->distinct()
                 ->limit(2)
-                ->pluck('pegawai_nip');
+                ->pluck('presensi.pegawai_id');
 
-            if ($uniqueNips->count() === 1) {
-                $pegawai = Pegawai::where('nip', $uniqueNips->first())->first();
-                $singleEmployeeName = $pegawai ? $pegawai->nama : 'NIP. ' . $uniqueNips->first();
+            if ($uniquePegawaiIds->count() === 1) {
+                $pegawai = Pegawai::find($uniquePegawaiIds->first());
+                $singleEmployeeName = $pegawai ? $pegawai->nama : 'NIP. ' . $uniquePegawaiIds->first();
             }
         }
 

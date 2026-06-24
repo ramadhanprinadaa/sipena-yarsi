@@ -34,6 +34,7 @@ class DetailImportPresensi extends Component
                 'created_at',
             ])
             ->findOrFail($fileId);
+
         $this->errorSummary = $this->file->error_summary ?? [];
         $this->dispatch('open-detail-import');
     }

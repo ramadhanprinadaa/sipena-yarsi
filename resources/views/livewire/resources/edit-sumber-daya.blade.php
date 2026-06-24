@@ -33,6 +33,7 @@
                 <input
                     type="text"
                     wire:model="judul"
+                    wire:dirty.class="border-amber-800"
                     placeholder="cth: Manual Book Pengguna SIPENA"
                     class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-amber-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400">
                 @error('judul')

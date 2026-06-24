@@ -113,7 +113,7 @@
                         </label>
                         <input type="text"
                             class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
-                            wire:model.live.debounce.500ms="form.nama" placeholder="cth: Fadil Jaidi">
+                            wire:model.live.blur="form.nama" placeholder="cth: Fadil Jaidi">
                         @error('form.nama') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
@@ -124,7 +124,7 @@
                         </label>
                         <input type="text"
                             class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
-                            wire:model.live.debounce.500ms="form.ktp" placeholder="cth: 317203xxxxxxxxxxx">
+                            wire:model.live.blur="form.ktp" placeholder="cth: 317203xxxxxxxxxxx">
                         @error('form.ktp') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
@@ -135,7 +135,7 @@
                         </label>
                         <input type="text"
                             class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
-                            wire:model.live.debounce.500ms="form.nip" placeholder="cth: 1502023xxxxxx">
+                            wire:model.live.blur="form.nip" placeholder="cth: 1502023xxxxxx">
                         @error('form.nip') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
@@ -146,7 +146,7 @@
                         </label>
                         <input type="text"
                             class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
-                            wire:model.live.debounce.500ms="form.npwp" placeholder="cth: 317203xxxxxxxxxxx">
+                            wire:model.live.blur="form.npwp" placeholder="cth: 317203xxxxxxxxxxx">
                         @error('form.npwp') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
@@ -309,7 +309,7 @@
                         <label class="block text-xs font-medium text-gray-600 mb-1">
                             Gelar Depan
                         </label>
-                        <input wire:model.live="form.gelar_depan" type="text" id="floating_gelar_depan" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: Prof. Dr.">
+                        <input wire:model.live.blur="form.gelar_depan" type="text" id="floating_gelar_depan" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: Prof. Dr.">
                         @error('form.gelar_depan') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                     <!-- Gelar Belakang -->
@@ -317,15 +317,15 @@
                         <label class="block text-xs font-medium text-gray-600 mb-1">
                             Gelar Depan
                         </label>
-                        <input wire:model.live="form.gelar_belakang" type="text" id="floating_gelar_belakang" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: S.Kom, M.Kom">
+                        <input wire:model.live.blur="form.gelar_belakang" type="text" id="floating_gelar_belakang" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: S.Kom, M.Kom">
                         @error('form.gelar_belakang') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                     <!-- Tempat Lahir -->
                     <div>
                         <label class="block text-xs font-medium text-gray-600 mb-1">
-                            Tempat Lahir
+                            Tempat Lahir <span class="text-red-500">*</span>
                         </label>
-                        <input wire:model.live="form.tempat_lahir" type="text" id="floating_tempat_lahir" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: Jakarta">
+                        <input wire:model.live.blur="form.tempat_lahir" type="text" id="floating_tempat_lahir" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: Jakarta">
                         @error('form.tempat_lahir') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                     <!-- Tanggal Lahir -->
@@ -576,7 +576,7 @@
                             Nomor Telepon
                         </label>
                         <input
-                            wire:model.live="form.no_telpon"
+                            wire:model.live.blur="form.no_telpon"
                             type="text" id="no_telpon"
                             class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: 0812xxxxxxxx">
                         @error('form.no_telpon') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
@@ -586,7 +586,7 @@
                         <label class="block text-xs font-medium text-gray-600 mb-1">
                             Email Yarsi
                         </label>
-                        <input wire:model.live="form.email_yarsi" type="text" id="email_yarsi" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: budi@yarsi.ac.id">
+                        <input wire:model.live.blur="form.email_yarsi" type="text" id="email_yarsi" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: budi@yarsi.ac.id">
                         @error('form.email_yarsi') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
@@ -599,7 +599,7 @@
                         <label class="block text-xs font-medium text-gray-600 mb-1">
                             Alamat Lengkap
                         </label>
-                        <input wire:model.live="form.alamat_ktp" type="text" id="floating_alamat" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: Jl. Ngawi Selatan No. 123">
+                        <input wire:model.live.blur="form.alamat_ktp" type="text" id="floating_alamat" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: Jl. Ngawi Selatan No. 123">
                         @error('form.alamat_ktp') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
@@ -607,7 +607,7 @@
                         <label class="block text-xs font-medium text-gray-600 mb-1">
                             Alamat Domisili
                         </label>
-                        <input wire:model.live="form.alamat_domisili" type="text" id="alamat_domisili" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: Jl. Ngawi Timur No. 135">
+                        <input wire:model.live.blur="form.alamat_domisili" type="text" id="alamat_domisili" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: Jl. Ngawi Timur No. 135">
                         @error('form.alamat_domisili') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>

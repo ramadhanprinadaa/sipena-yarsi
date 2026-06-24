@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
             JenisCutiSeeder::class,
             JenisKeluargaSeeder::class,
             JenjangPendidikanSeeder::class,
+            LemburSeeder::class,
+            CutiSeeder::class,
         ]);
     }
 }

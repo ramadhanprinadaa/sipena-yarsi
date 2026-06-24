@@ -4,7 +4,7 @@ namespace App\Livewire\Dashboard\Presensi;
 
 use App\Models\Presensi;
 use App\Models\HariLibur;
-use App\Services\StatusKehadiranService;
+use App\Services\StatusKehadiranService2;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -28,9 +28,9 @@ class RingkasanPresensi extends Component
         // }
     }
 
-    protected function getPegawaiNip(): ?string
+    protected function getPegawaiId(): ?string
     {
-        return Auth::user()->pegawai?->nip;
+        return Auth::user()->pegawai?->id;
     }
 
     /**
@@ -76,14 +76,14 @@ class RingkasanPresensi extends Component
     #[Computed]
     public function ringkasanData(): ?array
     {
-        $nip = $this->getPegawaiNip();
-        if (!$nip) return null;
+        $pegawai_id = $this->getPegawaiId();
+        if (!$pegawai_id) return null;
 
         [$mulai, $selesai] = $this->getPeriodeAktif();
         $pegawai = Auth::user()->pegawai;
 
         // Fetch presensi pada periode aktif
-        $presensiList = Presensi::where('pegawai_nip', $nip)
+        $presensiList = Presensi::where('pegawai_id', $pegawai_id)
             ->whereBetween('tanggal', [$mulai, $selesai])
             ->get();
 
@@ -105,22 +105,22 @@ class RingkasanPresensi extends Component
 
             // A. Hitung Kehadiran
             switch ($statusId) {
-                case StatusKehadiranService::HADIR_NORMAL:
-                case StatusKehadiranService::HADIR_KURANG_JAM:
+                case StatusKehadiranService2::HADIR_NORMAL:
+                case StatusKehadiranService2::HADIR_KURANG_JAM:
                     $hadir++;
                     break;
-                case StatusKehadiranService::TIDAK_HADIR_KURANG_JAM:
-                case StatusKehadiranService::TIDAK_HADIR_ABSEN_1X:
-                case StatusKehadiranService::TIDAK_HADIR_TANPA_KETERANGAN:
+                case StatusKehadiranService2::TIDAK_HADIR_KURANG_JAM:
+                case StatusKehadiranService2::TIDAK_HADIR_ABSEN_1X:
+                case StatusKehadiranService2::TIDAK_HADIR_TANPA_KETERANGAN:
                     $tidakHadir++;
                     break;
-                case StatusKehadiranService::IZIN:
+                case StatusKehadiranService2::IZIN:
                     $izin++;
                     break;
-                case StatusKehadiranService::SAKIT:
+                case StatusKehadiranService2::SAKIT:
                     $sakit++;
                     break;
-                case StatusKehadiranService::CUTI:
+                case StatusKehadiranService2::CUTI:
                     $cuti++;
                     break;
             }
@@ -137,14 +137,14 @@ class RingkasanPresensi extends Component
             $isLemburDisetujui = $lemburByDate->has($tanggalStr);
             $dataLembur = $isLemburDisetujui ? $lemburByDate->get($tanggalStr) : null;
             $isWeekend = Carbon::parse($presensi->tanggal)->isWeekend();
-            $isHariLibur = $statusId == StatusKehadiranService::LEMBUR || $isWeekend || ($dataLembur && in_array($dataLembur->jenis_hari, ['Hari Libur', 'Libur Nasional']));
+            $isHariLibur = $statusId == StatusKehadiranService2::LEMBUR || $isWeekend || ($dataLembur && in_array($dataLembur->jenis_hari, ['Hari Libur', 'Libur Nasional']));
 
             $menitLemburValidHariIni = 0;
 
             if (in_array($statusId, [
-                StatusKehadiranService::HADIR_NORMAL,
-                StatusKehadiranService::HADIR_KURANG_JAM,
-                StatusKehadiranService::LEMBUR
+                StatusKehadiranService2::HADIR_NORMAL,
+                StatusKehadiranService2::HADIR_KURANG_JAM,
+                StatusKehadiranService2::LEMBUR
             ])) {
                 if (!$isHariLibur) {
                     $menitKerjaReguler = min($menitKerjaHariIni, 480); // Maks 8 jam
@@ -192,8 +192,8 @@ class RingkasanPresensi extends Component
     #[Computed]
     public function riwayatTerakhir()
     {
-        $nip = $this->getPegawaiNip();
-        if (!$nip) return collect();
+        $pegawai_id = $this->getPegawaiId();
+        if (!$pegawai_id) return collect();
 
         // Tentukan rentang 5 hari (Hari kemarin s/d 5 hari yang lalu)
         $endDate = now()->subDay();
@@ -201,7 +201,7 @@ class RingkasanPresensi extends Component
 
         // 1. Ambil data presensi pada rentang tanggal tersebut dan ubah jadi key-value berdasarkan tanggal
         $presensiList = Presensi::with('statusKehadiran')
-            ->where('pegawai_nip', $nip)
+            ->where('pegawai_id', $pegawai_id)
             ->whereBetween('tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
             ->get()
             ->keyBy(function ($item) {
@@ -262,7 +262,6 @@ class RingkasanPresensi extends Component
 
                 $riwayat->push($item);
                 $hariDitemukan++;
-
             } else {
                 // SKENARIO 2: TIDAK ADA DATA PRESENSI
 
@@ -300,7 +299,7 @@ class RingkasanPresensi extends Component
     #[Computed]
     public function emptyStateMessageRiwayat(): string
     {
-        if (!$this->getPegawaiNip()) {
+        if (!$this->getPegawaiId()) {
             return "Akun Anda belum tertaut dengan data pegawai manapun.";
         }
 
@@ -324,7 +323,7 @@ class RingkasanPresensi extends Component
     #[Computed]
     public function emptyStateMessage(): string
     {
-        if (!$this->getPegawaiNip()) {
+        if (!$this->getPegawaiId()) {
             return "Akun Anda belum tertaut dengan data pegawai manapun.";
         }
 

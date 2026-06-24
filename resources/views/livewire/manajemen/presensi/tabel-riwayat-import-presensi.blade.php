@@ -24,7 +24,7 @@
                     <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
                 </div>
                 <input type="text" x-ref="input" wire:model.live="selectedPeriodeMulai" placeholder="Dari Tanggal"
-                    class="w-full h-10 pl-9 pr-3 text-bs border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition" />
+                    class="w-full h-10 pl-9 pr-3 text-bs border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition text-sm" />
                 <button type="button" x-show="$wire.selectedPeriodeMulai"
                     @click="
                     $wire.set('selectedPeriodeMulai', null);
@@ -49,7 +49,7 @@
                     <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
                 </div>
                 <input type="text" x-ref="input" placeholder="Sampai Tanggal"
-                    class="w-full h-10 pl-9 pr-3 text-base border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition" />
+                    class="w-full h-10 pl-9 pr-3 text-base border border-gray-300 rounded-md text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition text-sm" />
                 <button type="button" x-show="$wire.selectedPeriodeSelesai"
                     @click="
                     $wire.set('selectedPeriodeSelesai', null);
@@ -112,7 +112,7 @@
             @else
                 <table class="table">
                     <thead class="table-header">
-                        <tr>
+                        <tr class="text-xs uppercase">
                             <th scope="col" class="px-4 py-3 font-medium w-[5%] text-center">#</th>
                             <th scope="col" class="px-3 py-3 font-medium w-[19%] text-left truncate">
                                 Nama File

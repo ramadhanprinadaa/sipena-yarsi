@@ -1,5 +1,5 @@
 <div x-data="{ showLoading: false }"
-    class="relative bg-white w-3xl h-[90vh] mx-auto rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+    class="relative bg-white w-3xl min-h-[68vh] mx-auto rounded-2xl shadow-2xl flex flex-col overflow-hidden">
 
     {{-- Header --}}
     <header

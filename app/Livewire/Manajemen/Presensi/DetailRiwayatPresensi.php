@@ -4,7 +4,7 @@ namespace App\Livewire\Manajemen\Presensi;
 
 use App\Models\Presensi;
 use App\Models\PresensiLog;
-use App\Services\StatusKehadiranService;
+use App\Services\StatusKehadiranService2;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
@@ -12,7 +12,7 @@ use Livewire\Component;
 
 class DetailRiwayatPresensi extends Component
 {
-    public ?Presensi $presensi= null;
+    public ?Presensi $presensi = null;
 
     public bool $isEdit = false;
 
@@ -33,8 +33,7 @@ class DetailRiwayatPresensi extends Component
                 'statusKehadiran:id,status,kondisi,warna',
                 'latestLog',
             ])
-            ->findOrFail($presensiId)
-        ;
+            ->findOrFail($presensiId);
         $this->fillForm();
         $this->dispatch('open-detail-riwayat');
     }
@@ -114,7 +113,7 @@ class DetailRiwayatPresensi extends Component
     public function getIsDirtyProperty(): bool
     {
         return
-        $this->form['jam_masuk'] !== $this->originalForm['jam_masuk'] || $this->form['jam_keluar'] !== $this->originalForm['jam_keluar'];
+            $this->form['jam_masuk'] !== $this->originalForm['jam_masuk'] || $this->form['jam_keluar'] !== $this->originalForm['jam_keluar'];
     }
 
     public function updated($property): void
@@ -124,7 +123,7 @@ class DetailRiwayatPresensi extends Component
         }
     }
 
-    public function save(StatusKehadiranService $statusService): void
+    public function save(StatusKehadiranService2 $statusService): void
     {
         if (!$this->isDirty) return;
 
@@ -147,11 +146,10 @@ class DetailRiwayatPresensi extends Component
 
         // Resolusi status_kehadiran_id otomatis lewat service
         $newStatusId = $statusService->resolve(
-            pegawaiNip: $this->presensi->pegawai_nip,
+            pegawaiId: $this->presensi->pegawai_id,
             tanggal: Carbon::parse($this->presensi->tanggal)->format('Y-m-d'),
-            attendanceStatus: null,
             jamMasuk: $this->form['jam_masuk'],
-            jamKeluar: $this->form['jam_keluar']
+            jamKeluar: $this->form['jam_keluar'],
         );
 
         // Update record Presensi Utama

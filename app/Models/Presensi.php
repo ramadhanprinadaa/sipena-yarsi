@@ -13,7 +13,8 @@ class Presensi extends Model
     protected $table = 'presensi';
 
     protected $fillable = [
-        'pegawai_nip',
+        // 'pegawai_nip',
+        'pegawai_id',
         'tanggal',
         'jam_masuk',
         'jam_keluar',
@@ -21,6 +22,8 @@ class Presensi extends Model
         'last_import_presensi_id',
         'created_by',
         'updated_by',
+        'created_at',
+        'updated_at',
     ];
 
     protected function casts(): array
@@ -32,9 +35,14 @@ class Presensi extends Model
         ];
     }
 
+    // public function pegawai()
+    // {
+    //     return $this->belongsTo(Pegawai::class, 'pegawai_nip', 'nip');
+    // }
+
     public function pegawai()
     {
-        return $this->belongsTo(Pegawai::class, 'pegawai_nip', 'nip');
+        return $this->belongsTo(Pegawai::class, 'pegawai_id', 'id');
     }
 
     public function user()
@@ -67,10 +75,10 @@ class Presensi extends Model
         return $this->hasOne(PresensiLog::class, 'presensi_id')->latestOfMany();
     }
 
-    public function scopeByPegawaiDanTanggal($query, $pegawaiNip, $tanggal)
+    public function scopeByPegawaiDanTanggal($query, $pegawaiId, $tanggal)
     {
         return $query
-            ->where('pegawai_nip', $pegawaiNip)
+            ->where('pegawai_id', $pegawaiId)
             ->where('tanggal', $tanggal);
     }
 

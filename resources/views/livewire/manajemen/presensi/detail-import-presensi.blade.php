@@ -1,4 +1,4 @@
-<div class="bg-white w-3xl h-[88vh] mx-auto rounded-2xl shadow-xl flex flex-col overflow-hidden">
+<div class="bg-white w-3xl h-[83vh] mx-auto rounded-2xl shadow-xl flex flex-col overflow-hidden">
 
     {{-- Header --}}
     <header class="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
@@ -13,10 +13,7 @@
                 </h2>
 
                 <div class="flex items-center gap-0.5 mt-1 min-w-0">
-                    <p
-                        class="text-xs text-gray-500 truncate self-center"
-                        title="{{ $file?->file_name }}"
-                    >
+                    <p class="text-xs text-gray-500 truncate self-center" title="{{ $file?->file_name }}">
                         {{ $file?->file_name }}
                     </p>
                 </div>
@@ -30,36 +27,30 @@
     </header>
 
     {{-- Content --}}
-    <div class="flex-1 overflow-y-auto p-6 space-y-6">
+    <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50/50">
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-3 gap-4 mb-6 shrink-0 ">
 
-            <div class="rounded-2xl border border-gray-100 p-4">
-                <p class="text-xs text-gray-400">Total Data</p>
-                <h3 class="text-2xl font-bold text-gray-800">
-                    {{ number_format($file?->total_rows ?? 0) }}
-                </h3>
+            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                <p class="text-xs text-gray-500 font-semibold mb-1">Total Baris Diproses</p>
+                <p class="text-2xl font-bold text-gray-800">{{ number_format($file?->total_rows ?? 0) }}</p>
             </div>
 
-            <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
-                <p class="text-xs text-emerald-500">Created</p>
-                <h3 class="text-2xl font-bold text-emerald-600">
-                    {{ number_format($file?->total_created ?? 0) }}
-                </h3>
+            <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm">
+                <p class="text-xs text-emerald-600 font-semibold mb-1">Total Data Berhasil</p>
+                <p class="text-2xl font-bold text-emerald-600">{{ number_format($file?->total_created ?? 0) }}</p>
             </div>
 
-            <div class="rounded-2xl border border-amber-100 bg-amber-50 p-4">
+            {{-- <div class="rounded-2xl border border-amber-100 bg-amber-50 p-4">
                 <p class="text-xs text-amber-500">Updated</p>
                 <h3 class="text-2xl font-bold text-amber-600">
                     {{ number_format($file?->total_updated ?? 0) }}
                 </h3>
-            </div>
+            </div> --}}
 
-            <div class="rounded-2xl border border-red-100 bg-red-50 p-4">
-                <p class="text-xs text-red-500">Failed</p>
-                <h3 class="text-2xl font-bold text-red-600">
-                    {{ number_format($file?->total_failed ?? 0) }}
-                </h3>
+            <div class="bg-white p-4 rounded-xl border border-red-200 shadow-sm">
+                <p class="text-xs text-red-600 font-semibold mb-1">Total Data Gagal</p>
+                <p class="text-2xl font-bold text-red-600">{{ number_format($file?->total_failed ?? 0) }}</p>
             </div>
 
         </div>

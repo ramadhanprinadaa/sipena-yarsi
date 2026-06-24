@@ -145,6 +145,5 @@ class JenisCutiSeeder extends Seeder
                 'deskripsi' => 'Izin ibadah haji yang hanya dapat digunakan satu kali selama menjadi pegawai.',
             ],
         ]);
-
     }
 }

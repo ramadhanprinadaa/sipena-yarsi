@@ -62,14 +62,14 @@ class RiwayatPresensi extends Component
         return "Bulan Berjalan (" . now()->translatedFormat('F Y') . ")";
     }
 
-    protected function getPegawaiNip(): ?string
+    protected function getPegawaiId(): ?string
     {
-        return Auth::user()->pegawai?->nip;
+        return Auth::user()->pegawai?->id;
     }
 
     protected function baseQuery()
     {
-        $nip = $this->getPegawaiNip();
+        $pegawai_id = $this->getPegawaiId();
 
         // 1. Parsing Tanggal
         $filterMulai = $this->selectedPeriodeMulai
@@ -87,7 +87,7 @@ class RiwayatPresensi extends Component
 
         // 2. Inisialisasi Base Query khusus untuk pegawai login
         $query = Presensi::query()
-            ->where('pegawai_nip', $nip)
+            ->where('pegawai_id', $pegawai_id)
             ->with(['statusKehadiran:id,status,warna']); // Eager loading untuk optimasi performa
 
         // 3. Implementasi Filter
@@ -117,7 +117,7 @@ class RiwayatPresensi extends Component
     public function riwayatData()
     {
         // Proteksi jika akun belum direlasikan ke data pegawai
-        if (!$this->getPegawaiNip()) {
+        if (!$this->getPegawaiId()) {
             return Presensi::whereNull('id')->paginate(10); // Kembalikan paginator kosong
         }
 
@@ -128,7 +128,7 @@ class RiwayatPresensi extends Component
     #[Computed]
     public function emptyStateMessage(): string
     {
-        if (!$this->getPegawaiNip()) {
+        if (!$this->getPegawaiId()) {
             return "Data Pegawai tidak ditemukan.";
         }
         $mulai = $this->selectedPeriodeMulai

@@ -15,7 +15,7 @@ class DetailRiwayatPresensi extends Component
     #[On('load-detail-riwayat')]
     public function load(int $presensiId): void
     {
-        $nip = Auth::user()->pegawai?->nip;
+        $pegawai_id = Auth::user()->pegawai?->id;
 
         $this->presensi = Presensi::query()
             ->with([
@@ -31,7 +31,7 @@ class DetailRiwayatPresensi extends Component
                 'presensiLogs.editor:id,username',
                 'presensiLogs.editor.pegawai:id,user_id,nama',
             ])
-            ->where('pegawai_nip', $nip)
+            ->where('pegawai_id', $pegawai_id)
             ->findOrFail($presensiId);
 
         $this->dispatch('open-detail-riwayat');

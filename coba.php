@@ -1,141 +1,119 @@
 <?php
 
-namespace App\Livewire\Manajemen\Pegawai\DetailPegawai;
+namespace App\Livewire\Manajemen\Presensi;
 
-use App\Models\JenisKeluarga;
-use App\Models\Keluarga as KeluargaModel;
-use App\Models\Pegawai;
-use Livewire\Attributes\Computed;
-use Livewire\Attributes\On;
-use Livewire\Attributes\Session;
+use App\Imports\PresensiImpor;
+use App\Models\ImportPresensi as ImportPresensiModel;
+use App\Models\Presensi;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
-use Livewire\WithPagination;
+use Livewire\WithFileUploads;
+use Maatwebsite\Excel\Facades\Excel;
 
-class Keluarga extends Component
+class ImportPresensi extends Component
 {
-    use WithPagination;
-    protected string $paginationTheme = 'tailwind';
+    use WithFileUploads;
 
-    public array $hubunganKeluarga;
-    public Pegawai $pegawai;
+    #[Validate('required|file|mimes:xlsx,xls,csv,ods,tsv|max:10240')]
+    public $file;
 
-    // Filter
-    #[Session]
-    public ?string $selectedHubungan = null;
+    public bool $showResult = false;
+    public ?string $errorMessage = null;
 
-    // Search
-    #[Session]
-    public $search = '';
+    // ... (method messages() dan downloadTemplate() biarkan sama) ...
 
-    // Filter Urutan Data
-    #[Session]
-    public ?string $sortField = null;
-    #[Session]
-    public ?string $sortDirection = 'asc';
-
-    #[On('refresh-table')]
-    public function refreshTable(): void
+    public function import()
     {
-        $this->resetPage();
-    }
+        $this->validate();
 
-    public function mount(Pegawai $pegawai)
-    {
-        $this->pegawai = $pegawai;
-        $this->hubunganKeluarga = JenisKeluarga::pluck('jenis')->toArray();
-    }
+        $originalFileName = pathinfo($this->file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = $this->file->getClientOriginalExtension();
+        $filename = $originalFileName . '_' . time() . '.' . $extension;
+        $filepath = $this->file->storeAs('imports/presensi', $filename);
 
-    public function updated(string $property): void
-    {
-        if (in_array($property, [
-            'search',
-            'selectedHubungan',
-        ])) {
-            $this->resetPage();
-        }
-    }
+        // 1. Buat record awal di database
+        $importPresensi = ImportPresensiModel::create([
+            'file_name'       => $filename,
+            'file_path'       => $filepath,
+            'imported_by'     => Auth::id(),
+        ]);
 
-    public function baseQuery()
-    {
-        // Optimasi: Membatasi select kolom (Hemat Memori) & Eager Loading (Hemat Query)
-        $query = KeluargaModel::query()
-            ->select([
-                'keluarga.id',
-                'keluarga.pegawai_id',
-                'keluarga.jenis_keluarga_id',
-                'keluarga.nama',
-                'keluarga.tempat_lahir',
-                'keluarga.tanggal_lahir',
-                'keluarga.pekerjaan',
-                'keluarga.no_telpon'
-            ])
-            ->where('keluarga.pegawai_id', $this->pegawai->id)
-            ->with(['jenis_keluarga:id,jenis']);
+        try {
+            // 2. Jalankan Import HANYA SEKALI
+            $importInstance = new PresensiImpor($importPresensi, Auth::id());
+            Excel::import($importInstance, $filepath);
 
-        // Search by name
-        if (!empty($this->search)) {
-            $query->where('keluarga.nama', 'like', '%' . $this->search . '%');
-        }
+            // 3. Ambil data kegagalan validasi (Failures)
+            $failures = $importInstance->failures();
+            $total_failed = count($failures);
 
-        // Filter by Jenis Keluarga
-        if (!empty($this->selectedHubungan)) {
-            $query->whereHas('jenis_keluarga', function ($q) {
-                $q->where('jenis', $this->selectedHubungan);
-            });
-        }
+            // Kelompokkan error agar sesuai dengan struktur Blade (message, count, rows)
+            $errorSummary = [];
+            foreach ($failures as $failure) {
+                $row = $failure->row();
+                foreach ($failure->errors() as $errorMessage) {
+                    if (!isset($errorSummary[$errorMessage])) {
+                        $errorSummary[$errorMessage] = [
+                            'message' => $errorMessage,
+                            'count' => 0,
+                            'rows' => []
+                        ];
+                    }
 
-        return $query;
-    }
-
-    #[Computed]
-    public function keluarga()
-    {
-        $query = $this->baseQuery();
-
-        // Logika Sorting
-        if ($this->sortField) {
-            if ($this->sortField === 'jenis_keluarga') {
-                // Sorting berdasarkan tabel relasi dengan Join agar tetap dalam eksekusi DB Level
-                $query->join('jenis_keluarga', 'keluarga.jenis_keluarga_id', '=', 'jenis_keluarga.id')
-                    ->orderBy('jenis_keluarga.jenis', $this->sortDirection);
-            } else {
-                $query->orderBy('keluarga.' . $this->sortField, $this->sortDirection);
+                    // Increment count dan masukkan baris jika belum ada di array
+                    $errorSummary[$errorMessage]['count']++;
+                    if (!in_array($row, $errorSummary[$errorMessage]['rows'])) {
+                        $errorSummary[$errorMessage]['rows'][] = $row;
+                    }
+                }
             }
-        } else {
-            $query->orderBy('keluarga.tanggal_lahir', 'asc');
-        }
+            $errorSummary = array_values($errorSummary); // Re-index array
 
-        return $query->paginate(10);
+            // 4. Kalkulasi Data Sukses dari Database
+            $querySukses = Presensi::where('last_import_presensi_id', $importPresensi->id);
+            $total_success = $querySukses->count();
+
+            $total_created = (clone $querySukses)
+                ->where('created_at', '>=', $importPresensi->created_at)
+                ->count();
+
+            $total_updated = $total_success - $total_created;
+            $total_rows = $total_success + $total_failed;
+
+            // 5. Update Record Import
+            $importPresensi->update([
+                'periode_mulai'   => $importInstance->periodeMulai,
+                'periode_selesai' => $importInstance->periodeSelesai,
+                'total_rows'      => $total_rows,
+                'total_created'   => $total_created,
+                'total_updated'   => $total_updated,
+                'total_failed'    => $total_failed,
+                'error_summary'   => $total_failed > 0 ? $errorSummary : null,
+            ]);
+
+            return $importPresensi;
+
+        } catch (\Exception $e) {
+            // Jika gagal di tengah jalan, hapus/update record
+            $importPresensi->update(['error_summary' => json_encode(['System Error' => $e->getMessage()])]);
+            throw $e;
+        }
     }
 
-    #[Computed]
-    public function emptyStateMessage(): string
+    public function save()
     {
-        if (!empty($this->search) || !empty($this->selectedHubungan)) {
-            return "Data keluarga tidak ditemukan untuk pencarian atau filter yang dipilih.";
-        }
-        return "Belum ada data keluarga pegawai yang terdaftar.";
-    }
-
-    public function sortBy($field)
-    {
-        if ($this->sortField === $field) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortDirection = 'asc';
+        try {
+            $importRecord = $this->import();
+            $this->dispatch('refresh-table-import');
+            $this->dispatch('load-detail-import', fileId: $importRecord->id);
+            $this->dispatch('open-loading-detail-import');
+        } catch (\Throwable $e) {
+            $this->errorMessage = "Terjadi kesalahan sistem: " . $e->getMessage();
         }
 
-        $this->sortField = $field;
-        $this->resetPage();
+        $this->resetImport();
     }
 
-    public function sortIcon($field)
-    {
-        if ($this->sortField !== $field) {
-            return 'fa-sort text-gray-300';
-        }
-        return $this->sortDirection === 'asc'
-            ? 'fa-sort-up text-indigo-500'
-            : 'fa-sort-down text-indigo-500';
-    }
+    // ... (method lainnya biarkan sama) ...
 }

@@ -179,7 +179,7 @@ class Pegawai extends Model
 
     public function presensi()
     {
-        return $this->hasMany(Presensi::class, 'pegawai_nip', 'nip');
+        return $this->hasMany(Presensi::class, 'pegawai_id', 'id');
     }
 
     public function arsipFiles()

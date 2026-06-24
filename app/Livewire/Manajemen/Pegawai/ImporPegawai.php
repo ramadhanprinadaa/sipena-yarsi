@@ -17,7 +17,6 @@ class ImporPegawai extends Component
 
     public bool $showResult = false;
     public ?string $errorMessage = null;
-
     public array $importResults = [];
     public ?string $activeTab = null;
 

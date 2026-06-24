@@ -280,12 +280,12 @@
             @else
                 <table class="table w-full table-fixed">
                     <thead class="table-header">
-                        <tr>
+                        <tr class="text-xs uppercase">
                             <th scope="col" class="px-4 py-3 font-medium w-[5%] text-center">#</th>
-                            <th scope="col" class="px-4 py-3 font-medium w-[17%] text-left">
+                            <th scope="col" class="px-4 py-3 font-medium w-[17%]">
                                 Nama Pegawai
                             </th>
-                            <th scope="col" class="px-4 py-3 font-medium w-[17%] text-left">
+                            <th scope="col" class="px-4 py-3 font-medium w-[17%]">
                                 Tanggal Presensi
                             </th>
                             <th scope="col" class="px-4 py-3 font-medium w-[13%] text-center">
@@ -321,7 +321,7 @@
                                             {{ $riwayat->pegawai?->nama ?? $riwayat->pegawai_nip }}
                                         </span>
                                         <span class="text-[11px] text-gray-400">NIP.
-                                            {{ $riwayat->pegawai_nip }}</span>
+                                            {{ $riwayat->pegawai->nip }}</span>
                                     </div>
                                 </td>
 
