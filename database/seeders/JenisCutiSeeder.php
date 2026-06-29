@@ -44,7 +44,7 @@ class JenisCutiSeeder extends Seeder
                 'id' => 3,
                 'nama' => 'Cuti Melahirkan',
                 'minimal_masa_kerja_bulan' => null,
-                'minimal_hari_pengajuan' => 3,
+                'minimal_hari_pengajuan' => null,
                 'maksimal_hari' => 90,
                 'maksimal_hari_per_bulan' => null,
                 'memotong_saldo' => false,

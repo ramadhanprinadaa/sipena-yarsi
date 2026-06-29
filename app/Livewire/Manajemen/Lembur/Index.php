@@ -26,8 +26,7 @@ class Index extends Component
     public $confirmMessage = '';
     public $password = '';
     public $confirmStep = 'confirmation';
-    public $openDetailLaporan = false;
-    public $selectedLemburDetail = null;
+    
     
     // Filter properties
     public $filterSplDate = '';
@@ -65,10 +64,6 @@ class Index extends Component
     public function loadData()
     {
         $this->syncDueLemburStatuses();
-
-        
-
-        
     }
 
     private function syncDueLemburStatuses(): void
@@ -219,23 +214,7 @@ class Index extends Component
         $this->resetErrorBag();
     }
 
-    public function showDetailLaporan(int $id): void
-    {
-        $this->selectedLemburDetail = Lembur::with([
-            'pegawai.unit_kerja',
-            'pegawai.user.role',
-            'suratPerintahLembur',
-            'laporanHasilLembur.persetujuan.approver.pegawai',
-            'laporanHasilLembur.persetujuan.approver.role'
-        ])->findOrFail($id);
-        $this->openDetailLaporan = true;
-    }
-
-    public function closeDetailLaporan(): void
-    {
-        $this->openDetailLaporan = false;
-        $this->selectedLemburDetail = null;
-    }
+    
 
     public function confirmApproval(): void
     {

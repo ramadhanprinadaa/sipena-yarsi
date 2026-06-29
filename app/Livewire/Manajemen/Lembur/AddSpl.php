@@ -7,6 +7,7 @@ use Livewire\Attributes\On;
 use App\Models\SuratPerintahLembur;
 use App\Models\Pegawai;
 use App\Models\UnitKerja;
+use App\Support\WorkflowEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
@@ -154,6 +155,22 @@ class AddSpl extends Component
             return;
         }
 
+        if ($this->form['tanggal_lembur'] && $this->form['jenis_hari']) {
+        $tanggalLembur = \Carbon\Carbon::parse($this->form['tanggal_lembur']);
+        
+        // jika jenis hari 'Hari Kerja Normal'
+        if ($this->form['jenis_hari'] === 'Hari Kerja Normal' && $tanggalLembur->isWeekend()) {
+            $this->addError('form.tanggal_lembur', 'Untuk Hari Kerja Normal, tanggal lembur harus dipilih dari Senin - Jumat.');
+            return;
+        }
+
+        // jika jenis hari adalah 'Hari Kerja Mingguan'
+        if ($this->form['jenis_hari'] === 'Hari Libur Mingguan' && $tanggalLembur->isWeekday()) {
+            $this->addError('form.tanggal_lembur', 'Untuk Hari Libur Mingguan, tanggal lembur harus dipilih pada hari Sabtu atau Minggu.');
+            return;
+        }
+    }
+
         // Simpan SPL
         $spl = SuratPerintahLembur::create([
             'nomor_surat' => $this->form['nomor_surat'],
@@ -170,6 +187,11 @@ class AddSpl extends Component
 
         // Attach pegawai
         $spl->pegawai()->attach($pegawaiIds);
+        $spl->load(['pegawai.unit_kerja', 'pegawai.user', 'unitKerja']);
+
+        foreach ($spl->pegawai as $pegawai) {
+            WorkflowEmail::notifySplPublished($spl, $pegawai, Auth::user()?->pegawai);
+        }
 
         // Emit event untuk refresh tabel
         $this->dispatch('spl-created');
@@ -201,8 +223,22 @@ class AddSpl extends Component
         }
 
         if ($role === 'SDM Yayasan') {
-            return $query->whereHas('user.role', function ($roleQuery) {
-                $roleQuery->where('name', 'SDM Universitas');
+            $unitSdmId = $user?->pegawai?->unit_kerja?->unit_sdm_id;
+
+            return $query->where(function ($roleQuery) use ($unitSdmId) {
+                $roleQuery->whereHas('user.role', function ($userRoleQuery) {
+                    $userRoleQuery->where('name', 'SDM Universitas');
+                })->orWhere(function ($pimpinanQuery) use ($unitSdmId) {
+                    $pimpinanQuery->whereHas('user.role', function ($userRoleQuery) {
+                        $userRoleQuery->where('name', 'Pimpinan');
+                    });
+
+                    if ($unitSdmId) {
+                        $pimpinanQuery->whereHas('unit_kerja', function ($unitQuery) use ($unitSdmId) {
+                            $unitQuery->where('unit_sdm_id', $unitSdmId);
+                        });
+                    }
+                });
             });
         }
 

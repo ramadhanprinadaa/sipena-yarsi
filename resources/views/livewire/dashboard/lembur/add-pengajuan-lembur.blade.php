@@ -1,6 +1,7 @@
 
 <div>
     @if($open)
+        <template x-teleport="body">
         {{-- MODAL: Form Pengajuan Lembur --}}
         <div 
             class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
@@ -161,5 +162,6 @@
                 </div>
             </div>
         </div>
+        </template>
     @endif
 </div>

@@ -1,5 +1,6 @@
 <div>                
                 @if ($openDetail && $selectedLembur)    
+                    <template x-teleport="body">
                     <!-- DETAIL MODAL -->
                     <div 
                         x-transition.opacity
@@ -107,5 +108,6 @@
                             </div>
                         </div>
                     </div>
+                    </template>
                 @endif
 </div>

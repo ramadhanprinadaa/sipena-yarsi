@@ -28,13 +28,13 @@ return new class extends Migration
         $table->enum('metode_potongan', ['potong_cuti', 'potong_gaji'])->nullable();
         $table->text('keterangan')->nullable();
         $table->enum('status', [
-            'pending_atasan',
-            'pending_rektor',
-            'pending_sdm_universitas',
-            'pending_sdm_yayasan',
-            'disetujui',
-            'ditolak'
-            ])->default('pending_atasan');
+            'Menunggu Verifikasi Pimpinan',
+            'Menunggu Verifikasi Rektor',
+            'Menunggu Verifikasi SDM Universitas',
+            'Menunggu Verifikasi SDM Yayasan',
+            'Disetujui',
+            'Ditolak'
+            ])->default('Menunggu Verifikasi Pimpinan');
             $table->timestamps();
         });
     }

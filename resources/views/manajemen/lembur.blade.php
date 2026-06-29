@@ -23,6 +23,6 @@
         <livewire:manajemen.lembur.index />
         <livewire:manajemen.lembur.add-spl />
         <livewire:manajemen.lembur.edit-spl />
-        
+        <livewire:manajemen.lembur.detail-laporan />
     </div>
 @endsection

@@ -53,8 +53,8 @@ class EditCuti extends Component
 
         $cuti = Cuti::where('pegawai_id', Auth::user()?->pegawai?->id)->findOrFail($id);
 
-        if ($cuti->status === 'disetujui') {
-            $this->addError('cuti', 'Cuti yang sudah disetujui tidak dapat diedit.');
+        if (in_array($cuti->status, ['disetujui', 'ditolak'])) {
+            $this->addError('cuti', 'Cuti yang sudah disetujui atau ditolak tidak dapat diedit.');
             return;
         }
 
@@ -80,8 +80,8 @@ class EditCuti extends Component
         $pegawai = Auth::user()?->pegawai;
         $cuti = Cuti::where('pegawai_id', $pegawai?->id)->findOrFail($this->cutiId);
 
-        if ($cuti->status === 'disetujui') {
-            $this->addError('cuti', 'Cuti yang sudah disetujui tidak dapat diedit.');
+        if (in_array($cuti->status, ['disetujui', 'ditolak'])) {
+            $this->addError('cuti', 'Cuti yang sudah disetujui atau ditolak tidak dapat diedit.');
             return;
         }
 
@@ -99,14 +99,14 @@ class EditCuti extends Component
             return;
         }
 
-        $saldo = $this->getSaldoCuti($pegawai);
         $isPotongCutiSakit = ($jenisCuti->id == 4 && $this->metode_potongan === 'potong_cuti');
-        $harusPotongSaldo = $jenisCuti->memotong_saldo || $isPotongCutiSakit;
+        $harusPotongSaldo = $jenisCuti->memotong_saldo || $isPotongCutiSakit || $jenisCuti->id == 2;
 
-        $saldoSebelum = $saldo?->sisa_cuti ?? null;
-        $saldoSesudah = $harusPotongSaldo && $jumlahHari
-            ? max(0, ($saldoSebelum ?? 0) - $jumlahHari)
-            : $saldoSebelum;
+        $infoSaldo = $harusPotongSaldo && $jumlahHari
+            ? $this->getSaldoCuti($pegawai, $jenisCuti, $cuti->id)
+            : null;
+        $saldoSebelum = $infoSaldo['sisa'] ?? null;
+        $saldoSesudah = $saldoSebelum;
 
         // 2. Logic File Upload & Penghapusan Otomatis
         $filePath = $this->dokumen_lama;
@@ -285,9 +285,15 @@ class EditCuti extends Component
         }
 
         $isPotongCutiSakit = ($jenisCuti->id == 4 && $this->metode_potongan === 'potong_cuti');
-        if (($jenisCuti->memotong_saldo || $isPotongCutiSakit) && ($this->getSaldoCuti($pegawai)?->sisa_cuti ?? 0) < $jumlahHari) {
-            $this->addError('tanggal_selesai', 'Sisa saldo cuti tidak mencukupi.');
-            return false;
+        $harusPotongSaldo = $jenisCuti->memotong_saldo || $isPotongCutiSakit || $jenisCuti->id == 2;
+
+        if ($harusPotongSaldo && $jumlahHari) {
+            $infoSaldo = $this->getSaldoCuti($pegawai, $jenisCuti, $ignoreId);
+
+            if ($infoSaldo['sisa'] < $jumlahHari) {
+                $this->addError('tanggal_selesai', "Sisa saldo {$infoSaldo['nama_saldo']} tidak mencukupi (Sisa: {$infoSaldo['sisa']} hari).");
+                return false;
+            }
         }
 
         return true;
@@ -298,12 +304,62 @@ class EditCuti extends Component
         return (int) floor(Carbon::parse($this->jam_mulai)->diffInMinutes(Carbon::parse($this->jam_selesai)) / 60);
     }
 
-    private function getSaldoCuti(Pegawai $pegawai): ?SaldoCuti
+    private function getSaldoCuti(Pegawai $pegawai, ?JenisCuti $jenisCuti = null, ?int $ignoreId = null): array
     {
-        return SaldoCuti::firstOrCreate(
+        $masaKerjaBulan = $pegawai->tanggal_bergabung
+            ? Carbon::parse($pegawai->tanggal_bergabung)->diffInMonths(Carbon::today())
+            : 0;
+
+        $serviceYear = floor($masaKerjaBulan / 12) + 1;
+        $usesCutiBesarBalance = $jenisCuti?->id == 2
+            || ($jenisCuti?->id == 4 && $this->metode_potongan === 'potong_cuti' && in_array($serviceYear, [7, 8]));
+
+        if ($usesCutiBesarBalance) {
+            $totalUsedQuery = Cuti::where('pegawai_id', $pegawai->id)
+                ->where(function($query) {
+                    $query->where('jenis_cuti_id', 2)
+                        ->orWhere(function($q) {
+                            $q->where('jenis_cuti_id', 4)->where('metode_potongan', 'potong_cuti');
+                        });
+                })
+                ->whereIn('status', ['pending_atasan', 'pending_rektor', 'pending_sdm_universitas', 'pending_sdm_yayasan', 'disetujui']);
+
+            if ($ignoreId) {
+                $totalUsedQuery->where('id', '!=', $ignoreId);
+            }
+
+            $totalUsed = $totalUsedQuery->sum('jumlah_hari_cuti');
+
+            return [
+                'sisa' => max(0, 66 - $totalUsed),
+                'nama_saldo' => 'Cuti Besar',
+                'is_cuti_besar' => true,
+            ];
+        }
+
+        $saldo = SaldoCuti::firstOrCreate(
             ['pegawai_id' => $pegawai->id, 'tahun' => now()->year],
             ['hak_cuti' => 12, 'cuti_terpakai' => 0, 'sisa_cuti' => 12]
         );
+
+        $reservedQuery = Cuti::where('pegawai_id', $pegawai->id)
+            ->where(function ($query) {
+                $query->whereHas('jenisCuti', fn ($jenisQuery) => $jenisQuery->where('memotong_saldo', true))
+                    ->orWhere(function ($q) {
+                        $q->where('jenis_cuti_id', 4)->where('metode_potongan', 'potong_cuti');
+                    });
+            })
+            ->whereIn('status', ['pending_atasan', 'pending_rektor', 'pending_sdm_universitas', 'pending_sdm_yayasan']);
+
+        if ($ignoreId) {
+            $reservedQuery->where('id', '!=', $ignoreId);
+        }
+
+        return [
+            'sisa' => max(0, $saldo->sisa_cuti - $reservedQuery->sum('jumlah_hari_cuti')),
+            'nama_saldo' => 'Cuti Tahunan',
+            'is_cuti_besar' => false,
+        ];
     }
 
     private function initialStatusFor(Pegawai $pegawai): string

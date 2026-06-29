@@ -1,5 +1,6 @@
 <div>
 @if($open)                
+    <template x-teleport="body">
         {{-- MODAL EDIT CUTI --}}
         <div x-data="{ 
             showModalPengajuan: false,
@@ -254,5 +255,6 @@
                         </div>
                     </div>
                 </div>
+        </template>
 @endif
 </div>

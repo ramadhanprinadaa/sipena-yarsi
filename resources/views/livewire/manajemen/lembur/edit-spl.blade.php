@@ -1,6 +1,7 @@
 <div>
                 <!-- EDIT SPL MODAL -->
                 @if($open)
+                    <template x-teleport="body">
                     <div 
                         class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
                     >
@@ -36,12 +37,17 @@
                                                 type="text" placeholder="SPL/2023/X/089"
                                                 wire:model="form.nomor_surat"
                                                 class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
+                                                @error('form.nomor_surat')
+                                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                             <div>
                                                 <label class="block text-xs font-semibold text-gray-700 mb-2">Unit Kerja</label>
                                                 <input type="text" placeholder="Engineering"
                                                     wire:model="form.unit_kerja"
-                                                    class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
+                                                    disabled
+                                                    readonly
+                                                    class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition bg-gray-50">
                                             </div>
                                         </div>
                                         <div class="mt-4">
@@ -49,6 +55,9 @@
                                             <input type="date" 
                                                 wire:model="form.tanggal_dibuat"
                                                 class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
+                                            @error('form.tanggal_dibuat')
+                                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
 
@@ -63,6 +72,9 @@
                                             <input type="text" placeholder="Contoh: Menyelesaikan Fitur SIPENA"
                                                 wire:model="form.nama_kegiatan"
                                                 class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition mb-4">
+                                                @error('form.nama_kegiatan')
+                                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                                @enderror
                                         </div>
                                         <div>
                                             <label class="block text-xs font-semibold text-gray-700 mb-2">Deskripsi Tugas</label>
@@ -70,6 +82,9 @@
                                                 wire:model="form.deskripsi_tugas"
                                                 class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition h-24 resize-none scrollbar-thin scrollbar-thumb-[#2B76FF]/40 scrollbar-track-gray-50">Membuat dan menyelesaikan fitur SIPENA untuk manajemen lembur, termasuk pembuatan SPL, pengajuan lembur, dan rekapitulasi lembur. Fitur ini bertujuan untuk mempermudah proses administrasi lembur bagi pegawai dan manajemen.
                                             </textarea>
+                                            @error('form.deskripsi_tugas')
+                                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
 
@@ -226,5 +241,6 @@
                             
                         </div>
                     </div>
+                    </template>
                 @endif
 </div>

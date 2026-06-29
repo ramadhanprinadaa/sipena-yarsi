@@ -175,7 +175,7 @@
                                             </td>
                                             <td class="px-4 py-4 text-center text-gray-600">{{ $cuti->keterangan }}</td>
                                             <td class="px-4 py-4 text-center">
-                                                @if($cuti->status !== 'disetujui')
+                                                @if(!in_array($cuti->status, ['disetujui', 'ditolak']))
                                                     <button wire:click="$dispatch('openModalEdit', { id: {{ $cuti->id }} })" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition cursor-pointer">
                                                         Edit
                                                     </button>
@@ -285,58 +285,6 @@
 
                     </div>
 
-                    <!-- Stats Cards Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="group relative bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-600 rounded-[16px] p-5 shadow-lg hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 overflow-hidden border border-white/20">
-                            <div class="relative z-10 flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs font-semibold text-white/80 uppercase">Total Cuti</p>
-                                    <h4 class="text-3xl font-black text-white mt-1">{{ $rekapSummary['cuti_terpakai_total'] }}</h4>
-                                    <p class="text-[10px] text-white/60 mt-1 font-medium">Hari disetujui</p>
-                                </div>
-                                <div class="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
-                                    <i class="fa-solid fa-umbrella-beach text-2xl text-white"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="group relative bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 rounded-[16px] p-5 shadow-lg hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 overflow-hidden border border-white/20">
-                            <div class="relative z-10 flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs font-semibold text-white/80 uppercase">Sisa Saldo</p>
-                                    <h4 class="text-3xl font-black text-white mt-1">{{ $rekapSummary['sisa_saldo'] }}</h4>
-                                    <p class="text-[10px] text-white/60 mt-1 font-medium">Hak tersedia</p>
-                                </div>
-                                <div class="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
-                                    <i class="fa-solid fa-wallet text-2xl text-white"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="group relative bg-gradient-to-br from-amber-400 via-orange-500 to-red-500 rounded-[16px] p-5 shadow-lg hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 overflow-hidden border border-white/20">
-                            <div class="relative z-10 flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs font-semibold text-white/80 uppercase">Cuti Tahunan</p>
-                                    <h4 class="text-3xl font-black text-white mt-1">{{ $rekapSummary['cuti_terpakai_tahunan'] }}</h4>
-                                    <p class="text-[10px] text-white/60 mt-1 font-medium">Hari terpakai</p>
-                                </div>
-                                <div class="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
-                                    <i class="fa-solid fa-calendar-days text-2xl text-white"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="group relative bg-gradient-to-br from-purple-500 via-pink-600 to-rose-600 rounded-[16px] p-5 shadow-lg hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 overflow-hidden border border-white/20">
-                            <div class="relative z-10 flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs font-semibold text-white/80 uppercase">Besar/Melahirkan</p>
-                                    <h4 class="text-3xl font-black text-white mt-1">{{ $rekapSummary['cuti_terpakai_besar'] + $rekapSummary['cuti_terpakai_melahirkan'] }}</h4>
-                                    <p class="text-[10px] text-white/60 mt-1 font-medium">Total penggunaan</p>
-                                </div>
-                                <div class="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
-                                    <i class="fa-solid fa-heart-pulse text-2xl text-white"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Data Cards List -->
                     <div class="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-3">
                         @forelse($rekapList as $cuti)
@@ -364,8 +312,8 @@
                                             <p class="text-xl font-black text-indigo-600">{{ $cuti->jenisCuti?->dihitung_per_jam ? (($cuti->jumlah_jam ?? 0) . ' Jam') : (($cuti->jumlah_hari_cuti ?? 0) . ' Hari') }}</p>
                                         </div>
                                         <div class="h-10 w-[1px] bg-gray-200 hidden md:block mx-2"></div>
-                                        <span class="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold shadow-sm border border-emerald-200">
-                                            <i class="fa-solid fa-circle-check mr-1.5"></i>Disetujui
+                                        <span class="px-4 py-2 {{ $cuti->status === 'ditolak' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200' }} rounded-full text-xs font-bold shadow-sm border">
+                                            <i class="fa-solid {{ $cuti->status === 'ditolak' ? 'fa-circle-xmark' : 'fa-circle-check' }} mr-1.5"></i>{{ $this->statusLabel($cuti->status) }}
                                         </span>
                                     </div>
                                 </div>
@@ -397,7 +345,7 @@
                 <div class="bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600 rounded-[20px] p-6 shadow-lg">
                     <div class="flex items-start justify-between mb-4">
                         <div>
-                            <p class="text-blue-100 text-sm font-medium mb-1">Sisa Saldo Cuti</p>
+                            <p class="text-blue-100 text-sm font-medium mb-1">{{$rekapSummary['label_saldo_cuti']}}</p>
                             <h3 class="text-4xl font-bold text-white">{{ $rekapSummary['sisa_saldo'] }}</h3>
                             <p class="text-blue-200 text-xs mt-1">Hari</p>
                         </div>
@@ -461,7 +409,7 @@
                     <div class="flex items-start justify-between mb-4">
                         <div>
                             <p class="text-green-100 text-sm font-medium mb-1">Cuti Terpakai</p>
-                            <h3 class="text-4xl font-bold text-white">{{ ($rekapSummary['cuti_terpakai'] + $rekapSummary['cuti_terpakai_besar'] + $rekapSummary['cuti_terpakai_melahirkan']) }}</h3>
+                            <h3 class="text-4xl font-bold text-white">{{ $rekapSummary['cuti_terpakai'] }}</h3>
                             <p class="text-green-200 text-xs mt-1">Hari</p>
                         </div>
                         <div class="bg-white/20 p-3 rounded-lg">

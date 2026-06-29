@@ -1,5 +1,6 @@
 <div>
 @if($open)     
+    <template x-teleport="body">
         {{-- MODAL: Form Pengajuan Cuti --}}
         <div x-data="{ 
             filePengajuan: null,
@@ -127,8 +128,8 @@
                                     :class="$wire.metode_potongan === 'potong_cuti' ? 'border-[#2B76FF] bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'">
                                     <input type="radio" wire:model.live="metode_potongan" value="potong_cuti" class="w-4 h-4 text-[#2B76FF] focus:ring-[#2B76FF]">
                                     <div class="ml-3">
-                                        <p class="text-sm font-bold text-gray-800">Potong Saldo Cuti</p>
-                                        <p class="text-[10px] text-gray-500">Memotong sisa saldo cuti anda</p>
+                                        <p class="text-sm font-bold text-gray-800">{{ $labelPotongCuti }}</p>
+                                        <p class="text-[10px] text-gray-500">Saldo {{ strtolower($labelPotongCuti) }} akan dikurangi</p>
                                     </div>
                                 </label>
                             </div>
@@ -212,5 +213,6 @@
                 </div>
             </div>
         </div>
+        </template>
 @endif
 </div>

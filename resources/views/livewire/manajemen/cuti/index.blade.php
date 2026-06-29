@@ -89,42 +89,113 @@
                         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-start w-full md:w-auto">
 
                             <!-- Search -->
-                            <div class="flex items-center w-full md:w-60 border border-gray-200 rounded-[10px] bg-white px-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M16 10a6 6 0 11-12 0 6 6 0 0112 0z"/>
-                                </svg>
-                                <input type="text" wire:model.live="filterRiwayatSearch" placeholder="Cari Nama atau NIP..." class="w-full h-10 px-2 text-sm outline-none focus:ring-0 focus:border-transparent border-0 focus:outline-none focus:shadow-none">
+                            <div class="relative w-65">
+                                <div class="absolute inset-y-0 flex items-center ps-3 pointer-events-none">
+                                    <svg class="w-4 h-4 text-body" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg>
+                                </div>
+                                <input type="text" class="input-search"
+                                    wire:model.live.debounce.300ms="filterRiwayatSearch" placeholder="Cari Nama atau NIP ...">
                             </div>
 
                             <!-- Date Filter -->
                             <div class="flex flex-wrap gap-3">
                                 <div class="relative w-48">
-                                    <input type="date" wire:model.live="filterRiwayatDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                                    <input type="date" wire:model.live="filterRiwayatDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-3 focus:ring-indigo-500">
                                 </div>
                             </div>
                         </div>
                             
                         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-end w-full md:w-auto">
-                             
-                            <div class="relative w-48">
-                                <select wire:model.live="filterRiwayatJenis" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
-                                    <option value="">Jenis Cuti</option>
-                                    @foreach($jenisCutiList as $jenis)
-                                        <option value="{{ $jenis->id }}">{{ $jenis->nama }}</option>
-                                    @endforeach
-                                </select>
+
+                            <div class="relative w-65" x-data="{ open: false, selected: 'Semua Jenis' }">
+                                <button
+                                    @click="open = !open"
+                                    wire:model.live="filterRiwayatJenis"
+                                    class="filter-dropdown"
+                                    type="button">
+                                        <span x-text="selected" class="truncate"></span>
+                                        <svg
+                                            class="w-4 h-4 ms-1.5 -me-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/>
+                                        </svg>
+                                </button>
+                                <!-- Menu -->
+                                <div
+                                    x-show="open"
+                                    @click.outside="open = false"
+                                    x-transition
+                                    class="dropdown-menu">
+                                    <ul class="p-2 text-sm text-body font-medium">
+                                        <li>
+                                            <button @click="selected='Semua Jenis'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatJenis', null)">
+                                                Semua Jenis
+                                            </button>
+                                        </li>
+                                        @foreach($jenisCutiList as $jenis)
+                                            <li>
+                                                <button @click="selected='{{ $jenis->nama }}'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatJenis', '{{ $jenis->id }}')">
+                                                    {{ $jenis->nama }}
+                                                </button>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
                             </div>
 
-                            <div class="relative w-48">
-                                <select wire:model.live="filterRiwayatStatus" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
-                                    <option value="">Semua Status</option>
-                                    <option value="pending_atasan">Menunggu Pimpinan</option>
-                                    <option value="pending_rektor">Menunggu Rektor</option>
-                                    <option value="pending_sdm_universitas">Menunggu SDM Universitas</option>
-                                    <option value="pending_sdm_yayasan">Menunggu SDM Yayasan</option>
-                                    <option value="disetujui">Disetujui</option>
-                                    <option value="ditolak">Ditolak</option>
-                                </select>
+                            <div class="relative w-65" x-data="{ open: false, selected: 'Semua Status' }">
+                                <button
+                                    @click="open = !open"
+                                    wire:model.live="filterRiwayatStatus"
+                                    class="filter-dropdown"
+                                    type="button">
+                                        <span x-text="selected" class="truncate"></span>
+                                        <svg
+                                            class="w-4 h-4 ms-1.5 -me-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/>
+                                        </svg>
+                                </button>
+                                <!-- Menu -->
+                                <div
+                                    x-show="open"
+                                    @click.outside="open = false"
+                                    x-transition
+                                    class="dropdown-menu">
+                                    <ul class="p-2 text-sm text-body font-medium">
+                                        <li>
+                                            <button @click="selected='Semua Status'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus', null)">
+                                                Semua Status
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Menunggu Verifikasi Pimpinan'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus', 'Menunggu Verifikasi Pimpinan')">
+                                                Menunggu Verifikasi Pimpinan
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Menunggu Verifikasi Rektor'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus', 'Menunggu Verifikasi Rektor')">
+                                                Menunggu Verifikasi Rektor
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Menunggu Verifikasi SDM Universitas'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus', 'Menunggu Verifikasi SDM Universitas')">
+                                                Menunggu Verifikasi SDM Universitas
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Menunggu Verifikasi SDM Yayasan'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus', 'Menunggu Verifikasi SDM Yayasan')">
+                                                Menunggu Verifikasi SDM Yayasan
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Disetujui'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus', 'Disetujui')">
+                                                Disetujui
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Ditolak'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus', 'Ditolak')">
+                                                Ditolak
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
 
                             <button wire:click="exportRiwayatExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-green-500 hover:bg-green-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
@@ -220,11 +291,11 @@
                                             <td class="px-4 py-4 text-center">
                                                 @php
                                                     $statusClass = 'bg-gray-100 text-gray-700';
-                                                    if (in_array($cuti->status, ['disetujui'])) {
+                                                    if (in_array($cuti->status, ['Disetujui'])) {
                                                         $statusClass = 'bg-green-100 text-green-700';
-                                                    } elseif (str_contains($cuti->status, 'pending')) {
+                                                    } elseif (str_contains($cuti->status, 'Menunggu Verifikasi')) {
                                                         $statusClass = 'bg-yellow-100 text-yellow-700';
-                                                    } elseif ($cuti->status === 'ditolak') {
+                                                    } elseif ($cuti->status === 'Ditolak') {
                                                         $statusClass = 'bg-red-100 text-red-700';
                                                     }
                                                 @endphp
@@ -320,10 +391,10 @@
 
                         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-start w-full md:w-auto">
                             <div class="relative w-48">
-                                <input type="date" wire:model.live="filterRekapStartDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                                <input type="date" wire:model.live="filterRekapStartDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-3 focus:ring-indigo-500">
                             </div>
                             <div class="relative w-48">
-                                <input type="date" wire:model.live="filterRekapEndDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                                <input type="date" wire:model.live="filterRekapEndDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-3 focus:ring-indigo-500">
                             </div>
                         </div>
                         
@@ -460,6 +531,7 @@
                             <div class="px-6 py-5 border-b border-gray-100">
                                 <h3 class="text-lg font-bold text-gray-800">{{ $confirmTitle }}</h3>
                                 <p class="mt-2 text-sm text-gray-600">{{ $confirmMessage }}</p>
+                                @error('approval') <p class="mt-2 text-sm font-medium text-red-600">{{ $message }}</p> @enderror
                             </div>
                             <div class="px-6 py-4 flex justify-end gap-3">
                                 <button wire:click="closeApprovalConfirmation" class="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-[10px] hover:bg-gray-50 transition cursor-pointer">
