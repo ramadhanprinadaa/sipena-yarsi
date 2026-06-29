@@ -2,13 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Services\LdapAuthService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    protected LdapAuthService $ldapAuth;
+
+    public function __construct(LdapAuthService $ldapAuth)
+    {
+        $this->ldapAuth = $ldapAuth;
+    }
+
     public function showLoginForm()
     {
         return view('auth.login');
@@ -27,18 +35,20 @@ class AuthController extends Controller
                 'password' => 'Password'
             ]
         );
-        $field = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-        $user = User::where($field, $request->username)->first();
+        $isAuthenticated = $this->ldapAuth->authenticate($request->username, $request->password);
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return back()->withErrors([
-                'login' => 'Username atau Password salah'
-            ])->withInput();
+        if ($isAuthenticated) {
+            // 3. Regenerate session untuk mencegah Session Fixation
+            $request->session()->regenerate();
+
+            // 4. Redirect ke halaman tujuan asli Anda
+            return redirect()->route('kepegawaian');
         }
 
-        Auth::login($user, $request->has('remember'));
-        $request->session()->regenerate();
-        return redirect()->route('kepegawaian');
+        // 5. Jika gagal (baik lokal maupun LDAP, atau pegawai tidak ditemukan)
+        return back()->withErrors([
+            'login' => 'Username atau Password salah, atau profil pegawai belum terdaftar di SIPENA.'
+        ])->withInput($request->except('password'));
     }
 
     public function logout(Request $request)

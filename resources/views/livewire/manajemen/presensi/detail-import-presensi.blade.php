@@ -41,11 +41,9 @@
                 <p class="text-2xl font-bold text-emerald-600">{{ number_format($file?->total_created ?? 0) }}</p>
             </div>
 
-            {{-- <div class="rounded-2xl border border-amber-100 bg-amber-50 p-4">
-                <p class="text-xs text-amber-500">Updated</p>
-                <h3 class="text-2xl font-bold text-amber-600">
-                    {{ number_format($file?->total_updated ?? 0) }}
-                </h3>
+            {{-- <div class="bg-white p-4 rounded-xl border border-amber-200 shadow-sm">
+                <p class="text-xs text-amber-600 font-semibold mb-1">Total Data Diperbarui</p>
+                <p class="text-2xl font-bold text-amber-600">{{ number_format($file?->total_updated ?? 0) }}</p>
             </div> --}}
 
             <div class="bg-white p-4 rounded-xl border border-red-200 shadow-sm">

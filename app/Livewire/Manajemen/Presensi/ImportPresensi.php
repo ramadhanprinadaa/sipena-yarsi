@@ -98,14 +98,7 @@ class ImportPresensi extends Component
             // Kalkulasi Data Sukses
             $querySukses = Presensi::where('last_import_presensi_id', $importPresensi->id);
             $total_success = $querySukses->count();
-
-            $importTimestamp = $importPresensi->created_at;
-            $total_created = (clone $querySukses)
-                ->whereColumn('created_at', 'updated_at')
-                ->where('created_at', '>=', $importTimestamp)
-                ->count();
-
-            $total_updated = $total_success - $total_created;
+            $total_updated = 0;
             $total_skipped = 0;
             $total_rows = $total_success + $total_failed;
 
@@ -114,7 +107,7 @@ class ImportPresensi extends Component
                 'periode_mulai'   => $importInstance->getPeriodeMulai(),
                 'periode_selesai' => $importInstance->getPeriodeSelesai(),
                 'total_rows'      => $total_rows,
-                'total_created'   => $total_created,
+                'total_created'   => $total_success,
                 'total_updated'   => $total_updated,
                 'total_failed'    => $total_failed,
                 'total_skipped'   => $total_skipped,

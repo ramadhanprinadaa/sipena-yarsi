@@ -54,15 +54,15 @@ class UserSeeder extends Seeder
             'status' => 'active',
         ]);
         // Pimpinan / Muhammad Ramadhan Prinada
-        User::create([
-            'id' => 5,
-            'username' => 'muhammad.prinada',
-            'pegawai_id' => 1,
-            'role_id' => 5,
-            'email' => 'ramadhan@gmail.com',
-            'password' => Hash::make('password'),
-            'status' => 'active',
-        ]);
+        // User::create([
+        //     'id' => 5,
+        //     'username' => 'muhammad.prinada',
+        //     'pegawai_id' => 1,
+        //     'role_id' => 5,
+        //     'email' => 'ramadhan@gmail.com',
+        //     'password' => Hash::make('password'),
+        //     'status' => 'active',
+        // ]);
         // Staff / Annisa Putri
         User::create([
             'id' => 6,

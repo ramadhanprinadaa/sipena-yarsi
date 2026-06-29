@@ -82,7 +82,7 @@
                             </span>
                         @endforeach
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-3">
+                    <p class="text-[11px] text-gray-400 mt-3">
                         Maksimal ukuran file 10 MB
                     </p>
                 </div>

@@ -142,7 +142,7 @@
                     <i class="fa-solid fa-business-time"></i>
                 </div>
             </div>
-            <p class="text-[11px] uppercase tracking-wider font-semibold text-gray-500">Frekuensi Lembur</p>
+            <p class="text-[11px] uppercase tracking-wider font-semibold text-gray-500">Jumlah Lembur</p>
             @if(!$pegawai)
                 <h4 class="text-xl font-bold text-gray-800 mt-0.5">N/A <span class="text-xs font-medium text-gray-400">Hari</span></h4>
             @else

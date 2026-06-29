@@ -17,8 +17,9 @@ return new class extends Migration
             $table->foreignId('pegawai_id')->nullable();
             $table->string('username');
             $table->string('email')->unique();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->string('status');
+            $table->enum('auth_type', ['local', 'ldap'])->default('local');
             $table->rememberToken();
             $table->timestamps();
         });

@@ -148,7 +148,7 @@
             @else
                 <table class="table w-full table-fixed">
                     <thead class="table-header">
-                        <tr>
+                        <tr class="text-xs uppercase">
                             <th scope="col" class="px-4 py-3.5 font-semibold w-[5%] text-center">#</th>
                             <th scope="col" class="px-4 py-3.5 font-semibold w-[20%] text-left">Tanggal Presensi</th>
                             <th scope="col" class="px-4 py-3.5 font-semibold w-[15%] text-center">Jam Masuk</th>

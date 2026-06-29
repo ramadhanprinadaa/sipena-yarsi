@@ -222,7 +222,7 @@
             @else
                 <table class="table">
                     <thead class="table-header">
-                        <tr>
+                        <tr class="text-xs uppercase">
                             <th scope="col" class="px-4 py-3 font-medium w-10 text-center">#</th>
                             <th scope="col" class="px-4 py-3 font-medium w-50 text-left">
                                 <div class="truncate">Nama Pegawai</div>

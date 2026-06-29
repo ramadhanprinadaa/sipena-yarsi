@@ -2,118 +2,305 @@
 
 namespace App\Livewire\Manajemen\Presensi;
 
-use App\Imports\PresensiImpor;
-use App\Models\ImportPresensi as ImportPresensiModel;
-use App\Models\Presensi;
+use App\Exports\RekapitulasiPresensiExport;
+use App\Models\Pegawai;
+use App\Models\UnitKerja;
+use App\Services\RekapitulasiPresensiService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Attributes\Validate;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Session;
 use Livewire\Component;
-use Livewire\WithFileUploads;
-use Maatwebsite\Excel\Facades\Excel;
+use Livewire\WithPagination;
 
-class ImportPresensi extends Component
+class TabelRekapitulasiPresensi extends Component
 {
-    use WithFileUploads;
+    use WithPagination;
 
-    #[Validate('required|file|mimes:xlsx,xls,csv,ods,tsv|max:10240')]
-    public $file;
+    protected string $paginationTheme = 'tailwind';
 
-    public bool $showResult = false;
-    public ?string $errorMessage = null;
+    public array $unitKerja            = [];
+    public array $unitKerjaUniversitas = [];
 
-    // ... (method messages() dan downloadTemplate() biarkan sama) ...
+    // Filter
+    #[Session]
+    public ?string $selectedUnitKerja      = null;
+    #[Session]
+    public ?string $selectedPeriodeMulai   = null;
+    #[Session]
+    public ?string $selectedPeriodeSelesai = null;
 
-    public function import()
+    // Search
+    #[Session]
+    public string $search = '';
+
+    // ──────────────────────────────────────────────────────────────────
+    // Lifecycle
+    // ──────────────────────────────────────────────────────────────────
+
+    public function mount(): void
     {
-        $this->validate();
+        $this->unitKerja = UnitKerja::orderBy('name')
+            ->pluck('name')
+            ->toArray();
 
-        $originalFileName = pathinfo($this->file->getClientOriginalName(), PATHINFO_FILENAME);
-        $extension = $this->file->getClientOriginalExtension();
-        $filename = $originalFileName . '_' . time() . '.' . $extension;
-        $filepath = $this->file->storeAs('imports/presensi', $filename);
+        $this->unitKerjaUniversitas = UnitKerja::query()
+            ->whereHas('unitSdm', fn($q) => $q->where('name', 'SDM Universitas'))
+            ->orderBy('name')
+            ->pluck('name')
+            ->toArray();
+    }
 
-        // 1. Buat record awal di database
-        $importPresensi = ImportPresensiModel::create([
-            'file_name'       => $filename,
-            'file_path'       => $filepath,
-            'imported_by'     => Auth::id(),
-        ]);
+    public function updated(string $property): void
+    {
+        $filterProperties = [
+            'search',
+            'selectedUnitKerja',
+            'selectedPeriodeMulai',
+            'selectedPeriodeSelesai',
+        ];
 
-        try {
-            // 2. Jalankan Import HANYA SEKALI
-            $importInstance = new PresensiImpor($importPresensi, Auth::id());
-            Excel::import($importInstance, $filepath);
+        if (in_array($property, $filterProperties)) {
+            $this->resetPage();
+        }
+    }
 
-            // 3. Ambil data kegagalan validasi (Failures)
-            $failures = $importInstance->failures();
-            $total_failed = count($failures);
+    #[On('refresh-table-riwayat-rekapitulasi')]
+    public function refreshTable(): void
+    {
+        $this->resetPage();
+    }
 
-            // Kelompokkan error agar sesuai dengan struktur Blade (message, count, rows)
-            $errorSummary = [];
-            foreach ($failures as $failure) {
-                $row = $failure->row();
-                foreach ($failure->errors() as $errorMessage) {
-                    if (!isset($errorSummary[$errorMessage])) {
-                        $errorSummary[$errorMessage] = [
-                            'message' => $errorMessage,
-                            'count' => 0,
-                            'rows' => []
-                        ];
-                    }
+    // ──────────────────────────────────────────────────────────────────
+    // Computed: data utama
+    // ──────────────────────────────────────────────────────────────────
 
-                    // Increment count dan masukkan baris jika belum ada di array
-                    $errorSummary[$errorMessage]['count']++;
-                    if (!in_array($row, $errorSummary[$errorMessage]['rows'])) {
-                        $errorSummary[$errorMessage]['rows'][] = $row;
-                    }
-                }
+    #[Computed]
+    public function rekapitulasiPresensi()
+    {
+        [$mulai, $selesai] = $this->getPeriode();
+
+        $pegawais = $this->baseQuery()
+            ->with([
+                'presensi' => fn($q) => $q->whereBetween('tanggal', [$mulai, $selesai]),
+                'unit_kerja:id,name',
+            ])
+            ->paginate(10);
+
+        // Satu instance service untuk semua pegawai dalam satu request
+        // (memanfaatkan cache bulan yang sudah di-load sebelumnya)
+        $service = new RekapitulasiPresensiService();
+
+        $pegawais->getCollection()->transform(function ($pegawai) use ($service) {
+            $rekap = $service->hitungRekap($pegawai->id, $pegawai->presensi);
+
+            $pegawai->rekap = [
+                'hadir'            => $rekap['hadir'],
+                'tidak_hadir'      => $rekap['tidak_hadir'],
+                'lembur'           => $rekap['lembur'],
+                'cuti'             => $rekap['cuti'],
+                'izin'             => $rekap['izin'],
+                'sakit'            => $rekap['sakit'],
+                'total_jam_kerja'  => $service->formatMenit($rekap['total_menit_kerja']),
+                'total_jam_lembur' => $service->formatMenit($rekap['total_menit_lembur']),
+            ];
+
+            return $pegawai;
+        });
+
+        return $pegawais;
+    }
+
+    #[Computed]
+    public function infoPeriodeAktif(): string
+    {
+        [$mulai, $selesai] = $this->getPeriode();
+
+        $formatMulai   = $mulai->translatedFormat('d F Y');
+        $formatSelesai = $selesai->translatedFormat('d F Y');
+
+        if (!$this->selectedPeriodeMulai && !$this->selectedPeriodeSelesai) {
+            return "Bulan Berjalan ({$formatMulai} — {$formatSelesai})";
+        }
+
+        return "{$formatMulai} s/d {$formatSelesai}";
+    }
+
+    #[Computed]
+    public function hasPresensiData(): bool
+    {
+        [$mulai, $selesai] = $this->getPeriode();
+
+        return $this->baseQuery()
+            ->without(['presensi', 'lembur', 'unit_kerja'])
+            ->whereHas('presensi', fn($q) => $q->whereBetween('tanggal', [$mulai, $selesai]))
+            ->exists();
+    }
+
+    #[Computed]
+    public function emptyStateMessage(): string
+    {
+        if (!$this->baseQuery()->exists()) {
+            return $this->search
+                ? "Pegawai dengan kata pencarian '{$this->search}' tidak ditemukan."
+                : "Tidak ada data pegawai pada filter atau unit kerja yang dipilih.";
+        }
+
+        [$mulai, $selesai] = $this->getPeriode();
+        $formatMulai   = $mulai->translatedFormat('d F Y');
+        $formatSelesai = $selesai->translatedFormat('d F Y');
+
+        if ($this->selectedPeriodeMulai || $this->selectedPeriodeSelesai) {
+            return "Belum ada data rekapitulasi presensi yang terekam untuk periode: {$formatMulai} s/d {$formatSelesai}.";
+        }
+
+        return "Belum ada data rekapitulasi presensi yang terekam untuk bulan " . now()->translatedFormat('F Y') . ".";
+    }
+
+    #[Computed]
+    public function exportPreviewData(): array
+    {
+        $isPegawaiEmpty = !$this->baseQuery()->exists();
+        $isEmpty        = $isPegawaiEmpty || !$this->hasPresensiData;
+
+        $singleEmployeeName = null;
+
+        if (!$isPegawaiEmpty && !empty($this->search)) {
+            $uniqueNips = $this->baseQuery()
+                ->reorder()
+                ->select('pegawai.nip')
+                ->distinct()
+                ->limit(2)
+                ->pluck('pegawai.nip');
+
+            if ($uniqueNips->count() === 1) {
+                $pegawai            = Pegawai::where('nip', $uniqueNips->first())->first();
+                $singleEmployeeName = $pegawai?->nama ?? 'NIP. ' . $uniqueNips->first();
             }
-            $errorSummary = array_values($errorSummary); // Re-index array
-
-            // 4. Kalkulasi Data Sukses dari Database
-            $querySukses = Presensi::where('last_import_presensi_id', $importPresensi->id);
-            $total_success = $querySukses->count();
-
-            $total_created = (clone $querySukses)
-                ->where('created_at', '>=', $importPresensi->created_at)
-                ->count();
-
-            $total_updated = $total_success - $total_created;
-            $total_rows = $total_success + $total_failed;
-
-            // 5. Update Record Import
-            $importPresensi->update([
-                'periode_mulai'   => $importInstance->periodeMulai,
-                'periode_selesai' => $importInstance->periodeSelesai,
-                'total_rows'      => $total_rows,
-                'total_created'   => $total_created,
-                'total_updated'   => $total_updated,
-                'total_failed'    => $total_failed,
-                'error_summary'   => $total_failed > 0 ? $errorSummary : null,
-            ]);
-
-            return $importPresensi;
-
-        } catch (\Exception $e) {
-            // Jika gagal di tengah jalan, hapus/update record
-            $importPresensi->update(['error_summary' => json_encode(['System Error' => $e->getMessage()])]);
-            throw $e;
         }
+
+        return [
+            'isEmpty'        => $isEmpty,
+            'periode'        => $this->infoPeriodeAktif,
+            'unit'           => $this->selectedUnitKerja ?? 'Semua Unit Kerja',
+            'singleEmployee' => $singleEmployeeName,
+        ];
     }
 
-    public function save()
+    // ──────────────────────────────────────────────────────────────────
+    // Actions
+    // ──────────────────────────────────────────────────────────────────
+
+    public function exportData()
     {
-        try {
-            $importRecord = $this->import();
-            $this->dispatch('refresh-table-import');
-            $this->dispatch('load-detail-import', fileId: $importRecord->id);
-            $this->dispatch('open-loading-detail-import');
-        } catch (\Throwable $e) {
-            $this->errorMessage = "Terjadi kesalahan sistem: " . $e->getMessage();
+        if (!$this->baseQuery()->exists() || !$this->hasPresensiData) {
+            return;
         }
 
-        $this->resetImport();
+        $preview  = $this->exportPreviewData;
+        $fileName = $this->buildExportFileName($preview);
+
+        return (new RekapitulasiPresensiExport($this->baseQuery()))->download($fileName);
     }
 
-    // ... (method lainnya biarkan sama) ...
+    public function openExportPreview(): void
+    {
+        $this->dispatch('open-export');
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // Render
+    // ──────────────────────────────────────────────────────────────────
+
+    public function render()
+    {
+        return view('livewire.manajemen.presensi.tabel-rekapitulasi-presensi');
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // Private helpers
+    // ──────────────────────────────────────────────────────────────────
+
+    /**
+     * Mengembalikan [Carbon $mulai, Carbon $selesai] berdasarkan filter aktif.
+     *
+     * @return array{0: Carbon, 1: Carbon}
+     */
+    private function getPeriode(): array
+    {
+        $mulai = $this->selectedPeriodeMulai
+            ? Carbon::createFromFormat('d/m/Y', $this->selectedPeriodeMulai)->startOfDay()
+            : now()->startOfMonth();
+
+        $selesai = $this->selectedPeriodeSelesai
+            ? Carbon::createFromFormat('d/m/Y', $this->selectedPeriodeSelesai)->endOfDay()
+            : now()->endOfMonth();
+
+        return [$mulai, $selesai];
+    }
+
+    /**
+     * Base query pegawai dengan scoping berdasarkan role user.
+     */
+    private function baseQuery()
+    {
+        $user = Auth::user();
+
+        $query = Pegawai::query()
+            ->select('pegawai.*')
+            ->leftJoin('unit_kerja', 'pegawai.unit_kerja_id', '=', 'unit_kerja.id')
+            ->orderBy('unit_kerja.name')
+            ->orderBy('pegawai.nama');
+
+        // Scoping berdasarkan role
+        if ($user->hasRole('SDM Universitas')) {
+            $unitKerjaIds = UnitKerja::whereHas('unitSdm', fn($q) => $q->where('name', 'SDM Universitas'))
+                ->pluck('id');
+
+            $query->whereIn('pegawai.unit_kerja_id', $unitKerjaIds);
+        } elseif ($user->hasRole('Pimpinan')) {
+            $unitId = $user->pegawai?->memimpin_unit?->id;
+
+            $unitId
+                ? $query->where('pegawai.unit_kerja_id', $unitId)
+                : $query->whereNull('pegawai.id');
+        }
+
+        // Filter unit kerja
+        if ($this->selectedUnitKerja) {
+            $query->where('unit_kerja.name', $this->selectedUnitKerja);
+        }
+
+        // Filter search
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('pegawai.nama', 'like', "%{$this->search}%")
+                    ->orWhere('pegawai.nip', 'like', "%{$this->search}%");
+            });
+        }
+
+        return $query;
+    }
+
+    /**
+     * Membangun nama file untuk export berdasarkan filter aktif.
+     */
+    private function buildExportFileName(array $preview): string
+    {
+        $parts = ['Rekapitulasi_Presensi'];
+
+        if (!empty($preview['singleEmployee'])) {
+            $parts[] = str_replace(' ', '_', $preview['singleEmployee']);
+        }
+
+        if ($this->selectedUnitKerja) {
+            $parts[] = str_replace(' ', '_', $this->selectedUnitKerja);
+        }
+
+        $periode = str_replace([' ', '(', ')', '/', '—'], ['_', '', '', '-', '-'], $preview['periode']);
+        $parts[] = $periode;
+
+        return implode('_', $parts) . '.xlsx';
+    }
 }

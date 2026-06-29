@@ -20,11 +20,11 @@
         @open-loading-detail-riwayat.window="openLoadingDetailRiwayat = true"
         @open-detail-riwayat.window="openDetailRiwayat = true; openLoadingDetailRiwayat = false"
         @close-detail-riwayat.window="openDetailRiwayat = false"
-        class="w-full space-y-4">
+        class="w-full">
 
         {{-- ===== HERO CARD ===== --}}
         <div
-            class="relative bg-gradient-to-br from-teal-600 via-emerald-600 to-cyan-600 rounded-2xl shadow-lg overflow-hidden mt-2">
+            class="relative bg-gradient-to-br from-teal-600 via-emerald-600 to-cyan-600 rounded-2xl shadow-lg overflow-hidden">
             {{-- Decorative background shapes --}}
             <div class="absolute inset-0 opacity-10">
                 <div class="absolute -top-16 -right-16 w-72 h-72 bg-white rounded-full"></div>
@@ -101,7 +101,7 @@
         </div>
 
         {{-- ===== TABS & CONTENT CONTAINER ===== --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mt-4">
 
             {{-- Navigation Tabs --}}
             <div class="border-b border-gray-200 bg-slate-50/50 px-2 sm:px-6">

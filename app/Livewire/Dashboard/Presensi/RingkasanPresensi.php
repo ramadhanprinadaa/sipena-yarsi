@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Dashboard\Presensi;
 
-use App\Models\Presensi;
 use App\Models\HariLibur;
-use App\Services\StatusKehadiranService2;
+use App\Models\Presensi;
+use App\Services\RekapitulasiPresensiService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -14,29 +14,189 @@ use Livewire\Component;
 class RingkasanPresensi extends Component
 {
     #[Session]
-    public ?string $selectedPeriodeMulai = null;
+    public ?string $selectedPeriodeMulai   = null;
     #[Session]
     public ?string $selectedPeriodeSelesai = null;
 
-    public function updated(string $property): void
+    // ──────────────────────────────────────────────────────────────────
+    // Computed: data utama
+    // ──────────────────────────────────────────────────────────────────
+
+    #[Computed]
+    public function infoPeriodeAktif(): string
     {
-        // if (in_array($property, [
-        //     'selectedPeriodeMulai',
-        //     'selectedPeriodeSelesai',
-        // ])) {
-        //     $this->resetPage();
-        // }
+        [$mulai, $selesai] = $this->getPeriode();
+
+        if ($this->selectedPeriodeMulai || $this->selectedPeriodeSelesai) {
+            return $mulai->translatedFormat('d M Y') . ' — ' . $selesai->translatedFormat('d M Y');
+        }
+
+        return "Bulan Berjalan (" . now()->translatedFormat('F Y') . ")";
     }
 
-    protected function getPegawaiId(): ?string
+    #[Computed]
+    public function ringkasanData(): ?array
+    {
+        $pegawaiId = $this->getPegawaiId();
+        if (!$pegawaiId) {
+            return null;
+        }
+
+        [$mulai, $selesai] = $this->getPeriode();
+
+        $presensiList = Presensi::where('pegawai_id', $pegawaiId)
+            ->whereBetween('tanggal', [$mulai, $selesai])
+            ->get();
+
+        if ($presensiList->isEmpty()) {
+            return ['is_empty' => true];
+        }
+
+        $service = new RekapitulasiPresensiService();
+        $rekap   = $service->hitungRekap($pegawaiId, $presensiList);
+
+        return [
+            'hadir'       => $rekap['hadir'],
+            'tidak_hadir' => $rekap['tidak_hadir'],
+            'lembur'      => $rekap['lembur'],
+            'cuti'        => $rekap['cuti'],
+            'izin'        => $rekap['izin'],
+            'sakit'       => $rekap['sakit'],
+            // Format array agar kompatibel dengan blade view yang sudah ada
+            'total_jam_kerja' => [
+                'jam'   => (int) floor($rekap['total_menit_kerja'] / 60),
+                'menit' => $rekap['total_menit_kerja'] % 60,
+            ],
+            'total_jam_lembur' => [
+                'jam'   => (int) floor($rekap['total_menit_lembur'] / 60),
+                'menit' => $rekap['total_menit_lembur'] % 60,
+            ],
+            'is_empty' => false,
+        ];
+    }
+
+    /**
+     * Riwayat presensi 5 hari kerja terakhir (tidak disentuh, tidak ada kalkulasi di sini).
+     */
+    #[Computed]
+    public function riwayatTerakhir()
+    {
+        $pegawaiId = $this->getPegawaiId();
+        if (!$pegawaiId) {
+            return collect();
+        }
+
+        $endDate   = now()->subDay();
+        $startDate = now()->subDays(14);
+
+        $presensiList = Presensi::with('statusKehadiran')
+            ->where('pegawai_id', $pegawaiId)
+            ->whereBetween('tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->get()
+            ->keyBy(fn($item) => Carbon::parse($item->tanggal)->format('Y-m-d'));
+
+        $hariLiburList = HariLibur::whereBetween('tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->get()
+            ->keyBy(fn($item) => Carbon::parse($item->tanggal)->format('Y-m-d'));
+
+        $riwayat       = collect();
+        $hariDitemukan = 0;
+        $hariMundur    = 1;
+
+        while ($hariDitemukan < 5 && $hariMundur <= 14) {
+            $currentDate = now()->subDays($hariMundur);
+            $dateString  = $currentDate->format('Y-m-d');
+
+            $adaPresensi     = $presensiList->has($dateString);
+            $isAkhirPekan    = $currentDate->isWeekend();
+            $isLiburNasional = $hariLiburList->has($dateString);
+
+            if ($adaPresensi) {
+                $item = $presensiList->get($dateString);
+                $item->status_datang = $this->resolveStatusDatang($item->jam_masuk);
+                $item->status_pulang = $this->resolveStatusPulang($item->jam_keluar);
+                $item->is_empty_day  = false;
+
+                $riwayat->push($item);
+                $hariDitemukan++;
+            } elseif (!$isAkhirPekan && !$isLiburNasional) {
+                $riwayat->push((object) [
+                    'is_empty_day' => true,
+                    'tanggal'      => $dateString,
+                    'pesan'        => $this->getEmptyStateMessagePerHari(),
+                ]);
+                $hariDitemukan++;
+            }
+
+            $hariMundur++;
+        }
+
+        return $riwayat;
+    }
+
+    #[Computed]
+    public function isRiwayatKosongTotal(): bool
+    {
+        return $this->riwayatTerakhir->every('is_empty_day', true);
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // Computed: empty state
+    // ──────────────────────────────────────────────────────────────────
+
+    #[Computed]
+    public function emptyStateMessage(): string
+    {
+        if (!$this->getPegawaiId()) {
+            return "Akun Anda belum tertaut dengan data pegawai manapun.";
+        }
+
+        [$mulai, $selesai] = $this->getPeriode();
+
+        if ($this->selectedPeriodeMulai || $this->selectedPeriodeSelesai) {
+            return "Anda belum memiliki riwayat presensi untuk periode: "
+                . $mulai->translatedFormat('d F Y') . ' s/d ' . $selesai->translatedFormat('d F Y') . ".";
+        }
+
+        return "Anda belum memiliki riwayat presensi yang terekam untuk bulan "
+            . now()->translatedFormat('F Y') . ".";
+    }
+
+    #[Computed]
+    public function emptyStateMessageRiwayat(): string
+    {
+        if (!$this->getPegawaiId()) {
+            return "Akun Anda belum tertaut dengan data pegawai manapun.";
+        }
+
+        $awal  = now()->subDays(5)->translatedFormat('d F Y');
+        $akhir = now()->subDay()->translatedFormat('d F Y');
+
+        return "Belum ada riwayat presensi yang tercatat dalam 5 hari terakhir ({$awal} s/d {$akhir}).";
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // Render
+    // ──────────────────────────────────────────────────────────────────
+
+    public function render()
+    {
+        return view('livewire.dashboard.presensi.ringkasan-presensi');
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // Private helpers
+    // ──────────────────────────────────────────────────────────────────
+
+    private function getPegawaiId(): ?string
     {
         return Auth::user()->pegawai?->id;
     }
 
     /**
-     * Helper untuk memparsing rentang waktu dari filter atau default
+     * @return array{0: Carbon, 1: Carbon}
      */
-    protected function getPeriodeAktif(): array
+    private function getPeriode(): array
     {
         $mulai = $this->selectedPeriodeMulai
             ? Carbon::createFromFormat('d/m/Y', $this->selectedPeriodeMulai)->startOfDay()
@@ -49,297 +209,34 @@ class RingkasanPresensi extends Component
         return [$mulai, $selesai];
     }
 
-    /**
-     * Computed Property untuk menampilkan teks informasi periode di header blade
-     * Menggunakan translatedFormat() untuk lokalisasi bahasa (Indonesia)
-     */
-    #[Computed]
-    public function infoPeriodeAktif(): string
+    private function resolveStatusDatang(?string $jamMasuk): string
     {
-        // Ambil objek Carbon mulai dan selesai dari method yang sudah kita buat sebelumnya
-        [$mulai, $selesai] = $this->getPeriodeAktif();
-
-        // Jika user memfilter menggunakan tanggal kustom
-        if ($this->selectedPeriodeMulai || $this->selectedPeriodeSelesai) {
-            $formatMulai = $mulai->translatedFormat('d M Y');
-            $formatSelesai = $selesai->translatedFormat('d M Y');
-            return "{$formatMulai} — {$formatSelesai}";
+        if (!$jamMasuk) {
+            return '-';
         }
 
-        // Default jika filter kosong (Bulan Berjalan)
-        return "Bulan Berjalan (" . now()->translatedFormat('F Y') . ")";
+        $waktu = Carbon::parse($jamMasuk)->format('H:i:s');
+
+        return match (true) {
+            $waktu > '08:00:00' => 'Terlambat',
+            $waktu < '08:00:00' => 'Datang Lebih Awal',
+            default             => 'Tepat Waktu',
+        };
     }
 
-    /**
-     * Computed Property untuk menghitung Ringkasan Presensi
-     */
-    #[Computed]
-    public function ringkasanData(): ?array
+    private function resolveStatusPulang(?string $jamKeluar): string
     {
-        $pegawai_id = $this->getPegawaiId();
-        if (!$pegawai_id) return null;
-
-        [$mulai, $selesai] = $this->getPeriodeAktif();
-        $pegawai = Auth::user()->pegawai;
-
-        // Fetch presensi pada periode aktif
-        $presensiList = Presensi::where('pegawai_id', $pegawai_id)
-            ->whereBetween('tanggal', [$mulai, $selesai])
-            ->get();
-
-        // Fetch lembur yang disetujui pada periode aktif lalu mapping berdasarkan tanggal untuk pencarian O(1)
-        $lemburByDate = $pegawai->lembur()
-            ->whereBetween('tanggal_lembur', [$mulai, $selesai])
-            ->where('status', 'Disetujui')
-            ->get()
-            ->keyBy(function ($l) {
-                return Carbon::parse($l->tanggal_lembur)->format('Y-m-d');
-            });
-
-        // Inisialisasi variabel hitung
-        $hadir = $tidakHadir = $lembur = $cuti = $izin = $sakit = $totalMenitKerja = $totalMenitLembur = 0;
-
-        foreach ($presensiList as $presensi) {
-            $tanggalStr = Carbon::parse($presensi->tanggal)->format('Y-m-d');
-            $statusId = $presensi->status_kehadiran_id;
-
-            // A. Hitung Kehadiran
-            switch ($statusId) {
-                case StatusKehadiranService2::HADIR_NORMAL:
-                case StatusKehadiranService2::HADIR_KURANG_JAM:
-                    $hadir++;
-                    break;
-                case StatusKehadiranService2::TIDAK_HADIR_KURANG_JAM:
-                case StatusKehadiranService2::TIDAK_HADIR_ABSEN_1X:
-                case StatusKehadiranService2::TIDAK_HADIR_TANPA_KETERANGAN:
-                    $tidakHadir++;
-                    break;
-                case StatusKehadiranService2::IZIN:
-                    $izin++;
-                    break;
-                case StatusKehadiranService2::SAKIT:
-                    $sakit++;
-                    break;
-                case StatusKehadiranService2::CUTI:
-                    $cuti++;
-                    break;
-            }
-
-            // B. Hitung Menit Kerja Aktual
-            $menitKerjaHariIni = 0;
-            if ($presensi->jam_masuk && $presensi->jam_keluar) {
-                $masuk = Carbon::parse($presensi->jam_masuk);
-                $keluar = Carbon::parse($presensi->jam_keluar);
-                $menitKerjaHariIni = $masuk->diffInMinutes($keluar);
-            }
-
-            // C. Logika Lembur & Jam Kerja Terhitung
-            $isLemburDisetujui = $lemburByDate->has($tanggalStr);
-            $dataLembur = $isLemburDisetujui ? $lemburByDate->get($tanggalStr) : null;
-            $isWeekend = Carbon::parse($presensi->tanggal)->isWeekend();
-            $isHariLibur = $statusId == StatusKehadiranService2::LEMBUR || $isWeekend || ($dataLembur && in_array($dataLembur->jenis_hari, ['Hari Libur', 'Libur Nasional']));
-
-            $menitLemburValidHariIni = 0;
-
-            if (in_array($statusId, [
-                StatusKehadiranService2::HADIR_NORMAL,
-                StatusKehadiranService2::HADIR_KURANG_JAM,
-                StatusKehadiranService2::LEMBUR
-            ])) {
-                if (!$isHariLibur) {
-                    $menitKerjaReguler = min($menitKerjaHariIni, 480); // Maks 8 jam
-                    $totalMenitKerja += $menitKerjaReguler;
-
-                    if ($isLemburDisetujui && $menitKerjaHariIni > 480) {
-                        $menitLemburValidHariIni = min(($menitKerjaHariIni - 480), 120); // Maks 2 jam lembur
-                        $totalMenitLembur += $menitLemburValidHariIni;
-                    }
-                } else {
-                    if ($isLemburDisetujui) {
-                        $menitLemburValidHariIni = min($menitKerjaHariIni, 300); // Maks 5 jam weekend
-                        $totalMenitLembur += $menitLemburValidHariIni;
-                    }
-                }
-            }
-
-            if ($menitLemburValidHariIni > 0) {
-                $lembur++;
-            }
+        if (!$jamKeluar) {
+            return '-';
         }
 
-        return [
-            'hadir'            => $hadir,
-            'tidak_hadir'      => $tidakHadir,
-            'lembur'           => $lembur,
-            'cuti'             => $cuti,
-            'izin'             => $izin,
-            'sakit'            => $sakit,
-            'total_jam_kerja'  => [
-                'jam'   => floor($totalMenitKerja / 60),
-                'menit' => $totalMenitKerja % 60
-            ],
-            'total_jam_lembur' => [
-                'jam'   => floor($totalMenitLembur / 60),
-                'menit' => $totalMenitLembur % 60
-            ],
-            'is_empty'         => $presensiList->isEmpty()
-        ];
+        return Carbon::parse($jamKeluar)->format('H:i:s') < '16:00:00'
+            ? 'Pulang Lebih Awal'
+            : 'Tepat Waktu';
     }
 
-    /**
-     * Computed Property untuk Riwayat Presensi 5 Hari Terakhir
-     */
-    #[Computed]
-    public function riwayatTerakhir()
-    {
-        $pegawai_id = $this->getPegawaiId();
-        if (!$pegawai_id) return collect();
-
-        // Tentukan rentang 5 hari (Hari kemarin s/d 5 hari yang lalu)
-        $endDate = now()->subDay();
-        $startDate = now()->subDays(14);
-
-        // 1. Ambil data presensi pada rentang tanggal tersebut dan ubah jadi key-value berdasarkan tanggal
-        $presensiList = Presensi::with('statusKehadiran')
-            ->where('pegawai_id', $pegawai_id)
-            ->whereBetween('tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-            ->get()
-            ->keyBy(function ($item) {
-                return Carbon::parse($item->tanggal)->format('Y-m-d');
-            });
-
-        // 2. Ambil data Hari Libur Nasional (jadikan key-value berdasarkan tanggal Y-m-d)
-        $hariLiburList = HariLibur::whereBetween('tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-            ->get()
-            ->keyBy(function ($item) {
-                return Carbon::parse($item->tanggal)->format('Y-m-d');
-            });
-
-        $riwayat = collect();
-        $hariDitemukan = 0;
-        $hariMundur = 1;
-
-        while ($hariDitemukan < 5 && $hariMundur <= 14) {
-            $currentDate = now()->subDays($hariMundur);
-            $dateString = $currentDate->format('Y-m-d');
-
-            // Cek status hari ini
-            $adaDataPresensi = $presensiList->has($dateString);
-            $isAkhirPekan = $currentDate->isWeekend();
-            $isLiburNasional = $hariLiburList->has($dateString);
-
-            if ($adaDataPresensi) {
-                // SKENARIO 1: ADA DATA PRESENSI
-                // (Meskipun hari libur / akhir pekan, jika pegawai absen lembur, tetap dimasukkan ke riwayat)
-                $item = $presensiList->get($dateString);
-
-                $statusDatang = '-';
-                $statusPulang = '-';
-
-                if ($item->jam_masuk) {
-                    $waktuMasuk = Carbon::parse($item->jam_masuk)->format('H:i:s');
-                    if ($waktuMasuk > '08:00:00') {
-                        $statusDatang = 'Terlambat';
-                    } elseif ($waktuMasuk < '08:00:00') {
-                        $statusDatang = 'Datang Lebih Awal';
-                    } else {
-                        $statusDatang = 'Tepat Waktu';
-                    }
-                }
-
-                if ($item->jam_keluar) {
-                    $waktuKeluar = Carbon::parse($item->jam_keluar)->format('H:i:s');
-                    if ($waktuKeluar < '16:00:00') {
-                        $statusPulang = 'Pulang Lebih Awal';
-                    } else {
-                        $statusPulang = 'Tepat Waktu';
-                    }
-                }
-
-                $item->status_datang = $statusDatang;
-                $item->status_pulang = $statusPulang;
-                $item->is_empty_day = false;
-
-                $riwayat->push($item);
-                $hariDitemukan++;
-            } else {
-                // SKENARIO 2: TIDAK ADA DATA PRESENSI
-
-                // Pastikan bukan akhir pekan DAN bukan libur nasional
-                if (!$isAkhirPekan && !$isLiburNasional) {
-
-                    // Ini adalah Hari Kerja Normal (Senin-Jumat, bukan tanggal merah), tapi belum/tidak absen
-                    $riwayat->push((object)[
-                        'is_empty_day' => true,
-                        'tanggal'      => $dateString,
-                        'pesan'        => $this->getEmptyStateMessagePerHari()
-                    ]);
-                    $hariDitemukan++; // Dihitung sebagai 1 slot riwayat
-                }
-            }
-
-            $hariMundur++;
-        }
-
-        return $riwayat;
-    }
-
-    /**
-     * Computed Property untuk mengecek apakah data presensi 5 hari terakhir kosong total
-     */
-    #[Computed]
-    public function isRiwayatKosongTotal(): bool
-    {
-        return $this->riwayatTerakhir->every('is_empty_day', true);
-    }
-
-    /**
-     * Helper function untuk pesan empty state TOTAL (jika 5 hari kosong semua)
-     */
-    #[Computed]
-    public function emptyStateMessageRiwayat(): string
-    {
-        if (!$this->getPegawaiId()) {
-            return "Akun Anda belum tertaut dengan data pegawai manapun.";
-        }
-
-        $awal = now()->subDays(5)->translatedFormat('d F Y');
-        $akhir = now()->subDay()->translatedFormat('d F Y');
-
-        return "Belum ada riwayat presensi yang tercatat dalam 5 hari terakhir ({$awal} s/d {$akhir}).";
-    }
-
-    /**
-     * Helper function untuk pesan empty state PER HARI
-     */
-    protected function getEmptyStateMessagePerHari(): string
+    private function getEmptyStateMessagePerHari(): string
     {
         return 'Data presensi untuk hari ini belum tersedia. Silahkan Hubungi Administrator.';
-    }
-
-    /**
-     * Computed Property untuk Empty State Message
-     */
-    #[Computed]
-    public function emptyStateMessage(): string
-    {
-        if (!$this->getPegawaiId()) {
-            return "Akun Anda belum tertaut dengan data pegawai manapun.";
-        }
-
-        [$mulai, $selesai] = $this->getPeriodeAktif();
-        $formatMulai = $mulai->translatedFormat('d F Y');
-        $formatSelesai = $selesai->translatedFormat('d F Y');
-
-        if ($this->selectedPeriodeMulai || $this->selectedPeriodeSelesai) {
-            return "Anda belum memiliki riwayat presensi untuk periode: {$formatMulai} s/d {$formatSelesai}.";
-        }
-
-        return "Anda belum memiliki riwayat presensi yang terekam untuk bulan " . now()->translatedFormat('F Y') . ".";
-    }
-
-    public function render()
-    {
-        return view('livewire.dashboard.presensi.ringkasan-presensi');
     }
 }
