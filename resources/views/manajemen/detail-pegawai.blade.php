@@ -3,11 +3,11 @@
 @section('title', 'SIPENA | Detail Pegawai')
 
 @section('breadcrumb')
-    <div class="flex flex-wrap justify-center items-center space-x-2 text-sm text-gray-400 font-medium">
+    <div class="flex flex-wrap justify-center items-center space-x-2 text-sm text-gray-500 font-medium">
         <span>Manajemen</span>
-        <i class="fa-solid fa-chevron-right text-xs text-gray-400"></i>
+        <i class="fa-solid fa-chevron-right text-xs"></i>
         <a wire:navigate href="{{ route('manajemen-pegawai') }}" class="hover:text-indigo-500">Pegawai</a>
-        <i class="fa-solid fa-chevron-right text-xs text-gray-400"></i>
+        <i class="fa-solid fa-chevron-right text-xs"></i>
         <a wire:navigate href="{{ route('manajemen-pegawai-detail', $pegawai->id) }}"
             class="text-indigo-600 hover:text-indigo-500">Detail Pegawai</a>
     </div>
@@ -202,7 +202,7 @@
                     x-transition:enter-start="opacity-0 translate-y-4"
                     x-transition:enter-end="opacity-100 translate-y-0"
                     style="display: none;">
-                    <livewire:manajemen.pegawai.detail-pegawai.biodata :pegawai="$pegawai" />
+                    <livewire:manajemen.pegawai.detail-pegawai.biodata.biodata :pegawai="$pegawai" />
                 </div>
 
                 {{-- Wrapper Tab Keluarga --}}

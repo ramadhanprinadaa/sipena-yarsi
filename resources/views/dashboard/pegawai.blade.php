@@ -3,10 +3,10 @@
 @section('title', 'SIPENA | Kepegawaian')
 
 @section('breadcrumb')
-    <div class="flex flex-wrap justify-center items-center space-x-2 text-sm text-gray-400 font-medium">
-        <span>Dashboard</span>
-        <i class="fa-solid fa-chevron-right text-xs text-gray-400"></i>
-        <a wire:navigate href="{{ route('kepegawaian') }}" class="text-indigo-500">Pegawai</a>
+    <div class="flex flex-wrap justify-center items-center space-x-2 text-sm text-gray-500 font-medium">
+        <span>Beranda</span>
+        <i class="fa-solid fa-chevron-right text-xs"></i>
+        <a wire:navigate href="{{ route('kepegawaian') }}" class="text-indigo-600 hover:text-indigo-500">Pegawai</a>
     </div>
 @endsection
 

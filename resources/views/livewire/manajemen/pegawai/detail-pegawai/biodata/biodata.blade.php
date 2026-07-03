@@ -1,4 +1,10 @@
-<div class="space-y-6">
+<div
+    x-data="{
+        openEditModal: false,
+    }"
+    @open-edit-biodata-modal.window="openEditModal = true;"
+    @close-edit-biodata-modal.window="openEditModal = false;"
+    class="">
 
     <!-- Header -->
     <div class="flex items-center justify-between bg-white rounded-md shadow-md border border-indigo-100 border-t-4 border-t-indigo-500 p-5">
@@ -11,11 +17,23 @@
                 Informasi personal dan identitas kependudukan
             </p>
         </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+            <!-- Button Edit Biodata -->
+            @if (auth()->user()->hasRole(['Admin', 'SDM Yayasan']))
+                <button @click="openEditModal = true; $dispatch('open-edit-biodata-modal')"
+                    class="flex items-center px-3 h-10 justify-center cursor-pointer bg-indigo-600 text-indigo-50 hover:bg-indigo-50 hover:text-indigo-600 text-sm rounded-md transition">
+                    <i class="fa-solid fa-pen mr-2"></i>
+                    <span>Edit Biodata</span>
+                </button>
+            @endif
+        </div>
     </div>
 
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
 
-        {{-- 1. KARTU INFORMASI PRIBADI (Tema Biru) --}}
+        {{-- KARTU INFORMASI PRIBADI --}}
         <div class="bg-white rounded-md shadow-sm border border-gray-100 border-t-4 border-t-blue-500 overflow-hidden">
             <div class="p-5 border-b border-gray-50 flex items-center gap-3">
                 <div class="w-8 h-8 rounded-md bg-blue-50 flex items-center justify-center text-blue-600">
@@ -72,7 +90,7 @@
             </div>
         </div>
 
-        {{-- 2. KARTU IDENTITAS & ALAMAT (Tema Emerald/Hijau) --}}
+        {{-- 2. KARTU IDENTITAS & ALAMAT --}}
         <div class="bg-white rounded-md shadow-sm border border-gray-100 border-t-4 border-t-emerald-500 overflow-hidden">
             <div class="p-5 border-b border-gray-50 flex items-center gap-3">
                 <div class="w-8 h-8 rounded-md bg-emerald-50 flex items-center justify-center text-emerald-600">
@@ -112,7 +130,7 @@
             </div>
         </div>
 
-        {{-- 3. KARTU RINGKASAN PEKERJAAN (Tema Ungu/Purple) --}}
+        {{-- 3. KARTU RINGKASAN PEKERJAAN --}}
         <div class="bg-white rounded-md shadow-sm border border-gray-100 border-t-4 border-t-purple-500 overflow-hidden xl:col-span-2">
             <div class="p-5 border-b border-gray-50 flex items-center gap-3">
                 <div class="w-8 h-8 rounded-md bg-purple-50 flex items-center justify-center text-purple-600">
@@ -195,4 +213,27 @@
         </div>
 
     </div>
+
+    <!-- Modal Edit Biodata -->
+    <template x-teleport="body">
+        <div x-show="openEditModal" x-cloak x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            @click.self="openEditModal = false"
+            @keydown.escape.window="openEditModal = false"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md"
+            style="display: none;">
+
+            <div x-show="openEditModal" x-cloak
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 scale-95" @click.stop>
+                <livewire:manajemen.pegawai.detail-pegawai.biodata.edit-biodata :pegawai_id="$pegawai->id" />
+            </div>
+        </div>
+    </template>
 </div>

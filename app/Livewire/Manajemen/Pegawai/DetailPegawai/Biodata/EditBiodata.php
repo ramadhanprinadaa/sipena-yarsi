@@ -2,38 +2,37 @@
 
 namespace App\Livewire\Manajemen\Pegawai\DetailPegawai\Biodata;
 
-use App\Models\Pegawai;
-use App\Models\UnitKerja;
 use App\Models\JenisPegawai;
+use App\Models\Pegawai;
 use App\Models\StatusPegawai;
+use App\Models\UnitKerja;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-class EditBiodataPegawai extends Component
+class EditBiodata extends Component
 {
-    // Konstanta id status pegawai, mengikuti konvensi yang sudah dipakai di TambahPegawai.
     const STATUS_TETAP = 1;
     const STATUS_KONTRAK = 2;
 
     #[Locked]
     public int $pegawai_id;
 
-    // Ditampilkan sebagai informasi read-only pada form (tidak boleh diubah).
     public string $nama_pegawai = '';
     public string $nik_pegawai = '';
 
-    // Seluruh field yang boleh diedit (di luar nama & nip).
     public array $form = [];
+    public array $originalForm = [];
 
-    public $unitKerja;
-    public $jenisPegawai;
-    public $statusPegawai;
+    public Collection $unitKerja;
+    public Collection $jenisPegawai;
+    public Collection $statusPegawai;
 
-    public function mount(int $pegawai_id): void
+    public function mount(int $pegawai_id)
     {
         $this->pegawai_id = $pegawai_id;
 
@@ -56,12 +55,6 @@ class EditBiodataPegawai extends Component
         $this->loadPegawai();
     }
 
-    /**
-     * Dipicu setiap tombol "Edit Biodata" di parent (Biodata) di-klik.
-     * Karena komponen ini hanya di-mount sekali saat halaman detail pegawai
-     * pertama kali dirender, listener ini memastikan data selalu dimuat ulang
-     * dari database setiap modal dibuka (bukan memakai data lama di memori).
-     */
     #[On('open-edit-biodata-modal')]
     public function handleOpen(): void
     {
@@ -70,11 +63,6 @@ class EditBiodataPegawai extends Component
         $this->resetValidation();
     }
 
-    /**
-     * Dipicu saat modal ditutup (tombol close / klik di luar modal).
-     * Membersihkan seluruh state validasi agar form benar-benar bersih
-     * sebelum dibuka kembali di lain waktu.
-     */
     #[On('close-edit-biodata-modal')]
     public function handleClose(): void
     {
@@ -83,14 +71,9 @@ class EditBiodataPegawai extends Component
         $this->loadPegawai();
     }
 
-    /**
-     * Mengambil data pegawai terbaru dari database dan mengisi ulang form.
-     */
     private function loadPegawai(): void
     {
         $pegawai = Pegawai::findOrFail($this->pegawai_id);
-
-        // nama & nip hanya ditampilkan, tidak masuk ke $form (tidak bisa diedit).
         $this->nama_pegawai = $pegawai->nama;
         $this->nik_pegawai = $pegawai->nip;
 
@@ -106,8 +89,6 @@ class EditBiodataPegawai extends Component
             'gelar_depan' => $pegawai->gelar_depan,
             'gelar_belakang' => $pegawai->gelar_belakang,
             'tempat_lahir' => $pegawai->tempat_lahir,
-            // getRawOriginal dipakai agar tidak terkena accessor getJenisKelaminAttribute()
-            // pada model Pegawai (yang mengubah 'L'/'P' menjadi label "Laki-Laki"/"Perempuan").
             'jenis_kelamin' => $pegawai->getRawOriginal('jenis_kelamin'),
 
             'tanggal_lahir' => optional($pegawai->tanggal_lahir)->format('d/m/Y'),
@@ -122,35 +103,37 @@ class EditBiodataPegawai extends Component
 
             'status' => $pegawai->status,
         ];
+
+        $this->originalForm = $this->form;
     }
 
     protected function rules(): array
     {
         return [
-            'form.unit_kerja_id' => ['required', 'exists:unit_kerja,id'],
-            'form.jenis_pegawai_id' => ['required', 'exists:jenis_pegawai,id'],
-            'form.status_pegawai_id' => ['required', 'exists:status_pegawai,id'],
-            'form.unit_bagian' => ['nullable', 'string', 'max:255'],
+            'form.unit_kerja_id'        => ['required', 'exists:unit_kerja,id'],
+            'form.jenis_pegawai_id'     => ['required', 'exists:jenis_pegawai,id'],
+            'form.status_pegawai_id'    => ['required', 'exists:status_pegawai,id'],
+            'form.unit_bagian'          => ['nullable', 'string', 'max:255'],
 
-            'form.ktp' => ['required', 'digits:16', Rule::unique('pegawai', 'ktp')->ignore($this->pegawai_id)],
-            'form.npwp' => ['nullable', 'digits_between:15,16', Rule::unique('pegawai', 'npwp')->ignore($this->pegawai_id)],
+            'form.ktp'  => ['required', 'digits:16', Rule::unique('pegawai', 'ktp')->ignore($this->pegawai_id)],
+            'form.npwp' => ['nullable', 'digits_between:10,16', Rule::unique('pegawai', 'npwp')->ignore($this->pegawai_id)],
 
-            'form.gelar_depan' => ['nullable', 'string', 'max:50'],
-            'form.gelar_belakang' => ['nullable', 'string', 'max:50'],
-            'form.tempat_lahir' => ['required', 'string', 'max:50'],
-            'form.tanggal_lahir' => ['required', 'date_format:d/m/Y'],
-            'form.jenis_kelamin' => ['required', 'in:L,P'],
+            'form.gelar_depan'      => ['nullable', 'string', 'max:50'],
+            'form.gelar_belakang'   => ['nullable', 'string', 'max:50'],
+            'form.tempat_lahir'     => ['required', 'string', 'max:50'],
+            'form.tanggal_lahir'    => ['required', 'date_format:d/m/Y'],
+            'form.jenis_kelamin'    => ['required', 'in:L,P'],
 
-            'form.tanggal_bergabung' => ['required', 'date_format:d/m/Y'],
-            'form.tanggal_habis_kontrak' => ['nullable', 'date_format:d/m/Y', 'required_if:form.status_pegawai_id,' . self::STATUS_KONTRAK],
-            'form.tanggal_pensiun' => ['nullable', 'date_format:d/m/Y', 'required_if:form.status_pegawai_id,' . self::STATUS_TETAP],
+            'form.tanggal_bergabung'        => ['required', 'date_format:d/m/Y'],
+            'form.tanggal_habis_kontrak'    => ['nullable', 'date_format:d/m/Y', 'required_if:form.status_pegawai_id,' . self::STATUS_KONTRAK],
+            'form.tanggal_pensiun'          => ['nullable', 'date_format:d/m/Y', 'required_if:form.status_pegawai_id,' . self::STATUS_TETAP],
 
-            'form.no_telpon' => ['required', 'regex:/^\d{10,15}$/'],
-            'form.email_yarsi' => ['nullable', 'email', Rule::unique('pegawai', 'email_yarsi')->ignore($this->pegawai_id)],
-            'form.alamat_ktp' => ['required', 'string', 'max:255'],
-            'form.alamat_domisili' => ['nullable', 'string', 'max:255'],
+            'form.no_telpon'        => ['required', 'regex:/^\d{10,15}$/'],
+            'form.email_yarsi'      => ['nullable', 'email', Rule::unique('pegawai', 'email_yarsi')->ignore($this->pegawai_id)],
+            'form.alamat_ktp'       => ['required', 'string', 'max:255'],
+            'form.alamat_domisili'  => ['nullable', 'string', 'max:255'],
 
-            'form.status' => ['required', 'in:active,inactive'],
+            'form.status'           => ['required', 'in:active,inactive'],
         ];
     }
 
@@ -172,7 +155,7 @@ class EditBiodataPegawai extends Component
             'form.ktp.digits' => 'NIK harus terdiri dari 16 digit.',
             'form.ktp.unique' => 'NIK sudah terdaftar pada pegawai lain.',
 
-            'form.npwp.digits_between' => 'NPWP harus terdiri dari 15–16 digit.',
+            'form.npwp.digits_between' => 'NPWP harus terdiri dari 10–16 digit.',
             'form.npwp.unique' => 'NPWP sudah terdaftar pada pegawai lain.',
 
             'form.gelar_depan.max' => 'Gelar depan maksimal 50 karakter.',
@@ -242,6 +225,12 @@ class EditBiodataPegawai extends Component
         ];
     }
 
+    public function getIsDirtyProperty()
+    {
+        return $this->form != $this->originalForm;
+    }
+
+
     public function updated($property): void
     {
         if (!str_starts_with($property, 'form.')) {
@@ -265,18 +254,14 @@ class EditBiodataPegawai extends Component
         $pegawai = Pegawai::findOrFail($this->pegawai_id);
 
         $data = $this->form;
-        $data['tanggal_lahir'] = $this->normalizeDate($data['tanggal_lahir']);
-        $data['tanggal_bergabung'] = $this->normalizeDate($data['tanggal_bergabung']);
-        $data['tanggal_habis_kontrak'] = $this->normalizeDate($data['tanggal_habis_kontrak']) ?: null;
-        $data['tanggal_pensiun'] = $this->normalizeDate($data['tanggal_pensiun']) ?: null;
-        $data['npwp'] = $data['npwp'] ?: null;
+        $data['tanggal_lahir']          = $this->normalizeDate($data['tanggal_lahir']);
+        $data['tanggal_bergabung']      = $this->normalizeDate($data['tanggal_bergabung']);
+        $data['tanggal_habis_kontrak']  = $this->normalizeDate($data['tanggal_habis_kontrak']) ?: null;
+        $data['tanggal_pensiun']        = $this->normalizeDate($data['tanggal_pensiun']) ?: null;
+        $data['npwp']                   = $data['npwp'] ?: null;
 
-        // nama & nip sengaja tidak pernah ada di $data karena tidak tersimpan di $this->form.
         $pegawai->update($data);
 
-        // Setelah update() berhasil dan response diterima, Livewire otomatis
-        // menyamakan snapshot client dengan server, sehingga $dirty kembali false
-        // tanpa perlu kode tambahan apa pun.
         $this->dispatch('close-edit-biodata-modal');
         $this->dispatch('refresh-biodata');
         $this->dispatch(
@@ -286,8 +271,9 @@ class EditBiodataPegawai extends Component
         );
     }
 
+
     public function render()
     {
-        return view('livewire.manajemen.pegawai.detail-pegawai.biodata.edit-biodata-pegawai');
+        return view('livewire.manajemen.pegawai.detail-pegawai.biodata.edit-biodata');
     }
 }
