@@ -26,12 +26,12 @@
 
     {{-- Error Message --}}
     @error('login')
-        <div 
+        <div
             x-data="{ open: true }"
             x-show="open"
             class="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
         >
-            <div 
+            <div
                 x-show="open"
                 x-transition
                 class="bg-white rounded-2xl shadow-xl p-6 w-120 text-center"
@@ -42,7 +42,7 @@
                 <p class="text-gray-600 mb-4">
                     {{ $message }}
                 </p>
-                <button 
+                <button
                     @click="open = false"
                     class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 cursor-pointer"
                 >
@@ -51,7 +51,7 @@
             </div>
         </div>
     @enderror
-    
+
     {{-- Form Login --}}
     <div class="w-full max-w-5xl flex flex-col md:flex-row bg-white/20 backdrop-blur-xl rounded-xl shadow-2xl overflow-hidden">
         {{-- Left Side Image Background --}}
@@ -77,44 +77,38 @@
                     @csrf
                     {{-- Username --}}
                     <div>
-                        <label for="username" 
+                        <label for="username"
                         class="block text-sm text-gray-700">
                             Username / Email
                         </label>
-
+                        <input
+                            name="username"
+                            id="username"
+                            type="text"
+                            placeholder="Masukkan Username atau Email"
+                            value="{{ old('username') }}"
+                            class="w-full mt-1 px-4 py-3 rounded-xl
+                            bg-white/60 backdrop-blur-md
+                            border border-gray-300
+                            focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                        >
                         @error('username')
                             <small class="text-red-500">
                                 {{ $message }}
                             </small>
                         @enderror
-
-                        <input 
-                            name="username" 
-                            id="username" 
-                            type="text" 
-                            placeholder="Masukkan Username atau Email" 
-                            value="{{ old('username') }}"
-                            class="w-full mt-1 px-4 py-3 rounded-xl 
-                            bg-white/60 backdrop-blur-md
-                            border border-gray-300
-                            focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                        >
                     </div>
+
 
                     {{-- Password --}}
                     <div x-data="{ showPassword: false }">
                         <label for="password" class="block text-sm text-gray-700">
                             Password
                         </label>
-                        @error('password')
-                            <small class="text-red-500">
-                                {{ $message }}
-                            </small>
-                        @enderror
                         <div class="relative mt-1">
-                            <input 
-                                id="password" 
-                                name="password" 
+                            <input
+                                id="password"
+                                name="password"
                                 type="password"
                                 :type = "showPassword ? 'text' : 'password'"
                                 placeholder="Masukkan password"
@@ -122,7 +116,7 @@
                                 bg-white/60 backdrop-blur-md
                                 border border-gray-300
                                 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                            <button 
+                            <button
                                 type="button"
                                 @click="showPassword = !showPassword"
                                 class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
@@ -130,6 +124,11 @@
                                 <i id="toggleIcon" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'" class="fa-solid"></i>
                             </button>
                         </div>
+                        @error('password')
+                            <small class="text-red-500">
+                                {{ $message }}
+                            </small>
+                        @enderror
                     </div>
 
                     {{-- Login Button --}}
@@ -139,17 +138,44 @@
                     </button>
                 </form>
 
-                {{-- Back to Dashboard --}}
+                {{-- Back to Landing Page --}}
                 <div class="mt-6 text-center">
-                    <a href="/dashboard"
+                    <a href="{{ route('home') }}"
                         class="text-sm text-indigo-400 hover:underline">
-                        ← Kembali ke Dashboard
+                        &larr; Kembali ke Beranda
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
+    {{-- Error Message --}}
+    @error('failed')
+        <div
+            x-data="{ open: true }"
+            x-show="open"
+            class="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
+        >
+            <div
+                x-show="open"
+                x-transition
+                class="bg-white rounded-2xl shadow-xl p-6 w-120 text-center"
+            >
+                <h2 class="text-lg font-semibold text-red-600 mb-2">
+                    Username / Password Salah
+                </h2>
+                <p class="text-gray-600 mb-4">
+                    {{ $message }}
+                </p>
+                <button
+                    @click="open = false"
+                    class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 cursor-pointer"
+                >
+                    Tutup
+                </button>
+            </div>
+        </div>
+    @enderror
+
 </body>
 </html>
-

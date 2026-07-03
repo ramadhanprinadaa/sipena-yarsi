@@ -29,6 +29,7 @@ class User extends Authenticatable
         'password',
         'status',
         'auth_type',
+        'ldap_synced_at',
     ];
 
     /**
@@ -43,7 +44,9 @@ class User extends Authenticatable
 
     protected $attributes = [
         'status' => 'active',
-        'role_id' => 7
+        'role_id' => 6, // Default role is 'Staff' (id_role = 6)
+        'auth_type' => 'local',
+        'ldap_synced_at' => null,
     ];
 
     /**

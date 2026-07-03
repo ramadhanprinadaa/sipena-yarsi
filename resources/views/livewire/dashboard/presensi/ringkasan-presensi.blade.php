@@ -105,7 +105,7 @@
                 <h4 class="text-xl font-bold text-gray-800 mt-0.5">N/A <span class="text-xs font-medium text-gray-400">Hari</span></h4>
             @else
                 <h4 class="text-2xl font-bold text-gray-800 mt-0.5">
-                    {{ $this->ringkasanData['hadir'] }}
+                    {{ $this->ringkasanData['hadir']  ?? 'N/A'}}
                     <span class="text-xs font-medium text-gray-400">Hari</span>
                 </h4>
             @endif
@@ -126,7 +126,7 @@
                 <h4 class="text-xl font-bold text-gray-800 mt-0.5">N/A <span class="text-xs font-medium text-gray-400">Hari</span></h4>
             @else
                 <h4 class="text-2xl font-bold text-gray-800 mt-0.5">
-                    {{ $this->ringkasanData['tidak_hadir'] }}
+                    {{ $this->ringkasanData['tidak_hadir'] ?? 'N/A' }}
                     <span class="text-xs font-medium text-gray-400">Hari</span>
                 </h4>
             @endif
@@ -147,7 +147,7 @@
                 <h4 class="text-xl font-bold text-gray-800 mt-0.5">N/A <span class="text-xs font-medium text-gray-400">Hari</span></h4>
             @else
                 <h4 class="text-2xl font-bold text-gray-800 mt-0.5">
-                    {{ $this->ringkasanData['lembur'] }}
+                    {{ $this->ringkasanData['lembur'] ?? 'N/A' }}
                     <span class="text-xs font-medium text-gray-400">Hari</span>
                 </h4>
             @endif
@@ -168,7 +168,7 @@
                 <h4 class="text-xl font-bold text-gray-800 mt-0.5">N/A <span class="text-xs font-medium text-gray-400">Hari</span></h4>
             @else
                 <h4 class="text-2xl font-bold text-gray-800 mt-0.5">
-                    {{ $this->ringkasanData['cuti'] }}
+                    {{ $this->ringkasanData['cuti'] ?? 'N/A' }}
                     <span class="text-xs font-medium text-gray-400">Hari</span>
                 </h4>
             @endif
@@ -189,7 +189,7 @@
                 <h4 class="text-xl font-bold text-gray-800 mt-0.5">N/A <span class="text-xs font-medium text-gray-400">Hari</span></h4>
             @else
                 <h4 class="text-2xl font-bold text-gray-800 mt-0.5">
-                    {{ $this->ringkasanData['izin'] }}
+                    {{ $this->ringkasanData['izin'] ?? 'N/A' }}
                     <span class="text-xs font-medium text-gray-400">Hari</span>
                 </h4>
             @endif
@@ -210,7 +210,7 @@
                 <h4 class="text-xl font-bold text-gray-800 mt-0.5">N/A <span class="text-xs font-medium text-gray-400">Hari</span></h4>
             @else
                 <h4 class="text-2xl font-bold text-gray-800 mt-0.5">
-                    {{ $this->ringkasanData['sakit'] }}
+                    {{ $this->ringkasanData['sakit'] ?? 'N/A' }}
                     <span class="text-xs font-medium text-gray-400">Hari</span>
                 </h4>
             @endif
@@ -231,10 +231,10 @@
                 <h4 class="text-xl font-bold text-gray-800 mt-0.5">N/A <span class="text-xs font-medium text-gray-400">h</span> <span class="text-xs font-medium text-gray-400">m</span></h4>
             @else
                 <h4 class="text-2xl font-bold text-gray-800 mt-0.5">
-                    {{ $this->ringkasanData['total_jam_kerja']['jam'] }}
+                    {{ $this->ringkasanData['total_jam_kerja']['jam']  ?? 0 }}
                     <span class="text-sm font-semibold text-gray-400 mr-1">h</span>
 
-                    {{ $this->ringkasanData['total_jam_kerja']['menit'] }}
+                    {{ $this->ringkasanData['total_jam_kerja']['menit']  ?? 0 }}
                     <span class="text-sm font-semibold text-gray-400">m</span>
                 </h4>
             @endif
@@ -255,9 +255,9 @@
                 <h4 class="text-xl font-bold text-gray-800 mt-0.5">N/A <span class="text-xs font-medium text-gray-400">h</span> <span class="text-xs font-medium text-gray-400">m</span></h4>
             @else
                 <h4 class="text-2xl font-bold text-gray-800 mt-0.5">
-                    {{ $this->ringkasanData['total_jam_lembur']['jam'] }}
+                    {{ $this->ringkasanData['total_jam_lembur']['jam'] ?? 0 }}
                     <span class="text-sm font-semibold text-gray-400 mr-1">h</span>
-                    {{ $this->ringkasanData['total_jam_lembur']['menit'] }}
+                    {{ $this->ringkasanData['total_jam_lembur']['menit'] ?? 0 }}
                     <span class="text-sm font-semibold text-gray-400">m</span>
                 </h4>
             @endif

@@ -2,117 +2,204 @@
 
 namespace App\Services;
 
-use App\Models\User;
+use App\Ldap\User as LdapUser;
 use App\Models\Pegawai;
 use App\Models\Role;
-use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use Illuminate\Support\Facades\Log;
+use LdapRecord\Container;
+use LdapRecord\Auth\BindException;
 
 class LdapAuthService
 {
-    protected string $host = 'pdc.yarsi.ac.id';
-    protected string $baseDn = 'dc=yarsi,dc=ac,dc=id';
-    protected int $port = 389;
+    /**
+     * Mapping title LDAP -> nama role SIPENA default.
+     * Role ini HANYA dipakai saat user baru pertama kali dibuat.
+     */
+    protected const ROLE_MAP = [
+        'D' => 'Dosen',
+        'S' => 'Staff',
+        'M' => 'Staff',
+    ];
 
-    public function authenticate(string $username, string $password): bool
+    protected const DEFAULT_ROLE = 'Staff';
+
+    /**
+     * Autentikasi user via LDAP, lalu resolve/provision ke User SIPENA.
+     *
+     * @return User|null  Null jika autentikasi gagal ATAU pegawai/user tidak dapat di-resolve.
+     */
+    public function authenticate(string $username, string $password): ?User
     {
-        // 1. Coba login sebagai Local User terlebih dahulu (Support Email & Username)
-        $field = filter_var($username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $ldapUser = $this->findLdapUser($username);
 
-        // 1. Coba login sebagai Local User terlebih dahulu
-        $localUser = User::where($field, $username)->where('auth_type', 'local')->first();
-        if ($localUser && Auth::attempt([$field => $username, 'password' => $password])) {
-            return true;
+        if (! $ldapUser) {
+            Log::info('LDAP login gagal: username tidak ditemukan di direktori', [
+                'username' => $username,
+            ]);
+
+            return null;
         }
 
-        // 2. Jika bukan Local User, proses via LDAP
-        $ldapConnection = @ldap_connect($this->host, $this->port);
-        if (!$ldapConnection) return false;
+        if (! $this->verifyPassword($ldapUser, $password)) {
+            Log::warning('LDAP login gagal: password salah', [
+                'username' => $username,
+            ]);
 
-        ldap_set_option($ldapConnection, LDAP_OPT_PROTOCOL_VERSION, 3);
-        ldap_set_option($ldapConnection, LDAP_OPT_REFERRALS, 0);
+            return null;
+        }
 
-        // Format user DN untuk bind, menyesuaikan struktur YARSI
-        $userDn = "cn={$username},{$this->baseDn}";
+        return $this->resolveOrProvisionUser($ldapUser);
+    }
 
-        // Proses verifikasi username dan password ke LDAP
+    /**
+     * Cari entry user di LDAP berdasarkan cn (username).
+     */
+    protected function findLdapUser(string $username): ?LdapUser
+    {
         try {
-            $bind = @ldap_bind($ldapConnection, $userDn, $password);
-        } catch (\Exception $e) {
+            return LdapUser::findBy('cn', $username);
+        } catch (\Throwable $e) {
+            Log::error('LDAP search error', [
+                'username' => $username,
+                'message' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    /**
+     * Verifikasi password dengan bind langsung ke DN user (bukan akun admin).
+     */
+    protected function verifyPassword(LdapUser $ldapUser, string $password): bool
+    {
+        try {
+            $connection = Container::getConnection($ldapUser->getConnectionName() ?? 'default');
+
+            return $connection->auth()->attempt($ldapUser->getDn(), $password);
+        } catch (BindException $e) {
+            return false;
+        } catch (\Throwable $e) {
+            Log::error('LDAP bind error', ['message' => $e->getMessage()]);
+
             return false;
         }
-
-        if ($bind) {
-            // Ambil atribut pengguna LDAP
-            $filter = "(cn=$username)";
-            $search = ldap_search($ldapConnection, $this->baseDn, $filter);
-            $entries = ldap_get_entries($ldapConnection, $search);
-
-            if ($entries['count'] > 0) {
-                $ldapData = $entries[0];
-                return $this->handleLdapProvisioning($ldapData);
-            }
-        }
-
-        return false;
     }
 
-    protected function handleLdapProvisioning(array $ldapData): bool
+    /**
+     * Resolusi pegawai -> user SIPENA. Auto-provisioning jika pegawai ditemukan
+     * tapi user belum ada. Menolak login jika pegawai tidak ditemukan.
+     */
+    protected function resolveOrProvisionUser(LdapUser $ldapUser): ?User
     {
-        // Ekstraksi data berdasarkan struktur atribut LDAP YARSI
-        $username = $ldapData['cn'][0] ?? null;
-        $nipNpm = $ldapData['description'][0] ?? null;
-        $namaLengkap = $ldapData['displayname'][0] ?? null;
-        $telp = $ldapData['telephonenumber'][0] ?? null;
-        $title = $ldapData['title'][0] ?? null; // D, S, M
+        $nip = $this->firstAttributeValue($ldapUser, 'description');
 
-        if (!$nipNpm) return false; // NIP/NPM wajib ada
+        if (! $nip) {
+            Log::warning('LDAP login ditolak: atribut description (NIP/NPM) kosong', [
+                'dn' => $ldapUser->getDn(),
+            ]);
 
-        // Cari pegawai berdasarkan NIP dari LDAP
-        $pegawai = Pegawai::where('nip', $nipNpm)->first();
+            return null;
+        }
 
-        // REJECT jika pegawai tidak terdaftar (Keamanan)
-        if (!$pegawai) return false;
+        $pegawai = Pegawai::where('nip', $nip)->first();
 
-        // Cari atau buat User berdasarkan pegawai_id
+        if (! $pegawai) {
+            // Kebijakan: pegawai tidak ditemukan -> tolak login (tidak auto-provisioning).
+            Log::warning('LDAP login ditolak: pegawai dengan NIP tersebut tidak ditemukan di SIPENA', [
+                'nip' => $nip,
+            ]);
+
+            return null;
+        }
+
         $user = User::where('pegawai_id', $pegawai->id)->first();
 
-        if (!$user) {
-            // Pertama kali login (Provisioning)
-            $user = new User();
-            $user->pegawai_id = $pegawai->id;
-            $user->auth_type = 'ldap';
-            // Mapping Role saat pertama kali dibuat
-            $user->role_id = $this->mapLdapTitleToRole($title);
+        if (! $user) {
+            $user = $this->provisionUser($pegawai, $ldapUser);
+        } else {
+            $this->syncUserFromLdap($user, $pegawai, $ldapUser);
         }
 
-        // Sinkronisasi data yang diizinkan (berlaku untuk insert baru & update)
-        $user->username = $username;
-        // Hanya sinkron jika nilai dari LDAP tidak kosong
-        if ($namaLengkap) $pegawai->nama = $namaLengkap;
-        if ($telp) $pegawai->no_telpon = $telp;
-
-        $pegawai->save();
-        $user->save();
-
-        // Login user ke sesi Laravel
-        Auth::login($user);
-
-        return true;
+        return $user;
     }
 
-    protected function mapLdapTitleToRole(?string $title): int
+    /**
+     * Buat user SIPENA baru untuk pegawai yang baru pertama kali login via LDAP.
+     */
+    protected function provisionUser(Pegawai $pegawai, LdapUser $ldapUser): User
     {
-        // Role Mapping berdasarkan $title LDAP: D, S, M
-        $roleName = match(strtoupper($title)) {
-            'D' => 'Dosen',
-            'S', 'M' => 'Staff',
-            default => 'Staff'
-        };
+        $roleId = $this->resolveRoleId($ldapUser);
 
-        // Asumsi nama role di tabel roles sesuai dengan string di atas
+        $user = new User([
+            'username' => $this->firstAttributeValue($ldapUser, 'cn'),
+            'pegawai_id' => $pegawai->id,
+            'role_id' => $roleId,
+            'email' => $pegawai->email_yarsi,
+            'status' => 'active',
+            'auth_type' => 'ldap',
+        ]);
+
+        // Password acak & di-hash: user LDAP tidak pernah login pakai password lokal,
+        // tapi kolom password NOT NULL di banyak skema Laravel default.
+        $user->password = bcrypt(str()->random(32));
+        $user->ldap_synced_at = now();
+        $user->save();
+
+        Log::info('User SIPENA baru dibuat dari LDAP', [
+            'user_id' => $user->id,
+            'pegawai_id' => $pegawai->id,
+            'role_id' => $roleId,
+        ]);
+
+        return $user;
+    }
+
+    /**
+     * Sinkronkan HANYA data identitas dari LDAP. Role dan data bisnis lain
+     * tidak boleh disentuh setelah user pernah dibuat.
+     */
+    protected function syncUserFromLdap(User $user, Pegawai $pegawai, LdapUser $ldapUser): void
+    {
+        $user->fill([
+            'username' => $this->firstAttributeValue($ldapUser, 'cn') ?? $user->username,
+            'email' => $pegawai->email_yarsi ?? $user->email,
+        ]);
+
+        $user->ldap_synced_at = now();
+        $user->save();
+    }
+
+    /**
+     * Tentukan role_id awal berdasarkan title LDAP. Dipanggil HANYA saat provisioning.
+     */
+    protected function resolveRoleId(LdapUser $ldapUser): int
+    {
+        $title = $this->firstAttributeValue($ldapUser, 'title');
+        $roleName = self::ROLE_MAP[$title] ?? self::DEFAULT_ROLE;
+
         $role = Role::where('name', $roleName)->first();
 
-        // Return ID, fallback ke default role ID (misal 7) jika tidak ketemu
-        return $role ? $role->id : 7;
+        if (! $role) {
+            Log::warning('Role default tidak ditemukan di tabel roles, fallback ke role_id bawaan User model', [
+                'role_name' => $roleName,
+            ]);
+
+            // Fallback ke default attribute pada User model (role_id => 6 / Staff)
+            return (new User())->role_id;
+        }
+
+        return $role->id;
+    }
+
+    /**
+     * Helper: ambil nilai pertama dari atribut LDAP multi-value dengan aman.
+     */
+    protected function firstAttributeValue(LdapUser $ldapUser, string $attribute): ?string
+    {
+        $value = $ldapUser->getFirstAttribute($attribute);
+
+        return $value !== null ? trim($value) : null;
     }
 }

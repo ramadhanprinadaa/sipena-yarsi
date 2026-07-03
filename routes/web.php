@@ -5,13 +5,12 @@ use App\Http\Controllers\DetailPegawaiController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\ManajemenPegawaiController;
 use App\Http\Controllers\PegawaiController;
-use App\Livewire\Manajemen\Pegawai\DetailPegawai;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return Auth::check() ? redirect()->route('kepegawaian') : redirect()->route('login');
-});
+    return Auth::check() ? redirect()->route('kepegawaian') : view('welcome');
+})->name('home');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
