@@ -5,6 +5,7 @@ namespace App\Livewire\Manajemen\Pegawai\DetailPegawai\Keluarga;
 use App\Models\JenisKeluarga;
 use App\Models\Keluarga;
 use App\Models\Pegawai;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -17,12 +18,12 @@ class TambahKeluarga extends Component
 
     public array $form = [
         'jenis_keluarga_id' => '',
-        'nama' => '',
-        'tempat_lahir' => '',
-        'tanggal_lahir' => '',
-        'pekerjaan' => '',
-        'no_telpon' => '',
-        'alamat' => '',
+        'nama'              => '',
+        'tempat_lahir'      => '',
+        'tanggal_lahir'     => '',
+        'pekerjaan'         => '',
+        'no_telpon'         => '',
+        'alamat'            => '',
     ];
 
     public function mount(int $pegawai_id)
@@ -32,7 +33,7 @@ class TambahKeluarga extends Component
         $this->jenisKeluarga = JenisKeluarga::pluck('jenis', 'id')->toArray();
     }
 
-    protected function rules()
+    protected function rules(): array
     {
         return [
             'form.jenis_keluarga_id' => 'required|exists:jenis_keluarga,id',
@@ -46,7 +47,7 @@ class TambahKeluarga extends Component
     }
 
 
-    protected function validationAttributes()
+    protected function validationAttributes(): array
     {
         return [
             'form.jenis_keluarga_id' => 'Hubungan Keluarga',
@@ -61,7 +62,27 @@ class TambahKeluarga extends Component
 
     protected function messages(): array
     {
-        return [];
+        return [
+            'form.jenis_keluarga_id.required' => ':attribute wajib dipilih.',
+            'form.jenis_keluarga_id.exists'   => ':attribute yang dipilih tidak valid.',
+
+            'form.nama.required'             => ':attribute wajib diisi.',
+            'form.nama.string'               => ':attribute harus berupa teks.',
+            'form.nama.max'                  => ':attribute maksimal :max karakter.',
+
+            'form.tempat_lahir.string'       => ':attribute harus berupa teks.',
+            'form.tempat_lahir.max'          => ':attribute maksimal :max karakter.',
+
+            'form.tanggal_lahir.required'    => ':attribute wajib diisi.',
+
+            'form.pekerjaan.string'          => ':attribute harus berupa teks.',
+            'form.pekerjaan.max'             => ':attribute maksimal :max karakter.',
+
+            'form.no_telpon.string'          => ':attribute harus berupa teks.',
+            'form.no_telpon.max'             => ':attribute maksimal :max karakter.',
+
+            'form.alamat.string'             => ':attribute harus berupa teks.',
+        ];
     }
 
     public function save()
@@ -73,7 +94,7 @@ class TambahKeluarga extends Component
             'jenis_keluarga_id' => $this->form['jenis_keluarga_id'],
             'nama'              => $this->form['nama'],
             'tempat_lahir'      => $this->form['tempat_lahir'],
-            'tanggal_lahir'     => $this->form['tanggal_lahir'],
+            'tanggal_lahir'     => Carbon::createFromFormat('d/m/Y', $this->form['tanggal_lahir'])->format('Y-m-d'),
             'pekerjaan'         => $this->form['pekerjaan'] ?: null,
             'no_telpon'         => $this->form['no_telpon'] ?: null,
             'alamat'            => $this->form['alamat'] ?: null,

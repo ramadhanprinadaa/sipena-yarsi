@@ -1,10 +1,10 @@
-<div x-data="{ openEditModal: false }" @open-rekening-modal.window="openEditModal = true"
-    @close-rekening-modal.window="openEditModal = false"
-    class="flex flex-col space-y-6 min-h-[calc(100vh-380px)]">
+<div x-data="{ openFormModal: false }"
+    @open-rekening-modal.window="openFormModal = true"
+    @close-rekening-modal.window="openFormModal = false"
+    class="flex flex-col min-h-[calc(100vh-380px)]">
 
     <!-- Header -->
-    <div
-        class="flex items-center justify-between bg-white rounded-md shadow-md border border-indigo-100 border-t-4 border-t-indigo-500 p-5">
+    <div class="flex items-center justify-between bg-white rounded-md shadow-md border border-indigo-100 border-t-4 border-t-indigo-500 p-5">
 
         <!-- Header Information -->
         <div>
@@ -14,10 +14,19 @@
                 Informasi detail akun bank dan pencatatan riwayat modifikasi data.
             </p>
         </div>
+
+        <!-- Button Trigger Add / Edit Rekening -->
+        <button
+            type="button"
+            @click="openFormModal = true; $dispatch('open-rekening-modal')"
+            class="flex items-center px-3 h-10 justify-center cursor-pointer bg-indigo-600 text-indigo-50 hover:bg-indigo-50 hover:text-indigo-600 text-sm rounded-md transition">
+            <i class="fa-solid {{ $currentRekening ? 'fa-pen-to-square' : 'fa-plus' }} mr-2"></i>
+            {{ $currentRekening ? 'Edit Rekening' : 'Tambah Rekening' }}
+        </button>
     </div>
 
     <!-- Main Content -->
-    <div class="flex-1 relative rounded-md shadow-md border border-slate-100 border-t-4 border-t-slate-500 p-4 flex">
+    <div class="flex-1 relative rounded-md shadow-md border border-slate-100 border-t-4 border-t-slate-500 p-4 flex mt-6">
 
         @if ($currentRekening)
             <div class="grid grid-cols-1 lg:grid-cols-10 gap-8 items-center flex-1">
@@ -87,7 +96,7 @@
                             </p>
                             <p class="text-[10px] text-slate-400">
                                 Pada tanggal:
-                                {{ \Carbon\Carbon::parse($currentRekening['updated_at'])->format('d M Y, H:i') }} WIB
+                                {{ \Carbon\Carbon::parse($currentRekening['updated_at'])->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB
                             </p>
                         </div>
                     </div>
@@ -114,4 +123,27 @@
             </div>
         @endif
     </div>
+
+    <!-- Modal Form Rekening -->
+    <template x-teleport="body">
+        <div x-show="openFormModal" x-cloak x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            @click.self="openFormModal = false"
+            @keydown.escape.window="openFormModal = false"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md"
+            style="display: none;">
+
+            <div x-show="openFormModal" x-cloak
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 scale-95" @click.stop>
+                <livewire:manajemen.pegawai.detail-pegawai.rekening.rekening-form :pegawai_id="$pegawai_id" />
+            </div>
+        </div>
+    </template>
 </div>

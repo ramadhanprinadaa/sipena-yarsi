@@ -1,7 +1,6 @@
 <div class="relative bg-white min-w-2xl min-h-[78vh] mx-auto rounded-2xl shadow-2xl flex flex-col overflow-hidden">
     <!-- Header -->
-    <header
-        class="flex items-center justify-between px-5 py-4 border-b border-slate-200 shrink-0 bg-gradient-to-r from-indigo-50 via-white to-blue-50">
+    <header class="flex items-center justify-between px-5 py-4 border-b border-slate-200 shrink-0 bg-gradient-to-r from-indigo-50 via-white to-blue-50">
 
         <!-- Decoration -->
         <div class="absolute inset-0 opacity-40 pointer-events-none">
@@ -122,7 +121,7 @@
                     autohide: true,
                     language: 'id'
                 });
-                
+
                 $refs.input.addEventListener('changeDate', () => {
                     $wire.set('form.tanggal_lahir', $refs.input.value);
                 });" class="relative">

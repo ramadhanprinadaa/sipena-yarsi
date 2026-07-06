@@ -1,7 +1,8 @@
 <div class="relative bg-white min-w-4xl max-h-[88vh] mx-auto rounded-2xl shadow-2xl flex flex-col overflow-hidden">
 
     <!-- Header -->
-    <header class="relative flex items-center justify-between px-5 py-4 border-b border-slate-200 shrink-0 bg-gradient-to-r from-indigo-50 via-white to-blue-50">
+    <header
+        class="relative flex items-center justify-between px-5 py-4 border-b border-slate-200 shrink-0 bg-gradient-to-r from-indigo-50 via-white to-blue-50">
 
         <!-- Decoration -->
         <div class="absolute inset-0 opacity-40 pointer-events-none">
@@ -11,7 +12,8 @@
 
         <!-- Header Information -->
         <div class="relative flex items-center gap-4">
-            <div class="w-11 h-11 rounded-2xl bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-200">
+            <div
+                class="w-11 h-11 rounded-2xl bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-200">
                 <i class="fa-solid fa-id-card-clip text-lg text-white"></i>
             </div>
             <div>
@@ -24,8 +26,8 @@
             </div>
         </div>
 
+        <!-- Close Button -->
         <div class="relative flex items-center gap-2">
-            <!-- Close Button -->
             <button type="button" @click="$dispatch('close-edit-biodata-modal')" wire:loading.attr="disabled"
                 class="w-10 h-10 rounded-full hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all duration-200 cursor-pointer">
                 <i class="fa-solid fa-xmark text-lg"></i>
@@ -40,7 +42,8 @@
         <div class="flex-1 overflow-y-auto px-6 py-4">
 
             <!-- Data Tidak Dapat Diubah -->
-            <p class="text-xs font-medium text-indigo-400 uppercase tracking-wider mb-4">Identitas Pegawai (Tidak Dapat Diubah)</p>
+            <p class="text-xs font-medium text-indigo-400 uppercase tracking-wider mb-4">Identitas Pegawai (Tidak Dapat
+                Diubah)</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 mb-3">
                 <!-- Nama (read-only) -->
                 <div>
@@ -68,7 +71,9 @@
                     <input type="text" wire:model.live.blur="form.ktp"
                         class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
                         placeholder="cth: 317203xxxxxxxxxxx">
-                    @error('form.ktp') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.ktp')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- NPWP -->
@@ -77,7 +82,9 @@
                     <input type="text" wire:model.live.blur="form.npwp"
                         class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
                         placeholder="cth: 317203xxxxxxxxxxx">
-                    @error('form.npwp') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.npwp')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Gelar Depan -->
@@ -86,7 +93,9 @@
                     <input type="text" wire:model.live.blur="form.gelar_depan"
                         class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
                         placeholder="cth: Dr.">
-                    @error('form.gelar_depan') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.gelar_depan')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Gelar Belakang -->
@@ -95,7 +104,9 @@
                     <input type="text" wire:model.live.blur="form.gelar_belakang"
                         class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
                         placeholder="cth: S.Kom., M.T.">
-                    @error('form.gelar_belakang') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.gelar_belakang')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
@@ -104,27 +115,28 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 space-y-3">
 
                 <!-- Unit Kerja -->
-                <div
-                    x-data="{
-                        show: false,
-                        selected: @entangle('form.unit_kerja_id').live,
-                        get selectedLabel() {
-                            let data = {{ Js::from($unitKerja) }};
-                            let found = data.find(u => u.id == this.selected);
-                            return found ? found.name : '';
-                        }
-                    }"
-                    @keydown.escape.window="show = false"
+                <div x-data="{
+                    show: false,
+                    selected: @entangle('form.unit_kerja_id').live,
+                    get selectedLabel() {
+                        let data = {{ Js::from($unitKerja) }};
+                        let found = data.find(u => u.id == this.selected);
+                        return found ? found.name : '';
+                    }
+                }" @keydown.escape.window="show = false"
                     class="relative input-wrapper col-span-2">
                     <label class="block text-xs font-medium text-gray-500 mb-1">
                         Unit Kerja <span class="text-red-500">*</span>
                     </label>
                     <button type="button" x-on:click="show = !show"
                         class="w-full flex justify-between items-center py-2 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none text-sm cursor-pointer">
-                        <span :class="selectedLabel ? 'text-gray-900' : 'text-gray-500/90'" x-text="selectedLabel || 'Pilih Unit Kerja'"></span>
+                        <span :class="selectedLabel ? 'text-gray-900' : 'text-gray-500/90'"
+                            x-text="selectedLabel || 'Pilih Unit Kerja'"></span>
                         <i class="fa-solid fa-chevron-down text-xs text-gray-400/90"></i>
                     </button>
-                    @error('form.unit_kerja_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.unit_kerja_id')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                     <div x-show="show" @click.outside="show = false" x-transition
                         class="absolute mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
                         <ul class="text-sm py-1">
@@ -146,31 +158,33 @@
                     <input type="text" wire:model.live.blur="form.unit_bagian"
                         class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
                         placeholder="cth: Bagian Akademik">
-                    @error('form.unit_bagian') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.unit_bagian')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Jenis Pegawai -->
-                <div
-                    x-data="{
-                        show: false,
-                        selected: @entangle('form.jenis_pegawai_id').live,
-                        get selectedLabel() {
-                            let data = {{ Js::from($jenisPegawai) }};
-                            let found = data.find(u => u.id == this.selected);
-                            return found ? found.jenis : '';
-                        }
-                    }"
-                    @keydown.escape.window="show = false"
-                    class="relative input-wrapper">
+                <div x-data="{
+                    show: false,
+                    selected: @entangle('form.jenis_pegawai_id').live,
+                    get selectedLabel() {
+                        let data = {{ Js::from($jenisPegawai) }};
+                        let found = data.find(u => u.id == this.selected);
+                        return found ? found.jenis : '';
+                    }
+                }" @keydown.escape.window="show = false" class="relative input-wrapper">
                     <label class="block text-xs font-medium text-gray-500 mb-1">
                         Jenis Pegawai <span class="text-red-500">*</span>
                     </label>
                     <button type="button" x-on:click="show = !show"
                         class="w-full flex justify-between items-center py-2 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none text-sm cursor-pointer">
-                        <span :class="selectedLabel ? 'text-gray-900' : 'text-gray-500/90'" x-text="selectedLabel || 'Pilih Jenis Pegawai'"></span>
+                        <span :class="selectedLabel ? 'text-gray-900' : 'text-gray-500/90'"
+                            x-text="selectedLabel || 'Pilih Jenis Pegawai'"></span>
                         <i class="fa-solid fa-chevron-down text-xs text-gray-400/90"></i>
                     </button>
-                    @error('form.jenis_pegawai_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.jenis_pegawai_id')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                     <div x-show="show" @click.outside="show = false" x-transition
                         class="absolute mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
                         <ul class="text-sm py-1">
@@ -187,27 +201,27 @@
                 </div>
 
                 <!-- Status Pegawai -->
-                <div
-                    x-data="{
-                        show: false,
-                        selected: @entangle('form.status_pegawai_id').live,
-                        get selectedLabel() {
-                            let data = {{ Js::from($statusPegawai) }};
-                            let found = data.find(u => u.id == this.selected);
-                            return found ? found.status : '';
-                        }
-                    }"
-                    @keydown.escape.window="show = false"
-                    class="relative input-wrapper">
+                <div x-data="{
+                    show: false,
+                    selected: @entangle('form.status_pegawai_id').live,
+                    get selectedLabel() {
+                        let data = {{ Js::from($statusPegawai) }};
+                        let found = data.find(u => u.id == this.selected);
+                        return found ? found.status : '';
+                    }
+                }" @keydown.escape.window="show = false" class="relative input-wrapper">
                     <label class="block text-xs font-medium text-gray-500 mb-1">
                         Status Pegawai <span class="text-red-500">*</span>
                     </label>
                     <button type="button" x-on:click="show = !show"
                         class="w-full flex justify-between items-center py-2 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none text-sm cursor-pointer">
-                        <span :class="selectedLabel ? 'text-gray-900' : 'text-gray-500/90'" x-text="selectedLabel || 'Pilih Status Pegawai'"></span>
+                        <span :class="selectedLabel ? 'text-gray-900' : 'text-gray-500/90'"
+                            x-text="selectedLabel || 'Pilih Status Pegawai'"></span>
                         <i class="fa-solid fa-chevron-down text-xs text-gray-400/90"></i>
                     </button>
-                    @error('form.status_pegawai_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.status_pegawai_id')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                     <div x-show="show" @click.outside="show = false" x-transition
                         class="absolute mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
                         <ul class="text-sm py-1">
@@ -224,25 +238,25 @@
                 </div>
 
                 <!-- Jenis Kelamin -->
-                <div
-                    x-data="{
-                        show: false,
-                        selected: @entangle('form.jenis_kelamin').live,
-                        get selectedLabel() {
-                            return this.selected === 'L' ? 'Laki-Laki' : (this.selected === 'P' ? 'Perempuan' : '');
-                        }
-                    }"
-                    @keydown.escape.window="show = false"
-                    class="relative input-wrapper">
+                <div x-data="{
+                    show: false,
+                    selected: @entangle('form.jenis_kelamin').live,
+                    get selectedLabel() {
+                        return this.selected === 'L' ? 'Laki-Laki' : (this.selected === 'P' ? 'Perempuan' : '');
+                    }
+                }" @keydown.escape.window="show = false" class="relative input-wrapper">
                     <label class="block text-xs font-medium text-gray-500 mb-1">
                         Jenis Kelamin <span class="text-red-500">*</span>
                     </label>
                     <button type="button" x-on:click="show = !show"
                         class="w-full flex justify-between items-center py-2 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none text-sm cursor-pointer">
-                        <span :class="selectedLabel ? 'text-gray-900' : 'text-gray-500/90'" x-text="selectedLabel || 'Pilih Jenis Kelamin'"></span>
+                        <span :class="selectedLabel ? 'text-gray-900' : 'text-gray-500/90'"
+                            x-text="selectedLabel || 'Pilih Jenis Kelamin'"></span>
                         <i class="fa-solid fa-chevron-down text-xs text-gray-400/90"></i>
                     </button>
-                    @error('form.jenis_kelamin') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.jenis_kelamin')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                     <div x-show="show" @click.outside="show = false" x-transition
                         class="absolute mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
                         <ul class="text-sm py-1">
@@ -270,7 +284,9 @@
                     <input type="text" wire:model.live.blur="form.tempat_lahir"
                         class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
                         placeholder="cth: Jakarta">
-                    @error('form.tempat_lahir') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.tempat_lahir')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Tanggal Lahir -->
@@ -278,17 +294,18 @@
                     <label class="block text-xs font-medium text-gray-600 mb-1">
                         Tanggal Lahir <span class="text-red-500">*</span>
                     </label>
-                    <div x-data="{ picker: null }"
-                        x-init="picker = new Datepicker($refs.input, { format: 'dd/mm/yyyy', autohide: true, language: 'id' });
-                            $refs.input.addEventListener('changeDate', () => { $wire.set('form.tanggal_lahir', $refs.input.value); });"
-                        class="relative">
+                    <div x-data="{ picker: null }" x-init="picker = new Datepicker($refs.input, { format: 'dd/mm/yyyy', autohide: true, language: 'id' });
+                    $refs.input.addEventListener('changeDate', () => { $wire.set('form.tanggal_lahir', $refs.input.value); });" class="relative">
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                             <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
                         </div>
-                        <input wire:model="form.tanggal_lahir" type="text" x-ref="input" placeholder="Pilih Tanggal Lahir"
+                        <input wire:model="form.tanggal_lahir" type="text" x-ref="input"
+                            placeholder="Pilih Tanggal Lahir"
                             class="w-full h-9 pl-9 pr-3 text-sm text-gray-700 placeholder-gray-400 border-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none focus:ring-0 transition-colors duration-200 placeholder:italic">
                     </div>
-                    @error('form.tanggal_lahir') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.tanggal_lahir')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
@@ -300,17 +317,18 @@
                     <label class="block text-xs font-medium text-gray-600 mb-1">
                         Tanggal Bergabung <span class="text-red-500">*</span>
                     </label>
-                    <div x-data="{ picker: null }"
-                        x-init="picker = new Datepicker($refs.input, { format: 'dd/mm/yyyy', autohide: true, language: 'id' });
-                            $refs.input.addEventListener('changeDate', () => { $wire.set('form.tanggal_bergabung', $refs.input.value); });"
-                        class="relative">
+                    <div x-data="{ picker: null }" x-init="picker = new Datepicker($refs.input, { format: 'dd/mm/yyyy', autohide: true, language: 'id' });
+                    $refs.input.addEventListener('changeDate', () => { $wire.set('form.tanggal_bergabung', $refs.input.value); });" class="relative">
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                             <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
                         </div>
-                        <input wire:model="form.tanggal_bergabung" type="text" x-ref="input" placeholder="Pilih Tanggal Bergabung"
+                        <input wire:model="form.tanggal_bergabung" type="text" x-ref="input"
+                            placeholder="Pilih Tanggal Bergabung"
                             class="w-full h-9 pl-9 pr-3 text-sm text-gray-700 placeholder-gray-400 border-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none focus:ring-0 transition-colors duration-200 placeholder:italic">
                     </div>
-                    @error('form.tanggal_bergabung') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.tanggal_bergabung')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 @switch($form['status_pegawai_id'])
@@ -320,38 +338,42 @@
                             <label class="block text-xs font-medium text-gray-600 mb-1">
                                 Tanggal Pensiun <span class="text-red-500">*</span>
                             </label>
-                            <div x-data="{ picker: null }"
-                                x-init="picker = new Datepicker($refs.input, { format: 'dd/mm/yyyy', autohide: true, language: 'id' });
-                                    $refs.input.addEventListener('changeDate', () => { $wire.set('form.tanggal_pensiun', $refs.input.value); });"
-                                class="relative">
+                            <div x-data="{ picker: null }" x-init="picker = new Datepicker($refs.input, { format: 'dd/mm/yyyy', autohide: true, language: 'id' });
+                            $refs.input.addEventListener('changeDate', () => { $wire.set('form.tanggal_pensiun', $refs.input.value); });" class="relative">
                                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                     <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
                                 </div>
-                                <input wire:model="form.tanggal_pensiun" type="text" x-ref="input" placeholder="Pilih Tanggal Pensiun"
+                                <input wire:model="form.tanggal_pensiun" type="text" x-ref="input"
+                                    placeholder="Pilih Tanggal Pensiun"
                                     class="w-full h-9 pl-9 pr-3 text-sm text-gray-700 placeholder-gray-400 border-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none focus:ring-0 transition-colors duration-200 placeholder:italic">
                             </div>
-                            @error('form.tanggal_pensiun') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                            @error('form.tanggal_pensiun')
+                                <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
-                        @break
+                    @break
+
                     @case(2)
                         <!-- Tanggal Habis Kontrak -->
                         <div>
                             <label class="block text-xs font-medium text-gray-600 mb-1">
                                 Tanggal Habis Kontrak <span class="text-red-500">*</span>
                             </label>
-                            <div x-data="{ picker: null }"
-                                x-init="picker = new Datepicker($refs.input, { format: 'dd/mm/yyyy', autohide: true, language: 'id' });
-                                    $refs.input.addEventListener('changeDate', () => { $wire.set('form.tanggal_habis_kontrak', $refs.input.value); });"
-                                class="relative">
+                            <div x-data="{ picker: null }" x-init="picker = new Datepicker($refs.input, { format: 'dd/mm/yyyy', autohide: true, language: 'id' });
+                            $refs.input.addEventListener('changeDate', () => { $wire.set('form.tanggal_habis_kontrak', $refs.input.value); });" class="relative">
                                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                     <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
                                 </div>
-                                <input wire:model="form.tanggal_habis_kontrak" type="text" x-ref="input" placeholder="Pilih Tanggal Habis Kontrak"
+                                <input wire:model="form.tanggal_habis_kontrak" type="text" x-ref="input"
+                                    placeholder="Pilih Tanggal Habis Kontrak"
                                     class="w-full h-9 pl-9 pr-3 text-sm text-gray-700 placeholder-gray-400 border-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none focus:ring-0 transition-colors duration-200 placeholder:italic">
                             </div>
-                            @error('form.tanggal_habis_kontrak') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                            @error('form.tanggal_habis_kontrak')
+                                <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
-                        @break
+                    @break
+
                 @endswitch
             </div>
 
@@ -363,7 +385,9 @@
                     <input type="text" wire:model.live.blur="form.no_telpon"
                         class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
                         placeholder="cth: 0812xxxxxxxx">
-                    @error('form.no_telpon') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.no_telpon')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="md:col-span-2">
@@ -371,7 +395,9 @@
                     <input type="text" wire:model.live.blur="form.email_yarsi"
                         class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
                         placeholder="cth: budi@yarsi.ac.id">
-                    @error('form.email_yarsi') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.email_yarsi')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
@@ -382,7 +408,9 @@
                     <input type="text" wire:model.live.blur="form.alamat_ktp"
                         class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
                         placeholder="cth: Jl. Ngawi Selatan No. 123">
-                    @error('form.alamat_ktp') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.alamat_ktp')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="md:col-span-2">
@@ -390,7 +418,9 @@
                     <input type="text" wire:model.live.blur="form.alamat_domisili"
                         class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
                         placeholder="cth: Jl. Ngawi Timur No. 135">
-                    @error('form.alamat_domisili') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.alamat_domisili')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
@@ -406,7 +436,9 @@
                         <option value="active">Aktif</option>
                         <option value="inactive">Tidak Aktif</option>
                     </select>
-                    @error('form.status') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('form.status')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
         </div>
@@ -415,7 +447,7 @@
         <div class="flex items-center justify-end gap-2 px-6 py-4 border-t border-gray-100 shrink-0 bg-gray-50/60">
 
             <!-- Indikator perubahan belum tersimpan -->
-            @if($this->isDirty)
+            @if ($this->isDirty)
                 <span class="mr-auto text-xs text-amber-600 flex items-center gap-1">
                     <i class="fa-solid fa-circle-exclamation"></i>
                     Ada perubahan yang belum disimpan
@@ -423,7 +455,9 @@
             @endif
 
             <!-- Batal -->
-            <button type="button" @click="$dispatch('close-edit-biodata-modal')"
+            <button
+                type="button"
+                @click="$dispatch('close-edit-biodata-modal')"
                 class="px-4 py-2 text-sm font-medium text-white bg-red-400 hover:bg-red-500 rounded-md transition cursor-pointer">
                 Batal
             </button>
@@ -431,9 +465,7 @@
             <!-- Simpan (disabled ketika form belum berubah) -->
             <button type="button"
                 x-on:click="showLoading = true; $wire.save().finally(() => setTimeout(() => showLoading = false, 500))"
-                @disabled($errors->any() || !$this->isDirty)
-                wire:loading.attr="disabled"
-                wire:target="save"
+                @disabled($errors->any() || !$this->isDirty) wire:loading.attr="disabled" wire:target="save"
                 class="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-emerald-500 hover:bg-emerald-600 text-white rounded-md transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-emerald-500">
 
                 <!-- Loading spinner -->

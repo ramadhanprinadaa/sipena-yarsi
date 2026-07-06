@@ -220,7 +220,7 @@
                     x-transition:enter-start="opacity-0 translate-y-4"
                     x-transition:enter-end="opacity-100 translate-y-0"
                     style="display: none;">
-                    <livewire:manajemen.pegawai.detail-pegawai.rekening :pegawai_id="$pegawai->id" />
+                    <livewire:manajemen.pegawai.detail-pegawai.rekening.rekening :pegawai_id="$pegawai->id" />
                 </div>
 
                 <div x-show="activeTab === 'pendidikan'" x-cloak
@@ -228,7 +228,7 @@
                     x-transition:enter-start="opacity-0 translate-y-4"
                     x-transition:enter-end="opacity-100 translate-y-0"
                     style="display: none;">
-                    <livewire:manajemen.pegawai.detail-pegawai.pendidikan :pegawai_id="$pegawai->id" />
+                    <livewire:manajemen.pegawai.detail-pegawai.pendidikan.pendidikan :pegawai_id="$pegawai->id" />
                 </div>
 
                 <div x-show="activeTab === 'kepegawaian'" x-cloak>

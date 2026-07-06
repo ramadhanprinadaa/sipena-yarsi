@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Manajemen\Pegawai\DetailPegawai;
+namespace App\Livewire\Manajemen\Pegawai\DetailPegawai\Pendidikan;
 
 use App\Models\JenjangPendidikan;
 use App\Models\RiwayatPendidikan;
@@ -28,7 +28,7 @@ class Pendidikan extends Component
     #[Session]
     public ?string $sortDirection = 'asc';
 
-    #[On('refresh-table')]
+    #[On('refresh-table-pendidikan')]
     public function refreshTable(): void
     {
         $this->resetPage();
@@ -124,6 +124,6 @@ class Pendidikan extends Component
 
     public function render()
     {
-        return view('livewire.manajemen.pegawai.detail-pegawai.pendidikan');
+        return view('livewire.manajemen.pegawai.detail-pegawai.pendidikan.pendidikan');
     }
 }

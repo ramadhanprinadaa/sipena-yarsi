@@ -3,8 +3,7 @@
     openEditModal: false,
     openLoadingDetail: false,
     openDeleteModal: false
-}"
-    @edit-keluarga-loaded.window="openLoadingDetail = false; openEditModal = true;"
+}" @edit-keluarga-loaded.window="openLoadingDetail = false; openEditModal = true;"
     @close-modal.window="openAddModal = false"
     @close-edit-modal.window="openEditModal = false; openLoadingDetail = false;"
     @close-delete-modal.window="openDeleteModal = false" class="flex flex-col h-[calc(100vh-280px)]">
@@ -78,14 +77,15 @@
                 <button @click="openAddModal = true"
                     class="flex items-center px-3 h-10 justify-center cursor-pointer bg-indigo-600 text-indigo-50 hover:bg-indigo-50 hover:text-indigo-600 text-sm rounded-md transition">
                     <i class="fa-solid fa-user-plus mr-2"></i>
-                    <span>Tambah Data</span>
+                    <span>Tambah Keluarga</span>
                 </button>
             @endif
         </div>
     </div>
 
     <!-- Table -->
-    <div class="table-container relative rounded-md shadow-md border border-slate-100 border-t-4 border-t-slate-500 mt-4">
+    <div
+        class="table-container relative rounded-md shadow-md border border-slate-100 border-t-4 border-t-slate-500 mt-4">
 
         <!-- Loading -->
         <div wire:loading wire:target="">
@@ -310,8 +310,7 @@
         <div x-show="openEditModal || openLoadingDetail" x-cloak x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @click.self="openEditModal = false"
+            x-transition:leave-end="opacity-0" @click.self="openEditModal = false"
             @keydown.escape.window="openEditModal = false"
             class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md"
             style="display: none;">

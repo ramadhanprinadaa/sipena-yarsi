@@ -1,7 +1,14 @@
-<div class="flex flex-col space-y-6 h-[calc(100vh-250px)]">
+<div
+    x-data="{
+        openAddPendidikan: false,
+        openEditPendidikan: false,
+        openLoadingPendidikan: false,
+        openDeletePendidikan: false,
+    }"
+    @close-add-pendidikan-modal.window="openAddPendidikan = false"
+    class="flex flex-col h-[calc(100vh-250px)]">
     <!-- Header -->
-    <div
-        class="flex items-center justify-between bg-white rounded-md shadow-md border border-indigo-100 border-t-4 border-t-indigo-500 p-5">
+    <div class="flex items-center justify-between bg-white rounded-md shadow-md border border-indigo-100 border-t-4 border-t-indigo-500 p-5">
 
         <!-- Header Information -->
         <div>
@@ -12,7 +19,7 @@
             </p>
         </div>
 
-        <!-- Filter -->
+        <!-- Filter dan Button Tambah Data Pendidikan -->
         <div class="flex flex-wrap items-center gap-3">
 
             <!-- Filter Jenjang Pendidikan -->
@@ -46,11 +53,20 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Button Tambah Data Keluarga -->
+            @if (auth()->user()->hasRole(['Admin', 'SDM Yayasan']))
+                <button @click="openAddPendidikan = true; $dispatch('open-add-pendidikan-modal')"
+                    class="flex items-center px-3 h-10 justify-center cursor-pointer bg-indigo-600 text-indigo-50 hover:bg-indigo-50 hover:text-indigo-600 text-sm rounded-md transition">
+                    <i class="fa-solid fa-file-circle-plus mr-2"></i>
+                    <span>Tambah Pendidikan</span>
+                </button>
+            @endif
         </div>
     </div>
 
     <!-- Table -->
-    <div class="table-container relative rounded-md shadow-md border border-slate-100 border-t-4 border-t-slate-500">
+    <div class="table-container relative rounded-md shadow-md border border-slate-100 border-t-4 border-t-slate-500 mt-6">
         <!-- Loading -->
         <div wire:loading wire:target="">
             <div
@@ -97,20 +113,20 @@
                             </th>
 
                             <!-- Tahun Masuk -->
-                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[16%] uppercase">Tahun Masuk
+                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[15%] uppercase">Tahun Masuk
                             </th>
 
                             <!-- Tahun Lulus -->
-                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[16%] uppercase">Tahun Lulus
-                            </th>
-
-                            <!-- File Ijazah -->
-                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[20%] uppercase">File Ijazah
+                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[15%] uppercase">Tahun Lulus
                             </th>
 
                             <!-- Updated By -->
-                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[18%] uppercase">Diperbarui
+                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[25%] uppercase">Diperbarui
                                 Oleh
+                            </th>
+
+                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[15%] uppercase">
+                                Aksi
                             </th>
                         </tr>
                     </thead>
@@ -123,7 +139,7 @@
                                 </td>
 
                                 <!-- Jenjang Pendidikan -->
-                                <td class="px-4 py-3 text-sm text-gray-800">
+                                <td class="px-4 py-3 text-sm text-gray-800 truncate">
                                     @php
                                         $kodePendidikan = $p->jenjangPendidikan->kode;
                                         $badgeColor = match (true) {
@@ -165,15 +181,6 @@
                                     </span>
                                 </td>
 
-                                <!-- File Ijazah -->
-                                <td class="px-4 py-3 text-sm text-gray-800 text-center">
-                                    @if ($p->file_ijazah)
-                                        <span class="text-blue-600 hover:underline cursor-pointer">Lihat Berkas</span>
-                                    @else
-                                        <span class="text-gray-400 italic text-xs">Belum ada berkas</span>
-                                    @endif
-                                </td>
-
                                 <!-- Diperbarui Oleh -->
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-2">
@@ -190,6 +197,32 @@
                                                 Terakhir mengubah data
                                             </div>
                                         </div>
+                                    </div>
+                                </td>
+
+                                <!-- Aksi -->
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <!-- Button Unduh Berkas -->
+                                        <button
+                                            class="py-1.5 px-2 text-white bg-emerald-500 hover:bg-emerald-100 hover:text-emerald-600 rounded-md transition-colors cursor-pointer"
+                                            title="Download Berkas">
+                                            <i class="fa-solid fa-cloud-arrow-down"></i>
+                                        </button>
+
+                                        <!-- Button Lihat Berkas -->
+                                        <button
+                                            class="py-1.5 px-2 text-white bg-blue-500 hover:bg-blue-100 hover:text-blue-600 rounded-md transition-colors cursor-pointer"
+                                            title="Lihat Berkas">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+
+                                        <!-- Button Edit Pendidikan -->
+                                        <button
+                                            class="py-1.5 px-2 text-white bg-amber-500 hover:bg-amber-100 hover:text-amber-500 rounded-md transition-colors cursor-pointer"
+                                            title="Edit Data">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -247,5 +280,27 @@
             </nav>
         </div>
     </div>
+
+    <!-- Modal Tambah Pendidikan -->
+    <template x-teleport="body">
+        <div x-show="openAddPendidikan" x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            @click.self="openAddPendidikan = false"
+            @keydown.escape.window="openAddPendidikan = false"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md"
+            style="display: none;">
+            <div x-show="openAddPendidikan" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+                @click.stop>
+                <livewire:manajemen.pegawai.detail-pegawai.pendidikan.tambah-pendidikan :pegawai_id="$pegawai_id" />
+            </div>
+        </div>
+    </template>
 
 </div>
