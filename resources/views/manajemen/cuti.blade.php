@@ -21,6 +21,7 @@
         </div>
 
         <livewire:manajemen.cuti.index />
+        <livewire:manajemen.cuti.detail-cuti />
         
     </div>
 @endsection

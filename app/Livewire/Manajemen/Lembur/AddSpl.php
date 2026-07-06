@@ -126,11 +126,11 @@ class AddSpl extends Component
         $this->validate([
             'form.nomor_surat' => 'required|unique:surat_perintah_lembur,nomor_surat|string|max:255',
             'form.unit_kerja' => 'required|string|max:255',
-            'form.tanggal_dibuat' => 'required|date',
+            'form.tanggal_dibuat' => 'required|date|after_or_equal:today',
             'form.nama_kegiatan' => 'required|string|max:255',
             'form.deskripsi_tugas' => 'required|string',
             'form.jenis_hari' => 'required|in:Hari Kerja Normal,Hari Libur Mingguan,Hari Libur Nasional',
-            'form.tanggal_lembur' => 'required|date',
+            'form.tanggal_lembur' => 'required|date|after_or_equal:today',
             'form.jam_mulai' => 'required',
             'form.jam_selesai' => 'required',
             'selectedEmployees' => $this->usesSelectedEmployeeUnit() ? 'required|array|size:1' : 'required|array|min:1',

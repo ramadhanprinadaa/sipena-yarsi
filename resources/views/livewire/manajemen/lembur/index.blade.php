@@ -31,94 +31,95 @@
                 }
             @endphp
             
-            <div x-data="{ 
-                activeTab: '{{ $defaultTab }}',
-                selectedEmployees: [],
-                activeButtonWidth: 0,
-                activeButtonLeft: 0,
-                isEmployeeSelected(nip) {
-                    return this.selectedEmployees.some(emp => emp.nip === nip);
-                },
-                toggleEmployeeSelection(employee) {
-                    const index = this.selectedEmployees.findIndex(emp => emp.nip === employee.nip);
-                    if (index > -1) {
-                        this.selectedEmployees.splice(index, 1);
-                    } else {
-                        this.selectedEmployees.push(employee);
+            {{-- ─── Tabs Navigation ─── --}}
+            <div x-data="{
+                    activeTab: 'spl',
+                    init() { this.$nextTick(() => this.updatePill()) },
+                    updatePill() {
+                        const refs = {
+                            spl:     this.$refs.btnSpl,
+                            riwayat: this.$refs.btnRiwayat,
+                            laporan: this.$refs.btnLaporan,
+                            rekapitulasi:   this.$refs.btnRekapitulasi,
+                        };
+                        const btn = refs[this.activeTab];
+                        if (!btn) return;
+                        const pill = this.$refs.pill;
+                        pill.style.width  = btn.offsetWidth  + 'px';
+                        pill.style.left   = btn.offsetLeft   + 'px';
+                    },
+                    setTab(tab) {
+                        this.activeTab = tab;
+                        this.$nextTick(() => this.updatePill());
                     }
-                },
-                updateUnderline() {
-                    const buttons = {
-                        'spl': this.$refs.btnSpl,
-                        'riwayat': this.$refs.btnRiwayat,
-                        'rekap': this.$refs.btnRekap,
-                        'verifikasi': this.$refs.btnVerifikasi
-                    };
-                    const activeBtn = buttons[this.activeTab];
-                    if (activeBtn) {
-                        this.activeButtonWidth = activeBtn.offsetWidth;
-                        this.activeButtonLeft = activeBtn.offsetLeft;
-                    }
-                }
-            }" 
-            @load="updateUnderline()" 
-            class="flex flex-col gap-4 min-h-0">
-                <div class="relative border-b border-gray-200">
-                    <div class="flex gap-2">
-                        {{-- Surat Perintah Lembur (SPL) - Only Pimpinan --}}
-                        @if(in_array('spl', $allowedTabs))
-                            <button 
-                                x-ref="btnSpl"
-                                @click="activeTab = 'spl'; $nextTick(() => updateUnderline())" 
-                                :class="activeTab === 'spl' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'" 
-                                class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
-                                <i class="fa-solid fa-file-lines mr-2"></i>Surat Perintah Lembur
-                            </button>
-                        @endif
-                        
-                        {{-- Riwayat Lembur - All allowed roles --}}
-                        @if(in_array('riwayat', $allowedTabs))
-                            <button 
-                                x-ref="btnRiwayat"
-                                @click="activeTab = 'riwayat'; $nextTick(() => updateUnderline())" 
-                                :class="activeTab === 'riwayat' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'" 
-                                class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
-                                <i class="fa-solid fa-history mr-2"></i>Riwayat Pengajuan Lembur
-                            </button>
-                        @endif
+                }"
+                class="flex flex-col gap-4 min-h-0"
+            >
 
-                        {{-- Persetujuan & Verifikasi - SDM Yayasan, SDM Universitas, Pimpinan --}}
-                        @if(in_array('verifikasi', $allowedTabs))
-                            <button 
-                                x-ref="btnVerifikasi"
-                                @click="activeTab = 'verifikasi'; $nextTick(() => updateUnderline())" 
-                                :class="activeTab === 'verifikasi' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'" 
-                                class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
-                                <i class="fa-solid fa-check-double mr-2"></i>Persetujuan & Verifikasi Laporan Lembur
-                            </button>
-                        @endif
+                {{-- Tab Bar --}}
+                <div class="relative inline-flex items-center gap-1.5 p-1.5 bg-gradient-to-r from-indigo-50 via-white to-cyan-50 rounded-3xl self-start shadow-lg shadow-indigo-100/60 border border-indigo-100/80 overflow-hidden">
 
-                        {{-- Rekapitulasi - Admin & SDM Yayasan --}}
-                        @if(in_array('rekap', $allowedTabs))
-                            <button 
-                                x-ref="btnRekap"
-                                @click="activeTab = 'rekap'; $nextTick(() => updateUnderline())" 
-                                :class="activeTab === 'rekap' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'" 
-                                class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
-                                <i class="fa-solid fa-chart-bar mr-2"></i>Rekapitulasi
-                            </button>
-                        @endif
-                    </div>
-                    <!-- Smooth Underline Indicator -->
-                    <div 
-                        :style="{ left: activeButtonLeft + 'px', width: activeButtonWidth + 'px' }"
-                        class="absolute bottom-0 h-0.5 translate-y-0.5 bg-indigo-600 transition-all duration-500 ease-out"
+                    <div class="absolute -top-8 -left-8 h-24 w-24 rounded-full bg-indigo-200/25 blur-2xl pointer-events-none"></div>
+                    <div class="absolute -bottom-8 -right-8 h-24 w-24 rounded-full bg-cyan-200/25 blur-2xl pointer-events-none"></div>
+
+                    {{-- Sliding pill (background) --}}
+                    <div
+                        x-ref="pill"
+                        class="absolute top-1.5 bottom-1.5 rounded-2xl bg-white shadow-lg shadow-indigo-200/40 border border-indigo-200/70 ring-1 ring-indigo-100/50 transition-all duration-300 ease-out pointer-events-none"
                     ></div>
+
+                    {{-- Surat Perintah Lembur --}}
+                    <button
+                        x-ref="btnSpl"
+                        @click="setTab('spl')"
+                        :class="activeTab === 'spl' ? 'text-indigo-700 scale-[1.01]' : 'text-gray-500 hover:text-gray-700 hover:-translate-y-0.5'"
+                        class="relative z-10 flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-2xl transition-all duration-200 cursor-pointer whitespace-nowrap group"
+                    >
+                        <i class="fa-solid fa-file-lines text-base transition-transform duration-200 group-hover:scale-110"></i>
+                        <span>Surat Perintah Lembur</span>
+                    </button>
+
+                    {{-- Riwayat Lembur --}}
+                    <button
+                        x-ref="btnRiwayat"
+                        @click="setTab('riwayat')"
+                        :class="activeTab === 'riwayat' ? 'text-indigo-700 scale-[1.01]' : 'text-gray-500 hover:text-gray-700 hover:-translate-y-0.5'"
+                        class="relative z-10 flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-2xl transition-all duration-200 cursor-pointer whitespace-nowrap group"
+                    >
+                        <i class="fa-solid fa-history text-base transition-transform duration-200 group-hover:scale-110"></i>
+                        <span>Riwayat Lembur</span>
+                    </button>
+
+                    {{-- Laporan Lembur --}}
+                    <button
+                        x-ref="btnLaporan"
+                        @click="setTab('laporan')"
+                        :class="activeTab === 'laporan' ? 'text-indigo-700 scale-[1.01]' : 'text-gray-500 hover:text-gray-700 hover:-translate-y-0.5'"
+                        class="relative z-10 flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-2xl transition-all duration-200 cursor-pointer whitespace-nowrap group"
+                    >
+                        <i class="fa-solid fa-clipboard-check text-base transition-transform duration-200 group-hover:scale-110"></i>
+                        <span>Laporan Lembur</span>
+                    </button>
+
+                    {{-- Rekapitulasi --}}
+                    <button
+                        x-ref="btnRekapitulasi"
+                        @click="setTab('rekapitulasi')"
+                        :class="activeTab === 'rekapitulasi' ? 'text-indigo-700 scale-[1.01]' : 'text-gray-500 hover:text-gray-700 hover:-translate-y-0.5'"
+                        class="relative z-10 flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-2xl transition-all duration-200 cursor-pointer whitespace-nowrap group"
+                    >
+                        <i class="fa-solid fa-chart-bar text-base transition-transform duration-200 group-hover:scale-110"></i>
+                        <span>Rekapitulasi</span>
+                    </button>
                 </div>
 
                 {{-- TAB 1: Surat Perintah Lembur (SPL) - Only Pimpinan --}}
                 @if(in_array('spl', $allowedTabs))
-                <div x-show="activeTab === 'spl'" class="flex flex-col space-y-4 min-h-[65vh]">
+                <div x-show="activeTab === 'spl'" 
+                    x-transition:enter="transition ease-out duration-200" 
+                    x-transition:enter-start="opacity-0 translate-y-1" 
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="flex flex-col space-y-4 min-h-[65vh]">
 
                     <!-- Filter & Search -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -126,14 +127,14 @@
                         <!-- Filter -->
                         <div class="flex flex-wrap gap-3">
                             <div class="relative w-48">
-                                <input type="date" wire:model.live="filterSplDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:ring-3 focus:ring-indigo-500">
+                                <input type="date" wire:model.live="filterSplDate" class="filter-dropdown border border-gray-200">
                             </div>
                         </div>
 
-                        <!-- Button -->
-                        <button wire:click="$dispatch('open-add-spl')" class="flex items-center w-48 h-10 justify-center cursor-pointer bg-[#2B76FF] hover:shadow-lg text-white text-sm rounded-[10px] transition">
+                        <button wire:click="$dispatch('open-add-spl')" class="flex items-center w-48 h-10 justify-center cursor-pointer bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 hover:shadow-xl text-white text-sm font-semibold rounded-[10px] transition duration-300 ease-in-out transform hover:scale-105">
                             <i class="fa-solid fa-plus mr-2"></i> Buat & Terbitkan SPL
                         </button>
+                        
                     </div>
 
                     <!-- Table -->
@@ -282,7 +283,11 @@
             
                 {{-- TAB 2: Riwayat Lembur - All allowed roles --}}
                 @if(in_array('riwayat', $allowedTabs))
-                <div x-show="activeTab === 'riwayat'" class="flex flex-col space-y-4 min-h-[65vh]">
+                <div x-show="activeTab === 'riwayat'" 
+                    x-transition:enter="transition ease-out duration-200" 
+                    x-transition:enter-start="opacity-0 translate-y-1" 
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="flex flex-col space-y-4 min-h-[65vh]">
 
                     <!-- Filter & Search -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -290,7 +295,7 @@
                         <!-- Filter (Left Side) -->
                         <div class="flex flex-wrap gap-3">
                             <!-- Status Filter -->
-                            <div class="relative w-65" x-data="{ open: false, selected: 'Semua Status' }">
+                            <div class="relative w-48" x-data="{ open: false, selected: 'Semua Status' }">
                                 <button
                                     @click="open = !open"
                                     wire:model.live="filterRiwayatStatus"
@@ -359,7 +364,7 @@
 
                             <!-- Date Filter -->
                             <div class="relative w-48">
-                                <input type="date" wire:model.live="filterRiwayatDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:ring-3 focus:ring-indigo-500">
+                                <input type="date" wire:model.live="filterRiwayatDate" class="filter-dropdown border border-gray-200">
                             </div>
                         </div>
 
@@ -375,7 +380,7 @@
                             </div>
 
                             <!-- Button -->
-                            <button wire:click="exportRiwayatExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-green-500 hover:bg-green-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
+                            <button wire:click="exportRiwayatExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 hover:shadow-xl text-white text-sm font-semibold rounded-[10px] transition duration-300 ease-in-out transform hover:scale-105">
                                 <i class="fa-solid fa-download mr-2"></i> Export Excel
                             </button>
                         </div>
@@ -521,7 +526,11 @@
 
                 {{-- TAB 3: Rekapitulasi Lembur - Admin & SDM Yayasan --}}
                 @if(in_array('rekap', $allowedTabs))
-                <div x-show="activeTab === 'rekap'" class="flex flex-col space-y-4 min-h-[65vh]">
+                <div x-show="activeTab === 'rekapitulasi'" 
+                    x-transition:enter="transition ease-out duration-200" 
+                    x-transition:enter-start="opacity-0 translate-y-1" 
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="flex flex-col space-y-4 min-h-[65vh]">
 
                     <!-- Filter & Search -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -529,17 +538,18 @@
                         <!-- Filter -->
                         <div class="flex flex-wrap gap-3">
                             <div class="relative w-48">
-                                <input type="date" wire:model.live="filterRekapStartDate" placeholder="Start Date" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:ring-3 focus:ring-indigo-500">
+                                <input type="date" wire:model.live="filterRekapStartDate" placeholder="Start Date" class="filter-dropdown border border-gray-200">
                             </div>
                             <div class="relative w-48">
-                                <input type="date" wire:model.live="filterRekapEndDate" placeholder="End Date" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:ring-3 focus:ring-indigo-500">
+                                <input type="date" wire:model.live="filterRekapEndDate" placeholder="End Date" class="filter-dropdown border border-gray-200">
                             </div>
                         </div>
 
                         <!-- Button -->
-                        <button wire:click="exportRekapExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-green-500 hover:bg-green-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
+                        <button wire:click="exportRekapExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 hover:shadow-xl text-white text-sm font-semibold rounded-[10px] transition duration-300 ease-in-out transform hover:scale-105">
                             <i class="fa-solid fa-download mr-2"></i> Export Excel
                         </button>
+
                     </div>
 
                     <!-- Table -->
@@ -667,7 +677,11 @@
 
                 {{-- TAB 4: Persetujuan & Verifikasi Laporan Lembur - SDM Yayasan, SDM Universitas, Pimpinan --}}
                 @if(in_array('verifikasi', $allowedTabs))
-                <div x-show="activeTab === 'verifikasi'" class="flex flex-col space-y-4 min-h-[65vh]">
+                <div x-show="activeTab === 'laporan'" 
+                    x-transition:enter="transition ease-out duration-200" 
+                    x-transition:enter-start="opacity-0 translate-y-1" 
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="flex flex-col space-y-4 min-h-[65vh]">
 
                     <!-- Filter & Search -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -675,7 +689,7 @@
                         <!-- Filter -->
                         <div class="flex flex-wrap gap-3">
                             <div class="relative w-48">
-                                <input type="date" wire:model.live="filterLaporanDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:ring-3 focus:ring-indigo-500">
+                                <input type="date" wire:model.live="filterLaporanDate" class="filter-dropdown border border-gray-200">
                             </div>
                         </div>
 

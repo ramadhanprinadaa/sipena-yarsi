@@ -7,11 +7,14 @@ use App\Models\CutiApproval;
 use App\Models\SaldoCuti;
 use App\Models\UnitKerja;
 use Carbon\Carbon;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Index extends Component
 {
+    use WithPagination;
+    
     public $jenisCutiList = [];
 
     public $filterRiwayatSearch = '';
@@ -246,7 +249,7 @@ class Index extends Component
         $unitSdmId = (int) $cuti->pegawai?->unit_kerja?->unit_sdm_id;
 
         if ($role === 'Pimpinan') {
-            return $cuti->status === 'Menunggu Verifikasi Pimpinan  '
+            return $cuti->status === 'Menunggu Verifikasi Pimpinan'
                 && $cuti->pegawai?->unit_kerja_id === Auth::user()->pegawai?->unit_kerja_id
                 && !in_array($requesterRole, ['Pimpinan', 'Rektor', 'SDM Universitas', 'SDM Yayasan']);
         }
@@ -378,7 +381,7 @@ class Index extends Component
     {
 
         $rekapQuery = Cuti::with(['pegawai.unit_kerja', 'jenisCuti'])
-            ->whereIn('status', ['disetujui', 'ditolak']);
+            ->where('status', 'disetujui');
         $this->applyCutiScope($rekapQuery);
         $this->applyRekapPeriodFilter($rekapQuery);
 
@@ -476,7 +479,7 @@ class Index extends Component
 
         //Load Data Rekapitulasi Pegawai
         $rekapQuery = Cuti::with(['pegawai.unit_kerja', 'jenisCuti'])
-            ->whereIn('status', ['disetujui', 'ditolak']);
+            ->where('status', 'disetujui');
             
         $this->applyCutiScope($rekapQuery);
         $this->applyRekapPeriodFilter($rekapQuery);

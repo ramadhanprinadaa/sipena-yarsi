@@ -1,50 +1,67 @@
-            {{-- Tabs Navigation --}}
-            <div x-data="{ 
-                activeTab: 'riwayat',
-                activeButtonWidth: 0,
-                activeButtonLeft: 0,
-                updateUnderline() {
-                    const buttons = {
-                        'riwayat': this.$refs.btnRiwayat,
-                        'rekapitulasi': this.$refs.btnRekapitulasi,
-                    };
-                    const activeBtn = buttons[this.activeTab];
-                    if (activeBtn) {
-                        this.activeButtonWidth = activeBtn.offsetWidth;
-                        this.activeButtonLeft = activeBtn.offsetLeft;
+            {{-- ─── Tabs Navigation ─── --}}
+            <div x-data="{
+                    activeTab: 'riwayat',
+                    init() { this.$nextTick(() => this.updatePill()) },
+                    updatePill() {
+                        const refs = {
+                            riwayat: this.$refs.btnRiwayat,
+                            rekapitulasi:   this.$refs.btnRekapitulasi,
+                        };
+                        const btn = refs[this.activeTab];
+                        if (!btn) return;
+                        const pill = this.$refs.pill;
+                        pill.style.width  = btn.offsetWidth  + 'px';
+                        pill.style.left   = btn.offsetLeft   + 'px';
+                    },
+                    setTab(tab) {
+                        this.activeTab = tab;
+                        this.$nextTick(() => this.updatePill());
                     }
-                }
-            }" 
-            @load="updateUnderline()" 
-            class="flex flex-col gap-4 min-h-0">
-                <div class="relative border-b border-gray-200">
-                    <div class="flex gap-2">
-                        <!-- Riwayat Cuti -->
-                        <button 
-                            x-ref="btnRiwayat"
-                            @click="activeTab = 'riwayat'; $nextTick(() => updateUnderline())" 
-                            :class="activeTab === 'riwayat' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'" 
-                            class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
-                            <i class="fa-solid fa-history mr-2"></i>Riwayat Cuti
-                        </button>
-                        <!-- Rekapitulasi -->
-                        <button 
-                            x-ref="btnRekapitulasi"
-                            @click="activeTab = 'rekapitulasi'; $nextTick(() => updateUnderline())" 
-                            :class="activeTab === 'rekapitulasi' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'" 
-                            class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
-                            <i class="fa-solid fa-chart-bar mr-2"></i>Rekapitulasi
-                        </button>
-                    </div>
-                    <!-- Smooth Underline Indicator -->
-                    <div 
-                        :style="{ left: activeButtonLeft + 'px', width: activeButtonWidth + 'px' }"
-                        class="absolute bottom-0 h-0.5 translate-y-0.5 bg-indigo-600 transition-all duration-500 ease-out"
+                }"
+                class="flex flex-col gap-4 min-h-0">
+
+                {{-- Tab Bar --}}
+                <div class="relative inline-flex items-center gap-1.5 p-1.5 bg-gradient-to-r from-indigo-50 via-white to-cyan-50 rounded-3xl self-start shadow-lg shadow-indigo-100/60 border border-indigo-100/80 overflow-hidden">
+
+                    <div class="absolute -top-8 -left-8 h-24 w-24 rounded-full bg-indigo-200/25 blur-2xl pointer-events-none"></div>
+                    <div class="absolute -bottom-8 -right-8 h-24 w-24 rounded-full bg-cyan-200/25 blur-2xl pointer-events-none"></div>
+
+                    {{-- Sliding pill (background) --}}
+                    <div
+                        x-ref="pill"
+                        class="absolute top-1.5 bottom-1.5 rounded-2xl bg-white shadow-lg shadow-indigo-200/40 border border-indigo-200/70 ring-1 ring-indigo-100/50 transition-all duration-300 ease-out pointer-events-none"
                     ></div>
+
+                    {{-- Riwayat Cuti --}}
+                    <button
+                        x-ref="btnRiwayat"
+                        @click="setTab('riwayat')"
+                        :class="activeTab === 'riwayat' ? 'text-indigo-700 scale-[1.01]' : 'text-gray-500 hover:text-gray-700 hover:-translate-y-0.5'"
+                        class="relative z-10 flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-2xl transition-all duration-200 cursor-pointer whitespace-nowrap group"
+                    >
+                        <i class="fa-solid fa-file-lines text-base transition-transform duration-200 group-hover:scale-110"></i>
+                        <span>Riwayat Cuti</span>
+                    </button>
+
+                    {{-- Rekapitulasi Cuti --}}
+                    <button
+                        x-ref="btnRekapitulasi"
+                        @click="setTab('rekapitulasi')"
+                        :class="activeTab === 'rekapitulasi' ? 'text-indigo-700 scale-[1.01]' : 'text-gray-500 hover:text-gray-700 hover:-translate-y-0.5'"
+                        class="relative z-10 flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-2xl transition-all duration-200 cursor-pointer whitespace-nowrap group"
+                    >
+                        <i class="fa-solid fa-history text-base transition-transform duration-200 group-hover:scale-110"></i>
+                        <span>Rekapitulasi Cuti</span>
+                    </button>
+
                 </div>
 
                 {{-- TAB 1: Riwayat Cuti --}}
-                <div x-show="activeTab === 'riwayat'" class="flex flex-col space-y-4 min-h-[65vh]">
+                <div x-show="activeTab === 'riwayat'" 
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="flex flex-col space-y-4 min-h-[65vh]">
 
                     <!-- Filter  -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -54,20 +71,65 @@
                             <!-- Date Filter  -->
                             <div class="flex flex-wrap gap-3">
                                 <div class="relative w-48">
-                                    <input type="date" wire:model.live="filterRiwayatDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                                    <input type="date" wire:model.live="filterRiwayatDate" class="filter-dropdown border border-gray-200">
                                 </div>
                             </div>
 
-                            <div class="relative w-48">
-                                <select wire:model.live="filterRiwayatStatus" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
-                                    <option value="">Status Pengajuan</option>
-                                    <option value="pending_atasan">Menunggu Pimpinan</option>
-                                    <option value="pending_rektor">Menunggu Rektor</option>
-                                    <option value="pending_sdm_universitas">Menunggu SDM Universitas</option>
-                                    <option value="pending_sdm_yayasan">Menunggu SDM Yayasan</option>
-                                    <option value="disetujui">Disetujui</option>
-                                    <option value="ditolak">Ditolak</option>
-                                </select>
+                            <div class="relative w-48" x-data="{ open: false, selected: 'Semua Status' }">
+                                <button
+                                    @click="open = !open"
+                                    wire:model.live="filterRiwayatStatus"
+                                    class="filter-dropdown"
+                                    type="button">
+                                        <span x-text="selected" class="truncate"></span>
+                                        <svg
+                                            class="w-4 h-4 ms-1.5 -me-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/>
+                                        </svg>
+                                </button>
+                                <!-- Menu -->
+                                <div
+                                    x-show="open"
+                                    @click.outside="open = false"
+                                    x-transition
+                                    class="dropdown-menu">
+                                    <ul class="p-2 text-sm text-body font-medium">
+                                        <li>
+                                            <button @click="selected='Semua Status'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus', null)">
+                                                Semua Status
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Menunggu Verifikasi Pimpinan'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus','Menunggu Verifikasi Pimpinan')">
+                                                Menunggu Verifikasi Pimpinan
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Menunggu Verifikasi Rektor'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus','Menunggu Verifikasi Rektor')">
+                                                Menunggu Verifikasi Rektor
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Menunggu Verifikasi SDM Universitas'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus','Menunggu Verifikasi SDM Universitas')">
+                                                Menunggu Verifikasi SDM Universitas
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Menunggu Verifikasi SDM Yayasan'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus','Menunggu Verifikasi SDM Yayasan')">
+                                                Menunggu Verifikasi SDM Yayasan
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Disetujui'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus','Disetujui')">
+                                                Disetujui
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Ditolak'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus','Ditolak')">
+                                                Ditolak
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
 
                         </div>
@@ -76,14 +138,13 @@
                         <div class="flex items-center gap-3">
 
                             <!-- Ajukan Cuti Button -->
-                            <button @click="$dispatch('open-modal-add')" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-blue-500 hover:bg-blue-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
+                            <button @click="$dispatch('open-modal-add')" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 hover:shadow-xl text-white text-sm font-semibold rounded-[10px] transition duration-300 ease-in-out transform hover:scale-105">
                                 <!-- Icon -->
                                 <i class="fa-solid fa-add mr-2"></i> Ajukan Cuti
                             </button>
 
                             <!-- Export Button -->
-                            <button wire:click="exportRiwayatExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-green-500 hover:bg-green-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
-                                <!-- Icon -->
+                            <button wire:click="exportRiwayatExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 hover:shadow-xl text-white text-sm font-semibold rounded-[10px] transition duration-300 ease-in-out transform hover:scale-105">
                                 <i class="fa-solid fa-download mr-2"></i> Export Excel
                             </button>
 
@@ -169,7 +230,7 @@
                                             <td class="px-4 py-4 text-center text-gray-600">
                                                 {{ $cuti->jenisCuti?->dihitung_per_jam ? (($cuti->jumlah_jam ?? 0) . ' Jam') : (($cuti->jumlah_hari_cuti ?? 0) . ' Hari') }}
                                             </td>
-                                            <td class="px-4 py-4 text-center text-gray-600">{{ $cuti->saldo_cuti_sesudah ?? '-' }} Hari</td>
+                                            <td class="px-4 py-4 text-center text-gray-600">{{ $this->displaySaldoCutiSesudah($cuti) }} Hari</td>
                                             <td class="px-4 py-4 text-center">
                                                 <span class="px-3 py-1 {{ $this->statusBadgeClass($cuti->status) }} rounded-full text-xs font-semibold">{{ $this->statusLabel($cuti->status) }}</span>
                                             </td>
@@ -258,15 +319,25 @@
                 </div>
 
                 {{-- TAB 2: Rekapitulasi Cuti --}}
-                <div x-show="activeTab === 'rekapitulasi'" class="flex flex-col space-y-4 h-full min-h-0">
+                <div x-show="activeTab === 'rekapitulasi'" 
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="flex flex-col space-y-4 h-full min-h-0">
 
                     <!-- Filter & Export -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 
-                        <div class="flex flex-col gap-3 md:flex-row md:items-center">
+                        <div class="flex flex-row gap-3 md:items-center">
+                            
                             <div class="flex flex-wrap gap-3">
-                                <input type="date" wire:model.live="filterRekapStartDate" class="w-48 h-10 px-3 text-sm bg-white border-2 border-indigo-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition cursor-pointer hover:border-indigo-400">
-                                <input type="date" wire:model.live="filterRekapEndDate" class="w-48 h-10 px-3 text-sm bg-white border-2 border-indigo-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition cursor-pointer hover:border-indigo-400">
+                                <div class="relative w-48">
+                                    <input type="date" wire:model.live="filterRekapStartDate" class="filter-dropdown border border-gray-200">
+                                </div>
+
+                                <div class="relative w-48">
+                                    <input type="date" wire:model.live="filterRekapEndDate" class="filter-dropdown border border-gray-200">
+                                </div>
                             </div>
 
                             <div class="relative w-48">
@@ -275,6 +346,7 @@
                                     {{ $filterRekapStartDate || $filterRekapEndDate ? 'Periode aktif' : 'Semua periode' }}
                                 </div>
                             </div>
+                            
                         </div>
 
                         <!-- Button -->
@@ -375,7 +447,7 @@
                                 <span class="text-white text-xs font-bold">{{ $rekapSummary['cuti_terpakai_tahunan'] }}/12 Hari</span>
                             </div>
                             <div class="w-full bg-white/30 rounded-full h-2">
-                                <div class="bg-blue-400 h-2 rounded-full" style="width: {{ ($rekapSummary['cuti_terpakai_tahunan']) > 0 ? min(100, ($rekapSummary['cuti_terpakai_tahunan'] / 12) * 100) : 0 }}%"></div>
+                                <div class="bg-blue-400 h-2 rounded-full" style="<?php echo 'width: ' . e($this->cutiTahunanProgress()) . '%'; ?>"></div>
                             </div>
                         </div>
                         
@@ -383,10 +455,10 @@
                         <div>
                             <div class="flex justify-between items-center mb-1">
                                 <p class="text-white text-xs font-medium">Cuti Besar</p>
-                                <span class="text-white text-xs font-bold">{{ $rekapSummary['cuti_terpakai_besar'] }}/66 Hari</span>
+                                <span class="text-white text-xs font-bold">{{ $rekapSummary['cuti_terpakai_besar'] }}/{{ $cutiBesarQuota }} Hari</span>
                             </div>
                             <div class="w-full bg-white/30 rounded-full h-2">
-                                <div class="bg-red-400 h-2 rounded-full" style="width: {{ ($rekapSummary['cuti_terpakai_besar']) > 0 ? min(100, ($rekapSummary['cuti_terpakai_besar'] / 66) * 100) : 0 }}%"></div>
+                                <div class="bg-red-400 h-2 rounded-full" style="<?php echo 'width: ' . e($this->cutiBesarProgress()) . '%'; ?>"></div>
                             </div>
                         </div>
 
@@ -397,7 +469,7 @@
                                 <span class="text-white text-xs font-bold">{{ $rekapSummary['cuti_terpakai_melahirkan'] }}/90 Hari</span>
                             </div>
                             <div class="w-full bg-white/30 rounded-full h-2">
-                                <div class="bg-pink-400 h-2 rounded-full" style="width: {{ ($rekapSummary['cuti_terpakai_melahirkan']) > 0 ? min(100, ($rekapSummary['cuti_terpakai_melahirkan'] / 90) * 100) : 0 }}%"></div>
+                                <div class="bg-pink-400 h-2 rounded-full" style="<?php echo 'width: ' . e($this->cutiMelahirkanProgress()) . '%'; ?>"></div>
                             </div>
                         </div>
                         

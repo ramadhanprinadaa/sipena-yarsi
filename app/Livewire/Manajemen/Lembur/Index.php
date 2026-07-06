@@ -267,6 +267,8 @@ class Index extends Component
             ]);
         }
 
+        $this->dispatch('laporan-updated');
+
     }
 
     // private function recordApproval(int $lemburId, string $action, string $catatan): void
@@ -530,6 +532,7 @@ class Index extends Component
     }
 
     #[On(['spl-created', 'spl-updated'])]
+    #[On('laporan-updated')]
     public function refreshData()
     {
         $this->loadData();
@@ -587,7 +590,11 @@ class Index extends Component
         }        
 
         // Load Rekapitulasi Lembur para pegawai
-        $rekapQuery = Lembur::with('pegawai');
+        $rekapQuery = Lembur::with('pegawai')
+            ->where('status', 'Selesai')
+            ->whereHas('laporanHasilLembur.persetujuan', function ($query) {
+                $query->where('status', 'Disetujui');
+            });
         $this->applyLemburScope($rekapQuery);
         $this->applyRekapPeriodFilter($rekapQuery);
 

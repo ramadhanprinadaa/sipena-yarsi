@@ -7,10 +7,12 @@ use Livewire\Attributes\On;
 use App\Models\SuratPerintahLembur;
 use App\Models\Lembur;
 use Carbon\Carbon;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 
 class Index extends Component
 {
+    use WithPagination;
 
     public $openDetail = false;
     public $isAutoFilled = false;
@@ -37,6 +39,7 @@ class Index extends Component
 
     #[On('lembur-created')]
     #[On('laporan-created')]
+    #[On('laporan-updated')]
     public function refreshData()
     {
         $this->loadData();
@@ -75,6 +78,11 @@ class Index extends Component
             ->whereDate('tanggal_lembur', '<=', Carbon::today())
             ->whereDoesntHave('laporanHasilLembur')
             ->update(['status' => 'Menunggu Laporan']);
+
+        SuratPerintahLembur::where('status', 'Diterbitkan')
+            ->whereDate('tanggal_lembur', '<', Carbon::today())
+            ->whereDoesntHave('lembur')
+            ->update(['status' => 'Kedaluwarsa']);
     }
 
     public function updatedFilterSplDate()
@@ -137,7 +145,11 @@ class Index extends Component
 
             //Load Rekapitulasi Milik Pegawai
             $rekapQuery = Lembur::where('pegawai_id', $user->pegawai->id)
-                ->with(['suratPerintahLembur', 'laporanHasilLembur']);
+                ->where('status', 'Selesai')
+                ->whereHas('laporanHasilLembur.persetujuan', function ($query) {
+                    $query->where('status', 'Disetujui');
+                })
+                ->with(['suratPerintahLembur', 'laporanHasilLembur.persetujuan']);
 
             $this->applyRekapPeriodFilter($rekapQuery);
 

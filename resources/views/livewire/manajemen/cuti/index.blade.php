@@ -6,19 +6,19 @@
                 
                 switch($userRole) {
                     case 'Admin':
-                        $allowedTabs = ['riwayat', 'rekap'];
+                        $allowedTabs = ['riwayat', 'rekapitulasi'];
                         $defaultTab = 'riwayat';
                         break;
                     case 'SDM Yayasan':
-                        $allowedTabs = ['riwayat', 'rekap'];
+                        $allowedTabs = ['riwayat', 'rekapitulasi'];
                         $defaultTab = 'riwayat';
                         break;
                     case 'SDM Universitas':
-                        $allowedTabs = ['riwayat', 'rekap'];
+                        $allowedTabs = ['riwayat', 'rekapitulasi'];
                         $defaultTab = 'riwayat';
                         break;
                     case 'Pimpinan':
-                        $allowedTabs = ['riwayat', 'rekap'];
+                        $allowedTabs = ['riwayat', 'rekapitulasi'];
                         $defaultTab = 'riwayat';
                         break;
                     default:
@@ -27,61 +27,71 @@
                 }
             @endphp
             
-            <div x-data="{ 
-                activeTab: '{{ $defaultTab }}',
-                showModal: false,
-                activeButtonWidth: 0,
-                activeButtonLeft: 0,
-                updateUnderline() {
-                    const buttons = {
-                        'riwayat': this.$refs.btnRiwayat,
-                        'rekap': this.$refs.btnRekap,
-                        'verifikasi': this.$refs.btnVerifikasi
-                    };
-                    const activeBtn = buttons[this.activeTab];
-                    if (activeBtn) {
-                        this.activeButtonWidth = activeBtn.offsetWidth;
-                        this.activeButtonLeft = activeBtn.offsetLeft;
+            {{-- ─── Tabs Navigation ─── --}}
+            <div x-data="{
+                    activeTab: 'riwayat',
+                    init() { this.$nextTick(() => this.updatePill()) },
+                    updatePill() {
+                        const refs = {
+                            riwayat: this.$refs.btnRiwayat,
+                            rekapitulasi:   this.$refs.btnRekapitulasi,
+                        };
+                        const btn = refs[this.activeTab];
+                        if (!btn) return;
+                        const pill = this.$refs.pill;
+                        pill.style.width  = btn.offsetWidth  + 'px';
+                        pill.style.left   = btn.offsetLeft   + 'px';
+                    },
+                    setTab(tab) {
+                        this.activeTab = tab;
+                        this.$nextTick(() => this.updatePill());
                     }
-                }
-            }" 
-            @load="updateUnderline()" 
-            class="flex flex-col gap-4 min-h-0">
-                <div class="relative border-b border-gray-200">
-                    <div class="flex gap-2">            
-                        {{-- Riwayat Cuti - All allowed roles --}}
-                        @if(in_array('riwayat', $allowedTabs))
-                            <button 
-                                x-ref="btnRiwayat"
-                                @click="activeTab = 'riwayat'; $nextTick(() => updateUnderline())" 
-                                :class="activeTab === 'riwayat' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'" 
-                                class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
-                                <i class="fa-solid fa-history mr-2"></i>Riwayat Pengajuan Cuti
-                            </button>
-                        @endif
-                        
-                        {{-- Rekapitulasi - Admin & SDM Yayasan --}}
-                        @if(in_array('rekap', $allowedTabs))
-                            <button 
-                                x-ref="btnRekap"
-                                @click="activeTab = 'rekap'; $nextTick(() => updateUnderline())" 
-                                :class="activeTab === 'rekap' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'" 
-                                class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
-                                <i class="fa-solid fa-chart-bar mr-2"></i>Rekapitulasi
-                            </button>
-                        @endif
-                    </div>
+                }"
+                class="flex flex-col gap-4 min-h-0">
 
-                    <!-- Smooth Underline Indicator -->
-                    <div 
-                        :style="{ left: activeButtonLeft + 'px', width: activeButtonWidth + 'px' }"
-                        class="absolute bottom-0 h-0.5 translate-y-0.5 bg-indigo-600 transition-all duration-500 ease-out"
+                {{-- Tab Bar --}}
+                <div class="relative inline-flex items-center gap-1.5 p-1.5 bg-gradient-to-r from-indigo-50 via-white to-cyan-50 rounded-3xl self-start shadow-lg shadow-indigo-100/60 border border-indigo-100/80 overflow-hidden">
+
+                    <div class="absolute -top-8 -left-8 h-24 w-24 rounded-full bg-indigo-200/25 blur-2xl pointer-events-none"></div>
+                    <div class="absolute -bottom-8 -right-8 h-24 w-24 rounded-full bg-cyan-200/25 blur-2xl pointer-events-none"></div>
+
+                    {{-- Sliding pill (background) --}}
+                    <div
+                        x-ref="pill"
+                        class="absolute top-1.5 bottom-1.5 rounded-2xl bg-white shadow-lg shadow-indigo-200/40 border border-indigo-200/70 ring-1 ring-indigo-100/50 transition-all duration-300 ease-out pointer-events-none"
                     ></div>
+
+                    {{-- Riwayat Cuti --}}
+                    <button
+                        x-ref="btnRiwayat"
+                        @click="setTab('riwayat')"
+                        :class="activeTab === 'riwayat' ? 'text-indigo-700 scale-[1.01]' : 'text-gray-500 hover:text-gray-700 hover:-translate-y-0.5'"
+                        class="relative z-10 flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-2xl transition-all duration-200 cursor-pointer whitespace-nowrap group"
+                    >
+                        <i class="fa-solid fa-file-lines text-base transition-transform duration-200 group-hover:scale-110"></i>
+                        <span>Riwayat Cuti</span>
+                    </button>
+
+                    {{-- Rekapitulasi Cuti --}}
+                    <button
+                        x-ref="btnRekapitulasi"
+                        @click="setTab('rekapitulasi')"
+                        :class="activeTab === 'rekapitulasi' ? 'text-indigo-700 scale-[1.01]' : 'text-gray-500 hover:text-gray-700 hover:-translate-y-0.5'"
+                        class="relative z-10 flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-2xl transition-all duration-200 cursor-pointer whitespace-nowrap group"
+                    >
+                        <i class="fa-solid fa-history text-base transition-transform duration-200 group-hover:scale-110"></i>
+                        <span>Rekapitulasi Cuti</span>
+                    </button>
+
                 </div>
 
                 {{-- TAB 1: Riwayat Cuti - All allowed roles --}}
                 @if(in_array('riwayat', $allowedTabs))
-                <div x-show="activeTab === 'riwayat'" class="flex flex-col space-y-4 min-h-[65vh]">
+                <div x-show="activeTab === 'riwayat'" 
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="flex flex-col space-y-4 min-h-[65vh]">
 
                     <!-- Filter & Search -->
                     <div class="flex gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -100,14 +110,14 @@
                             <!-- Date Filter -->
                             <div class="flex flex-wrap gap-3">
                                 <div class="relative w-48">
-                                    <input type="date" wire:model.live="filterRiwayatDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-3 focus:ring-indigo-500">
+                                    <input type="date" wire:model.live="filterRiwayatDate" class="filter-dropdown border border-gray-200">
                                 </div>
                             </div>
                         </div>
                             
                         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-end w-full md:w-auto">
 
-                            <div class="relative w-65" x-data="{ open: false, selected: 'Semua Jenis' }">
+                            <div class="relative w-48" x-data="{ open: false, selected: 'Semua Jenis' }">
                                 <button
                                     @click="open = !open"
                                     wire:model.live="filterRiwayatJenis"
@@ -141,7 +151,7 @@
                                 </div>
                             </div>
 
-                            <div class="relative w-65" x-data="{ open: false, selected: 'Semua Status' }">
+                            <div class="relative w-48" x-data="{ open: false, selected: 'Semua Status' }">
                                 <button
                                     @click="open = !open"
                                     wire:model.live="filterRiwayatStatus"
@@ -197,10 +207,11 @@
                                     </ul>
                                 </div>
                             </div>
-
-                            <button wire:click="exportRiwayatExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-green-500 hover:bg-green-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
+                            
+                            <button wire:click="exportRiwayatExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 hover:shadow-xl text-white text-sm font-semibold rounded-[10px] transition duration-300 ease-in-out transform hover:scale-105">
                                 <i class="fa-solid fa-download mr-2"></i> Export Excel
                             </button>
+
                         </div>
                     </div>
 
@@ -383,24 +394,28 @@
                 @endif
 
                 {{-- TAB 2: Rekapitulasi Cuti - All allowed roles --}}
-                @if(in_array('rekap', $allowedTabs))
-                <div x-show="activeTab === 'rekap'" class="flex flex-col space-y-4 h-full min-h-[65vh]">
+                @if(in_array('rekapitulasi', $allowedTabs))
+                <div x-show="activeTab === 'rekapitulasi'"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="flex flex-col space-y-4 h-full min-h-[65vh]">
 
                     <!-- Filter & Search -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
 
                         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-start w-full md:w-auto">
                             <div class="relative w-48">
-                                <input type="date" wire:model.live="filterRekapStartDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-3 focus:ring-indigo-500">
+                                <input type="date" wire:model.live="filterRekapStartDate" class="filter-dropdown border border-gray-200">
                             </div>
                             <div class="relative w-48">
-                                <input type="date" wire:model.live="filterRekapEndDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-3 focus:ring-indigo-500">
+                                <input type="date" wire:model.live="filterRekapEndDate" class="filter-dropdown border border-gray-200">
                             </div>
                         </div>
                         
-                        <button wire:click="exportRekapExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-green-500 hover:bg-green-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
-                            <i class="fa-solid fa-download mr-2"></i> Export Excel
-                        </button>
+                        <button wire:click="exportRekapExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 hover:shadow-xl text-white text-sm font-semibold rounded-[10px] transition duration-300 ease-in-out transform hover:scale-105">
+                                <i class="fa-solid fa-download mr-2"></i> Export Excel
+                            </button>
                     </div>
 
                     <!-- Table -->
@@ -524,7 +539,7 @@
                     </div>
                 </div>
                 @endif
-
+                
                 @if($confirmAction)
                     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
                         <div class="w-full max-w-md bg-white rounded-[16px] shadow-2xl border border-gray-200">
@@ -544,7 +559,6 @@
                         </div>
                     </div>
                 @endif
-
-                <livewire:manajemen.cuti.detail-cuti />
+                
             </div>
 </div>

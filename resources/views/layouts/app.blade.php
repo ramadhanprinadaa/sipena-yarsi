@@ -60,7 +60,7 @@
                 $currentRoute = Route::currentRouteName();
                 $userRole = auth()->user()->role->name ?? null;
                 $isCutiPage = $currentRoute === 'cuti';
-                $isCutiRole = in_array($userRole, ['Staff', 'Tendik', 'Dosen']);
+                $isCutiRole = in_array($userRole, ['Staff', 'Tendik', 'Dosen', 'SDM Yayasan', 'SDM Universitas', 'Pimpinan']);
                 $removeMtFromMain = $isCutiPage && $isCutiRole;
             @endphp
 
