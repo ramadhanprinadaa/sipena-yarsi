@@ -82,7 +82,7 @@
                             <th scope="col" class="px-4 py-3 font-semibold text-center w-[5%] uppercase">#</th>
 
                             <!-- Jenjang Pendidikan -->
-                            <th scope="col" class="px-4 py-3 font-semibold w-[25%] uppercase">
+                            <th scope="col" class="px-4 py-3 font-semibold w-[20%] uppercase">
                                 <div class="flex items-center justify-between gap-2">
                                     <span class="truncate">Jenjang Pendidikan</span>
                                     <div>
@@ -95,20 +95,25 @@
                             </th>
 
                             <!-- Tahun Masuk -->
-                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[16%] uppercase">Tahun Masuk
+                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[15%] uppercase">Tahun Masuk
                             </th>
 
                             <!-- Tahun Lulus -->
-                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[16%] uppercase">Tahun Lulus
-                            </th>
-
-                            <!-- File Ijazah -->
-                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[20%] uppercase">File Ijazah
+                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[15%] uppercase">Tahun Lulus
                             </th>
 
                             <!-- Updated By -->
-                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[18%] uppercase">Diperbarui
+                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[15%] uppercase">Diperbarui
                                 Oleh
+                            </th>
+
+                            <!-- Status Berkas -->
+                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[15%] uppercase">
+                                Status Berkas
+                            </th>
+
+                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[15%] uppercase">
+                                Aksi
                             </th>
                         </tr>
                     </thead>
@@ -121,7 +126,7 @@
                                 </td>
 
                                 <!-- Jenjang Pendidikan -->
-                                <td class="px-4 py-3 text-sm text-gray-800">
+                                <td class="px-4 py-3 text-sm text-gray-800 truncate">
                                     @php
                                         $kodePendidikan = $p->jenjangPendidikan->kode;
                                         $badgeColor = match (true) {
@@ -163,17 +168,8 @@
                                     </span>
                                 </td>
 
-                                <!-- File Ijazah -->
-                                <td class="px-4 py-3 text-sm text-gray-800 text-center">
-                                    @if ($p->file_ijazah)
-                                        <span class="text-blue-600 hover:underline cursor-pointer">Lihat Berkas</span>
-                                    @else
-                                        <span class="text-gray-400 italic text-xs">Belum ada berkas</span>
-                                    @endif
-                                </td>
-
                                 <!-- Diperbarui Oleh -->
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 truncate">
                                     <div class="flex items-center gap-2">
                                         <div
                                             class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-semibold">
@@ -188,6 +184,59 @@
                                                 Terakhir mengubah data
                                             </div>
                                         </div>
+                                    </div>
+                                </td>
+
+                                <!-- Status Berkas -->
+                                <td class="px-4 py-3 text-center">
+                                    @if($p->file_ijazah)
+                                        <span
+                                            class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-md">
+                                            <i class="fa-solid fa-circle-check text-xs"></i>
+                                            Tersedia
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-amber-700 bg-amber-100 rounded-md">
+                                            <i class="fa-solid fa-circle-exclamation text-xs"></i>
+                                            Belum Tersedia
+                                        </span>
+                                    @endif
+                                </td>
+
+                                <!-- Aksi -->
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <!-- Button Unduh Berkas -->
+                                        <button
+                                            @disabled(!$p->file_ijazah)
+                                            wire:click="download({{ $p->id }})"
+                                            wire:target="download({{ $p->id }})"
+                                            class="py-1.5 px-2 text-white bg-emerald-500 enabled:hover:bg-emerald-100 enabled:hover:text-emerald-600 rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                            title="Download Berkas">
+                                            <i class="fa-solid fa-cloud-arrow-down" wire:loading.remove wire:target="download({{ $p->id }})"></i>
+                                            <!-- Ikon loading -->
+                                            <i class="fa-solid fa-spinner fa-spin" wire:loading wire:target="download({{ $p->id }})"></i>
+                                        </button>
+
+                                        <!-- Button Lihat Berkas -->
+                                        @if($p->file_ijazah)
+                                            <a
+                                                href="{{ $this->previewUrl($p->id) }}"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="py-1.5 px-2 text-white bg-blue-500 hover:bg-blue-100 hover:text-blue-600 rounded-md transition-colors cursor-pointer"
+                                                title="Lihat Berkas">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </a>
+                                        @else
+                                            <button
+                                                disabled
+                                                class="py-1.5 px-2 text-white bg-blue-500 rounded-md opacity-50 cursor-not-allowed"
+                                                title="Lihat Berkas">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

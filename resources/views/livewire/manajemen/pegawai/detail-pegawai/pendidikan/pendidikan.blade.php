@@ -3,9 +3,10 @@
         openAddPendidikan: false,
         openEditPendidikan: false,
         openLoadingPendidikan: false,
-        openDeletePendidikan: false,
     }"
     @close-add-pendidikan-modal.window="openAddPendidikan = false"
+    @edit-pendidikan-loaded.window="openLoadingPendidikan = false; openEditPendidikan = true;"
+    @close-edit-pendidikan-modal.window="openEditPendidikan = false; openLoadingPendidikan = false;"
     class="flex flex-col h-[calc(100vh-250px)]">
     <!-- Header -->
     <div class="flex items-center justify-between bg-white rounded-md shadow-md border border-indigo-100 border-t-4 border-t-indigo-500 p-5">
@@ -68,7 +69,7 @@
     <!-- Table -->
     <div class="table-container relative rounded-md shadow-md border border-slate-100 border-t-4 border-t-slate-500 mt-6">
         <!-- Loading -->
-        <div wire:loading wire:target="">
+        <div wire:loading wire:target="selectedJenjangPendidikan">
             <div
                 class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
                 <div role="status">
@@ -100,7 +101,7 @@
                             <th scope="col" class="px-4 py-3 font-semibold text-center w-[5%] uppercase">#</th>
 
                             <!-- Jenjang Pendidikan -->
-                            <th scope="col" class="px-4 py-3 font-semibold w-[25%] uppercase">
+                            <th scope="col" class="px-4 py-3 font-semibold w-[20%] uppercase">
                                 <div class="flex items-center justify-between gap-2">
                                     <span class="truncate">Jenjang Pendidikan</span>
                                     <div>
@@ -121,8 +122,13 @@
                             </th>
 
                             <!-- Updated By -->
-                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[25%] uppercase">Diperbarui
+                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[15%] uppercase">Diperbarui
                                 Oleh
+                            </th>
+
+                            <!-- Status Berkas -->
+                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[15%] uppercase">
+                                Status Berkas
                             </th>
 
                             <th scope="col" class="px-4 py-3 font-semibold text-center w-[15%] uppercase">
@@ -182,7 +188,7 @@
                                 </td>
 
                                 <!-- Diperbarui Oleh -->
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 truncate">
                                     <div class="flex items-center gap-2">
                                         <div
                                             class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-semibold">
@@ -200,29 +206,66 @@
                                     </div>
                                 </td>
 
+                                <!-- Status Berkas -->
+                                <td class="px-4 py-3 text-center">
+                                    @if($p->file_ijazah)
+                                        <span
+                                            class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-md">
+                                            <i class="fa-solid fa-circle-check text-xs"></i>
+                                            Tersedia
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-amber-700 bg-amber-100 rounded-md">
+                                            <i class="fa-solid fa-circle-exclamation text-xs"></i>
+                                            Belum Tersedia
+                                        </span>
+                                    @endif
+                                </td>
+
                                 <!-- Aksi -->
                                 <td class="px-4 py-3">
                                     <div class="flex items-center justify-center gap-2">
                                         <!-- Button Unduh Berkas -->
                                         <button
-                                            class="py-1.5 px-2 text-white bg-emerald-500 hover:bg-emerald-100 hover:text-emerald-600 rounded-md transition-colors cursor-pointer"
+                                            @disabled(!$p->file_ijazah)
+                                            wire:click="download({{ $p->id }})"
+                                            wire:target="download({{ $p->id }})"
+                                            class="py-1.5 px-2 text-white bg-emerald-500 enabled:hover:bg-emerald-100 enabled:hover:text-emerald-600 rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                             title="Download Berkas">
-                                            <i class="fa-solid fa-cloud-arrow-down"></i>
+                                            <i class="fa-solid fa-cloud-arrow-down" wire:loading.remove wire:target="download({{ $p->id }})"></i>
+                                            <!-- Ikon loading -->
+                                            <i class="fa-solid fa-spinner fa-spin" wire:loading wire:target="download({{ $p->id }})"></i>
                                         </button>
 
                                         <!-- Button Lihat Berkas -->
-                                        <button
-                                            class="py-1.5 px-2 text-white bg-blue-500 hover:bg-blue-100 hover:text-blue-600 rounded-md transition-colors cursor-pointer"
-                                            title="Lihat Berkas">
-                                            <i class="fa-solid fa-eye"></i>
-                                        </button>
+                                        @if($p->file_ijazah)
+                                            <a
+                                                href="{{ $this->previewUrl($p->id) }}"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="py-1.5 px-2 text-white bg-blue-500 hover:bg-blue-100 hover:text-blue-600 rounded-md transition-colors cursor-pointer"
+                                                title="Lihat Berkas">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </a>
+                                        @else
+                                            <button
+                                                disabled
+                                                class="py-1.5 px-2 text-white bg-blue-500 rounded-md opacity-50 cursor-not-allowed"
+                                                title="Lihat Berkas">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                        @endif
 
-                                        <!-- Button Edit Pendidikan -->
-                                        <button
-                                            class="py-1.5 px-2 text-white bg-amber-500 hover:bg-amber-100 hover:text-amber-500 rounded-md transition-colors cursor-pointer"
-                                            title="Edit Data">
-                                            <i class="fa-solid fa-pen-to-square"></i>
-                                        </button>
+                                        @if(auth()->user()->hasRole(['Admin', 'SDM Yayasan']))
+                                            <!-- Button Edit Pendidikan -->
+                                            <button
+                                                x-on:click="openLoadingPendidikan = true; $wire.selectPendidikan({{ $p->id }})"
+                                                class="py-1.5 px-2 text-white bg-amber-500 hover:bg-amber-100 hover:text-amber-500 rounded-md transition-colors cursor-pointer"
+                                                title="Edit Data">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -303,4 +346,35 @@
         </div>
     </template>
 
+    <!-- Modal Edit Pendidikan -->
+    <template x-teleport="body">
+        <div x-show="openEditPendidikan || openLoadingPendidikan"
+            x-cloak
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            @click.self="openEditPendidikan = false"
+            @keydown.escape.window="openEditPendidikan = false"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md"
+            style="display: none;">
+
+            <div x-show="openLoadingPendidikan" class="flex flex-col items-center gap-4">
+                <div class="w-10 h-10 border-[3px] border-white/20 border-t-white rounded-full animate-spin"></div>
+                <div class="text-sm font-medium tracking-wide text-white">
+                    Memuat Data...
+                </div>
+            </div>
+
+            <div x-show="openEditPendidikan && !openLoadingPendidikan" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+                @click.stop>
+                <livewire:manajemen.pegawai.detail-pegawai.pendidikan.edit-pendidikan :pegawai_id="$pegawai_id" />
+            </div>
+        </div>
+    </template>
 </div>

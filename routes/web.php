@@ -5,6 +5,7 @@ use App\Http\Controllers\DetailPegawaiController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\ManajemenPegawaiController;
 use App\Http\Controllers\PegawaiController;
+use App\Http\Controllers\RiwayatPendidikanPreviewController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -60,6 +61,10 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::view('sumber-daya', 'sumber-daya')->name('sumber-daya');
+
+    Route::get('/riwayat-pendidikan/{riwayatPendidikan}/preview', RiwayatPendidikanPreviewController::class)
+        ->middleware('signed')
+        ->name('riwayat-pendidikan.preview');
 });
 
 // Test Error

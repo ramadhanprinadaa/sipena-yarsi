@@ -4,7 +4,10 @@ namespace App\Livewire\Manajemen\Pegawai\DetailPegawai\Pendidikan;
 
 use App\Models\JenjangPendidikan;
 use App\Models\RiwayatPendidikan;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
 use Livewire\Component;
@@ -15,9 +18,11 @@ class Pendidikan extends Component
     use WithPagination;
     protected string $paginationTheme = 'tailwind';
 
-    public array $jenjangPendidikan;
+    #[Locked]
     public int $pegawai_id;
+
     public string $nama_pegawai;
+    public array $jenjangPendidikan;
 
     #[Session]
     public ?string $selectedJenjangPendidikan = null;
@@ -120,6 +125,40 @@ class Pendidikan extends Component
         return $this->sortDirection === 'asc'
             ? 'fa-sort-down'
             : 'fa-sort-up';
+    }
+
+    public function selectPendidikan(int $id)
+    {
+        $this->dispatch('load-edit-pendidikan', pendidikan_id: $id);
+    }
+
+    public function download(int $riwayatPendidikanId)
+    {
+        $riwayat = RiwayatPendidikan::where('pegawai_id', $this->pegawai_id)
+            ->find($riwayatPendidikanId);
+
+        if (
+            !$riwayat ||
+            !$riwayat->file_ijazah ||
+            !Storage::exists("{$riwayat->file_path}/{$riwayat->file_ijazah}")
+        ) {
+            $this->addError('file_ijazah', 'File ijazah tidak ditemukan atau sudah dihapus dari server.');
+            return;
+        }
+
+        return Storage::download(
+            "{$riwayat->file_path}/{$riwayat->file_ijazah}",
+            $riwayat->file_ijazah
+        );
+    }
+
+    public function previewUrl(int $riwayatPendidikanId): string
+    {
+        return URL::temporarySignedRoute(
+            'riwayat-pendidikan.preview',
+            now()->addMinutes(30),
+            ['riwayatPendidikan' => $riwayatPendidikanId]
+        );
     }
 
     public function render()

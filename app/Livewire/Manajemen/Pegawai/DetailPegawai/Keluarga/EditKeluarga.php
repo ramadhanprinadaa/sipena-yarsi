@@ -118,7 +118,27 @@ class EditKeluarga extends Component
 
     protected function messages(): array
     {
-        return [];
+        return [
+            'form.jenis_keluarga_id.required' => ':attribute wajib dipilih.',
+            'form.jenis_keluarga_id.exists'   => ':attribute yang dipilih tidak valid.',
+
+            'form.nama.required'             => ':attribute wajib diisi.',
+            'form.nama.string'               => ':attribute harus berupa teks.',
+            'form.nama.max'                  => ':attribute maksimal :max karakter.',
+
+            'form.tempat_lahir.string'       => ':attribute harus berupa teks.',
+            'form.tempat_lahir.max'          => ':attribute maksimal :max karakter.',
+
+            'form.tanggal_lahir.required'    => ':attribute wajib diisi.',
+
+            'form.pekerjaan.string'          => ':attribute harus berupa teks.',
+            'form.pekerjaan.max'             => ':attribute maksimal :max karakter.',
+
+            'form.no_telpon.string'          => ':attribute harus berupa teks.',
+            'form.no_telpon.max'             => ':attribute maksimal :max karakter.',
+
+            'form.alamat.string'             => ':attribute harus berupa teks.',
+        ];
     }
 
     public function resetForm()

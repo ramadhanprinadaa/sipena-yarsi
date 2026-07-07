@@ -6,7 +6,8 @@
 }" @edit-keluarga-loaded.window="openLoadingDetail = false; openEditModal = true;"
     @close-modal.window="openAddModal = false"
     @close-edit-modal.window="openEditModal = false; openLoadingDetail = false;"
-    @close-delete-modal.window="openDeleteModal = false" class="flex flex-col h-[calc(100vh-280px)]">
+    @close-delete-modal.window="openDeleteModal = false"
+    class="flex flex-col h-[calc(100vh-280px)]">
 
     <!-- Header -->
     <div
@@ -310,7 +311,8 @@
         <div x-show="openEditModal || openLoadingDetail" x-cloak x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0" @click.self="openEditModal = false"
+            x-transition:leave-end="opacity-0"
+            @click.self="openEditModal = false"
             @keydown.escape.window="openEditModal = false"
             class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md"
             style="display: none;">

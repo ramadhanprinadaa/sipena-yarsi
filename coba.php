@@ -4,22 +4,23 @@ namespace App\Livewire\Manajemen\Pegawai\DetailPegawai\Pendidikan;
 
 use App\Models\ArsipFile;
 use App\Models\JenjangPendidikan;
-use App\Models\Pegawai;
 use App\Models\RiwayatPendidikan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Livewire\Attributes\On;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-class TambahPendidikan extends Component
+class EditPendidikan extends Component
 {
     use WithFileUploads;
 
-    public int $pegawai_id;
-    public ?Pegawai $pegawai = null;
-    public array $jenjangPendidikan = [];
+    #[Locked]
+    public int $riwayat_pendidikan_id;
+
+    public array $jenjangPendidikan;
 
     public array $form = [
         'jenjang_pendidikan_id' => '',
@@ -28,11 +29,26 @@ class TambahPendidikan extends Component
         'file_ijazah'           => '',
     ];
 
-    public function mount(int $pegawai_id)
+    // Nama file ijazah yang sudah tersimpan, ditampilkan sebagai referensi di form
+    public ?string $existingFileName = null;
+
+    /**
+     * Karena component ini dirender ulang (fresh mount) setiap kali
+     * wire:key berubah, mount() otomatis menjadi titik reset yang bersih
+     * tanpa perlu listener open/close modal secara manual.
+     */
+    public function mount(int $riwayat_pendidikan_id): void
     {
-        $this->pegawai_id = $pegawai_id;
-        $this->pegawai = Pegawai::select('id', 'nama')->find($pegawai_id);
-        $this->jenjangPendidikan = JenjangPendidikan::orderBy('urutan')->pluck('kode', 'id')->toArray();
+        $this->riwayat_pendidikan_id = $riwayat_pendidikan_id;
+        $this->jenjangPendidikan = JenjangPendidikan::pluck('kode', 'id')->toArray();
+
+        $riwayat = RiwayatPendidikan::findOrFail($riwayat_pendidikan_id);
+
+        $this->form['jenjang_pendidikan_id'] = $riwayat->jenjang_pendidikan_id;
+        $this->form['tahun_masuk'] = $riwayat->tahun_masuk;
+        $this->form['tahun_lulus'] = $riwayat->tahun_lulus;
+
+        $this->existingFileName = $riwayat->file_ijazah;
     }
 
     protected function rules(): array
@@ -40,8 +56,9 @@ class TambahPendidikan extends Component
         return [
             'form.jenjang_pendidikan_id' => ['required', 'exists:jenjang_pendidikan,id'],
             'form.tahun_masuk'           => ['required', 'regex:/^\d{4}$/'],
-            'form.tahun_lulus'           => ['required', 'regex:/^\d{4}$/', 'gte:form.tahun_masuk'],
-            'form.file_ijazah'           => ['required', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
+            'form.tahun_lulus'           => ['required', 'regex:/^\d{4}$/'],
+            // File bersifat opsional: hanya divalidasi jika user memilih file baru
+            'form.file_ijazah'           => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
         ];
     }
 
@@ -64,89 +81,85 @@ class TambahPendidikan extends Component
             'form.tahun_masuk.required'           => 'Tahun masuk wajib diisi.',
             'form.tahun_masuk.regex'              => 'Tahun masuk harus berupa tahun 4 digit (contoh: 2020).',
 
-            'form.tahun_lulus.required'            => 'Tahun lulus wajib diisi.',
-            'form.tahun_lulus.regex'               => 'Tahun lulus harus berupa tahun 4 digit (contoh: 2024).',
-            'form.tahun_lulus.gte'                  => 'Tahun lulus tidak boleh lebih kecil dari tahun masuk.',
+            'form.tahun_lulus.required'          => 'Tahun lulus wajib diisi.',
+            'form.tahun_lulus.regex'             => 'Tahun lulus harus berupa tahun 4 digit (contoh: 2024).',
 
-            'form.file_ijazah.required'           => 'File ijazah wajib diunggah.',
             'form.file_ijazah.file'               => 'File ijazah harus berupa file yang valid.',
             'form.file_ijazah.mimes'              => 'File ijazah harus berformat PDF, DOC, atau DOCX.',
             'form.file_ijazah.max'                => 'Ukuran file ijazah maksimal 10 MB.',
         ];
     }
 
-    public function save()
+    public function update(): void
     {
         $this->validate();
 
-        // Builder file name: Ijazah_{KodeJenjang}_{YmdHis}.{ext}
-        // Contoh: Ijazah_S1_20260706143210.pdf
-        $kodeJenjang = $this->jenjangPendidikan[$this->form['jenjang_pendidikan_id']] ?? 'Pendidikan';
-        $kodeJenjang = Str::slug($kodeJenjang, '');
-        $extension   = $this->form['file_ijazah']->getClientOriginalExtension();
-        $fileName    = sprintf('Ijazah_%s_%s.%s', $kodeJenjang, now()->format('YmdHis'), $extension);
+        $riwayat = RiwayatPendidikan::findOrFail($this->riwayat_pendidikan_id);
 
-        // Direktori penyimpanan file per pegawai
-        $directory = "arsip_file/pegawai/{$this->pegawai_id}/ijazah";
+        $fileName = $riwayat->file_ijazah;
+        $directory = $riwayat->file_path;
+        $oldFileName = $riwayat->file_ijazah;
+        $oldDirectory = $riwayat->file_path;
+        $isFileReplaced = false;
 
-        // Simpan file ke disk "private" dengan nama yang sudah dibuat
-        $this->form['file_ijazah']->storeAs(path: $directory, name: $fileName, options: 'private');
+        // Hanya proses file baru jika user memilih file pengganti
+        if ($this->form['file_ijazah']) {
+            $kodeJenjang = $this->jenjangPendidikan[$this->form['jenjang_pendidikan_id']] ?? 'Pendidikan';
+            $kodeJenjang = Str::slug($kodeJenjang, '');
+            $extension = $this->form['file_ijazah']->getClientOriginalExtension();
+
+            $fileName = sprintf('Ijazah_%s_%s.%s', $kodeJenjang, now()->format('YmdHis'), $extension);
+            $directory = "arsip_file/pegawai/{$riwayat->pegawai_id}/ijazah";
+
+            $this->form['file_ijazah']->storeAs(path: $directory, name: $fileName);
+            $isFileReplaced = true;
+        }
 
         try {
-            DB::transaction(function () use ($fileName, $directory) {
-                // Simpan data riwayat pendidikan
-                RiwayatPendidikan::create([
-                    'pegawai_id'            => $this->pegawai_id,
+            DB::transaction(function () use ($riwayat, $fileName, $directory, $isFileReplaced) {
+                $riwayat->update([
                     'jenjang_pendidikan_id' => $this->form['jenjang_pendidikan_id'],
                     'tahun_masuk'           => $this->form['tahun_masuk'],
                     'tahun_lulus'           => $this->form['tahun_lulus'],
                     'file_ijazah'           => $fileName,
                     'file_path'             => $directory,
-                    'updated_by'            => auth()->id(),
+                    'updated_by'            => Auth::id(),
                 ]);
 
-                // Catat juga file yang diunggah ke arsip file terpusat
-                ArsipFile::create([
-                    'pegawai_id'  => $this->pegawai_id,
-                    'file_name'   => $fileName,
-                    'file_path'   => $directory,
-                    'jenis_file'  => 'Ijazah',
-                    'uploaded_by' => auth()->id(),
-                ]);
+                if ($isFileReplaced) {
+                    ArsipFile::create([
+                        'pegawai_id'  => $riwayat->pegawai_id,
+                        'file_name'   => $fileName,
+                        'file_path'   => $directory,
+                        'jenis_file'  => 'Ijazah',
+                        'uploaded_by' => Auth::id(),
+                    ]);
+                }
             });
         } catch (\Throwable $e) {
-            // Bersihkan file yang sudah terlanjur diunggah jika penyimpanan data gagal
-            Storage::disk('private')->delete("{$directory}/{$fileName}");
-
+            // Bersihkan file baru yang sudah terlanjur diunggah jika penyimpanan data gagal
+            if ($isFileReplaced) {
+                Storage::disk('private')->delete("{$directory}/{$fileName}");
+            }
             throw $e;
         }
 
-        // Beri tahu parent component agar tabel/list riwayat pendidikan di-refresh
-        $this->dispatch('pendidikan-added');
+        // Hapus file lama HANYA setelah transaksi berhasil, agar tidak kehilangan file jika gagal
+        if ($isFileReplaced && $oldFileName) {
+            Storage::disk('private')->delete("{$oldDirectory}/{$oldFileName}");
+        }
 
-        // Tutup modal setelah berhasil disimpan
-        $this->dispatch('close-add-pendidikan-modal');
-
-        $this->reset('form');
-        $this->resetValidation();
+        $this->dispatch('refresh-table-pendidikan');
+        $this->dispatch('close-edit-pendidikan-modal');
     }
 
-    #[On('open-add-pendidikan-modal')]
-    public function handleModalOpened()
+    public function updated($property): void
     {
-        $this->reset('form');
-        $this->resetValidation();
-    }
-
-    #[On('close-add-pendidikan-modal')]
-    public function handleModalClosed()
-    {
-        $this->reset('form');
-        $this->resetValidation();
+        $this->validateOnly($property);
     }
 
     public function render()
     {
-        return view('livewire.manajemen.pegawai.detail-pegawai.pendidikan.tambah-pendidikan');
+        return view('livewire.manajemen.pegawai.detail-pegawai.pendidikan.edit-pendidikan');
     }
 }
