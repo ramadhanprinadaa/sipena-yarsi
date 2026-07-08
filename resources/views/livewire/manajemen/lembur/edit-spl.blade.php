@@ -24,6 +24,12 @@
                             <div class="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[#2B76FF]/50 scrollbar-track-gray-100">
                                 <div class="p-6 space-y-6">
 
+                                    @error('spl')
+                                        <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+
                                     <!-- INFORMASI SURAT -->
                                     <div>
                                         <div class="flex items-center gap-2 mb-4 pb-3 border-b-2 border-[#2B76FF]">
@@ -71,12 +77,12 @@
                                             <label class="block text-xs font-semibold text-gray-700 mb-2">Nama Kegiatan</label>
                                             <input type="text" placeholder="Contoh: Menyelesaikan Fitur SIPENA"
                                                 wire:model="form.nama_kegiatan"
-                                                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition mb-4">
+                                                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
                                                 @error('form.nama_kegiatan')
                                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                                 @enderror
                                         </div>
-                                        <div>
+                                        <div class="mt-4">
                                             <label class="block text-xs font-semibold text-gray-700 mb-2">Deskripsi Tugas</label>
                                             <textarea placeholder="Tuliskan rincian tugas yang harus diselesaikan..."
                                                 wire:model="form.deskripsi_tugas"
@@ -219,6 +225,10 @@
                                             </div>
                                         </div>
                                         @endif
+
+                                        @error('selectedEmployees')
+                                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                        @enderror
                                     </div>
 
                                 </div>
@@ -227,12 +237,13 @@
 
                             <!-- Footer Button -->
                                 <div class="px-6 py-4 bg-white border-t border-gray-200 rounded-b-[20px] flex-shrink-0">
-                                    <button 
+                                    <button wire:click="save" wire:loading.attr="disabled" wire:target="save"
                                         type="submit"
                                         class="w-full py-3 rounded-lg text-white font-semibold 
-                                            bg-gradient-to-r from-[#2B76FF] via-[#7B61FF] to-[#FF00CC]  
+                                            bg-gradient-to-r from-[#2B76FF] via-[#7B61FF] to-[#FF00CC]
                                             hover:shadow-lg cursor-pointer transition duration-300">
-                                        Edit SPL
+                                        <span wire:loading.remove wire:target="save">Edit SPL</span>
+                                        <span wire:loading wire:target="save">Mengirim...</span>
                                     </button>
                                 </div>
 

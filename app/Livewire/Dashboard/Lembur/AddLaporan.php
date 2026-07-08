@@ -117,7 +117,7 @@ class AddLaporan extends Component
         ];
     }
 
-    public function submit()
+    public function save()
     {
         $this->validate([
             'form.lembur_id' => 'required|exists:lembur,id',

@@ -177,12 +177,12 @@
                                             </div>
                                         </th>
                                         <th scope="col" class="px-4 py-4 font-medium w-42">
-                                            <div class="flex items-center justify-between gap-2">
+                                            <div class="flex items-center justify-center gap-2">
                                                 <span class="truncate">Tanggal Mulai</span>
                                             </div>
                                         </th>
                                         <th scope="col" class="px-4 py-4 font-medium w-42">
-                                            <div class="flex items-center justify-between gap-2">
+                                            <div class="flex items-center justify-center gap-2">
                                                 <span class="truncate">Tanggal Selesai</span>
                                             </div>
                                         </th>
@@ -201,17 +201,17 @@
                                                 <span class="truncate">Sisa Saldo Cuti</span>
                                             </div>
                                         </th>
-                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                        <th scope="col" class="px-4 py-4 font-medium w-65">
                                             <div class="flex items-center justify-center gap-2">
                                                 <span class="truncate">Status</span>
                                             </div>
                                         </th>
-                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                        <th scope="col" class="px-4 py-4 font-medium w-50">
                                             <div class="flex items-center justify-center gap-2">
                                                 <span class="truncate">Keterangan</span>
                                             </div>
                                         </th>
-                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                        <th scope="col" class="px-4 py-4 font-medium w-55">
                                             <div class="flex items-center justify-center gap-2">
                                                 <span class="truncate">Aksi</span>
                                             </div>
@@ -235,13 +235,19 @@
                                                 <span class="px-3 py-1 {{ $this->statusBadgeClass($cuti->status) }} rounded-full text-xs font-semibold">{{ $this->statusLabel($cuti->status) }}</span>
                                             </td>
                                             <td class="px-4 py-4 text-center text-gray-600">{{ $cuti->keterangan }}</td>
-                                            <td class="px-4 py-4 text-center">
+                                            <td class="flex px-4 py-4 items-center justify-center gap-2">
                                                 @if(!in_array($cuti->status, ['disetujui', 'ditolak']))
-                                                    <button wire:click="$dispatch('openModalEdit', { id: {{ $cuti->id }} })" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition cursor-pointer">
-                                                        Edit
+                                                    <button wire:click="$dispatch('openModalEdit', { id: {{ $cuti->id }} })" class="flex px-3 py-2 text-white bg-amber-500 hover:bg-amber-100 hover:text-amber-500 rounded-md transition-colors cursor-pointer">
+                                                        <i class="fa-solid fa-pen-to-square mr-1"></i>
+                                                        <span class="text-xs">
+                                                            Edit
+                                                        </span>
                                                     </button>
-                                                    <button wire:click="$dispatch('openModalDelete', { id: {{ $cuti->id }} })" class="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition cursor-pointer">
-                                                        Hapus
+                                                    <button wire:click="$dispatch('openModalDelete', { id: {{ $cuti->id }} })" class="flex px-3 py-2 text-white bg-red-500 hover:bg-red-100 hover:text-red-500 rounded-md transition-colors cursor-pointer">
+                                                        <i class="fa-solid fa-trash-can mr-1"></i>
+                                                        <span class="text-xs">
+                                                            Hapus
+                                                        </span>
                                                     </button>
                                                 @else
                                                     <span class="text-xs text-gray-400">Tidak ada aksi</span>
@@ -265,7 +271,7 @@
                                     <span class="text-sm font-normal text-body block w-full md:inline md:w-auto">
                                         Menampilkan
                                         <span class="font-semibold text-heading">{{ $cutiList->firstItem() }}-{{ $cutiList->lastItem() }}</span> dari
-                                        <span class="font-semibold text-heading">{{ $cutiList->total() }} Lembur</span>
+                                        <span class="font-semibold text-heading">{{ $cutiList->total() }} Cuti</span>
                                     </span>
 
                                     <ul class="flex -space-x-px text-sm border border-gray-300 rounded-lg">
@@ -374,7 +380,7 @@
                                             </div>
                                             <div class="mt-1 flex items-center gap-4 text-xs font-medium text-gray-500">
                                                 <span><i class="fa-solid fa-file-signature mr-1.5 text-indigo-400"></i>Diajukan: {{ \Carbon\Carbon::parse($cuti->tanggal_pengajuan)->translatedFormat('d M Y') }}</span>
-                                                <span><i class="fa-solid fa-chart-line mr-1.5 text-emerald-400"></i>Sisa Saldo: {{ $cuti->saldo_cuti_sesudah ?? '-' }} Hari</span>
+                                                <span><i class="fa-solid fa-chart-line mr-1.5 text-emerald-400"></i>Sisa Saldo: {{ $this->displaySaldoCutiSesudah($cuti) ?? '-' }} Hari</span>
                                             </div>
                                         </div>
                                     </div>

@@ -541,7 +541,7 @@ class Index extends Component
     public function render()
     {
         // Load SPL untuk Pimpinan
-        $splQuery = SuratPerintahLembur::with(['pegawai', 'unitKerja']);
+        $splQuery = SuratPerintahLembur::with(['pegawai', 'unitKerja', 'lembur']);
 
         $this->applySplScope($splQuery);
 
@@ -689,7 +689,11 @@ class Index extends Component
 
     public function exportRekapExcel()
     {
-        $rekapQuery = Lembur::with('pegawai');
+        $rekapQuery = Lembur::with('pegawai')
+        ->where('status', 'Selesai')
+            ->whereHas('laporanHasilLembur.persetujuan', function ($query) {
+                $query->where('status', 'Disetujui');
+            });
         $this->applyLemburScope($rekapQuery);
         $this->applyRekapPeriodFilter($rekapQuery);
 

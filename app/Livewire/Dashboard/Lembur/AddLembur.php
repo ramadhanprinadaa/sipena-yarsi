@@ -115,7 +115,7 @@ class AddLembur extends Component
         ];
     }
 
-    public function submit()
+    public function save()
     {
         $this->validate([
             'form.surat_perintah_lembur_id' => 'required|exists:surat_perintah_lembur,id',

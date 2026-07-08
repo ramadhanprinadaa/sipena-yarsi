@@ -2,16 +2,17 @@
 
 namespace App\Livewire\Manajemen\Lembur;
 
-use Livewire\Component;
-use Livewire\Attributes\On;
-use App\Models\SuratPerintahLembur;
 use App\Models\Pegawai;
+use App\Models\SuratPerintahLembur;
+use App\Support\WorkflowEmail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class EditSpl extends Component
 {
-
     public $open = false;
     public $splId;
     public $searchPegawai = '';
@@ -31,10 +32,17 @@ class EditSpl extends Component
     ];
 
     #[On('open-edit-spl')]
-    public function open($id) {
+    public function open($id)
+    {
         $this->splId = $id;
         $this->loadSPL();
         $this->resetValidation();
+
+        $spl = $this->splId ? SuratPerintahLembur::with('lembur')->find($this->splId) : null;
+
+        if ($spl && $spl->lembur()->exists()) {
+            $this->addError('spl', 'SPL yang sudah diajukan oleh pegawai tidak dapat diedit lagi.');
+        }
 
         $this->open = true;
     }
@@ -43,7 +51,6 @@ class EditSpl extends Component
     {
         $this->resetValidation();
         $this->resetForm();
-
         $this->open = false;
     }
 
@@ -70,32 +77,35 @@ class EditSpl extends Component
     public function loadSPL()
     {
         $spl = SuratPerintahLembur::with(['pegawai', 'unitKerja'])->find($this->splId);
-        if ($spl) {
-            $this->form = [
-                'nomor_surat' => $spl->nomor_surat,
-                'unit_kerja' => $spl->unitKerja ? $spl->unitKerja->name : '',
-                'tanggal_dibuat' => $spl->tanggal_dibuat,
-                'nama_kegiatan' => $spl->nama_kegiatan,
-                'deskripsi_tugas' => $spl->deskripsi_tugas,
-                'jenis_hari' => $spl->jenis_hari,
-                'tanggal_lembur' => $spl->tanggal_lembur,
-                'jam_mulai' => $spl->jam_mulai,
-                'jam_selesai' => $spl->jam_selesai,
-            ];
 
-            $this->selectedEmployees = $spl->pegawai->map(function ($pegawai) {
-                $pegawai->loadMissing('unit_kerja');
-
-                return [
-                    'id' => $pegawai->id,
-                    'name' => $pegawai->nama,
-                    'nip' => $pegawai->nip,
-                    'npwp' => $pegawai->npwp,
-                    'unit_kerja_id' => $pegawai->unit_kerja_id,
-                    'unit_kerja' => $pegawai->unit_kerja?->name,
-                ];
-            })->toArray();
+        if (!$spl) {
+            return;
         }
+
+        $this->form = [
+            'nomor_surat' => $spl->nomor_surat,
+            'unit_kerja' => $spl->unitKerja ? $spl->unitKerja->name : '',
+            'tanggal_dibuat' => $spl->tanggal_dibuat,
+            'nama_kegiatan' => $spl->nama_kegiatan,
+            'deskripsi_tugas' => $spl->deskripsi_tugas,
+            'jenis_hari' => $spl->jenis_hari,
+            'tanggal_lembur' => $spl->tanggal_lembur,
+            'jam_mulai' => $spl->jam_mulai,
+            'jam_selesai' => $spl->jam_selesai,
+        ];
+
+        $this->selectedEmployees = $spl->pegawai->map(function ($pegawai) {
+            $pegawai->loadMissing('unit_kerja');
+
+            return [
+                'id' => $pegawai->id,
+                'name' => $pegawai->nama,
+                'nip' => $pegawai->nip,
+                'npwp' => $pegawai->npwp,
+                'unit_kerja_id' => $pegawai->unit_kerja_id,
+                'unit_kerja' => $pegawai->unit_kerja?->name,
+            ];
+        })->toArray();
     }
 
     public function updatedSearchPegawai()
@@ -150,29 +160,41 @@ class EditSpl extends Component
     public function save()
     {
         $this->validate([
-            'form.nomor_surat' => 'required|string|max:255',
+            'form.nomor_surat' => [
+                'required',
+                Rule::unique('surat_perintah_lembur', 'nomor_surat')->ignore($this->splId),
+                'string',
+                'max:255',
+            ],
             'form.unit_kerja' => 'required|string|max:255',
-            'form.tanggal_dibuat' => 'required|date',
+            'form.tanggal_dibuat' => 'required|date|after_or_equal:today',
             'form.nama_kegiatan' => 'required|string|max:255',
             'form.deskripsi_tugas' => 'required|string',
             'form.jenis_hari' => 'required|in:Hari Kerja Normal,Hari Libur Mingguan,Hari Libur Nasional',
-            'form.tanggal_lembur' => 'required|date',
+            'form.tanggal_lembur' => 'required|date|after_or_equal:today',
             'form.jam_mulai' => 'required',
             'form.jam_selesai' => 'required',
             'selectedEmployees' => $this->usesSelectedEmployeeUnit() ? 'required|array|size:1' : 'required|array|min:1',
-        ]);
+        ], [], $this->validationAttributes());
 
         $this->validateOvertimeRules();
 
-        $spl = SuratPerintahLembur::find($this->splId);
+        $unitKerja = $this->resolveUnitKerjaForSpl();
+
+        if (!$unitKerja) {
+            $this->addError('form.unit_kerja', 'Unit kerja tidak ditemukan.');
+            return;
+        }
+
+        $spl = SuratPerintahLembur::with('lembur')->find($this->splId);
+
         if (!$spl) {
             $this->addError('general', 'SPL tidak ditemukan.');
             return;
         }
 
-        $unitKerja = $this->resolveUnitKerjaForSpl();
-        if (!$unitKerja) {
-            $this->addError('form.unit_kerja', 'Unit kerja tidak ditemukan.');
+        if ($spl->lembur()->exists()) {
+            $this->addError('spl', 'SPL yang sudah diajukan oleh pegawai tidak dapat diedit lagi.');
             return;
         }
 
@@ -186,7 +208,20 @@ class EditSpl extends Component
             return;
         }
 
-        // Update SPL
+        if ($this->form['tanggal_lembur'] && $this->form['jenis_hari']) {
+            $tanggalLembur = \Carbon\Carbon::parse($this->form['tanggal_lembur']);
+
+            if ($this->form['jenis_hari'] === 'Hari Kerja Normal' && $tanggalLembur->isWeekend()) {
+                $this->addError('form.tanggal_lembur', 'Untuk Hari Kerja Normal, tanggal lembur harus dipilih dari Senin - Jumat.');
+                return;
+            }
+
+            if ($this->form['jenis_hari'] === 'Hari Libur Mingguan' && $tanggalLembur->isWeekday()) {
+                $this->addError('form.tanggal_lembur', 'Untuk Hari Libur Mingguan, tanggal lembur harus dipilih pada hari Sabtu atau Minggu.');
+                return;
+            }
+        }
+
         $spl->update([
             'nomor_surat' => $this->form['nomor_surat'],
             'unit_kerja_id' => $unitKerja->id,
@@ -199,10 +234,13 @@ class EditSpl extends Component
             'jam_selesai' => $this->form['jam_selesai'],
         ]);
 
-        // Sync pegawai
         $spl->pegawai()->sync($pegawaiIds);
+        $spl->load(['pegawai.unit_kerja', 'pegawai.user', 'unitKerja']);
 
-        // Emit event untuk refresh tabel
+        foreach ($spl->pegawai as $pegawai) {
+            WorkflowEmail::notifySplUpdated($spl, $pegawai, Auth::user()?->pegawai);
+        }
+
         $this->dispatch('spl-updated');
 
         $this->close();
@@ -232,8 +270,22 @@ class EditSpl extends Component
         }
 
         if ($role === 'SDM Yayasan') {
-            return $query->whereHas('user.role', function ($roleQuery) {
-                $roleQuery->where('name', 'SDM Universitas');
+            $unitSdmId = $user?->pegawai?->unit_kerja?->unit_sdm_id;
+
+            return $query->where(function ($roleQuery) use ($unitSdmId) {
+                $roleQuery->whereHas('user.role', function ($userRoleQuery) {
+                    $userRoleQuery->where('name', 'SDM Universitas');
+                })->orWhere(function ($pimpinanQuery) use ($unitSdmId) {
+                    $pimpinanQuery->whereHas('user.role', function ($userRoleQuery) {
+                        $userRoleQuery->where('name', 'Pimpinan');
+                    });
+
+                    if ($unitSdmId) {
+                        $pimpinanQuery->whereHas('unit_kerja', function ($unitQuery) use ($unitSdmId) {
+                            $unitQuery->where('unit_sdm_id', $unitSdmId);
+                        });
+                    }
+                });
             });
         }
 
@@ -246,6 +298,22 @@ class EditSpl extends Component
     private function usesSelectedEmployeeUnit(): bool
     {
         return in_array(Auth::user()->role->name ?? '', ['Rektor', 'SDM Universitas', 'SDM Yayasan']);
+    }
+
+    private function validationAttributes(): array
+    {
+        return [
+            'form.nomor_surat' => 'nomor surat',
+            'form.unit_kerja' => 'unit kerja',
+            'form.tanggal_dibuat' => 'tanggal dibuat',
+            'form.nama_kegiatan' => 'nama kegiatan',
+            'form.deskripsi_tugas' => 'deskripsi tugas',
+            'form.jenis_hari' => 'jenis hari',
+            'form.tanggal_lembur' => 'tanggal lembur',
+            'form.jam_mulai' => 'jam mulai',
+            'form.jam_selesai' => 'jam selesai',
+            'selectedEmployees' => 'pilih pegawai',
+        ];
     }
 
     private function syncUnitKerjaFromSelection(): void

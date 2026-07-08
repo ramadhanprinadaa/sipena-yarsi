@@ -231,8 +231,11 @@
                                                 <i class="fa-solid fa-file-export mr-1"></i>Laporan
                                             </button>
                                         @elseif($hasLaporan)
-                                            <button type="button" wire:click="showDetail({{ $lembur->id }})" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition cursor-pointer">
-                                                Detail
+                                            <button type="button" wire:click="showDetail({{ $lembur->id }})" class="px-3 py-1.5 text-white bg-indigo-500 hover:bg-indigo-100 hover:text-indigo-500 rounded-md transition-colors cursor-pointer">
+                                                <i class="fa-solid fa-eye mr-1"></i>
+                                                <span class="text-xs">
+                                                    Detail
+                                                </span>
                                             </button>
                                         @else
                                             <span class="text-gray-400 text-xs">Belum Waktunya</span>

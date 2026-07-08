@@ -249,7 +249,7 @@
                                                 <span class="truncate">Tanggal Pengajuan</span>
                                             </div>
                                         </th>
-                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                        <th scope="col" class="px-4 py-4 font-medium w-65">
                                             <div class="flex justify-center gap-2">
                                                 <span class="truncate items-center">Tanggal Mulai & Tanggal Selesai</span>
                                             </div>
@@ -298,7 +298,7 @@
                                             </td>
                                             <td class="px-4 py-4 text-center text-gray-600">{{ $cuti->jenisCuti->nama }}</td>
                                             <td class="px-4 py-4 text-center text-gray-600">{{ $cuti->jumlah_hari_cuti }} hari</td>
-                                            <td class="px-4 py-4 text-center text-gray-600">{{ $cuti->sisa_saldo_cuti ?? 0 }} hari</td>
+                                            <td class="px-4 py-4 text-center text-gray-600">{{ $this->displaySaldoCutiSesudah($cuti) ?? 0 }} hari</td>
                                             <td class="px-4 py-4 text-center">
                                                 @php
                                                     $statusClass = 'bg-gray-100 text-gray-700';
@@ -312,13 +312,37 @@
                                                 @endphp
                                                 <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $statusClass }}">{{ ucfirst(str_replace('_', ' ', $cuti->status)) }}</span>
                                             </td>
-                                            <td class="px-4 py-4 text-center">
+                                            <td class="flex px-4 py-4 items-center justify-center gap-2">
                                                 @if($this->canApprove($cuti))
-                                                    <button wire:click="openApprovalConfirmation('approve', {{ $cuti->id }})" class="px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-600 rounded-[10px] hover:bg-blue-600/10 transition mr-1 cursor-pointer">Setujui</button>
-                                                    <button wire:click="openApprovalConfirmation('reject', {{ $cuti->id }})" class="px-3 py-1.5 text-xs font-medium text-red-600 border border-red-600 rounded-[10px] hover:bg-red-600/10 transition cursor-pointer">Tolak</button>
-                                                    <button  type="button" wire:click="$dispatch('openDetailModal', { cutiId: {{ $cuti->id }} })" class="px-3 py-1.5 text-xs font-medium text-pink-500 border border-pink-500 rounded-[10px] hover:bg-pink-600/10 transition cursor-pointer">Detail </button>
+                                                    <button wire:click="openApprovalConfirmation('approve', {{ $cuti->id }})" 
+                                                        class="flex px-3 py-2 text-white bg-green-500 hover:bg-green-100 hover:text-green-500 rounded-md transition-colors cursor-pointer">
+                                                        <i class="fa-solid fa-check mr-1"></i>
+                                                        <span class="text-xs">
+                                                            Setujui
+                                                        </span>
+                                                    </button>
+                                                    <button wire:click="openApprovalConfirmation('reject', {{ $cuti->id }})" 
+                                                        class="flex px-3 py-2 text-white bg-red-500 hover:bg-red-100 hover:text-red-500 rounded-md transition-colors cursor-pointer">
+                                                        <i class="fa-solid fa-x mr-1"></i>
+                                                        <span class="text-xs">
+                                                            Tolak
+                                                        </span>
+                                                    </button>
+                                                    <button  type="button" wire:click="$dispatch('openDetailModal', { cutiId: {{ $cuti->id }} })" 
+                                                        class="flex px-3 py-2 text-white bg-indigo-500 hover:bg-indigo-100 hover:text-indigo-500 rounded-md transition-colors cursor-pointer">
+                                                        <i class="fa-solid fa-eye mr-1"></i>
+                                                        <span class="text-xs">
+                                                            Detail
+                                                        </span>
+                                                    </button>
                                                 @else
-                                                    <button  type="button" wire:click="$dispatch('openDetailModal', { cutiId: {{ $cuti->id }} })" class="px-3 py-1.5 text-xs font-medium text-pink-500 border border-pink-500 rounded-[10px] hover:bg-pink-600/10 transition cursor-pointer">Detail </button>
+                                                    <button  type="button" wire:click="$dispatch('openDetailModal', { cutiId: {{ $cuti->id }} })" 
+                                                        class="flex px-3 py-2 text-white bg-indigo-500 hover:bg-indigo-100 hover:text-indigo-500 rounded-md transition-colors cursor-pointer">
+                                                        <i class="fa-solid fa-eye mr-1"></i>
+                                                        <span class="text-xs">
+                                                            Detail
+                                                        </span>
+                                                    </button>
                                                 @endif
                                             </td>
                                         </tr>
@@ -467,7 +491,7 @@
                                             <td class="px-4 py-4 font-medium text-gray-700">{{ $item->pegawai->nama }}</td>
                                             <td class="px-4 py-4 text-gray-600">{{ $item->pegawai->nip }}</td>
                                             <td class="px-4 py-4 text-gray-600">{{ $item->jumlah_cuti }} hari</td>
-                                            <td class="px-4 py-4 text-gray-600">{{ $item->sisa_saldo_cuti ?? 0 }} hari</td>
+                                            <td class="px-4 py-4 text-gray-600">{{ $item->sisa_saldo ?? 0 }}  hari</td>
                                         </tr>
                                     @empty
                                         <tr>

@@ -186,8 +186,10 @@
                                                 <span class="truncate items-center">Status</span>
                                             </div>
                                         </th>
-                                        <th scope="col" class="px-4 py-4 font-medium w-18 text-center">
-                                            <span class="truncate">Aksi</span>
+                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                            <div class="flex justify-center gap-2">
+                                                <span class="truncate items-center">Aksi</span>
+                                            </div>
                                         </th>
                                     </tr>
                                 </thead>
@@ -205,9 +207,12 @@
                                             <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">{{ $spl->status }}</span>
                                         </td>
                                         <td class="px-4 py-4 text-center">
-                                            <button wire:click="$dispatch('open-edit-spl', { id: {{ $spl->id }} })" class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition cursor-pointer">
-                                                Edit
-                                            </button>
+                                            @if($spl->lembur->isEmpty())
+                                                <button wire:click="$dispatch('open-edit-spl', { id: {{ $spl->id }} })" class="px-3 py-1.5 text-white bg-amber-500 hover:bg-amber-100 hover:text-amber-500 rounded-md transition-colors cursor-pointer">
+                                                    <i class="fa-solid fa-pen-to-square mr-1"></i>
+                                                    <span class="text-xs">Edit</span>
+                                                </button>
+                                            @endif
                                         </td>
                                     </tr>
                                     @empty
@@ -737,7 +742,7 @@
                                                 <span class="truncate">Hasil Pekerjaan</span>
                                             </div>
                                         </th>
-                                        <th scope="col" class="px-4 py-4 font-medium w-25">
+                                        <th scope="col" class="px-4 py-4 font-medium w-35">
                                             <div class="flex items-center justify-between gap-2">
                                                 <span class="truncate">Status</span>
                                             </div>
@@ -752,7 +757,7 @@
                                                 <span class="truncate">Disetujui Oleh</span>
                                             </div>
                                         </th>
-                                        <th scope="col" class="px-4 py-4 text-center font-medium w-18">
+                                        <th scope="col" class="px-4 py-4 text-center font-medium w-40">
                                             <div class="flex items-center justify-center gap-2">
                                                 <span class="truncate">Aksi</span>
                                             </div>
@@ -772,17 +777,26 @@
                                             </td>
                                             <td class="px-4 py-4 text-gray-600">{{ $this->getApprovalCatatan($lembur, 'laporan') }}</td>
                                             <td class="px-4 py-4 text-gray-600">{{ $this->getApproverLabel($lembur, 'laporan') }}</td>
-                                            <td class="flex px-4 py-4 items-center justify-center">
+                                            <td class="flex px-4 py-4 items-center justify-center gap-2">
                                                 @if($this->canApproveLaporan($lembur))
-                                                    <button wire:click="openApprovalConfirmation('laporan', 'approve', {{ $lembur->id }})" class="px-3 py-1.5 text-xs font-medium text-blue-500 border border-blue-500 rounded-[10px] hover:bg-blue-600/10 transition cursor-pointer">
-                                                        Setujui
+                                                    <button wire:click="openApprovalConfirmation('laporan', 'approve', {{ $lembur->id }})" class="flex px-3 py-2 text-white bg-green-500 hover:bg-green-100 hover:text-green-500 rounded-md transition-colors cursor-pointer">
+                                                        <i class="fa-solid fa-check mr-1"></i>
+                                                        <span class="text-xs">
+                                                            Setujui
+                                                        </span>
                                                     </button>
-                                                    <button wire:click="openApprovalConfirmation('laporan', 'reject', {{ $lembur->id }})" class="px-3 py-1.5 text-xs font-medium text-red-500 border border-red-500 rounded-[10px] hover:bg-red-600/10 transition cursor-pointer">
-                                                        Tolak
+                                                    <button wire:click="openApprovalConfirmation('laporan', 'reject', {{ $lembur->id }})" class="flex px-3 py-2 text-white bg-red-500 hover:bg-red-100 hover:text-red-500 rounded-md transition-colors cursor-pointer">
+                                                        <i class="fa-solid fa-x mr-1"></i>
+                                                        <span class="text-xs">
+                                                            Tolak
+                                                        </span>
                                                     </button>
                                                 @endif
-                                                <button wire:click="$dispatch('showDetailLaporan', { id: {{ $lembur->id }} })" class="px-3 py-1.5 text-xs font-medium text-pink-500 border border-pink-500 rounded-[10px] hover:bg-pink-600/10 transition cursor-pointer">
-                                                    Detail
+                                                <button wire:click="$dispatch('showDetailLaporan', { id: {{ $lembur->id }} })" class="flex px-3 py-2 text-white bg-indigo-500 hover:bg-indigo-100 hover:text-indigo-500 rounded-md transition-colors cursor-pointer">
+                                                    <i class="fa-solid fa-eye mr-1"></i>
+                                                    <span class="text-xs">
+                                                        Detail
+                                                    </span>
                                                 </button>
                                             </td>
                                         </tr>

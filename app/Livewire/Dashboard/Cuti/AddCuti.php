@@ -8,6 +8,7 @@ use App\Models\Pegawai;
 use App\Models\SaldoCuti;
 use App\Support\WorkflowEmail;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -73,7 +74,7 @@ class AddCuti extends Component
 
         $tanggalMulai = Carbon::parse($this->tanggal_mulai);
         $tanggalSelesai = Carbon::parse($this->tanggal_selesai);
-        $jumlahHari = $jenisCuti->dihitung_per_jam ? null : $tanggalMulai->diffInDays($tanggalSelesai) + 1;
+        $jumlahHari = $jenisCuti->dihitung_per_jam ? null : $this->countWeekdaysBetweenDates($tanggalMulai, $tanggalSelesai);
         $jumlahJam = $jenisCuti->dihitung_per_jam ? $this->calculateHours() : null;
 
         if (!$this->passesBusinessRules($pegawai, $jenisCuti, $jumlahHari, $jumlahJam)) {
@@ -290,6 +291,21 @@ class AddCuti extends Component
     private function calculateHours(): int
     {
         return (int) floor(Carbon::parse($this->jam_mulai)->diffInMinutes(Carbon::parse($this->jam_selesai)) / 60);
+    }
+
+    private function countWeekdaysBetweenDates(Carbon $startDate, Carbon $endDate): int
+    {
+        $count = 0;
+
+        foreach (CarbonPeriod::create($startDate->copy()->startOfDay(), $endDate->copy()->startOfDay()) as $date) {
+            if ($date->isWeekend()) {
+                continue;
+            }
+
+            $count++;
+        }
+
+        return $count;
     }
 
     private function getSaldoCuti(Pegawai $pegawai, ?JenisCuti $jenisCuti = null): array
