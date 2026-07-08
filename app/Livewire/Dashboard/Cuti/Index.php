@@ -6,10 +6,11 @@ use App\Models\Cuti;
 use App\Models\Pegawai;
 use App\Models\SaldoCuti;
 use Carbon\Carbon;
-use Livewire\WithPagination;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Index extends Component
 {
@@ -345,7 +346,9 @@ class Index extends Component
         $pegawai = Auth::user()?->pegawai;
 
         if (!$pegawai) {
-            return;
+            return view('livewire.dashboard.cuti.index', [
+                'cutiList' => new LengthAwarePaginator([], 0, 10),
+            ]);
         }
     //=============================================================================
         // 1. Hitung Masa Kerja

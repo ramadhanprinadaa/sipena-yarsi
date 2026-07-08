@@ -109,6 +109,10 @@ class Index extends Component
     {
 
         $user = Auth::user();
+
+        $query = SuratPerintahLembur::query()->whereRaw('1 = 0');
+        $lemburQuery = Lembur::query()->whereRaw('1 = 0');
+
         if ($user->pegawai) {
             // Load SPL yang diterbitkan dan pegawai user termasuk di dalamnya
             $query = SuratPerintahLembur::where('status', 'Diterbitkan')
@@ -167,7 +171,7 @@ class Index extends Component
         return view('livewire.dashboard.lembur.index', [
             'spls' => $query->paginate(10),
             'lemburList' => $lemburQuery->paginate(10),
-            'laporanList' => Lembur::where('pegawai_id', $user->pegawai->id)
+            'laporanList' => Lembur::where('pegawai_id', $user?->pegawai?->id ?? 0)
                 ->whereHas('laporanHasilLembur')
                 ->with(['suratPerintahLembur', 'pegawai.unit_kerja', 'pegawai.user.role', 'laporanHasilLembur.persetujuan.approver.pegawai', 'laporanHasilLembur.persetujuan.approver.role', 'persetujuan.approver.pegawai', 'persetujuan.approver.role'])
                 ->orderBy('updated_at', 'desc')
@@ -242,7 +246,7 @@ class Index extends Component
             return;
         }
 
-        $lemburQuery = Lembur::where('pegawai_id', $user->pegawai->id)
+        $lemburQuery = Lembur::where('pegawai_id', $user?->pegawai?->id ?? 0)
             ->with(['suratPerintahLembur', 'pegawai']);
 
         if ($this->filterRiwayatDate) {
