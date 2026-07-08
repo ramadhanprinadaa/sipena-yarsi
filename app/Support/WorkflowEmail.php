@@ -41,6 +41,34 @@ class WorkflowEmail
         ]);
     }
 
+    public static function notifySplUpdated(SuratPerintahLembur $spl, Pegawai $pegawai, ?Pegawai $publisher = null): void
+    {
+        $email = self::emailForPegawai($pegawai);
+
+        if (!$email) {
+            return;
+        }
+
+        self::send($email, 'Pembaruan SPL - ' . $spl->nomor_surat, [
+            'title' => 'Surat Perintah Lembur Diperbarui',
+            'greeting' => 'Halo ' . ($pegawai->nama ?? 'Pegawai'),
+            'intro' => 'Surat Perintah Lembur yang Anda terima telah diperbarui. Mohon cek kembali detail jadwal dan tugas berikut.',
+            'rows' => [
+                'Nomor Surat' => $spl->nomor_surat,
+                'Unit Kerja' => $spl->unitKerja->name ?? $pegawai->unit_kerja->name ?? '-',
+                'Nama Kegiatan' => $spl->nama_kegiatan,
+                'Jenis Hari' => $spl->jenis_hari,
+                'Tanggal Lembur' => self::formatDate($spl->tanggal_lembur),
+                'Jam Lembur' => self::formatTime($spl->jam_mulai) . ' - ' . self::formatTime($spl->jam_selesai),
+                'Diperbarui Oleh' => $publisher->nama ?? '-',
+            ],
+            'note' => sprintf(
+                'Silakan buka <a href="%s">SIPENA</a> untuk melihat pembaruan SPL tersebut.',
+                config('app.url')
+            ),
+        ]);
+    }
+
     public static function notifyLaporanSubmitted(Lembur $lembur, LaporanHasilLembur $laporan): void
     {
         $lembur->loadMissing(['pegawai.unit_kerja.pimpinan.user', 'pegawai.user.role', 'suratPerintahLembur']);

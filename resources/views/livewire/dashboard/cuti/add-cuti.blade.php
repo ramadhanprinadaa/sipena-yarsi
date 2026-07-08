@@ -206,6 +206,8 @@
                     <button wire:click="save" wire:loading.attr="disabled" wire:target="save,dokumen_pendukung"
                         class="w-full py-3 rounded-lg text-white font-semibold
                             bg-gradient-to-r from-[#2B76FF] via-[#7B61FF] to-[#FF00CC]
+                        class="w-full py-3 rounded-lg text-white font-semibold
+                            bg-gradient-to-r from-[#2B76FF] via-[#7B61FF] to-[#FF00CC]
                             hover:shadow-lg cursor-pointer transition duration-300">
                         <span wire:loading.remove wire:target="save">Ajukan Cuti</span>
                         <span wire:loading wire:target="save">Mengirim...</span>

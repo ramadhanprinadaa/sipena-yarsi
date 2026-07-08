@@ -7,6 +7,7 @@ use App\Models\JenisCuti;
 use App\Models\Pegawai;
 use App\Models\SaldoCuti;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\On;
@@ -92,7 +93,7 @@ class EditCuti extends Component
 
         $tanggalMulai = Carbon::parse($this->tanggal_mulai);
         $tanggalSelesai = Carbon::parse($this->tanggal_selesai);
-        $jumlahHari = $jenisCuti->dihitung_per_jam ? null : $tanggalMulai->diffInDays($tanggalSelesai) + 1;
+        $jumlahHari = $jenisCuti->dihitung_per_jam ? null : $this->countWeekdaysBetweenDates($tanggalMulai, $tanggalSelesai);
         $jumlahJam = $jenisCuti->dihitung_per_jam ? $this->calculateHours() : null;
 
         if (!$this->passesBusinessRules($pegawai, $jenisCuti, $jumlahHari, $jumlahJam, $cuti->id)) {
@@ -180,6 +181,18 @@ class EditCuti extends Component
             ? Carbon::parse($pegawai->tanggal_bergabung)->diffInMonths(Carbon::today())
             : 0;
 
+        $tanggalMulai = Carbon::parse($this->tanggal_mulai);
+        $tanggalSelesai = Carbon::parse($this->tanggal_selesai);
+
+        if ($tanggalMulai->isWeekend()) {
+            $this->addError('tanggal_mulai', 'Tanggal mulai cuti hanya bisa dipilih pada hari Senin - Jumat.');
+            return false;
+        }
+
+        if ($tanggalSelesai->isWeekend()) {
+            $this->addError('tanggal_selesai', 'Tanggal selesai cuti hanya bisa dipilih pada hari Senin - Jumat.');
+            return false;
+        }
         // 1. --- VALIDASI OVERLAP TANGGAL CUTI (Khusus Edit) ---
         $overlapQuery = Cuti::where('pegawai_id', $pegawai->id)
             ->where('status', '!=', 'ditolak')
@@ -302,6 +315,21 @@ class EditCuti extends Component
     private function calculateHours(): int
     {
         return (int) floor(Carbon::parse($this->jam_mulai)->diffInMinutes(Carbon::parse($this->jam_selesai)) / 60);
+    }
+
+    private function countWeekdaysBetweenDates(Carbon $startDate, Carbon $endDate): int
+    {
+        $count = 0;
+
+        foreach (CarbonPeriod::create($startDate->copy()->startOfDay(), $endDate->copy()->startOfDay()) as $date) {
+            if ($date->isWeekend()) {
+                continue;
+            }
+
+            $count++;
+        }
+
+        return $count;
     }
 
     private function getSaldoCuti(Pegawai $pegawai, ?JenisCuti $jenisCuti = null, ?int $ignoreId = null): array

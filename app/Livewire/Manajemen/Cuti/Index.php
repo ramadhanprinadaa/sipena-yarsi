@@ -7,6 +7,7 @@ use App\Models\CutiApproval;
 use App\Models\SaldoCuti;
 use App\Models\UnitKerja;
 use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -277,6 +278,45 @@ class Index extends Component
         return false;
     }
 
+    private function serviceYearForDate(Carbon $referenceDate, Carbon $joinDate): int
+    {
+        return $joinDate->diffInMonths($referenceDate) >= 0
+            ? (int) floor($joinDate->diffInMonths($referenceDate) / 12) + 1
+            : 1;
+    }
+
+    public function displaySaldoCutiSesudah(Cuti $cuti): string
+    {
+        if ($cuti->jenis_cuti_id !== 2 || !$cuti->tanggal_mulai) {
+            return $cuti->saldo_cuti_sesudah !== null ? (string) $cuti->saldo_cuti_sesudah : '-';
+        }
+
+        $pegawai = $cuti->pegawai;
+
+        if (!$pegawai || !$pegawai->tanggal_bergabung) {
+            return $cuti->saldo_cuti_sesudah !== null ? (string) $cuti->saldo_cuti_sesudah : '-';
+        }
+
+        $serviceYear = $this->serviceYearForDate(Carbon::parse($cuti->tanggal_mulai), Carbon::parse($pegawai->tanggal_bergabung));
+
+        if (!in_array($serviceYear, [7, 8])) {
+            return $cuti->saldo_cuti_sesudah !== null ? (string) $cuti->saldo_cuti_sesudah : '-';
+        }
+
+        $joinDate = Carbon::parse($pegawai->tanggal_bergabung);
+        $periodStart = $joinDate->copy()->addYears($serviceYear - 1)->startOfDay();
+        $usedBeforeThisCuti = (int) Cuti::where('pegawai_id', $pegawai->id)
+            ->where('jenis_cuti_id', 2)
+            ->where('status', 'disetujui')
+            ->whereDate('tanggal_mulai', '>=', $periodStart->toDateString())
+            ->whereDate('tanggal_mulai', '<=', Carbon::parse($cuti->tanggal_mulai)->toDateString())
+            ->sum('jumlah_hari_cuti');
+
+        $remaining = max(0, 33 - $usedBeforeThisCuti);
+
+        return (string) $remaining;
+    }
+
     public function statusLabel(string $status): string
     {
         return match ($status) {
@@ -397,15 +437,13 @@ class Index extends Component
             ->groupBy('pegawai_id')
             ->map(function ($items) {
                 $first = $items->first();
-                $saldo = SaldoCuti::where('pegawai_id', $first->pegawai_id)
-                    ->where('tahun', now()->year)
-                    ->first();
+                
                 return [
                     'nama' => $first->pegawai->nama ?? '-',
                     'nip' => $first->pegawai->nip ?? '-',
                     'jumlah_cuti' => $items->sum('jumlah_hari_cuti'),
                     'jumlah_jam' => $items->sum('jumlah_jam'),
-                    'sisa_saldo' => $saldo->sisa_cuti ?? '-',
+                    'sisa_saldo' => $this->displaySaldoCutiSesudah($first) ?? '-',
                 ];
             })
             ->values();
@@ -502,14 +540,38 @@ class Index extends Component
         //     })
         //     ->values();
 
+        $rekapItems = $rekapQuery->get()
+            ->groupBy('pegawai_id')
+            ->map(function ($items) {
+                $first = $items->first();
+
+                return (object) [
+                    'pegawai' => $first->pegawai,
+                    'jumlah_cuti' => $items->sum('jumlah_hari_cuti'),
+                    'jumlah_jam' => $items->sum('jumlah_jam'),
+                    'sisa_saldo' => $this->displaySaldoCutiSesudah($first),
+                ];
+            })
+            ->values();
+
+        $perPage = 10;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $currentItems = $rekapItems->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $rekapList = new LengthAwarePaginator(
+            $currentItems,
+            $rekapItems->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => request()->url(),
+                'query' => request()->query(),
+            ]
+        );
+
         return view('livewire.manajemen.cuti.index', [
             'cutiList' => $cutiQuery->orderBy('created_at', 'desc')->paginate(10),
-            'rekapList' => $rekapQuery->select('pegawai_id')
-                            ->selectRaw('SUM(jumlah_hari_cuti) as jumlah_cuti')
-                            ->selectRaw('SUM(jumlah_jam) as jumlah_jam')
-                            ->with('pegawai')
-                            ->groupBy('pegawai_id')
-                            ->paginate(10),
+            'rekapList' => $rekapList,
             'allowedTabs' => $this->allowedTabs,
         ]);
     }
