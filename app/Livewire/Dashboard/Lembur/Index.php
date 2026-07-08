@@ -7,10 +7,12 @@ use Livewire\Attributes\On;
 use App\Models\SuratPerintahLembur;
 use App\Models\Lembur;
 use Carbon\Carbon;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 
 class Index extends Component
 {
+    use WithPagination;
 
     public $openDetail = false;
     public $isAutoFilled = false;
@@ -37,6 +39,7 @@ class Index extends Component
 
     #[On('lembur-created')]
     #[On('laporan-created')]
+    #[On('laporan-updated')]
     public function refreshData()
     {
         $this->loadData();
@@ -45,6 +48,8 @@ class Index extends Component
     public function loadData()
     {
         $this->syncDueLemburStatuses();
+
+
     }
 
     private function applyRekapPeriodFilter($query): void
@@ -73,6 +78,11 @@ class Index extends Component
             ->whereDate('tanggal_lembur', '<=', Carbon::today())
             ->whereDoesntHave('laporanHasilLembur')
             ->update(['status' => 'Menunggu Laporan']);
+
+        SuratPerintahLembur::where('status', 'Diterbitkan')
+            ->whereDate('tanggal_lembur', '<', Carbon::today())
+            ->whereDoesntHave('lembur')
+            ->update(['status' => 'Kedaluwarsa']);
     }
 
     public function updatedFilterSplDate()
@@ -99,11 +109,6 @@ class Index extends Component
     {
 
         $user = Auth::user();
-
-        $query = SuratPerintahLembur::query()->where('id', 0);
-        $lemburQuery = Lembur::query()->where('id', 0);
-
-
         if ($user->pegawai) {
             // Load SPL yang diterbitkan dan pegawai user termasuk di dalamnya
             $query = SuratPerintahLembur::where('status', 'Diterbitkan')
@@ -140,7 +145,11 @@ class Index extends Component
 
             //Load Rekapitulasi Milik Pegawai
             $rekapQuery = Lembur::where('pegawai_id', $user->pegawai->id)
-                ->with(['suratPerintahLembur', 'laporanHasilLembur']);
+                ->where('status', 'Selesai')
+                ->whereHas('laporanHasilLembur.persetujuan', function ($query) {
+                    $query->where('status', 'Disetujui');
+                })
+                ->with(['suratPerintahLembur', 'laporanHasilLembur.persetujuan']);
 
             $this->applyRekapPeriodFilter($rekapQuery);
 
@@ -149,16 +158,16 @@ class Index extends Component
             $this->rekapList = $rekapList;
             $this->rekapSummary = [
                 'hari' => $rekapList->count(),
-                'total_jam' => $rekapList->sum(fn($lembur) => $this->durationInHours($lembur->jam_mulai, $lembur->jam_selesai)),
+                'total_jam' => $rekapList->sum(fn ($lembur) => $this->durationInHours($lembur->jam_mulai, $lembur->jam_selesai)),
                 'selesai' => $rekapList->where('status', 'Selesai')->count(),
-                'menunggu' => $rekapList->filter(fn($lembur) => !in_array($lembur->status, ['Selesai', 'Ditolak']))->count(),
+                'menunggu' => $rekapList->filter(fn ($lembur) => !in_array($lembur->status, ['Selesai', 'Ditolak']))->count(),
             ];
         }
 
         return view('livewire.dashboard.lembur.index', [
             'spls' => $query->paginate(10),
             'lemburList' => $lemburQuery->paginate(10),
-            'laporanList' => Lembur::where('pegawai_id', $user?->pegawai?->id ?? 0)
+            'laporanList' => Lembur::where('pegawai_id', $user->pegawai->id)
                 ->whereHas('laporanHasilLembur')
                 ->with(['suratPerintahLembur', 'pegawai.unit_kerja', 'pegawai.user.role', 'laporanHasilLembur.persetujuan.approver.pegawai', 'laporanHasilLembur.persetujuan.approver.role', 'persetujuan.approver.pegawai', 'persetujuan.approver.role'])
                 ->orderBy('updated_at', 'desc')
@@ -208,8 +217,7 @@ class Index extends Component
         $this->dispatch('open-add-laporan-lembur');
     }
 
-    public function showDetail($lemburId)
-    {
+    public function showDetail($lemburId) {
         $this->selectedLembur = Lembur::with([
             'suratPerintahLembur.unitKerja',
             'pegawai.unit_kerja',
@@ -218,12 +226,11 @@ class Index extends Component
             'laporanHasilLembur.persetujuan.approver.role',
             'persetujuan.approver.pegawai',
             'persetujuan.approver.role'
-        ])->find($lemburId);
+            ])->find($lemburId);
         $this->openDetail = true;
     }
 
-    public function closeDetail()
-    {
+    public function closeDetail() {
         $this->openDetail = false;
         $this->selectedLembur = null;
     }
@@ -479,4 +486,5 @@ class Index extends Component
 
         return $approval->catatan ?? '-';
     }
+
 }

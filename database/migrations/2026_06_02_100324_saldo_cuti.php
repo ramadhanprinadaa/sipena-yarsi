@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('saldo_cuti', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('pegawai_id');
-            $table->year('tahun');
-            $table->integer('hak_cuti');
-            $table->integer('cuti_terpakai');
-            $table->integer('sisa_cuti');
-            $table->timestamps();
+        $table->id();
+        $table->foreignId('pegawai_id');
+        $table->year('tahun');
+        $table->integer('hak_cuti');
+        $table->integer('cuti_terpakai');
+        $table->integer('sisa_cuti');
+        $table->timestamps();
         });
     }
 

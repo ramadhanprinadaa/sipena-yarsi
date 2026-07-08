@@ -3,24 +3,32 @@
 namespace App\Livewire\Dashboard\Cuti;
 
 use App\Models\Cuti;
+use App\Models\Pegawai;
 use App\Models\SaldoCuti;
 use Carbon\Carbon;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class Index extends Component
 {
+    use WithPagination;
+
     public $rekapList = [];
+    public $labelSaldoCuti = '';
+    public $sisaSaldoCuti = 0;
+    public $cutiTerpakai = 0;
+    public $cutiTerpakaiTahunan = 0;
+    public $cutiTerpakaiBesar = 0;
+    public $cutiBesarQuota = 12;
     public $rekapSummary = [
         'sisa_saldo' => 0,
+        'label_saldo_cuti' => '',
         'cuti_terpakai' => 0,
         'cuti_terpakai_tahunan' => 0,
         'cuti_terpakai_besar' => 0,
         'cuti_terpakai_melahirkan' => 0,
-        'sisa_saldo_tahunan' => 0,
-        'sisa_saldo_besar' => 0,
-        'sisa_saldo_melahirkan' => 0,
         'cuti_terpakai_total' => 0,
     ];
 
@@ -42,7 +50,10 @@ class Index extends Component
         $this->loadData();
     }
 
-    public function loadData() {}
+    public function loadData()
+    {
+
+    }
 
     public function updatedFilterRiwayatDate()
     {
@@ -75,6 +86,96 @@ class Index extends Component
         }
     }
 
+    private function serviceYearForDate(Carbon $referenceDate, Carbon $joinDate): int
+    {
+        return $joinDate->diffInMonths($referenceDate) >= 0
+            ? (int) floor($joinDate->diffInMonths($referenceDate) / 12) + 1
+            : 1;
+    }
+
+    private function currentServiceYear(Pegawai $pegawai): int
+    {
+        if (!$pegawai->tanggal_bergabung) {
+            return 1;
+        }
+
+        return (int) floor(Carbon::parse($pegawai->tanggal_bergabung)->diffInMonths(Carbon::today()) / 12) + 1;
+    }
+
+    private function currentCutiBesarQuota(Pegawai $pegawai): int
+    {
+        return in_array($this->currentServiceYear($pegawai), [7, 8]) ? 33 : 12;
+    }
+
+    private function currentCutiBesarPeriodRange(Pegawai $pegawai): ?array
+    {
+        if (!$pegawai->tanggal_bergabung) {
+            return null;
+        }
+
+        $serviceYear = $this->currentServiceYear($pegawai);
+
+        if (!in_array($serviceYear, [7, 8])) {
+            return null;
+        }
+
+        $joinDate = Carbon::parse($pegawai->tanggal_bergabung);
+        $periodStart = $joinDate->copy()->addYears($serviceYear - 1)->startOfDay();
+        $periodEnd = $joinDate->copy()->addYears($serviceYear)->subDay()->endOfDay();
+
+        return [$periodStart, $periodEnd];
+    }
+
+    private function usedCutiBesarInCurrentPeriod(Pegawai $pegawai): int
+    {
+        $period = $this->currentCutiBesarPeriodRange($pegawai);
+
+        if (!$period) {
+            return 0;
+        }
+
+        [$periodStart, $periodEnd] = $period;
+
+        return (int) Cuti::where('pegawai_id', $pegawai->id)
+            ->where('jenis_cuti_id', 2)
+            ->where('status', 'disetujui')
+            ->whereDate('tanggal_mulai', '>=', $periodStart->toDateString())
+            ->whereDate('tanggal_mulai', '<=', $periodEnd->toDateString())
+            ->sum('jumlah_hari_cuti');
+    }
+
+    public function displaySaldoCutiSesudah(Cuti $cuti): string
+    {
+        if ($cuti->jenis_cuti_id !== 2 || !$cuti->tanggal_mulai) {
+            return $cuti->saldo_cuti_sesudah !== null ? (string) $cuti->saldo_cuti_sesudah : '-';
+        }
+
+        $pegawai = Auth::user()?->pegawai;
+
+        if (!$pegawai || !$pegawai->tanggal_bergabung) {
+            return $cuti->saldo_cuti_sesudah !== null ? (string) $cuti->saldo_cuti_sesudah : '-';
+        }
+
+        $serviceYear = $this->serviceYearForDate(Carbon::parse($cuti->tanggal_mulai), Carbon::parse($pegawai->tanggal_bergabung));
+
+        if (!in_array($serviceYear, [7, 8])) {
+            return $cuti->saldo_cuti_sesudah !== null ? (string) $cuti->saldo_cuti_sesudah : '-';
+        }
+
+        $joinDate = Carbon::parse($pegawai->tanggal_bergabung);
+        $periodStart = $joinDate->copy()->addYears($serviceYear - 1)->startOfDay();
+        $usedBeforeThisCuti = (int) Cuti::where('pegawai_id', $pegawai->id)
+            ->where('jenis_cuti_id', 2)
+            ->where('status', 'disetujui')
+            ->whereDate('tanggal_mulai', '>=', $periodStart->toDateString())
+            ->whereDate('tanggal_mulai', '<=', Carbon::parse($cuti->tanggal_mulai)->toDateString())
+            ->sum('jumlah_hari_cuti');
+
+        $remaining = max(0, 33 - $usedBeforeThisCuti);
+
+        return (string) $remaining;
+    }
+
     public function statusLabel(string $status): string
     {
         return match ($status) {
@@ -95,6 +196,27 @@ class Index extends Component
             'ditolak' => 'bg-red-100 text-red-700',
             default => 'bg-yellow-100 text-yellow-700',
         };
+    }
+
+    public function cutiTahunanProgress(): float
+    {
+        return $this->rekapSummary['cuti_terpakai_tahunan'] > 0
+            ? min(100, ($this->rekapSummary['cuti_terpakai_tahunan'] / 12) * 100)
+            : 0;
+    }
+
+    public function cutiBesarProgress(): float
+    {
+        return $this->rekapSummary['cuti_terpakai_besar'] > 0
+            ? min(100, ($this->rekapSummary['cuti_terpakai_besar'] / ($this->cutiBesarQuota ?: 1)) * 100)
+            : 0;
+    }
+
+    public function cutiMelahirkanProgress(): float
+    {
+        return $this->rekapSummary['cuti_terpakai_melahirkan'] > 0
+            ? min(100, ($this->rekapSummary['cuti_terpakai_melahirkan'] / 90) * 100)
+            : 0;
     }
 
     public function getApproverLabel(Cuti $cuti): string
@@ -179,13 +301,13 @@ class Index extends Component
         return response()->streamDownload(function () use ($data) {
             $sheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
             $activeSheet = $sheet->getActiveSheet();
-            $headers = ['Tanggal Mulai', 'Tanggal Selesai', 'Jenis Cuti', 'Jumlah', 'Keterangan'];
+            $headers = ['Tanggal Mulai', 'Tanggal Selesai', 'Jenis Cuti', 'Jumlah', 'Status', 'Keterangan'];
 
             foreach ($headers as $index => $header) {
                 $activeSheet->setCellValue(chr(65 + $index) . '1', $header);
             }
 
-            $activeSheet->getStyle('A1:E1')->applyFromArray($this->headerStyle());
+            $activeSheet->getStyle('A1:F1')->applyFromArray($this->headerStyle());
 
             $row = 2;
             foreach ($data as $cuti) {
@@ -193,11 +315,12 @@ class Index extends Component
                 $activeSheet->setCellValue('B' . $row, $cuti->tanggal_selesai);
                 $activeSheet->setCellValue('C' . $row, $cuti->jenisCuti->nama ?? '-');
                 $activeSheet->setCellValue('D' . $row, $cuti->jenisCuti?->dihitung_per_jam ? ($cuti->jumlah_jam . ' jam') : ($cuti->jumlah_hari_cuti . ' hari'));
-                $activeSheet->setCellValue('E' . $row, $cuti->keterangan);
+                $activeSheet->setCellValue('E' . $row, $this->statusLabel($cuti->status));
+                $activeSheet->setCellValue('F' . $row, $cuti->keterangan);
                 $row++;
             }
 
-            foreach (range('A', 'E') as $column) {
+            foreach (range('A', 'F') as $column) {
                 $activeSheet->getColumnDimension($column)->setAutoSize(true);
             }
 
@@ -218,84 +341,88 @@ class Index extends Component
 
     public function render()
     {
+
         $pegawai = Auth::user()?->pegawai;
 
-        // 1. Siapkan Nilai Default (Query Kosong & Data Nol)
-        // Ini memastikan View tidak error jika akun tidak punya data pegawai
-        $query = \App\Models\Cuti::query()->where('id', 0);
+        if (!$pegawai) {
+            return;
+        }
+    //=============================================================================
+        // 1. Hitung Masa Kerja
+        $masaKerjaBulan = $pegawai?->tanggal_bergabung
+            ? Carbon::parse($pegawai->tanggal_bergabung)->diffInMonths(Carbon::today())
+            : 0;
 
-        $this->rekapList = [];
-        $this->rekapSummary = [
-            'sisa_saldo' => 0,
-            'cuti_terpakai' => 0,
-            'cuti_terpakai_tahunan' => 0,
-            'cuti_terpakai_besar' => 0,
-            'cuti_terpakai_melahirkan' => 0,
-            'sisa_saldo_tahunan' => 0,
-            'sisa_saldo_besar' => 0,
-            'sisa_saldo_melahirkan' => 0,
-            'cuti_terpakai_total' => 0,
-            'persentase_tahunan' => 0,
-            'persentase_besar' => 0,
-            'persentase_melahirkan' => 0,
-        ];
+        $serviceYear = floor($masaKerjaBulan / 12) + 1;
 
-        // 2. Jalankan logika asli HANYA jika pegawai ditemukan
-        if ($pegawai) {
-            // Load Data Cuti Milik Pegawai
-            $query = \App\Models\Cuti::where('pegawai_id', $pegawai->id)
-                ->with(['jenisCuti', 'approvals.approver.pegawai', 'approvals.approver.role'])
-                ->orderBy('created_at', 'desc');
+        // 2. Cek apakah pegawai berada di periode Cuti Besar (Tahun ke-7 dan ke-8)
+        $isCutiBesar = in_array($serviceYear, [7, 8]);
 
-            if ($this->filterRiwayatDate) {
-                $query->whereDate('tanggal_mulai', $this->filterRiwayatDate);
-            }
+        if ($isCutiBesar) {
+            $this->labelSaldoCuti = 'Sisa Saldo Cuti Besar';
+            $this->cutiBesarQuota = $this->currentCutiBesarQuota($pegawai);
 
-            if ($this->filterRiwayatStatus) {
-                $query->where('status', $this->filterRiwayatStatus);
-            }
+            $totalUsedCutiBesar = $this->usedCutiBesarInCurrentPeriod($pegawai);
 
-            // Load Rekapitulasi Milik Pegawai
-            $rekapQuery = \App\Models\Cuti::where('pegawai_id', $pegawai->id)
-                ->with('jenisCuti')
-                ->where('status', 'disetujui')
-                ->orderBy('tanggal_mulai', 'desc');
+            $this->sisaSaldoCuti = max(0, $this->currentCutiBesarQuota($pegawai) - $totalUsedCutiBesar);
+            $this->cutiTerpakai = $totalUsedCutiBesar;
+            $this->cutiTerpakaiBesar = $totalUsedCutiBesar;
 
-            $this->applyRekapPeriodFilter($rekapQuery);
-            $this->rekapList = $rekapQuery->get();
+        } else {
+            $this->labelSaldoCuti = 'Sisa Saldo Cuti Tahunan';
+            $this->cutiBesarQuota = 12;
 
-            $saldo = \App\Models\SaldoCuti::firstOrCreate(
+            // Ambil dari tabel SaldoCuti
+            $saldo = SaldoCuti::firstOrCreate(
                 ['pegawai_id' => $pegawai->id, 'tahun' => now()->year],
                 ['hak_cuti' => 12, 'cuti_terpakai' => 0, 'sisa_cuti' => 12]
             );
+            $this->sisaSaldoCuti = $saldo->sisa_cuti;
+            $this->cutiTerpakai = $saldo->cuti_terpakai;
+            $this->cutiTerpakaiTahunan = $saldo->cuti_terpakai;
+        }
+    //=============================================================================
 
-            $cutiTahunanUsed = collect($this->rekapList)->where('jenis_cuti_id', 1)->sum('jumlah_hari_cuti');
-            $cutiBesarUsed = collect($this->rekapList)->where('jenis_cuti_id', 2)->sum('jumlah_hari_cuti');
-            $cutiMelahirkanUsed = collect($this->rekapList)->where('jenis_cuti_id', 3)->sum('jumlah_hari_cuti');
+    //=============================================================================
+        //Load Data Cuti Milik Pegawai
+        $query = Cuti::where('pegawai_id', $pegawai->id)
+            ->with(['jenisCuti', 'approvals.approver.pegawai', 'approvals.approver.role'])
+            ->orderBy('created_at', 'desc');
 
-            $sisaTahunan = $saldo->sisa_cuti;
-            $sisaBesar = max(0, 66 - $cutiBesarUsed);
-            $sisaMelahirkan = max(0, 90 - $cutiMelahirkanUsed);
-
-            // Saya juga menyederhanakan perhitungan persentase di bawah ini
-            // agar meminimalisir error "undefined array key" di PHP
-            $this->rekapSummary = [
-                'sisa_saldo' => $sisaTahunan + $sisaBesar + $sisaMelahirkan,
-                'cuti_terpakai' => $cutiTahunanUsed + $cutiBesarUsed + $cutiMelahirkanUsed,
-                'cuti_terpakai_tahunan' => $cutiTahunanUsed,
-                'cuti_terpakai_besar' => $cutiBesarUsed,
-                'cuti_terpakai_melahirkan' => $cutiMelahirkanUsed,
-                'sisa_saldo_tahunan' => $sisaTahunan,
-                'sisa_saldo_besar' => $sisaBesar,
-                'sisa_saldo_melahirkan' => $sisaMelahirkan,
-                'cuti_terpakai_total' => $cutiTahunanUsed + $cutiBesarUsed + $cutiMelahirkanUsed,
-                'persentase_tahunan' => $cutiTahunanUsed > 0 ? min(100, ($cutiTahunanUsed / 12) * 100) : 0,
-                'persentase_besar' => $cutiBesarUsed > 0 ? min(100, ($cutiBesarUsed / 66) * 100) : 0,
-                'persentase_melahirkan' => $cutiMelahirkanUsed > 0 ? min(100, ($cutiMelahirkanUsed / 90) * 100) : 0,
-            ];
+        if ($this->filterRiwayatDate) {
+            $query->whereDate('tanggal_mulai', $this->filterRiwayatDate);
         }
 
-        // 3. SELALU kembalikan view di posisi terluar
+        if ($this->filterRiwayatStatus) {
+            $query->where('status', $this->filterRiwayatStatus);
+        }
+    //=============================================================================
+
+    //=============================================================================
+        //Load Rekapitulasi Milik Pegawai
+        $rekapQuery = Cuti::where('pegawai_id', $pegawai->id)
+            ->with('jenisCuti')
+            ->where('status', 'disetujui')
+            ->orderBy('tanggal_mulai', 'desc');
+
+        $this->applyRekapPeriodFilter($rekapQuery);
+        $this->rekapList = $rekapQuery->get();
+    //=============================================================================
+
+        $cutiMelahirkanUsed = collect($this->rekapList)->where('jenis_cuti_id', 3)->sum('jumlah_hari_cuti');
+
+        $this->rekapSummary = [
+            'sisa_saldo' => $this->sisaSaldoCuti,
+            'label_saldo_cuti' => $this->labelSaldoCuti,
+            'cuti_terpakai' => $this->cutiTerpakai,
+            'cuti_terpakai_tahunan' => $this->cutiTerpakaiTahunan,
+            'cuti_terpakai_besar' => $this->cutiTerpakaiBesar,
+            'cuti_terpakai_melahirkan' => $cutiMelahirkanUsed,
+            'persentase_tahunan' => $this->rekapSummary['cuti_terpakai_tahunan'] > 0 ? min(100, ($this->rekapSummary['cuti_terpakai_tahunan'] / 12) * 100) : 0,
+            'persentase_besar' => $this->rekapSummary['cuti_terpakai_besar'] > 0 ? min(100, ($this->rekapSummary['cuti_terpakai_besar'] / 66) * 100) : 0,
+            'persentase_melahirkan' => $this->rekapSummary['cuti_terpakai_melahirkan'] > 0 ? min(100, ($this->rekapSummary['cuti_terpakai_melahirkan'] / 90) * 100) : 0,
+        ];
+
         return view('livewire.dashboard.cuti.index', [
             'cutiList' => $query->paginate(10),
         ]);

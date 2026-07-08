@@ -28,10 +28,10 @@
     @livewireStyles
 </head>
 
-<body class="bg-gradient-to-br from-[#62A6FF] via-[#E4B4FF] to-[#D8E9FF]" x-data="{ sidebarToggle: $persist(true) }">
+<body class="bg-[linear-gradient(135deg,_#62A6FF_20%,_#E4B4FF_50%,_#D8E9FF_80%)]" x-data="{ sidebarToggle: $persist(true) }">
 
     {{-- Header --}}
-    <header class=" flex items-center fixed top-0 left-0 right-0 z-50 h-18 m-3 p-4 bg-white/75 backdrop-blur-sm shadow-md rounded-xl">
+    <header class=" flex items-center fixed top-0 left-0 right-0 z-50 h-18 m-3 p-4 bg-[#FFFFFF]/75 backdrop-blur-sm shadow-md rounded-xl">
         @include('layouts.header')
     </header>
 
@@ -65,7 +65,7 @@
                 $currentRoute = Route::currentRouteName();
                 $userRole = auth()->user()->role->name ?? null;
                 $isCutiPage = $currentRoute === 'cuti';
-                $isCutiRole = in_array($userRole, ['Staff', 'Tendik', 'Dosen']);
+                $isCutiRole = in_array($userRole, ['Staff', 'Tendik', 'Dosen', 'SDM Yayasan', 'SDM Universitas', 'Pimpinan']);
                 $removeMtFromMain = $isCutiPage && $isCutiRole;
             @endphp
 

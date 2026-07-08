@@ -30,7 +30,6 @@ class AuthController extends Controller
                 'username' => 'required|string|max:100',
                 'password' => 'required|max:100',
             ],
-            [],
             [
                 'username' => 'Username atau Email',
                 'password' => 'Password',

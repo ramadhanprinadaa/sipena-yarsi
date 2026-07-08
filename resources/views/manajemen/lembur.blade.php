@@ -20,12 +20,9 @@
             </div>
         </div>
 
-        <div class="flex-1 bg-white/30 backdrop-blur-xl shadow-md rounded-xl p-4">
-            <livewire:manajemen.lembur.index />
-        </div>
-
+        <livewire:manajemen.lembur.index />
         <livewire:manajemen.lembur.add-spl />
         <livewire:manajemen.lembur.edit-spl />
-
+        <livewire:manajemen.lembur.detail-laporan />
     </div>
 @endsection

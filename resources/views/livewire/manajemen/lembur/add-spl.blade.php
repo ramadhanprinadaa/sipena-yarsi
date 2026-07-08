@@ -1,6 +1,7 @@
 <div>
                 <!-- BUAT & TERBITKAN SPL MODAL -->
                 @if($open)
+                    <template x-teleport="body">
                     <div
                         class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
                     >
@@ -48,6 +49,7 @@
                                                 <label class="block text-xs font-semibold text-gray-700 mb-2">Unit Kerja</label>
                                                 <input type="text" placeholder="Engineering"
                                                     wire:model="form.unit_kerja"
+                                                    disabled
                                                     readonly
                                                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition bg-gray-50">
                                             </div>
@@ -100,6 +102,26 @@
                                                 <label class="block text-xs font-semibold text-gray-700 mb-2">Tanggal Lembur</label>
                                                 <input type="date"
                                                     wire:model="form.tanggal_lembur"
+                                                    x-on:change="
+                                                        let val = $event.target.value;
+                                                        if (!val) return;
+
+                                                        let day = new Date(val).getDay();
+
+                                                        // Mengambil nilai jenis_hari yang sedang dipilih di Livewire
+                                                        // Pastikan nama properti 'jenis_hari' dan value-nya sesuai dengan milik Anda
+                                                        let jenisHari = await $wire.get('form.jenis_hari');
+
+                                                        if (jenisHari === 'Hari Kerja Normal' && (day === 0 || day === 6)) {
+                                                            alert('SPL Hari Kerja Normal hanya berlaku untuk Senin - Jumat!');
+                                                            $event.target.value = '';
+                                                            $wire.set('form.tanggal_lembur', '');
+                                                        } else if (jenisHari === 'Hari Libur Mingguan' && (day !== 0 && day !== 6)) {
+                                                            alert('SPL Hari Libur Mingguan hanya berlaku untuk Sabtu dan Minggu!');
+                                                            $event.target.value = '';
+                                                            $wire.set('form.tanggal_lembur', '');
+                                                        }
+                                                    "
                                                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
                                                 @error('form.tanggal_lembur')
                                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -111,9 +133,9 @@
                                                     wire:model="form.jenis_hari"
                                                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
                                                     <option value="">Pilih Jenis Hari</option>
-                                                    <option value="Hari Kerja Normal">Hari kerja normal</option>
-                                                    <option value="Hari Libur Mingguan">Hari libur mingguan</option>
-                                                    <option value="Hari Libur Nasional">Hari libur nasional</option>
+                                                    <option value="Hari Kerja Normal">Hari Kerja Normal</option>
+                                                    <option value="Hari Libur Mingguan">Hari Libur Mingguan</option>
+                                                    <option value="Hari Libur Nasional">Hari Libur Nasional</option>
                                                 </select>
                                                 @error('form.jenis_hari')
                                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -245,5 +267,6 @@
 
                         </div>
                     </div>
+                    </template>
                 @endif
-</div>    
+</div>

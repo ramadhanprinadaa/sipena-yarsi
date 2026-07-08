@@ -22,11 +22,16 @@
 
         <div class="flex-1 flex flex-col gap-4 min-h-0">
 
-            <livewire:dashboard.cuti.index/>
-            <livewire:dashboard.cuti.add-cuti/>
-            <livewire:dashboard.cuti.edit-cuti/>
-            <livewire:dashboard.cuti.delete-cuti/>
+        <livewire:dashboard.cuti.index/>
+        <livewire:dashboard.cuti.add-cuti/>
+        <livewire:dashboard.cuti.edit-cuti/>
+        <livewire:dashboard.cuti.delete-cuti/>
+
 
         </div>
     </div>
 @endsection
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/rafly

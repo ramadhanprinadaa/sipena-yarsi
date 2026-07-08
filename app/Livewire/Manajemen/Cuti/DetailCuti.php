@@ -34,4 +34,5 @@ class DetailCuti extends Component
         $this->openDetail = false;
         $this->selectedCuti = null;
     }
+
 }

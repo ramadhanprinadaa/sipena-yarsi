@@ -26,8 +26,7 @@ class Index extends Component
     public $confirmMessage = '';
     public $password = '';
     public $confirmStep = 'confirmation';
-    public $openDetailLaporan = false;
-    public $selectedLemburDetail = null;
+
 
     // Filter properties
     public $filterSplDate = '';
@@ -215,23 +214,7 @@ class Index extends Component
         $this->resetErrorBag();
     }
 
-    public function showDetailLaporan(int $id): void
-    {
-        $this->selectedLemburDetail = Lembur::with([
-            'pegawai.unit_kerja',
-            'pegawai.user.role',
-            'suratPerintahLembur',
-            'laporanHasilLembur.persetujuan.approver.pegawai',
-            'laporanHasilLembur.persetujuan.approver.role'
-        ])->findOrFail($id);
-        $this->openDetailLaporan = true;
-    }
 
-    public function closeDetailLaporan(): void
-    {
-        $this->openDetailLaporan = false;
-        $this->selectedLemburDetail = null;
-    }
 
     public function confirmApproval(): void
     {
@@ -283,6 +266,9 @@ class Index extends Component
                 'status' => 'Ditolak',
             ]);
         }
+
+        $this->dispatch('laporan-updated');
+
     }
 
     // private function recordApproval(int $lemburId, string $action, string $catatan): void
@@ -311,6 +297,7 @@ class Index extends Component
             'catatan' => $catatan,
             'approved_at' => now(),
         ]);
+
     }
 
     // public function canApprovePengajuan(Lembur $lembur): bool
@@ -545,6 +532,7 @@ class Index extends Component
     }
 
     #[On(['spl-created', 'spl-updated'])]
+    #[On('laporan-updated')]
     public function refreshData()
     {
         $this->loadData();
@@ -580,7 +568,7 @@ class Index extends Component
         if ($this->filterRiwayatSearch) {
             $lemburQuery->whereHas('pegawai', function ($query) {
                 $query->where('nama', 'like', '%' . $this->filterRiwayatSearch . '%')
-                    ->orWhere('nip', 'like', '%' . $this->filterRiwayatSearch . '%');
+                        ->orWhere('nip', 'like', '%' . $this->filterRiwayatSearch . '%');
             });
         }
 
@@ -602,7 +590,11 @@ class Index extends Component
         }
 
         // Load Rekapitulasi Lembur para pegawai
-        $rekapQuery = Lembur::with('pegawai');
+        $rekapQuery = Lembur::with('pegawai')
+            ->where('status', 'Selesai')
+            ->whereHas('laporanHasilLembur.persetujuan', function ($query) {
+                $query->where('status', 'Disetujui');
+            });
         $this->applyLemburScope($rekapQuery);
         $this->applyRekapPeriodFilter($rekapQuery);
 
@@ -611,11 +603,11 @@ class Index extends Component
             'lemburList' => $lemburQuery->orderBy('created_at', 'desc')->paginate(10),
             'laporanList' => $laporanQuery->orderBy('updated_at', 'desc')->paginate(10),
             'rekapList' => $rekapQuery->select('pegawai_id')
-                ->selectRaw('COUNT(*) as hari')
-                ->selectRaw('SUM(TIMESTAMPDIFF(MINUTE, jam_mulai, jam_selesai))/60 as total_jam')
-                ->with('pegawai')
-                ->groupBy('pegawai_id')
-                ->paginate(10),
+                            ->selectRaw('COUNT(*) as hari')
+                            ->selectRaw('SUM(TIMESTAMPDIFF(MINUTE, jam_mulai, jam_selesai))/60 as total_jam')
+                            ->with('pegawai')
+                            ->groupBy('pegawai_id')
+                            ->paginate(10),
             'allowedTabs' => $this->allowedTabs,
         ]);
     }
@@ -640,7 +632,7 @@ class Index extends Component
         if ($this->filterRiwayatSearch) {
             $lemburQuery->whereHas('pegawai', function ($query) {
                 $query->where('nama', 'like', '%' . $this->filterRiwayatSearch . '%')
-                    ->orWhere('nip', 'like', '%' . $this->filterRiwayatSearch . '%');
+                        ->orWhere('nip', 'like', '%' . $this->filterRiwayatSearch . '%');
             });
         }
 

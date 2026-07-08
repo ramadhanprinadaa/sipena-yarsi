@@ -31,94 +31,95 @@
                 }
             @endphp
 
+            {{-- ─── Tabs Navigation ─── --}}
             <div x-data="{
-                activeTab: '{{ $defaultTab }}',
-                selectedEmployees: [],
-                activeButtonWidth: 0,
-                activeButtonLeft: 0,
-                isEmployeeSelected(nip) {
-                    return this.selectedEmployees.some(emp => emp.nip === nip);
-                },
-                toggleEmployeeSelection(employee) {
-                    const index = this.selectedEmployees.findIndex(emp => emp.nip === employee.nip);
-                    if (index > -1) {
-                        this.selectedEmployees.splice(index, 1);
-                    } else {
-                        this.selectedEmployees.push(employee);
+                    activeTab: 'spl',
+                    init() { this.$nextTick(() => this.updatePill()) },
+                    updatePill() {
+                        const refs = {
+                            spl:     this.$refs.btnSpl,
+                            riwayat: this.$refs.btnRiwayat,
+                            laporan: this.$refs.btnLaporan,
+                            rekapitulasi:   this.$refs.btnRekapitulasi,
+                        };
+                        const btn = refs[this.activeTab];
+                        if (!btn) return;
+                        const pill = this.$refs.pill;
+                        pill.style.width  = btn.offsetWidth  + 'px';
+                        pill.style.left   = btn.offsetLeft   + 'px';
+                    },
+                    setTab(tab) {
+                        this.activeTab = tab;
+                        this.$nextTick(() => this.updatePill());
                     }
-                },
-                updateUnderline() {
-                    const buttons = {
-                        'spl': this.$refs.btnSpl,
-                        'riwayat': this.$refs.btnRiwayat,
-                        'rekap': this.$refs.btnRekap,
-                        'verifikasi': this.$refs.btnVerifikasi
-                    };
-                    const activeBtn = buttons[this.activeTab];
-                    if (activeBtn) {
-                        this.activeButtonWidth = activeBtn.offsetWidth;
-                        this.activeButtonLeft = activeBtn.offsetLeft;
-                    }
-                }
-            }"
-            @load="updateUnderline()"
-            class="flex flex-col gap-4 min-h-0">
-                <div class="relative border-b border-gray-200">
-                    <div class="flex gap-2">
-                        {{-- Surat Perintah Lembur (SPL) - Only Pimpinan --}}
-                        @if(in_array('spl', $allowedTabs))
-                            <button
-                                x-ref="btnSpl"
-                                @click="activeTab = 'spl'; $nextTick(() => updateUnderline())"
-                                :class="activeTab === 'spl' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'"
-                                class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
-                                <i class="fa-solid fa-file-lines mr-2"></i>Surat Perintah Lembur
-                            </button>
-                        @endif
+                }"
+                class="flex flex-col gap-4 min-h-0"
+            >
 
-                        {{-- Riwayat Lembur - All allowed roles --}}
-                        @if(in_array('riwayat', $allowedTabs))
-                            <button
-                                x-ref="btnRiwayat"
-                                @click="activeTab = 'riwayat'; $nextTick(() => updateUnderline())"
-                                :class="activeTab === 'riwayat' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'"
-                                class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
-                                <i class="fa-solid fa-history mr-2"></i>Riwayat Pengajuan Lembur
-                            </button>
-                        @endif
+                {{-- Tab Bar --}}
+                <div class="relative inline-flex items-center gap-1.5 p-1.5 bg-gradient-to-r from-indigo-50 via-white to-cyan-50 rounded-3xl self-start shadow-lg shadow-indigo-100/60 border border-indigo-100/80 overflow-hidden">
 
-                        {{-- Persetujuan & Verifikasi - SDM Yayasan, SDM Universitas, Pimpinan --}}
-                        @if(in_array('verifikasi', $allowedTabs))
-                            <button
-                                x-ref="btnVerifikasi"
-                                @click="activeTab = 'verifikasi'; $nextTick(() => updateUnderline())"
-                                :class="activeTab === 'verifikasi' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'"
-                                class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
-                                <i class="fa-solid fa-check-double mr-2"></i>Persetujuan & Verifikasi Laporan Lembur
-                            </button>
-                        @endif
+                    <div class="absolute -top-8 -left-8 h-24 w-24 rounded-full bg-indigo-200/25 blur-2xl pointer-events-none"></div>
+                    <div class="absolute -bottom-8 -right-8 h-24 w-24 rounded-full bg-cyan-200/25 blur-2xl pointer-events-none"></div>
 
-                        {{-- Rekapitulasi - Admin & SDM Yayasan --}}
-                        @if(in_array('rekap', $allowedTabs))
-                            <button
-                                x-ref="btnRekap"
-                                @click="activeTab = 'rekap'; $nextTick(() => updateUnderline())"
-                                :class="activeTab === 'rekap' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-500'"
-                                class="px-4 py-2 font-medium transition-colors duration-300 cursor-pointer">
-                                <i class="fa-solid fa-chart-bar mr-2"></i>Rekapitulasi
-                            </button>
-                        @endif
-                    </div>
-                    <!-- Smooth Underline Indicator -->
+                    {{-- Sliding pill (background) --}}
                     <div
-                        :style="{ left: activeButtonLeft + 'px', width: activeButtonWidth + 'px' }"
-                        class="absolute bottom-0 h-0.5 translate-y-0.5 bg-indigo-600 transition-all duration-500 ease-out"
+                        x-ref="pill"
+                        class="absolute top-1.5 bottom-1.5 rounded-2xl bg-white shadow-lg shadow-indigo-200/40 border border-indigo-200/70 ring-1 ring-indigo-100/50 transition-all duration-300 ease-out pointer-events-none"
                     ></div>
+
+                    {{-- Surat Perintah Lembur --}}
+                    <button
+                        x-ref="btnSpl"
+                        @click="setTab('spl')"
+                        :class="activeTab === 'spl' ? 'text-indigo-700 scale-[1.01]' : 'text-gray-500 hover:text-gray-700 hover:-translate-y-0.5'"
+                        class="relative z-10 flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-2xl transition-all duration-200 cursor-pointer whitespace-nowrap group"
+                    >
+                        <i class="fa-solid fa-file-lines text-base transition-transform duration-200 group-hover:scale-110"></i>
+                        <span>Surat Perintah Lembur</span>
+                    </button>
+
+                    {{-- Riwayat Lembur --}}
+                    <button
+                        x-ref="btnRiwayat"
+                        @click="setTab('riwayat')"
+                        :class="activeTab === 'riwayat' ? 'text-indigo-700 scale-[1.01]' : 'text-gray-500 hover:text-gray-700 hover:-translate-y-0.5'"
+                        class="relative z-10 flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-2xl transition-all duration-200 cursor-pointer whitespace-nowrap group"
+                    >
+                        <i class="fa-solid fa-history text-base transition-transform duration-200 group-hover:scale-110"></i>
+                        <span>Riwayat Lembur</span>
+                    </button>
+
+                    {{-- Laporan Lembur --}}
+                    <button
+                        x-ref="btnLaporan"
+                        @click="setTab('laporan')"
+                        :class="activeTab === 'laporan' ? 'text-indigo-700 scale-[1.01]' : 'text-gray-500 hover:text-gray-700 hover:-translate-y-0.5'"
+                        class="relative z-10 flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-2xl transition-all duration-200 cursor-pointer whitespace-nowrap group"
+                    >
+                        <i class="fa-solid fa-clipboard-check text-base transition-transform duration-200 group-hover:scale-110"></i>
+                        <span>Laporan Lembur</span>
+                    </button>
+
+                    {{-- Rekapitulasi --}}
+                    <button
+                        x-ref="btnRekapitulasi"
+                        @click="setTab('rekapitulasi')"
+                        :class="activeTab === 'rekapitulasi' ? 'text-indigo-700 scale-[1.01]' : 'text-gray-500 hover:text-gray-700 hover:-translate-y-0.5'"
+                        class="relative z-10 flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-2xl transition-all duration-200 cursor-pointer whitespace-nowrap group"
+                    >
+                        <i class="fa-solid fa-chart-bar text-base transition-transform duration-200 group-hover:scale-110"></i>
+                        <span>Rekapitulasi</span>
+                    </button>
                 </div>
 
                 {{-- TAB 1: Surat Perintah Lembur (SPL) - Only Pimpinan --}}
                 @if(in_array('spl', $allowedTabs))
-                <div x-show="activeTab === 'spl'" class="flex flex-col space-y-4 min-h-[65vh]">
+                <div x-show="activeTab === 'spl'"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="flex flex-col space-y-4 min-h-[65vh]">
 
                     <!-- Filter & Search -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -126,14 +127,14 @@
                         <!-- Filter -->
                         <div class="flex flex-wrap gap-3">
                             <div class="relative w-48">
-                                <input type="date" wire:model.live="filterSplDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                                <input type="date" wire:model.live="filterSplDate" class="filter-dropdown border border-gray-200">
                             </div>
                         </div>
 
-                        <!-- Button -->
-                        <button wire:click="$dispatch('open-add-spl')" class="flex items-center w-48 h-10 justify-center cursor-pointer bg-[#2B76FF] hover:shadow-lg text-white text-sm rounded-[10px] transition">
+                        <button wire:click="$dispatch('open-add-spl')" class="flex items-center w-48 h-10 justify-center cursor-pointer bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 hover:shadow-xl text-white text-sm font-semibold rounded-[10px] transition duration-300 ease-in-out transform hover:scale-105">
                             <i class="fa-solid fa-plus mr-2"></i> Buat & Terbitkan SPL
                         </button>
+
                     </div>
 
                     <!-- Table -->
@@ -282,7 +283,11 @@
 
                 {{-- TAB 2: Riwayat Lembur - All allowed roles --}}
                 @if(in_array('riwayat', $allowedTabs))
-                <div x-show="activeTab === 'riwayat'" class="flex flex-col space-y-4 min-h-[65vh]">
+                <div x-show="activeTab === 'riwayat'"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="flex flex-col space-y-4 min-h-[65vh]">
 
                     <!-- Filter & Search -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -290,38 +295,92 @@
                         <!-- Filter (Left Side) -->
                         <div class="flex flex-wrap gap-3">
                             <!-- Status Filter -->
-                            <div class="relative w-48">
-                                <select wire:model.live="filterRiwayatStatus" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none">
-                                    <option value="">Semua Status</option>
-                                    <option value="Menunggu Verifikasi Atasan">Menunggu Verifikasi Atasan</option>
-                                    <option value="Menunggu Verifikasi Rektor">Menunggu Verifikasi Rektor</option>
-                                    <option value="Menunggu Verifikasi SDM Universitas">Menunggu Verifikasi SDM Universitas</option>
-                                    <option value="Menunggu Verifikasi SDM Yayasan">Menunggu Verifikasi SDM Yayasan</option>
-                                    <option value="Menunggu Pelaksanaan">Menunggu Pelaksanaan</option>
-                                    <option value="Menunggu Laporan">Menunggu Laporan</option>
-                                    <option value="Selesai">Selesai</option>
-                                    <option value="Ditolak">Ditolak</option>
-                                </select>
+                            <div class="relative w-48" x-data="{ open: false, selected: 'Semua Status' }">
+                                <button
+                                    @click="open = !open"
+                                    wire:model.live="filterRiwayatStatus"
+                                    class="filter-dropdown"
+                                    type="button">
+                                        <span x-text="selected" class="truncate"></span>
+                                        <svg
+                                            class="w-4 h-4 ms-1.5 -me-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/>
+                                        </svg>
+                                </button>
+                                <!-- Menu -->
+                                <div
+                                    x-show="open"
+                                    @click.outside="open = false"
+                                    x-transition
+                                    class="dropdown-menu">
+                                    <ul class="p-2 text-sm text-body font-medium">
+                                        <li>
+                                            <button @click="selected='Semua Status'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus', null)">
+                                                Semua Status
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Menunggu Verifikasi Atasan'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus','Menunggu Verifikasi Atasan')">
+                                                Menunggu Verifikasi Atasan
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Menunggu Verifikasi Rektor'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus','Menunggu Verifikasi Rektor')">
+                                                Menunggu Verifikasi Rektor
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Menunggu Verifikasi SDM Universitas'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus','Menunggu Verifikasi SDM Universitas')">
+                                                Menunggu Verifikasi SDM Universitas
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Menunggu Verifikasi SDM Yayasan'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus','Menunggu Verifikasi SDM Yayasan')">
+                                                Menunggu Verifikasi SDM Yayasan
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Menunggu Pelaksanaan'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus','Menunggu Pelaksanaan')">
+                                                Menunggu Pelaksanaan
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Menunggu Laporan'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus','Menunggu Laporan')">
+                                                Menunggu Laporan
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Selesai'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus','Selesai')">
+                                                Selesai
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @click="selected='Ditolak'; open=false" class="dropdown-item" wire:click="$set('filterRiwayatStatus','Ditolak')">
+                                                Ditolak
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
 
                             <!-- Date Filter -->
                             <div class="relative w-48">
-                                <input type="date" wire:model.live="filterRiwayatDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                                <input type="date" wire:model.live="filterRiwayatDate" class="filter-dropdown border border-gray-200">
                             </div>
                         </div>
 
                         <!-- Search & Button (Right Side) -->
                         <div class="flex flex-wrap gap-3">
                             <!-- Search -->
-                            <div class="flex items-center w-full md:w-72 border border-gray-200 rounded-[10px] bg-white px-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M16 10a6 6 0 11-12 0 6 6 0 0112 0z"/>
-                                </svg>
-                                <input type="text" wire:model.live="filterRiwayatSearch" placeholder="Cari Nama atau NIP..." class="w-full h-10 px-2 text-sm outline-none focus:ring-0 focus:border-transparent border-0 focus:outline-none focus:shadow-none">
+                            <div class="relative w-65">
+                                <div class="absolute inset-y-0 flex items-center ps-3 pointer-events-none">
+                                    <svg class="w-4 h-4 text-body" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg>
+                                </div>
+                                <input type="text" class="input-search"
+                                    wire:model.live.debounce.300ms="filterRiwayatSearch" placeholder="Cari Nama atau NIP ...">
                             </div>
 
                             <!-- Button -->
-                            <button wire:click="exportRiwayatExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-green-500 hover:bg-green-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
+                            <button wire:click="exportRiwayatExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 hover:shadow-xl text-white text-sm font-semibold rounded-[10px] transition duration-300 ease-in-out transform hover:scale-105">
                                 <i class="fa-solid fa-download mr-2"></i> Export Excel
                             </button>
                         </div>
@@ -467,7 +526,11 @@
 
                 {{-- TAB 3: Rekapitulasi Lembur - Admin & SDM Yayasan --}}
                 @if(in_array('rekap', $allowedTabs))
-                <div x-show="activeTab === 'rekap'" class="flex flex-col space-y-4 min-h-[65vh]">
+                <div x-show="activeTab === 'rekapitulasi'"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="flex flex-col space-y-4 min-h-[65vh]">
 
                     <!-- Filter & Search -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -475,17 +538,18 @@
                         <!-- Filter -->
                         <div class="flex flex-wrap gap-3">
                             <div class="relative w-48">
-                                <input type="date" wire:model.live="filterRekapStartDate" placeholder="Start Date" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                                <input type="date" wire:model.live="filterRekapStartDate" placeholder="Start Date" class="filter-dropdown border border-gray-200">
                             </div>
                             <div class="relative w-48">
-                                <input type="date" wire:model.live="filterRekapEndDate" placeholder="End Date" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                                <input type="date" wire:model.live="filterRekapEndDate" placeholder="End Date" class="filter-dropdown border border-gray-200">
                             </div>
                         </div>
 
                         <!-- Button -->
-                        <button wire:click="exportRekapExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-green-500 hover:bg-green-600 hover:shadow-lg text-white text-sm rounded-[10px] transition">
+                        <button wire:click="exportRekapExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 hover:shadow-xl text-white text-sm font-semibold rounded-[10px] transition duration-300 ease-in-out transform hover:scale-105">
                             <i class="fa-solid fa-download mr-2"></i> Export Excel
                         </button>
+
                     </div>
 
                     <!-- Table -->
@@ -613,7 +677,11 @@
 
                 {{-- TAB 4: Persetujuan & Verifikasi Laporan Lembur - SDM Yayasan, SDM Universitas, Pimpinan --}}
                 @if(in_array('verifikasi', $allowedTabs))
-                <div x-show="activeTab === 'verifikasi'" class="flex flex-col space-y-4 min-h-[65vh]">
+                <div x-show="activeTab === 'laporan'"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="flex flex-col space-y-4 min-h-[65vh]">
 
                     <!-- Filter & Search -->
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-gray-500">
@@ -621,16 +689,17 @@
                         <!-- Filter -->
                         <div class="flex flex-wrap gap-3">
                             <div class="relative w-48">
-                                <input type="date" wire:model.live="filterLaporanDate" class="w-48 h-10 px-2 text-sm bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                                <input type="date" wire:model.live="filterLaporanDate" class="filter-dropdown border border-gray-200">
                             </div>
                         </div>
 
                         <!-- Search -->
-                        <div class="flex items-center w-full md:w-72 border border-gray-200 rounded-[10px] bg-white px-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M16 10a6 6 0 11-12 0 6 6 0 0112 0z"/>
-                            </svg>
-                            <input type="text" wire:model.live="filterLaporanSearch" placeholder="Cari Nama atau NIP..." class="w-full h-10 px-2 text-sm outline-none focus:ring-0 focus:border-transparent border-0 focus:outline-none focus:shadow-none">
+                        <div class="relative w-77">
+                            <div class="absolute inset-y-0 flex items-center ps-3 pointer-events-none">
+                                <svg class="w-4 h-4 text-body" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg>
+                            </div>
+                            <input type="text" class="input-search"
+                                wire:model.live.debounce.300ms="filterLaporanSearch" placeholder="Cari Nama atau NIP ...">
                         </div>
                     </div>
 
@@ -712,7 +781,7 @@
                                                         Tolak
                                                     </button>
                                                 @endif
-                                                <button wire:click="showDetailLaporan({{ $lembur->id }})" class="px-3 py-1.5 text-xs font-medium text-pink-500 border border-pink-500 rounded-[10px] hover:bg-pink-600/10 transition cursor-pointer">
+                                                <button wire:click="$dispatch('showDetailLaporan', { id: {{ $lembur->id }} })" class="px-3 py-1.5 text-xs font-medium text-pink-500 border border-pink-500 rounded-[10px] hover:bg-pink-600/10 transition cursor-pointer">
                                                     Detail
                                                 </button>
                                             </td>
@@ -825,164 +894,6 @@
                     </div>
                 @endif
 
-                {{-- Detail Laporan Modal --}}
-                @if($openDetailLaporan && $selectedLemburDetail)
-                    <div class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"></div>
-                    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <div class="relative w-full max-w-4xl max-h-full bg-white rounded-3xl shadow-2xl overflow-hidden">
-                            {{-- Header --}}
-                            <div class="relative bg-gradient-to-br from-indigo-600 via-blue-500 to-sky-400 px-8 pt-8 pb-14 overflow-hidden">
-                                <div class="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/10"></div>
-                                <div class="absolute -bottom-14 left-16 w-56 h-56 rounded-full bg-white/5"></div>
-                                <div class="relative z-10 flex items-start justify-between">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center border border-white/25">
-                                            <i class="fa-solid fa-business-time text-white text-2xl"></i>
-                                        </div>
-                                        <div>
-                                            <p class="text-xs font-semibold tracking-widest uppercase text-white/70 mb-1">Laporan Lembur</p>
-                                            <h2 class="text-2xl font-bold text-white">Detail Laporan Lembur</h2>
-                                        </div>
-                                    </div>
-                                    <button type="button" wire:click="closeDetailLaporan" class="w-10 h-10 rounded-full bg-white/15 border border-white/25 text-white hover:bg-white/25 transition-colors flex items-center justify-center cursor-pointer">
-                                        <i class="fa-solid fa-xmark text-lg"></i>
-                                    </button>
-                                </div>
-                                <div class="relative z-10 mt-5 inline-flex items-center gap-2 bg-white/15 border border-white/30 backdrop-blur px-4 py-1.5 rounded-full">
-                                    @php
-                                        $statusLaporan = $this->getLaporanStatus($selectedLemburDetail);
-                                        $dotColor = match(true) {
-                                            $statusLaporan === 'Disetujui' => 'bg-emerald-400 shadow-emerald-400/50',
-                                            $statusLaporan === 'Ditolak' => 'bg-rose-400 shadow-rose-400/50',
-                                            str_contains($statusLaporan, 'Menunggu') => 'bg-amber-400 shadow-amber-400/50',
-                                            default => 'bg-slate-300',
-                                        };
-                                    @endphp
-                                    <span class="w-2 h-2 rounded-full shadow-lg {{ $dotColor }}"></span>
-                                    <span class="text-sm font-semibold text-white">{{ $statusLaporan }}</span>
-                                </div>
-                            </div>
 
-                            {{-- Stats Strip --}}
-                            <div class="mx-8 -mt-8 grid grid-cols-3 bg-white rounded-2xl shadow-xl border border-indigo-100 overflow-hidden z-20 relative">
-                                <div class="flex items-center gap-3 px-5 py-4 border-r border-slate-100">
-                                    <div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                                        <i class="fa-solid fa-calendar-day text-indigo-600"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tanggal</p>
-                                        <p class="text-sm font-bold text-slate-800 leading-tight">{{ \Carbon\Carbon::parse($selectedLemburDetail->tanggal_lembur)->translatedFormat('d M Y') }}</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3 px-5 py-4 border-r border-slate-100">
-                                    <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                        <i class="fa-solid fa-clock text-blue-600"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Jam Aktual</p>
-                                        <p class="text-sm font-bold text-slate-800 leading-tight">{{ $selectedLemburDetail->laporanHasilLembur->jam_mulai ?? '-' }} - {{ $selectedLemburDetail->laporanHasilLembur->jam_selesai ?? '-' }}</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3 px-5 py-4">
-                                    <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                                        <i class="fa-solid fa-hourglass-half text-emerald-600"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Jenis Hari</p>
-                                        <p class="text-sm font-bold text-slate-800 leading-tight">{{ $selectedLemburDetail->jenis_hari }}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Body --}}
-                            <div class="grid lg:grid-cols-2 gap-5 px-8 pt-5 pb-8 overflow-y-auto max-h-[60vh]">
-                                <div class="flex flex-col space-y-4 h-full">
-                                    <p class="text-[10px] font-bold tracking-widest uppercase text-slate-400">Informasi Pegawai & Laporan</p>
-                                    <div class="flex items-center gap-4 bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 rounded-2xl p-4">
-                                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-600 to-blue-500 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">{{ strtoupper(substr($selectedLemburDetail->pegawai->nama ?? 'P', 0, 1)) }}</div>
-                                        <div>
-                                            <p class="text-base font-bold text-slate-900">{{ $selectedLemburDetail->pegawai->nama ?? '-' }}</p>
-                                            <p class="text-xs font-semibold text-indigo-600 mt-0.5">{{ $selectedLemburDetail->pegawai->nip ?? '-' }}</p>
-                                        </div>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 col-span-2">
-                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Kegiatan (SPL)</p>
-                                            <p class="text-sm font-bold text-slate-800">{{ $selectedLemburDetail->suratPerintahLembur->nama_kegiatan ?? '-' }}</p>
-                                        </div>
-                                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 col-span-2">
-                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Hasil Pekerjaan</p>
-                                            <p class="text-sm font-semibold text-slate-800">{{ $selectedLemburDetail->laporanHasilLembur->hasil_pekerjaan ?? '-' }}</p>
-                                        </div>
-                                    </div>
-
-                                    {{-- Approved By --}}
-                                    <div class="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
-                                        <div class="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center flex-shrink-0">
-                                            <i class="fa-solid fa-user-check text-white text-sm"></i>
-                                        </div>
-                                        <div>
-                                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Disetujui Oleh</p>
-                                            <p class="text-sm font-bold text-emerald-800">
-                                                {{ $selectedLemburDetail->laporanHasilLembur->persetujuan->sortByDesc('approved_at')->first()?->approver?->pegawai?->nama ?? '-' }}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <p class="text-[10px] font-bold tracking-widest uppercase text-slate-400 mt-2">Riwayat Persetujuan Laporan</p>
-                                    @if($selectedLemburDetail->laporanHasilLembur->persetujuan->count())
-                                        <div class="space-y-2">
-                                            @foreach($selectedLemburDetail->laporanHasilLembur->persetujuan->sortByDesc('approved_at') as $approval)
-                                                <div class="flex items-start gap-3 {{ $approval->status === 'Disetujui' ? 'bg-emerald-50 border-emerald-200' : ($approval->status === 'Ditolak' ? 'bg-rose-50 border-rose-200' : 'bg-blue-50 border-blue-200') }} border rounded-xl px-4 py-2">
-                                                    <div class="w-9 h-9 rounded-xl {{ $approval->status === 'Disetujui' ? 'bg-emerald-500' : ($approval->status === 'Ditolak' ? 'bg-rose-500' : 'bg-blue-500') }} flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                        <i class="fa-solid {{ $approval->status === 'Disetujui' ? 'fa-check' : ($approval->status === 'Ditolak' ? 'fa-xmark' : 'fa-clock') }} text-white text-sm"></i>
-                                                    </div>
-                                                    <div class="flex-1 min-w-0">
-                                                        <p class="text-sm font-bold {{ $approval->status === 'Disetujui' ? 'text-emerald-900' : ($approval->status === 'Ditolak' ? 'text-rose-900' : 'text-blue-900') }} truncate">{{ $approval->approver->pegawai->nama ?? $approval->approver->name }}</p>
-                                                        <p class="text-xs font-semibold text-slate-500 mt-0.5">{{ $approval->role_approval }} · {{ $approval->status }}</p>
-                                                        @if($approval->catatan)<p class="text-xs text-slate-600 mt-1 italic">"{{ $approval->catatan }}"</p>@endif
-                                                    </div>
-                                                    <p class="text-xs text-slate-400 mt-0.5">{{ $approval->approved_at ? \Carbon\Carbon::parse($approval->approved_at)->translatedFormat('d M Y, H:i') : '-' }}</p>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <div class="flex h-full bg-slate-50 border border-dashed border-slate-300 rounded-xl p-4 text-center justify-center items-center">
-                                            <p class="text-sm text-slate-500">Belum ada riwayat persetujuan laporan.</p>
-                                        </div>
-                                    @endif
-                                </div>
-
-                                <div class="space-y-4 flex flex-col">
-                                    <p class="text-[10px] font-bold tracking-widest uppercase text-slate-400">File Laporan</p>
-                                    @if($selectedLemburDetail->laporanHasilLembur->file_laporan)
-                                        <div class="bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 rounded-2xl p-4 flex-1 flex flex-col gap-4">
-                                            <div class="w-full h-full">
-                                                @if(Str::endsWith($selectedLemburDetail->laporanHasilLembur->file_laporan, ['.jpg', '.jpeg', '.png']))
-                                                    <img src="{{ asset('storage/' . $selectedLemburDetail->laporanHasilLembur->file_laporan) }}" class="w-full h-full object-contain rounded-xl border border-amber-200 bg-white" />
-                                                @else
-                                                    <iframe src="{{ asset('storage/' . $selectedLemburDetail->laporanHasilLembur->file_laporan) }}" class="w-full h-full rounded-xl border border-amber-200"></iframe>
-                                                @endif
-                                            </div>
-                                            <div class="flex gap-3 h-12">
-                                                <a href="{{ asset('storage/' . $selectedLemburDetail->laporanHasilLembur->file_laporan) }}" target="_blank" class="w-full h-full rounded-xl bg-amber-400 hover:bg-amber-500 text-white text-sm font-semibold flex items-center justify-center transition-colors"><i class="fa-solid fa-eye mr-2"></i>
-                                                Preview
-                                                </a>
-                                                <a href="{{ asset('storage/' . $selectedLemburDetail->laporanHasilLembur->file_laporan) }}" download class="w-full h-full rounded-xl bg-amber-400 hover:bg-amber-500 text-white text-sm font-semibold flex items-center justify-center transition-colors"><i class="fa-solid fa-download mr-2"></i>
-                                                Unduh
-                                                </a>
-                                            </div>
-                                        </div>
-                                    @else
-                                        <div class="bg-slate-50 flex-1 flex flex-col items-center justify-center border border-dashed border-slate-300 rounded-2xl p-6 text-center">
-                                            <i class="fa-solid fa-file-slash text-slate-300 text-4xl mb-3"></i>
-                                            <p class="text-sm text-slate-500 font-medium">Tidak ada file laporan</p>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
             </div>
         </div>

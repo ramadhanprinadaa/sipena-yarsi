@@ -6,11 +6,15 @@ use App\Models\Cuti;
 use App\Models\CutiApproval;
 use App\Models\SaldoCuti;
 use App\Models\UnitKerja;
+use Carbon\Carbon;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Index extends Component
 {
+    use WithPagination;
+
     public $jenisCutiList = [];
 
     public $filterRiwayatSearch = '';
@@ -33,7 +37,11 @@ class Index extends Component
         $this->loadData();
     }
 
-    public function loadData() {}
+    public function loadData()
+    {
+
+
+    }
 
     private function scopedUnitKerjaIds(): ?array
     {
@@ -81,33 +89,16 @@ class Index extends Component
         }
     }
 
-    public function updatedFilterRiwayatSearch()
-    {
-        $this->loadData();
-    }
-    public function updatedFilterRiwayatDate()
-    {
-        $this->loadData();
-    }
-    public function updatedFilterRiwayatJenis()
-    {
-        $this->loadData();
-    }
-    public function updatedFilterRiwayatStatus()
-    {
-        $this->loadData();
-    }
-    public function updatedFilterRekapStartDate()
-    {
-        $this->loadData();
-    }
-    public function updatedFilterRekapEndDate()
-    {
-        $this->loadData();
-    }
+    public function updatedFilterRiwayatSearch() { $this->loadData(); }
+    public function updatedFilterRiwayatDate() { $this->loadData(); }
+    public function updatedFilterRiwayatJenis() { $this->loadData(); }
+    public function updatedFilterRiwayatStatus() { $this->loadData(); }
+    public function updatedFilterRekapStartDate() { $this->loadData(); }
+    public function updatedFilterRekapEndDate() { $this->loadData(); }
 
     public function openApprovalConfirmation(string $action, int $id): void
     {
+        $this->resetErrorBag('approval');
         $this->confirmAction = $action;
         $this->confirmId = $id;
         $this->confirmTitle = $action === 'approve' ? 'Konfirmasi Setujui' : 'Konfirmasi Tolak';
@@ -116,6 +107,7 @@ class Index extends Component
 
     public function closeApprovalConfirmation(): void
     {
+        $this->resetErrorBag('approval');
         $this->reset(['confirmAction', 'confirmId', 'confirmTitle', 'confirmMessage']);
     }
 
@@ -133,6 +125,11 @@ class Index extends Component
         }
 
         $status = $this->confirmAction === 'approve' ? 'disetujui' : 'ditolak';
+
+        if ($status === 'disetujui' && !$this->hasEnoughSaldoForApproval($cuti)) {
+            $this->addError('approval', 'Sisa saldo cuti tidak mencukupi untuk menyetujui pengajuan ini.');
+            return;
+        }
 
         CutiApproval::create([
             'cuti_id' => $cuti->id,
@@ -155,13 +152,28 @@ class Index extends Component
 
     private function applySaldoCuti(Cuti $cuti): void
     {
-        if (!$cuti->jenisCuti?->memotong_saldo || !$cuti->jumlah_hari_cuti) {
+        $harusPotongSaldo = $cuti->jenisCuti?->memotong_saldo
+            || ((int) $cuti->jenis_cuti_id === 4 && $cuti->metode_potongan === 'potong_cuti')
+            || (int) $cuti->jenis_cuti_id === 2;
+
+        if (!$harusPotongSaldo || !$cuti->jumlah_hari_cuti) {
+            return;
+        }
+
+        if ($this->usesCutiBesarBalance($cuti)) {
+            $saldoSebelum = $this->remainingCutiBesar($cuti);
+
+            $cuti->update([
+                'saldo_cuti_sebelum' => $saldoSebelum,
+                'saldo_cuti_sesudah' => max(0, $saldoSebelum - $cuti->jumlah_hari_cuti),
+            ]);
+
             return;
         }
 
         $saldo = SaldoCuti::firstOrCreate(
             ['pegawai_id' => $cuti->pegawai_id, 'tahun' => now()->year],
-            ['hak_cuti' => 2, 'cuti_terpakai' => 0, 'sisa_cuti' => 2]
+            ['hak_cuti' => 12, 'cuti_terpakai' => 0, 'sisa_cuti' => 12]
         );
 
         $saldo->update([
@@ -175,6 +187,61 @@ class Index extends Component
         ]);
     }
 
+    private function hasEnoughSaldoForApproval(Cuti $cuti): bool
+    {
+        $harusPotongSaldo = $cuti->jenisCuti?->memotong_saldo
+            || ((int) $cuti->jenis_cuti_id === 4 && $cuti->metode_potongan === 'potong_cuti')
+            || (int) $cuti->jenis_cuti_id === 2;
+
+        if (!$harusPotongSaldo || !$cuti->jumlah_hari_cuti) {
+            return true;
+        }
+
+        if ($this->usesCutiBesarBalance($cuti)) {
+            return $this->remainingCutiBesar($cuti) >= $cuti->jumlah_hari_cuti;
+        }
+
+        $saldo = SaldoCuti::firstOrCreate(
+            ['pegawai_id' => $cuti->pegawai_id, 'tahun' => now()->year],
+            ['hak_cuti' => 12, 'cuti_terpakai' => 0, 'sisa_cuti' => 12]
+        );
+
+        return $saldo->sisa_cuti >= $cuti->jumlah_hari_cuti;
+    }
+
+    private function usesCutiBesarBalance(Cuti $cuti): bool
+    {
+        if ((int) $cuti->jenis_cuti_id === 2) {
+            return true;
+        }
+
+        if ((int) $cuti->jenis_cuti_id !== 4 || $cuti->metode_potongan !== 'potong_cuti') {
+            return false;
+        }
+
+        $masaKerjaBulan = $cuti->pegawai?->tanggal_bergabung
+            ? Carbon::parse($cuti->pegawai->tanggal_bergabung)->diffInMonths(Carbon::today())
+            : 0;
+
+        return in_array(floor($masaKerjaBulan / 12) + 1, [7, 8]);
+    }
+
+    private function remainingCutiBesar(Cuti $cuti): int
+    {
+        $used = Cuti::where('pegawai_id', $cuti->pegawai_id)
+            ->where('id', '!=', $cuti->id)
+            ->where(function ($query) {
+                $query->where('jenis_cuti_id', 2)
+                    ->orWhere(function ($q) {
+                        $q->where('jenis_cuti_id', 4)->where('metode_potongan', 'potong_cuti');
+                    });
+            })
+            ->where('status', 'disetujui')
+            ->sum('jumlah_hari_cuti');
+
+        return max(0, 66 - $used);
+    }
+
     public function canApprove(Cuti $cuti): bool
     {
         $role = Auth::user()->role->name ?? '';
@@ -182,29 +249,29 @@ class Index extends Component
         $unitSdmId = (int) $cuti->pegawai?->unit_kerja?->unit_sdm_id;
 
         if ($role === 'Pimpinan') {
-            return $cuti->status === 'pending_atasan'
+            return $cuti->status === 'Menunggu Verifikasi Pimpinan'
                 && $cuti->pegawai?->unit_kerja_id === Auth::user()->pegawai?->unit_kerja_id
                 && !in_array($requesterRole, ['Pimpinan', 'Rektor', 'SDM Universitas', 'SDM Yayasan']);
         }
 
         if ($role === 'Rektor') {
-            return $cuti->status === 'pending_rektor'
+            return $cuti->status === 'Menunggu Verifikasi Rektor'
                 && $requesterRole === 'Pimpinan'
                 && $unitSdmId === 2;
         }
 
         if ($role === 'SDM Universitas') {
-            return $cuti->status === 'pending_sdm_universitas'
+            return $cuti->status === 'Menunggu Verifikasi SDM Universitas'
                 && $requesterRole === 'Rektor';
         }
 
         if ($role === 'SDM Yayasan') {
-            return $cuti->status === 'pending_sdm_yayasan'
+            return $cuti->status === 'Menunggu Verifikasi SDM Yayasan'
                 && ($unitSdmId === 1 || $requesterRole === 'SDM Universitas');
         }
 
         if ($role === 'Admin') {
-            return in_array($cuti->status, ['pending_atasan', 'pending_rektor', 'pending_sdm_universitas', 'pending_sdm_yayasan']);
+            return in_array($cuti->status, ['Menunggu Verifikasi Pimpinan', 'Menunggu Verifikasi Rektor', 'Menunggu Verifikasi SDM Universitas', 'Menunggu Verifikasi SDM Yayasan']);
         }
 
         return false;
@@ -213,10 +280,10 @@ class Index extends Component
     public function statusLabel(string $status): string
     {
         return match ($status) {
-            'pending_atasan' => 'Menunggu Persetujuan Pimpinan',
-            'pending_rektor' => 'Menunggu Persetujuan Rektor',
-            'pending_sdm_universitas' => 'Menunggu Persetujuan SDM Universitas',
-            'pending_sdm_yayasan' => 'Menunggu Persetujuan SDM Yayasan',
+            'Menunggu Verifikasi Pimpinan' => 'Menunggu Persetujuan Pimpinan',
+            'Menunggu Verifikasi Rektor' => 'Menunggu Persetujuan Rektor',
+            'Menunggu Verifikasi SDM Universitas' => 'Menunggu Persetujuan SDM Universitas',
+            'Menunggu Verifikasi SDM Yayasan' => 'Menunggu Persetujuan SDM Yayasan',
             'disetujui' => 'Disetujui',
             'ditolak' => 'Ditolak',
             default => $status,
@@ -438,11 +505,11 @@ class Index extends Component
         return view('livewire.manajemen.cuti.index', [
             'cutiList' => $cutiQuery->orderBy('created_at', 'desc')->paginate(10),
             'rekapList' => $rekapQuery->select('pegawai_id')
-                ->selectRaw('SUM(jumlah_hari_cuti) as jumlah_cuti')
-                ->selectRaw('SUM(jumlah_jam) as jumlah_jam')
-                ->with('pegawai')
-                ->groupBy('pegawai_id')
-                ->paginate(10),
+                            ->selectRaw('SUM(jumlah_hari_cuti) as jumlah_cuti')
+                            ->selectRaw('SUM(jumlah_jam) as jumlah_jam')
+                            ->with('pegawai')
+                            ->groupBy('pegawai_id')
+                            ->paginate(10),
             'allowedTabs' => $this->allowedTabs,
         ]);
     }

@@ -32,8 +32,8 @@ class DeleteCuti extends Component
     {
         $cuti = Cuti::where('pegawai_id', Auth::user()?->pegawai?->id)->findOrFail($this->cutiId);
 
-        if ($cuti->status === 'disetujui') {
-            $this->addError('cuti', 'Cuti yang sudah disetujui tidak dapat dihapus.');
+        if (in_array($cuti->status, ['disetujui', 'ditolak'])) {
+            $this->addError('cuti', 'Cuti yang sudah disetujui atau ditolak tidak dapat dihapus.');
             return;
         }
 

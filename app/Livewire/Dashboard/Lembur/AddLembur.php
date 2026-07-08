@@ -78,8 +78,7 @@ class AddLembur extends Component
     }
 
     #[On('open-add-pengajuan-lembur')]
-    public function open()
-    {
+    public function open() {
         // $this->resetForm();
         // $this->loadAvailableSPLs();
         $this->open = true;

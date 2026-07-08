@@ -12,7 +12,7 @@
 
 @section('content')
 
-    <div class="flex flex-col bg-white/20 backdrop-blur-sm shadow-md rounded-xl p-6 min-h-[calc(100vh-157px)]">
+    <div class="flex flex-col h-full min-h-0">
 
         <div class="flex justify-between mb-4">
             <div class="flex flex-col gap-2">

@@ -26,7 +26,7 @@ class CutiSeeder extends Seeder
             'saldo_cuti_sesudah'    => 10,
             'dokumen_pendukung'     => null,
             'keterangan'            => null,
-            'status'                => 'disetujui',
+            'status'                => 'Disetujui',
         ]);
 
         // Hilal Akbar Izin Sakit
@@ -45,7 +45,7 @@ class CutiSeeder extends Seeder
             'saldo_cuti_sesudah'    => null,
             'dokumen_pendukung'     => null,
             'keterangan'            => null,
-            'status'                => 'disetujui',
+            'status'                => 'Disetujui',
         ]);
 
         // Hilal Akbar Izin Insidental
@@ -64,7 +64,7 @@ class CutiSeeder extends Seeder
             'saldo_cuti_sesudah'    => null,
             'dokumen_pendukung'     => null,
             'keterangan'            => null,
-            'status'                => 'disetujui',
+            'status'                => 'Disetujui',
         ]);
     }
 }

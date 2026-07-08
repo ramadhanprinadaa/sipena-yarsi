@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Models\Lembur;
 use App\Models\LaporanHasilLembur;
+use App\Support\WorkflowEmail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -83,8 +84,7 @@ class AddLaporan extends Component
     }
 
     #[On('open-add-laporan-lembur')]
-    public function open()
-    {
+    public function open() {
         // $this->resetForm();
         $this->loadAvailableLembur();
         $this->open = true;
@@ -100,8 +100,7 @@ class AddLaporan extends Component
         $this->isAutoFilled = true;
     }
 
-    public function close()
-    {
+    public function close() {
         $this->resetForm();
         $this->isAutoFilled = false;
         $this->open = false;
@@ -149,13 +148,15 @@ class AddLaporan extends Component
             : null;
 
         // Create LaporanHasilLembur record
-        LaporanHasilLembur::create([
+        $laporan = LaporanHasilLembur::create([
             'lembur_id' => $this->form['lembur_id'],
             'jam_mulai' => $this->form['jam_mulai'],
             'jam_selesai' => $this->form['jam_selesai'],
             'hasil_pekerjaan' => $this->form['hasil_pekerjaan'],
             'file_laporan' => $filePath,
         ]);
+
+        WorkflowEmail::notifyLaporanSubmitted($lembur, $laporan);
 
         // Emit event untuk refresh data
         $this->dispatch('laporan-created');
@@ -203,4 +204,5 @@ class AddLaporan extends Component
 
         return ($hour * 60) + $minute;
     }
+
 }

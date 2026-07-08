@@ -31,8 +31,7 @@ class EditSpl extends Component
     ];
 
     #[On('open-edit-spl')]
-    public function open($id)
-    {
+    public function open($id) {
         $this->splId = $id;
         $this->loadSPL();
         $this->resetValidation();

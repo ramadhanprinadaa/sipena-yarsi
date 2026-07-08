@@ -1,8 +1,6 @@
 <div>
 @if($openDetail)
-
-    {{-- Blurred Backdrop --}}
-    <div class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"></div>
+    <template x-teleport="body">
 
     {{-- Detail Cuti Modal --}}
     <div
@@ -14,7 +12,7 @@
         x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100 scale-100"
         x-transition:leave-end="opacity-0 scale-95"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
         style="display: none;"
         x-cloak
     >
@@ -288,6 +286,7 @@
 
         </div>
     </div>
+    </template>
 
 @endif
 </div>
