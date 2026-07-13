@@ -15,18 +15,28 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Admin
+        // Admin 1
         User::create([
             'id' => 1,
-            'username' => 'admin',
+            'username' => 'admin1',
             'role_id' => 1,
-            'email' => 'admin@gmail.com',
-            'password' => Hash::make('password'),
+            'email' => 'admin1@gmail.com',
+            'password' => Hash::make('sipena123'),
             'status' => 'active',
         ]);
-        // SDM Yayasan
+        // Admin 2
         User::create([
             'id' => 2,
+            'username' => 'admin2',
+            'role_id' => 1,
+            'email' => 'admin2@gmail.com',
+            'password' => Hash::make('sipena123'),
+            'status' => 'active',
+        ]);
+
+        // SDM Yayasan
+        User::create([
+            'id' => 3,
             'username' => 'sdm.yayasan',
             'pegawai_id' => 4,
             'role_id' => 2,
@@ -36,7 +46,7 @@ class UserSeeder extends Seeder
         ]);
         // SDM Universitas
         User::create([
-            'id' => 3,
+            'id' => 4,
             'username' => 'sdm.universitas',
             'pegawai_id' => 5,
             'role_id' => 3,
@@ -46,23 +56,13 @@ class UserSeeder extends Seeder
         ]);
         // Rektor
         User::create([
-            'id' => 4,
+            'id' => 5,
             'username' => 'rektor',
             'role_id' => 4,
             'email' => 'rektor@gmail.com',
             'password' => Hash::make('password'),
             'status' => 'active',
         ]);
-        // Pimpinan / Muhammad Ramadhan Prinada
-        // User::create([
-        //     'id' => 5,
-        //     'username' => 'muhammad.prinada',
-        //     'pegawai_id' => 1,
-        //     'role_id' => 5,
-        //     'email' => 'ramadhan@gmail.com',
-        //     'password' => Hash::make('password'),
-        //     'status' => 'active',
-        // ]);
         // Staff / Annisa Putri
         User::create([
             'id' => 6,
@@ -73,12 +73,12 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'status' => 'active',
         ]);
-        // Staff / hilal.akbar
+        // Pimpinan / hilal.akbar
         User::create([
             'id' => 7,
             'username' => 'hilal.akbar',
             'pegawai_id' => 6,
-            'role_id' => 6,
+            'role_id' => 5,
             'email' => 'akbar@gmail.com',
             'password' => Hash::make('password'),
             'status' => 'active',

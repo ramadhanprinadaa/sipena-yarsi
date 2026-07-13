@@ -134,11 +134,11 @@
                             </th>
 
                             <!-- Hubungan -->
-                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[16%] uppercase">Hubungan
+                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[13%] uppercase">Hubungan
                             </th>
 
                             <!-- Tempat, Tanggal Lahir -->
-                            <th scope="col" class="px-4 py-3 font-semibold w-[18%] uppercase">
+                            <th scope="col" class="px-4 py-3 font-semibold w-[16%] uppercase">
                                 <div class="flex items-center justify-between gap-2">
                                     <span>Tempat, Tanggal Lahir</span>
                                     <div>
@@ -150,12 +150,16 @@
                                 </div>
                             </th>
 
+                            <!-- Usia -->
+                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[13%] uppercase">Usia
+                            </th>
+
                             <!-- Pekerjaan -->
-                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[16%] uppercase">Pekerjaan
+                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[13%] uppercase">Pekerjaan
                             </th>
 
                             <!-- No. Telpon -->
-                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[16%] uppercase">No. Telpon
+                            <th scope="col" class="px-4 py-3 font-semibold text-center w-[13%] uppercase">No. Telpon
                             </th>
 
                             <!-- Aksi -->
@@ -201,6 +205,18 @@
                                     {{ $k->tempat_lahir }},
                                     <span
                                         class="">{{ \Carbon\Carbon::parse($k->tanggal_lahir)->translatedFormat('d M Y') }}</span>
+                                </td>
+
+                                <!-- Usia -->
+                                @php
+                                    $tanggalLahir = \Carbon\Carbon::parse($k->tanggal_lahir);
+                                    $usia = $tanggalLahir->diff(now());
+                                @endphp
+                                <td class="px-4 py-3 text-sm text-gray-600 text-center">
+                                    <span class="font-semibold text-gray-800">
+                                        {{ $usia->y }} tahun
+                                    </span>
+                                    {{ $usia->m }} bulan
                                 </td>
 
                                 <!-- Pekerjaan -->

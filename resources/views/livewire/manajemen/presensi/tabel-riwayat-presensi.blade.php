@@ -8,7 +8,7 @@
             $unitName = null;
 
             if ($user->hasRole('SDM Universitas')) {
-                $unitName = $user->pegawai?->unit_kerja?->unitSdm?->name;
+                $unitName = 'SDM Universitas';
             } elseif ($user->hasRole('Pimpinan')) {
                 $unitName = $user->pegawai?->memimpin_unit?->name;
             }

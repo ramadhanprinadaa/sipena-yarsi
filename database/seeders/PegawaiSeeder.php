@@ -12,7 +12,6 @@ class PegawaiSeeder extends Seeder
      */
     public function run(): void
     {
-        // Pegawai::factory()->count(50)->create();
 
         // Muhammad Ramadhan Prinada 1
         Pegawai::create([
@@ -82,7 +81,7 @@ class PegawaiSeeder extends Seeder
             'alamat_ktp'                => 'Jl. Salemba Raya, Jakarta Pusat',
             'alamat_domisili'           => 'Jl. Salemba Raya, Jakarta Pusat',
             'no_telpon'                 => '081234567891',
-            'email_yarsi'               => 'aguswidayat@yarsi.ac.id',
+            'email_yarsi'               => 'ramadhanpmuhammad@gmail.com',
             'status'                    => 'active',
         ]);
 
@@ -154,7 +153,7 @@ class PegawaiSeeder extends Seeder
             'alamat_ktp'                => 'Kelapa Gading, Jakarta Utara',
             'alamat_domisili'           => 'Kelapa Gading, Jakarta Utara',
             'no_telpon'                 => '081317425875',
-            'email_yarsi'               => 'hilal.rizqi@yarsi.ac.id',
+            'email_yarsi'               => 'muhr69271@gmail.com',
             'status'                    => 'active',
         ]);
     }

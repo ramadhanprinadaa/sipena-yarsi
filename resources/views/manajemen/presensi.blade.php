@@ -3,9 +3,9 @@
 @section('title', 'SIPENA | Manajemen Presensi')
 
 @section('breadcrumb')
-    <div class="flex flex-wrap justify-center items-center space-x-2 text-sm text-gray-400 font-medium">
+    <div class="flex flex-wrap justify-center items-center space-x-2 text-sm text-gray-500 font-medium">
         <span>Manajemen</span>
-        <i class="fa-solid fa-chevron-right text-xs text-gray-400"></i>
+        <i class="fa-solid fa-chevron-right text-xs"></i>
         <a href="{{ route('manajemen-presensi') }}" class="text-indigo-600 hover:text-indigo-500">Presensi</a>
     </div>
 @endsection

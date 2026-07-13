@@ -31,7 +31,3 @@
         </div>
     </div>
 @endsection
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/rafly

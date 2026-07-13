@@ -4,7 +4,8 @@
 
 @section('breadcrumb')
     <div class="flex flex-wrap justify-center items-center space-x-2 text-sm text-gray-500 font-medium">
-        <i class="fa-solid fa-chevron-right"></i>
+        <span>Sumber Daya</span>
+        <i class="fa-solid fa-chevron-right text-xs"></i>
         <a href="{{ route('sumber-daya') }}" class="text-indigo-600 hover:text-indigo-500">Sumber Daya</a>
     </div>
 @endsection

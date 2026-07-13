@@ -5,8 +5,8 @@
 @section('breadcrumb')
     <div class="flex flex-wrap justify-center items-center space-x-2 text-sm text-gray-500 font-medium">
         <span>Manajemen</span>
-        <i class="fa-solid fa-chevron-right"></i>
-        <a href="{{ route('manajemen-cuti') }}" class="text-indigo-400">Pengajuan Cuti</a>
+        <i class="fa-solid fa-chevron-right text-xs"></i>
+        <a href="{{ route('manajemen-cuti') }}" class="text-indigo-600 hover:text-indigo-500">Pengajuan Cuti</a>
     </div>
 @endsection
 
