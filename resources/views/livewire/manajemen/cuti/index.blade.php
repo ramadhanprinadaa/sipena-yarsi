@@ -269,12 +269,12 @@
                                                 <span class="truncate">Sisa Saldo Cuti</span>
                                             </div>
                                         </th>
-                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                        <th scope="col" class="px-4 py-4 font-medium w-65">
                                             <div class="flex items-center justify-center gap-2">
                                                 <span class="truncate">Status</span>
                                             </div>
                                         </th>
-                                        <th scope="col" class="px-4 py-4 font-medium w-42">
+                                        <th scope="col" class="px-4 py-4 font-medium w-65">
                                             <div class="flex items-center justify-center gap-2">
                                                 <span class="truncate">Aksi</span>
                                             </div>

@@ -205,6 +205,7 @@ class AddSpl extends Component
     {
         $user = Auth::user();
         $role = $user->role->name ?? '';
+        $unitKerjaName = $user?->pegawai?->unit_kerja?->name ?? '';
 
         $query = Pegawai::query()
             ->where('id', '!=', $user?->pegawai?->id)
@@ -227,26 +228,44 @@ class AddSpl extends Component
         if ($role === 'SDM Yayasan') {
             $unitSdmId = $user?->pegawai?->unit_kerja?->unit_sdm_id;
 
-            return $query->where(function ($roleQuery) use ($unitSdmId) {
-                $roleQuery->whereHas('user.role', function ($userRoleQuery) {
-                    $userRoleQuery->where('name', 'SDM Universitas');
-                })->orWhere(function ($pimpinanQuery) use ($unitSdmId) {
-                    $pimpinanQuery->whereHas('user.role', function ($userRoleQuery) {
-                        $userRoleQuery->where('name', 'Pimpinan');
-                    });
-
+            // SDM Yayasan bisa menambahkan Pimpinan (sesuai unit_sdm-nya ATAU dari Sekretariat Universitas)
+            return $query->whereHas('user.role', function ($userRoleQuery) {
+                $userRoleQuery->where('name', 'Pimpinan');
+            })->whereHas('unit_kerja', function ($unitQuery) use ($unitSdmId) {
+                $unitQuery->where(function($q) use ($unitSdmId) {
+                    $q->where('name', 'Sekretariat Universitas');
                     if ($unitSdmId) {
-                        $pimpinanQuery->whereHas('unit_kerja', function ($unitQuery) use ($unitSdmId) {
-                            $unitQuery->where('unit_sdm_id', $unitSdmId);
-                        });
+                        $q->orWhere('unit_sdm_id', $unitSdmId);
                     }
                 });
             });
         }
 
+        // Default: Untuk Pimpinan atau role biasa (mengambil pegawai di unit kerjanya)
         return $query->where('unit_kerja_id', $user?->pegawai?->unit_kerja_id)
-            ->whereDoesntHave('user.role', function ($roleQuery) {
-                $roleQuery->whereIn('name', ['Pimpinan', 'Rektor', 'SDM Universitas', 'SDM Yayasan']);
+            ->where(function ($q) use ($role, $unitKerjaName) {
+                
+                // Secara default, tampilkan pegawai yang bukan Pimpinan/Rektor/SDM
+                $q->whereDoesntHave('user.role', function ($roleQuery) {
+                    $roleQuery->whereIn('name', ['Pimpinan', 'Rektor', 'SDM Universitas', 'SDM Yayasan']);
+                });
+
+                // Rule Tambahan khusus untuk role Pimpinan berdasarkan Unit Kerjanya
+                if ($role === 'Pimpinan') {
+                    // Jika dia Pimpinan dari Sekretariat Universitas, dia boleh menambahkan SDM Universitas
+                    if ($unitKerjaName === 'Sekretariat Universitas') {
+                        $q->orWhereHas('user.role', function ($roleQuery) {
+                            $roleQuery->where('name', 'SDM Universitas');
+                        });
+                    }
+
+                    // Jika dia Pimpinan dari Sekretariat Yayasan, dia boleh menambahkan SDM Yayasan
+                    if ($unitKerjaName === 'Sekretariat Yayasan') {
+                        $q->orWhereHas('user.role', function ($roleQuery) {
+                            $roleQuery->where('name', 'SDM Yayasan');
+                        });
+                    }
+                }
             });
     }
 

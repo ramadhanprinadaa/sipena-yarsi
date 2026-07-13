@@ -205,16 +205,6 @@ class AddCuti extends Component
                 return false;
             }
 
-            // $totalUsed = Cuti::where('pegawai_id', $pegawai->id)
-            //     ->where('jenis_cuti_id', 2)
-            //     ->where('status', '!=', 'ditolak')
-            //     ->sum('jumlah_hari_cuti');
-
-            // if (($totalUsed + $jumlahHari) > 66) {
-            //     $this->addError('tanggal_selesai', 'Total hak Cuti Besar adalah 66 hari.');
-            //     return false;
-            // }
-
             $yearUsed = Cuti::where('pegawai_id', $pegawai->id)
                 ->where('jenis_cuti_id', 2)
                 ->where('status', '!=', 'ditolak')
@@ -274,16 +264,6 @@ class AddCuti extends Component
                 return false;
             }
         }
-
-        // $isPotongCutiSakit = ($jenisCuti->id == 4 && $this->metode_potongan === 'potong_cuti');
-        // if ($jenisCuti->memotong_saldo || $isPotongCutiSakit) {
-        //     $saldo = $this->getSaldoCuti($pegawai);
-
-        //     if (($saldo?->sisa_cuti ?? 0) < $jumlahHari) {
-        //         $this->addError('tanggal_selesai', 'Sisa saldo cuti tidak mencukupi.');
-        //         return false;
-        //     }
-        // }
 
         return true;
     }
@@ -363,23 +343,34 @@ class AddCuti extends Component
     {
         $role = $pegawai->user?->role?->name;
         $unitSdmId = (int) $pegawai->unit_kerja?->unit_sdm_id;
+        $unitKerjaName = $pegawai->unit_kerja?->name ?? '';
 
+        // 1. Role SDM Universitas dan Yayasan kini disetujui oleh Pimpinan di unitnya
+        if (in_array($role, ['SDM Universitas', 'SDM Yayasan'])) {
+            return 'Menunggu Verifikasi Pimpinan';
+        }
+
+        // 2. Pimpinan dari Sekretariat Universitas dialihkan ke SDM Yayasan
+        if ($role === 'Pimpinan' && $unitKerjaName === 'Sekretariat Universitas') {
+            return 'Menunggu Verifikasi SDM Yayasan';
+        }
+
+        // 3. Pegawai yang bernaung di bawah Yayasan (termasuk Pimpinannya)
         if ($unitSdmId === 1) {
             return 'Menunggu Verifikasi SDM Yayasan';
         }
 
+        // 4. Pimpinan dari Universitas disetujui oleh Rektor
         if ($role === 'Pimpinan') {
-            return 'Menunggu Verifikasi Pimpinan';
-        }
-
-        if ($role === 'Rektor') {
             return 'Menunggu Verifikasi Rektor';
         }
 
-        if ($role === 'SDM Universitas') {
+        // 5. Cuti Rektor disetujui oleh SDM Universitas (Opsional, bawaan sebelumnya)
+        if ($role === 'Rektor') {
             return 'Menunggu Verifikasi SDM Universitas';
         }
 
+        // Default: Pegawai biasa di lingkungan Universitas 
         return 'Menunggu Verifikasi Pimpinan';
     }
 
