@@ -150,7 +150,7 @@ class AddCuti extends Component
         $tanggalMulai = \Carbon\Carbon::parse($this->tanggal_mulai);
         $tanggalSelesai = \Carbon\Carbon::parse($this->tanggal_selesai);
 
-        // --- VALIDASI HARI KERJA (SENIN - JUMAT) ---
+        // 1. --- VALIDASI HARI KERJA (SENIN - JUMAT) ---
         if ($tanggalMulai->isWeekend()) {
             $this->addError('tanggal_mulai', 'Tanggal mulai cuti hanya bisa dipilih pada hari Senin - Jumat.');
             return false;
@@ -161,7 +161,7 @@ class AddCuti extends Component
             return false;
         }
 
-        // 1. --- VALIDASI OVERLAP TANGGAL CUTI ---
+        // 2. --- VALIDASI OVERLAP TANGGAL CUTI ---
         $isOverlap = Cuti::where('pegawai_id', $pegawai->id)
             ->where('status', '!=', 'ditolak') // Abaikan cuti yang ditolak
             ->where('tanggal_mulai', '<=', $this->tanggal_selesai)
@@ -174,7 +174,7 @@ class AddCuti extends Component
             return false;
         }
 
-        // Validasi Minimal Hari Pengajuan
+        // 3. --- VALIDASI MINIMAL HARI PENGAJUAN ---
         if ($jenisCuti->minimal_hari_pengajuan) {
             $diffDays = Carbon::today()->diffInDays(Carbon::parse($this->tanggal_mulai), false);
             if ($diffDays < $jenisCuti->minimal_hari_pengajuan) {
@@ -216,8 +216,21 @@ class AddCuti extends Component
                 return false;
             }
         }
+
+        //Rules Cuti Izin Menikah dan Ibadah Haji
+        if ($jenisCuti->sekali_seumur_kerja) {
+            $pernahMengajukan = Cuti::where('pegawai_id', $pegawai->id)
+                ->where('jenis_cuti_id', $jenisCuti->id)
+                ->where('status', '!=', 'ditolak')
+                ->exists();
+
+            if ($pernahMengajukan) {
+                $this->addError('jenis_cuti_id', 'Jenis izin ini hanya dapat diajukan satu kali selama menjadi pegawai.');
+                return false;
+            }
+        }
         
-        // --- VALIDASI SISA SALDO (Mencakup Tahunan & Besar) ---
+        // 4. --- VALIDASI SISA SALDO (Mencakup Tahunan & Besar) ---
         $isCutiBesarType = ($jenisCuti->id == 2);
         $isPotongCutiSakit = ($jenisCuti->id == 4 && $this->metode_potongan === 'potong_cuti');
         $harusPotongSaldo = $jenisCuti->memotong_saldo || $isPotongCutiSakit || $isCutiBesarType;
@@ -247,21 +260,7 @@ class AddCuti extends Component
                 ->sum('jumlah_hari_cuti');
 
             if (($terpakaiBulanIni + $jumlahHari) > $jenisCuti->maksimal_hari_per_bulan) {
-                $this->addError('tanggal_mulai', 'Pengajuan melebihi batas hari cuti dalam 1 bulan.');
-                return false;
-            }
-        }
-
-        //Rules Cuti Izin Menikah dan Ibadah Haji
-        if ($jenisCuti->sekali_seumur_kerja) {
-            $pernahMengajukan = Cuti::where('pegawai_id', $pegawai->id)
-                ->where('jenis_cuti_id', $jenisCuti->id)
-                ->where('status', '!=', 'ditolak')
-                ->exists();
-
-            if ($pernahMengajukan) {
-                $this->addError('jenis_cuti_id', 'Jenis izin ini hanya dapat diajukan satu kali selama menjadi pegawai.');
-                return false;
+                return true; // Tetap bisa mengajukan
             }
         }
 
