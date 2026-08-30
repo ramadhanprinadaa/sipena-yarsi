@@ -236,7 +236,7 @@
                                             </td>
                                             <td class="px-4 py-4 text-center text-gray-600">{{ $cuti->keterangan }}</td>
                                             <td class="flex px-4 py-4 items-center justify-center gap-2">
-                                                @if(!in_array($cuti->status, ['disetujui', 'ditolak']))
+                                                @if(!in_array($cuti->status, ['Disetujui', 'Ditolak']))
                                                     <button wire:click="$dispatch('openModalEdit', { id: {{ $cuti->id }} })" class="flex px-3 py-2 text-white bg-amber-500 hover:bg-amber-100 hover:text-amber-500 rounded-md transition-colors cursor-pointer">
                                                         <i class="fa-solid fa-pen-to-square mr-1"></i>
                                                         <span class="text-xs">

@@ -412,21 +412,28 @@ class Index extends Component
     {
         $role = $lembur->pegawai?->user?->role?->name;
         $unitSdmId = (int) $lembur->pegawai?->unit_kerja?->unit_sdm_id;
+        $unitKerjaName = $lembur->pegawai?->unit_kerja?->name ?? '';
 
+        // Jika role Staff atau role lain yang bukan Pimpinan, Rektor, SDM Universitas, atau SDM Yayasan
         if (!in_array($role, ['Pimpinan', 'Rektor', 'SDM Universitas', 'SDM Yayasan'])) {
             return $unitSdmId === 1
                 ? 'Menunggu Verifikasi Atasan'
                 : 'Menunggu Verifikasi Atasan';
         }
-
+        // Jika role adalah Pimpinan Sekretariat Universitas atau Pimpinan di bawah SDM Yayasan
         if ($role === 'Pimpinan') {
-            return $unitSdmId === 1
+            // Arahkan Pimpinan Sekretariat Universitas ke SDM Yayasan
+            return ($unitSdmId === 1 || $unitKerjaName === 'Sekretariat Universitas')
                 ? 'Menunggu Verifikasi SDM Yayasan'
                 : 'Menunggu Verifikasi Rektor';
         }
-
-        if (in_array($role, ['Rektor', 'SDM Universitas'])) {
-            return 'Menunggu Verifikasi SDM Yayasan';
+        // Jika role adalah Rektor, maka status awal adalah menunggu verifikasi SDM Universitas
+        if ($role === 'Rektor') {
+            return 'Menunggu Verifikasi SDM Universitas';
+        }
+        // Jika role adalah SDM Universitas atau SDM Yayasan, maka status awal adalah menunggu verifikasi atasan dari Unit Kerja mereka
+        if (in_array($role, ['SDM Universitas', 'SDM Yayasan'])) {
+            return 'Menunggu Verifikasi Atasan';
         }
 
         return 'Menunggu Verifikasi SDM Yayasan';
@@ -437,6 +444,18 @@ class Index extends Component
         return ((int) $lembur->pegawai?->unit_kerja?->unit_sdm_id) === 1
             ? 'Menunggu Verifikasi SDM Yayasan'
             : 'Menunggu Verifikasi SDM Universitas';
+    }
+
+    public function canAddLaporan(Lembur $lembur): bool
+    {
+        // Batas pengajuan Laporan Lembur adalah 3 hari setelah tanggal lembur
+        $batasPengajuan = Carbon::parse($lembur->tanggal_lembur)->addDays(3);
+        return Carbon::today()->lte($batasPengajuan);
+    }
+
+    public function hasLaporan(Lembur $lembur): bool
+    {
+        return $lembur->laporanHasilLembur ? true : false;
     }
 
     public function getApproverLabel(Lembur $lembur, string $type = 'latest'): string

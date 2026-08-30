@@ -150,7 +150,7 @@ class AddCuti extends Component
         $tanggalMulai = \Carbon\Carbon::parse($this->tanggal_mulai);
         $tanggalSelesai = \Carbon\Carbon::parse($this->tanggal_selesai);
 
-        // --- VALIDASI HARI KERJA (SENIN - JUMAT) ---
+        // 1. --- VALIDASI HARI KERJA (SENIN - JUMAT) ---
         if ($tanggalMulai->isWeekend()) {
             $this->addError('tanggal_mulai', 'Tanggal mulai cuti hanya bisa dipilih pada hari Senin - Jumat.');
             return false;
@@ -161,7 +161,7 @@ class AddCuti extends Component
             return false;
         }
 
-        // 1. --- VALIDASI OVERLAP TANGGAL CUTI ---
+        // 2. --- VALIDASI OVERLAP TANGGAL CUTI ---
         $isOverlap = Cuti::where('pegawai_id', $pegawai->id)
             ->where('status', '!=', 'ditolak') // Abaikan cuti yang ditolak
             ->where('tanggal_mulai', '<=', $this->tanggal_selesai)
@@ -174,7 +174,7 @@ class AddCuti extends Component
             return false;
         }
 
-        // Validasi Minimal Hari Pengajuan
+        // 3. --- VALIDASI MINIMAL HARI PENGAJUAN ---
         if ($jenisCuti->minimal_hari_pengajuan) {
             $diffDays = Carbon::today()->diffInDays(Carbon::parse($this->tanggal_mulai), false);
             if ($diffDays < $jenisCuti->minimal_hari_pengajuan) {
@@ -205,16 +205,6 @@ class AddCuti extends Component
                 return false;
             }
 
-            // $totalUsed = Cuti::where('pegawai_id', $pegawai->id)
-            //     ->where('jenis_cuti_id', 2)
-            //     ->where('status', '!=', 'ditolak')
-            //     ->sum('jumlah_hari_cuti');
-
-            // if (($totalUsed + $jumlahHari) > 66) {
-            //     $this->addError('tanggal_selesai', 'Total hak Cuti Besar adalah 66 hari.');
-            //     return false;
-            // }
-
             $yearUsed = Cuti::where('pegawai_id', $pegawai->id)
                 ->where('jenis_cuti_id', 2)
                 ->where('status', '!=', 'ditolak')
@@ -227,7 +217,20 @@ class AddCuti extends Component
             }
         }
 
-        // --- VALIDASI SISA SALDO (Mencakup Tahunan & Besar) ---
+        //Rules Cuti Izin Menikah dan Ibadah Haji
+        if ($jenisCuti->sekali_seumur_kerja) {
+            $pernahMengajukan = Cuti::where('pegawai_id', $pegawai->id)
+                ->where('jenis_cuti_id', $jenisCuti->id)
+                ->where('status', '!=', 'ditolak')
+                ->exists();
+
+            if ($pernahMengajukan) {
+                $this->addError('jenis_cuti_id', 'Jenis izin ini hanya dapat diajukan satu kali selama menjadi pegawai.');
+                return false;
+            }
+        }
+        
+        // 4. --- VALIDASI SISA SALDO (Mencakup Tahunan & Besar) ---
         $isCutiBesarType = ($jenisCuti->id == 2);
         $isPotongCutiSakit = ($jenisCuti->id == 4 && $this->metode_potongan === 'potong_cuti');
         $harusPotongSaldo = $jenisCuti->memotong_saldo || $isPotongCutiSakit || $isCutiBesarType;
@@ -257,33 +260,9 @@ class AddCuti extends Component
                 ->sum('jumlah_hari_cuti');
 
             if (($terpakaiBulanIni + $jumlahHari) > $jenisCuti->maksimal_hari_per_bulan) {
-                $this->addError('tanggal_mulai', 'Pengajuan melebihi batas hari cuti dalam 1 bulan.');
-                return false;
+                return true; // Tetap bisa mengajukan
             }
         }
-
-        //Rules Cuti Izin Menikah dan Ibadah Haji
-        if ($jenisCuti->sekali_seumur_kerja) {
-            $pernahMengajukan = Cuti::where('pegawai_id', $pegawai->id)
-                ->where('jenis_cuti_id', $jenisCuti->id)
-                ->where('status', '!=', 'ditolak')
-                ->exists();
-
-            if ($pernahMengajukan) {
-                $this->addError('jenis_cuti_id', 'Jenis izin ini hanya dapat diajukan satu kali selama menjadi pegawai.');
-                return false;
-            }
-        }
-
-        // $isPotongCutiSakit = ($jenisCuti->id == 4 && $this->metode_potongan === 'potong_cuti');
-        // if ($jenisCuti->memotong_saldo || $isPotongCutiSakit) {
-        //     $saldo = $this->getSaldoCuti($pegawai);
-
-        //     if (($saldo?->sisa_cuti ?? 0) < $jumlahHari) {
-        //         $this->addError('tanggal_selesai', 'Sisa saldo cuti tidak mencukupi.');
-        //         return false;
-        //     }
-        // }
 
         return true;
     }
@@ -363,23 +342,34 @@ class AddCuti extends Component
     {
         $role = $pegawai->user?->role?->name;
         $unitSdmId = (int) $pegawai->unit_kerja?->unit_sdm_id;
+        $unitKerjaName = $pegawai->unit_kerja?->name ?? '';
 
+        // 1. Role SDM Universitas dan Yayasan kini disetujui oleh Pimpinan di unitnya
+        if (in_array($role, ['SDM Universitas', 'SDM Yayasan'])) {
+            return 'Menunggu Verifikasi Pimpinan';
+        }
+
+        // 2. Pimpinan dari Sekretariat Universitas dialihkan ke SDM Yayasan
+        if ($role === 'Pimpinan' && $unitKerjaName === 'Sekretariat Universitas') {
+            return 'Menunggu Verifikasi SDM Yayasan';
+        }
+
+        // 3. Pegawai yang bernaung di bawah Yayasan (termasuk Pimpinannya)
         if ($unitSdmId === 1) {
             return 'Menunggu Verifikasi SDM Yayasan';
         }
 
+        // 4. Pimpinan dari Universitas disetujui oleh Rektor
         if ($role === 'Pimpinan') {
-            return 'Menunggu Verifikasi Pimpinan';
-        }
-
-        if ($role === 'Rektor') {
             return 'Menunggu Verifikasi Rektor';
         }
 
-        if ($role === 'SDM Universitas') {
+        // 5. Cuti Rektor disetujui oleh SDM Universitas (Opsional, bawaan sebelumnya)
+        if ($role === 'Rektor') {
             return 'Menunggu Verifikasi SDM Universitas';
         }
 
+        // Default: Pegawai biasa di lingkungan Universitas 
         return 'Menunggu Verifikasi Pimpinan';
     }
 

@@ -40,8 +40,7 @@ class Index extends Component
 
     public function loadData()
     {
-
-
+        
     }
 
     private function scopedUnitKerjaIds(): ?array
@@ -70,9 +69,35 @@ class Index extends Component
 
     private function applyCutiScope($query): void
     {
+        $user = Auth::user();
+        $role = $user->role->name ?? '';
         $unitKerjaIds = $this->scopedUnitKerjaIds();
+        $userUnitKerjaName = $user->pegawai?->unit_kerja?->name ?? '';
 
-        if (is_array($unitKerjaIds)) {
+        if ($role === 'Pimpinan') {
+            $query->whereHas('pegawai', function ($pegawaiQuery) use ($unitKerjaIds, $userUnitKerjaName) {
+                $pegawaiQuery->where(function($q) use ($unitKerjaIds, $userUnitKerjaName) {
+                    // Akses default melihat pegawai dalam unit kerjanya
+                    if (is_array($unitKerjaIds)) {
+                        $q->whereIn('unit_kerja_id', $unitKerjaIds ?: [0]);
+                    }
+
+                    // Akses tambahan: Pimpinan Sekretariat Universitas dapat melihat cuti SDM Universitas
+                    if ($userUnitKerjaName === 'Sekretariat Universitas') {
+                        $q->orWhereHas('user.role', function ($r) {
+                            $r->where('name', 'SDM Universitas');
+                        });
+                    }
+
+                    // Akses tambahan: Pimpinan Sekretariat Yayasan dapat melihat cuti SDM Yayasan
+                    if ($userUnitKerjaName === 'Sekretariat Yayasan') {
+                        $q->orWhereHas('user.role', function ($r) {
+                            $r->where('name', 'SDM Yayasan');
+                        });
+                    }
+                });
+            });
+        } elseif (is_array($unitKerjaIds)) {
             $query->whereHas('pegawai', function ($pegawaiQuery) use ($unitKerjaIds) {
                 $pegawaiQuery->whereIn('unit_kerja_id', $unitKerjaIds ?: [0]);
             });
@@ -248,17 +273,37 @@ class Index extends Component
         $role = Auth::user()->role->name ?? '';
         $requesterRole = $cuti->pegawai?->user?->role?->name;
         $unitSdmId = (int) $cuti->pegawai?->unit_kerja?->unit_sdm_id;
+        $requesterUnitKerjaName = $cuti->pegawai?->unit_kerja?->name ?? '';
+        
+        $userUnitKerjaName = Auth::user()->pegawai?->unit_kerja?->name ?? '';
+        $userUnitKerjaId = Auth::user()->pegawai?->unit_kerja_id;
+
+        // Kumpulan status mentah yang mungkin tercipta dari form pembuatan cuti.
+        $pendingStatuses = ['Menunggu Verifikasi Pimpinan', 'Menunggu Verifikasi Atasan', 'Menunggu Verifikasi SDM Universitas', 'Menunggu Verifikasi SDM Yayasan', 'Menunggu Verifikasi Rektor'];
 
         if ($role === 'Pimpinan') {
+            // Aturan Tambahan 1: Pimpinan Sekretariat Universitas menyetujui cuti SDM Universitas
+            if ($userUnitKerjaName === 'Sekretariat Universitas' && $requesterRole === 'SDM Universitas') {
+                return in_array($cuti->status, $pendingStatuses);
+            }
+
+            // Aturan Tambahan 3: Pimpinan Sekretariat Yayasan menyetujui cuti SDM Yayasan
+            if ($userUnitKerjaName === 'Sekretariat Yayasan' && $requesterRole === 'SDM Yayasan') {
+                return in_array($cuti->status, $pendingStatuses);
+            }
+
+            // Aturan Default Pimpinan ke pegawainya
             return $cuti->status === 'Menunggu Verifikasi Pimpinan'
-                && $cuti->pegawai?->unit_kerja_id === Auth::user()->pegawai?->unit_kerja_id
+                && $cuti->pegawai?->unit_kerja_id === $userUnitKerjaId
                 && !in_array($requesterRole, ['Pimpinan', 'Rektor', 'SDM Universitas', 'SDM Yayasan']);
         }
 
         if ($role === 'Rektor') {
+            // Rektor dilarang menyetujui Pimpinan Sekretariat Universitas (dialihkan ke SDM Yayasan)
             return $cuti->status === 'Menunggu Verifikasi Rektor'
                 && $requesterRole === 'Pimpinan'
-                && $unitSdmId === 2;
+                && $unitSdmId === 2
+                && $requesterUnitKerjaName !== 'Sekretariat Universitas'; 
         }
 
         if ($role === 'SDM Universitas') {
@@ -267,12 +312,20 @@ class Index extends Component
         }
 
         if ($role === 'SDM Yayasan') {
+            // Aturan Tambahan 2: SDM Yayasan menyetujui cuti Pimpinan Sekretariat Universitas
+            if ($requesterRole === 'Pimpinan' && $requesterUnitKerjaName === 'Sekretariat Universitas') {
+                return in_array($cuti->status, $pendingStatuses);
+            }
+
+            // Aturan Default SDM Yayasan
+            // Dikecualikan SDM Universitas & SDM Yayasan agar tidak overlap dengan Atasan Pimpinan Sek.
             return $cuti->status === 'Menunggu Verifikasi SDM Yayasan'
-                && ($unitSdmId === 1 || $requesterRole === 'SDM Universitas');
+                && $unitSdmId === 1
+                && !in_array($requesterRole, ['SDM Yayasan', 'SDM Universitas']);
         }
 
         if ($role === 'Admin') {
-            return in_array($cuti->status, ['Menunggu Verifikasi Pimpinan', 'Menunggu Verifikasi Rektor', 'Menunggu Verifikasi SDM Universitas', 'Menunggu Verifikasi SDM Yayasan']);
+            return in_array($cuti->status, $pendingStatuses);
         }
 
         return false;
@@ -521,24 +574,6 @@ class Index extends Component
 
         $this->applyCutiScope($rekapQuery);
         $this->applyRekapPeriodFilter($rekapQuery);
-
-        // $this->rekapList = $rekapQuery->get()
-        //     ->groupBy('pegawai_id')
-        //     ->map(function ($items) {
-        //         $first = $items->first();
-        //         $saldo = SaldoCuti::where('pegawai_id', $first->pegawai_id)
-        //             ->where('tahun', now()->year)
-        //             ->first();
-
-        //         return [
-        //             'nama' => $first->pegawai->nama ?? '-',
-        //             'nip' => $first->pegawai->nip ?? '-',
-        //             'jumlah_cuti' => $items->sum('jumlah_hari_cuti'),
-        //             'jumlah_jam' => $items->sum('jumlah_jam'),
-        //             'sisa_saldo' => $saldo->sisa_cuti ?? '-',
-        //         ];
-        //     })
-        //     ->values();
 
         $rekapItems = $rekapQuery->get()
             ->groupBy('pegawai_id')

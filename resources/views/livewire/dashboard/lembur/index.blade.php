@@ -211,12 +211,6 @@
                         </thead>
                         <tbody class="divide-y divide-[#878787]/30">
                             @forelse($lemburList as $lembur)
-                                @php
-                                    $tanggalLembur = \Carbon\Carbon::parse($lembur->tanggal_lembur);
-                                    $now           = \Carbon\Carbon::now();
-                                    $canAddLaporan = $now >= $tanggalLembur;
-                                    $hasLaporan    = $lembur->laporanHasilLembur ? true : false;
-                                @endphp
                                 <tr class="table-row hover:bg-[#F5F7FA]/50 transition">
                                     <td class="px-4 py-4 font-medium text-gray-700">{{ \Carbon\Carbon::parse($lembur->tanggal_lembur)->format('d M Y') }}</td>
                                     <td class="px-4 py-4 text-gray-600">{{ $lembur->jenis_hari }}</td>
@@ -226,11 +220,11 @@
                                         <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">{{ $this->getStatusLembur($lembur) }}</span>
                                     </td>
                                     <td class="px-4 py-4 text-center">
-                                        @if($canAddLaporan && !$hasLaporan)
+                                        @if($this->canAddLaporan($lembur) && !$this->hasLaporan($lembur))
                                             <button type="button" wire:click="openLaporanModal({{ $lembur->id }})" class="px-3 py-1.5 text-xs font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition cursor-pointer">
                                                 <i class="fa-solid fa-file-export mr-1"></i>Laporan
                                             </button>
-                                        @elseif($hasLaporan)
+                                        @elseif($this->hasLaporan($lembur))
                                             <button type="button" wire:click="showDetail({{ $lembur->id }})" class="px-3 py-1.5 text-white bg-indigo-500 hover:bg-indigo-100 hover:text-indigo-500 rounded-md transition-colors cursor-pointer">
                                                 <i class="fa-solid fa-eye mr-1"></i>
                                                 <span class="text-xs">
@@ -273,10 +267,10 @@
         {{-- TAB 3: Laporan Lembur                                 --}}
         {{-- ═══════════════════════════════════════════════════════ --}}
         <div x-show="activeTab === 'laporan'"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 translate-y-1"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             class="flex flex-col space-y-4 min-h-[65vh]">
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 translate-y-1"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            class="flex flex-col space-y-4 min-h-[65vh]">
 
             <div class="table-container relative">
                 <div wire:loading>
