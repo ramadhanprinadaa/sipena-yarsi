@@ -34,7 +34,7 @@ class AddCuti extends Component
     public function open()
     {
         $this->resetForm();
-        
+
         $pegawai = Auth::user()?->pegawai;
         $masaKerjaBulan = $pegawai->tanggal_bergabung
             ? Carbon::parse($pegawai->tanggal_bergabung)->diffInMonths(Carbon::today())
@@ -146,7 +146,7 @@ class AddCuti extends Component
         $masaKerjaBulan = $pegawai->tanggal_bergabung
             ? Carbon::parse($pegawai->tanggal_bergabung)->diffInMonths(Carbon::today())
             : 0;
-        
+
         $tanggalMulai = \Carbon\Carbon::parse($this->tanggal_mulai);
         $tanggalSelesai = \Carbon\Carbon::parse($this->tanggal_selesai);
 
@@ -307,7 +307,7 @@ class AddCuti extends Component
                 })
                 ->whereIn('status', ['Menunggu Verifikasi Pimpinan', 'Menunggu Verifikasi Rektor', 'Menunggu Verifikasi SDM Universitas', 'Menunggu Verifikasi SDM Yayasan', 'disetujui'])
                 ->sum('jumlah_hari_cuti');
-            
+
             return [
                 'sisa' => max(0, 66 - $totalUsed),
                 'nama_saldo' => 'Cuti Besar',

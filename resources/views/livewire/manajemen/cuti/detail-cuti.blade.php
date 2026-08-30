@@ -148,7 +148,7 @@
                             <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Disetujui Oleh</p>
                             <p class="text-sm font-bold text-emerald-800">
                                 {{ $selectedCuti->approvals?->sortByDesc('approved_at')->first()?->approver?->pegawai?->nama ?? '-' }}
-                            </p>    
+                            </p>
                         </div>
                     </div>
 
@@ -225,7 +225,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="flex w-full h-full">
                             @if(Str::endsWith($selectedCuti->dokumen_pendukung, ['.pdf']))
                                 <iframe
@@ -242,7 +242,7 @@
                                 <p class="text-sm text-amber-700">Pratinjau tidak tersedia.</p>
                             @endif
                             </div>
-                            
+
                             <div class="flex h-15 gap-3">
                                 <a
                                         href="{{ asset('storage/' . $selectedCuti->dokumen_pendukung) }}"
@@ -261,8 +261,8 @@
                                         <span class="ml-2 text-sm font-semibold text-white">Unduh Dokumen</span>
                                 </a>
                             </div>
-                            
-                        </div>  
+
+                        </div>
                     @else
                         <div class="bg-slate-50 h-110 flex items-center justify-center border border-dashed border-slate-300 rounded-2xl p-6 text-center">
                             <i class="fa-solid fa-file-slash text-slate-300 text-3xl mb-2"></i>
@@ -270,7 +270,7 @@
                         </div>
                     @endif
 
-                    
+
 
                 </div>
             </div>

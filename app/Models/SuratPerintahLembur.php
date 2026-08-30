@@ -34,7 +34,7 @@ class SuratPerintahLembur extends Model
     {
         return $this->belongsTo(UnitKerja::class);
     }
-    
+
     public function lembur()
     {
         return $this->hasMany(
@@ -42,5 +42,4 @@ class SuratPerintahLembur extends Model
             'surat_perintah_lembur_id'
         );
     }
-
 }

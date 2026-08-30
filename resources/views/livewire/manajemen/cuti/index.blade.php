@@ -3,7 +3,7 @@
             @php
                 $userRole = auth()->user()->role->name ?? null;
                 $allowedTabs = [];
-                
+
                 switch($userRole) {
                     case 'Admin':
                         $allowedTabs = ['riwayat', 'rekapitulasi'];
@@ -26,7 +26,7 @@
                         $defaultTab = 'riwayat';
                 }
             @endphp
-            
+
             {{-- ─── Tabs Navigation ─── --}}
             <div x-data="{
                     activeTab: 'riwayat',
@@ -87,7 +87,7 @@
 
                 {{-- TAB 1: Riwayat Cuti - All allowed roles --}}
                 @if(in_array('riwayat', $allowedTabs))
-                <div x-show="activeTab === 'riwayat'" 
+                <div x-show="activeTab === 'riwayat'"
                     x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 translate-y-1"
                     x-transition:enter-end="opacity-100 translate-y-0"
@@ -114,7 +114,7 @@
                                 </div>
                             </div>
                         </div>
-                            
+
                         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-end w-full md:w-auto">
 
                             <div class="relative w-48" x-data="{ open: false, selected: 'Semua Jenis' }">
@@ -207,7 +207,7 @@
                                     </ul>
                                 </div>
                             </div>
-                            
+
                             <button wire:click="exportRiwayatExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 hover:shadow-xl text-white text-sm font-semibold rounded-[10px] transition duration-300 ease-in-out transform hover:scale-105">
                                 <i class="fa-solid fa-download mr-2"></i> Export Excel
                             </button>
@@ -217,7 +217,7 @@
 
                     <!-- Table -->
                     <div class="table-container relative">
-                        
+
                         <!-- Loading -->
                         <div wire:loading>
                             <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
@@ -230,7 +230,7 @@
                         <!-- Main Content -->
                         <div class="table-wrapper">
                             <table class="table">
-                                
+
                                 <!-- Header -->
                                 <thead class="table-header">
                                     <tr>
@@ -279,10 +279,10 @@
                                                 <span class="truncate">Aksi</span>
                                             </div>
                                         </th>
-                                        
+
                                     </tr>
                                 </thead>
-                                
+
                                 <!-- Body -->
                                 <tbody class="divide-y divide-[#878787]/30">
                                     @forelse($cutiList as $cuti)
@@ -436,7 +436,7 @@
                                 <input type="date" wire:model.live="filterRekapEndDate" class="filter-dropdown border border-gray-200">
                             </div>
                         </div>
-                        
+
                         <button wire:click="exportRekapExcel" class="flex items-center w-38 h-10 justify-center cursor-pointer bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 hover:shadow-xl text-white text-sm font-semibold rounded-[10px] transition duration-300 ease-in-out transform hover:scale-105">
                                 <i class="fa-solid fa-download mr-2"></i> Export Excel
                             </button>
@@ -444,7 +444,7 @@
 
                     <!-- Table -->
                     <div class="table-container relative">
-                        
+
                         <!-- Loading -->
                         <div wire:loading>
                             <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
@@ -457,7 +457,7 @@
                         <!-- Main Content -->
                         <div class="table-wrapper">
                             <table class="table">
-                                
+
                                 <!-- Header -->
                                 <thead class="table-header">
                                     <tr>
@@ -483,7 +483,7 @@
                                         </th>
                                     </tr>
                                 </thead>
-                                
+
                                 <!-- Body -->
                                 <tbody class="divide-y divide-[#878787]/30">
                                     @forelse($rekapList as $item)
@@ -563,7 +563,7 @@
                     </div>
                 </div>
                 @endif
-                
+
                 @if($confirmAction)
                     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
                         <div class="w-full max-w-md bg-white rounded-[16px] shadow-2xl border border-gray-200">
@@ -583,6 +583,6 @@
                         </div>
                     </div>
                 @endif
-                
+
             </div>
 </div>

@@ -87,7 +87,7 @@ class EditCuti extends Component
         }
 
         $jenisCuti = JenisCuti::find($this->jenis_cuti_id);
-        
+
         // 1. Validasi
         $this->validate($this->rules($jenisCuti), [], $this->attributes());
 
@@ -118,9 +118,9 @@ class EditCuti extends Component
             if ($filePath && Storage::disk('public')->exists($filePath)) {
                 Storage::disk('public')->delete($filePath);
             }
-            
+
             // Kosongkan path agar kolom database diperbarui menjadi null
-            $filePath = null; 
+            $filePath = null;
             $this->dokumen_lama = null; // Reset property Livewire
             $this->dokumen_pendukung = null;
         } else {
@@ -157,11 +157,11 @@ class EditCuti extends Component
 
     private function rules(?JenisCuti $jenisCuti): array
     {
-        // 4. Logic Validation: Dokumen hanya WAJIB jika jenis cuti butuh surat, 
+        // 4. Logic Validation: Dokumen hanya WAJIB jika jenis cuti butuh surat,
         // DAN pegawai belum pernah punya dokumen lama di pengajuan ini.
         $isDokumenRequired = $jenisCuti?->butuh_surat_dokter && empty($this->dokumen_lama);
-        $fileRule = $isDokumenRequired 
-            ? 'required|file|mimes:pdf,jpg,jpeg,png|max:2048' 
+        $fileRule = $isDokumenRequired
+            ? 'required|file|mimes:pdf,jpg,jpeg,png|max:2048'
             : 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
 
         return [

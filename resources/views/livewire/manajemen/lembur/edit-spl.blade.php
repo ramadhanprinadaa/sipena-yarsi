@@ -2,11 +2,11 @@
                 <!-- EDIT SPL MODAL -->
                 @if($open)
                     <template x-teleport="body">
-                    <div 
+                    <div
                         class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
                     >
                         <!-- Modal Box -->
-                        <div 
+                        <div
                             class="w-full max-w-4xl max-h-[80vh] bg-white rounded-[20px] shadow-2xl border border-gray-200 flex flex-col"
                         >
                             <!-- Header -->
@@ -39,7 +39,7 @@
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-xs font-semibold text-gray-700 mb-2">Nomor Surat</label>
-                                                <input 
+                                                <input
                                                 type="text" placeholder="SPL/2023/X/089"
                                                 wire:model="form.nomor_surat"
                                                 class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
@@ -58,7 +58,7 @@
                                         </div>
                                         <div class="mt-4">
                                             <label class="block text-xs font-semibold text-gray-700 mb-2">Tanggal Dibuat</label>
-                                            <input type="date" 
+                                            <input type="date"
                                                 wire:model="form.tanggal_dibuat"
                                                 class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
                                             @error('form.tanggal_dibuat')
@@ -103,7 +103,7 @@
                                         <div class="grid grid-cols-4 gap-4">
                                             <div>
                                                 <label class="block text-xs font-semibold text-gray-700 mb-2">Tanggal Lembur</label>
-                                                <input type="date" 
+                                                <input type="date"
                                                     wire:model="form.tanggal_lembur"
                                                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
                                                 @error('form.tanggal_lembur')
@@ -126,7 +126,7 @@
                                             </div>
                                             <div>
                                                 <label class="block text-xs font-semibold text-gray-700 mb-2">Jam Mulai</label>
-                                                <input type="time" 
+                                                <input type="time"
                                                     wire:model="form.jam_mulai"
                                                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
                                                 @error('form.jam_mulai')
@@ -135,7 +135,7 @@
                                             </div>
                                             <div>
                                                 <label class="block text-xs font-semibold text-gray-700 mb-2">Jam Selesai</label>
-                                                <input type="time" 
+                                                <input type="time"
                                                     wire:model="form.jam_selesai"
                                                     class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
                                                 @error('form.jam_selesai')
@@ -151,12 +151,12 @@
                                             <div class="w-1 h-5 bg-[#2B76FF] rounded-full"></div>
                                             <p class="text-xs font-bold text-[#2B76FF] uppercase tracking-wide">Pilih Pegawai</p>
                                         </div>
-                                        
+
                                         <!-- Search Input -->
                                         <div class="mb-4">
                                             <div class="flex items-center border border-gray-300 rounded-lg px-3 bg-white focus-within:ring-2 focus-within:ring-[#2B76FF] focus-within:border-transparent transition">
                                                 <i class="fa-solid fa-magnifying-glass text-gray-400 text-sm"></i>
-                                                <input type="text" placeholder="Cari berdasarkan Nama, NIP, atau NPWP..." 
+                                                <input type="text" placeholder="Cari berdasarkan Nama, NIP, atau NPWP..."
                                                     wire:model.live.debounce.300ms="searchPegawai"
                                                     class="w-full py-2.5 px-3 text-sm outline-none bg-white focus:ring-0 focus:border-transparent border-0 focus:outline-none focus:shadow-none">
                                             </div>
@@ -182,7 +182,7 @@
                                                         <td class="px-4 py-3 text-gray-600">{{ $pegawai->nip }}</td>
                                                         <td class="px-4 py-3 text-gray-600">{{ $pegawai->npwp }}</td>
                                                         <td class="px-4 py-3 text-center">
-                                                            <button type="button" wire:click="selectEmployee({{ $pegawai->id }})" 
+                                                            <button type="button" wire:click="selectEmployee({{ $pegawai->id }})"
                                                                 class="p-1.5 rounded-lg transition cursor-pointer {{ in_array($pegawai->id, array_column($selectedEmployees, 'id')) ? 'text-white bg-[#2B76FF]' : 'text-[#2B76FF] hover:bg-blue-100' }}">
                                                                 <i class="fa-solid fa-check text-sm"></i>
                                                             </button>
@@ -216,7 +216,7 @@
                                                             <p class="text-xs text-gray-600">{{ $employee['nip'] }} - {{ $employee['npwp'] }}</p>
                                                         </div>
                                                     </div>
-                                                    <button type="button" wire:click="removeEmployee({{ $index }})" 
+                                                    <button type="button" wire:click="removeEmployee({{ $index }})"
                                                         class="text-red-500 hover:text-red-700 cursor-pointer transition">
                                                         <i class="fa-solid fa-xmark text-sm"></i>
                                                     </button>
@@ -232,14 +232,14 @@
                                     </div>
 
                                 </div>
-                                
+
                             </div>
 
                             <!-- Footer Button -->
                                 <div class="px-6 py-4 bg-white border-t border-gray-200 rounded-b-[20px] flex-shrink-0">
                                     <button wire:click="save" wire:loading.attr="disabled" wire:target="save"
                                         type="submit"
-                                        class="w-full py-3 rounded-lg text-white font-semibold 
+                                        class="w-full py-3 rounded-lg text-white font-semibold
                                             bg-gradient-to-r from-[#2B76FF] via-[#7B61FF] to-[#FF00CC]
                                             hover:shadow-lg cursor-pointer transition duration-300">
                                         <span wire:loading.remove wire:target="save">Edit SPL</span>
@@ -248,8 +248,8 @@
                                 </div>
 
                             </form>
-                            
-                            
+
+
                         </div>
                     </div>
                     </template>

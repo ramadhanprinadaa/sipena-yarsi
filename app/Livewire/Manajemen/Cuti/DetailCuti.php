@@ -12,7 +12,7 @@ class DetailCuti extends Component
     public $openDetail = false;
     public $selectedCuti = null;
 
-    public function render() 
+    public function render()
     {
         return view('livewire.manajemen.cuti.detail-cuti');
     }
@@ -33,6 +33,6 @@ class DetailCuti extends Component
     {
         $this->openDetail = false;
         $this->selectedCuti = null;
-    }   
+    }
 
 }

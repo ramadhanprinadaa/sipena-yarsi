@@ -57,7 +57,7 @@
                 </div>
 
                 {{-- TAB 1: Riwayat Cuti --}}
-                <div x-show="activeTab === 'riwayat'" 
+                <div x-show="activeTab === 'riwayat'"
                     x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 translate-y-1"
                     x-transition:enter-end="opacity-100 translate-y-0"
@@ -154,7 +154,7 @@
 
                     <!-- Table -->
                     <div class="table-container relative">
-                        
+
                         <!-- Loading -->
                         <div wire:loading>
                             <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
@@ -167,7 +167,7 @@
                         <!-- Main Content -->
                         <div class="table-wrapper">
                             <table class="table">
-                                
+
                                 <!-- Header -->
                                 <thead class="table-header">
                                     <tr>
@@ -218,7 +218,7 @@
                                         </th>
                                     </tr>
                                 </thead>
-                                
+
                                 <!-- Body -->
                                 <tbody class="divide-y divide-[#878787]/30">
                                     @forelse($cutiList as $cuti)
@@ -270,8 +270,8 @@
                                 <nav class="flex items-center flex-column flex-wrap md:flex-row justify-between px-4 py-2" aria-label="Table navigation">
                                     <span class="text-sm font-normal text-body block w-full md:inline md:w-auto">
                                         Menampilkan
-                                        <span class="font-semibold text-heading">{{ $cutiList->firstItem() }}-{{ $cutiList->lastItem() }}</span> dari
-                                        <span class="font-semibold text-heading">{{ $cutiList->total() }} Cuti</span>
+                                        <span class="font-semibold text-heading">{{ $cutiList->firstItem() ?? 0 }}-{{ $cutiList->lastItem() ?? 0 }}</span> dari
+                                        <span class="font-semibold text-heading">{{ $cutiList->total() ?? 0 }} Cuti</span>
                                     </span>
 
                                     <ul class="flex -space-x-px text-sm border border-gray-300 rounded-lg">
@@ -325,7 +325,7 @@
                 </div>
 
                 {{-- TAB 2: Rekapitulasi Cuti --}}
-                <div x-show="activeTab === 'rekapitulasi'" 
+                <div x-show="activeTab === 'rekapitulasi'"
                     x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 translate-y-1"
                     x-transition:enter-end="opacity-100 translate-y-0"
@@ -335,7 +335,7 @@
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 
                         <div class="flex flex-row gap-3 md:items-center">
-                            
+
                             <div class="flex flex-wrap gap-3">
                                 <div class="relative w-48">
                                     <input type="date" wire:model.live="filterRekapStartDate" class="filter-dropdown border border-gray-200">
@@ -352,7 +352,7 @@
                                     {{ $filterRekapStartDate || $filterRekapEndDate ? 'Periode aktif' : 'Semua periode' }}
                                 </div>
                             </div>
-                            
+
                         </div>
 
                         <!-- Button -->
@@ -418,7 +418,7 @@
 
     {{-- Saldo Cuti Cards --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                
+
                 {{-- Card 1: Sisa Saldo Cuti --}}
                 <div class="bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600 rounded-[20px] p-6 shadow-lg">
                     <div class="flex items-start justify-between mb-4">
@@ -456,7 +456,7 @@
                                 <div class="bg-blue-400 h-2 rounded-full" style="<?php echo 'width: ' . e($this->cutiTahunanProgress()) . '%'; ?>"></div>
                             </div>
                         </div>
-                        
+
                         {{-- Cuti Besar --}}
                         <div>
                             <div class="flex justify-between items-center mb-1">
@@ -478,7 +478,7 @@
                                 <div class="bg-pink-400 h-2 rounded-full" style="<?php echo 'width: ' . e($this->cutiMelahirkanProgress()) . '%'; ?>"></div>
                             </div>
                         </div>
-                        
+
                     </div>
                 </div>
 

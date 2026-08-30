@@ -158,7 +158,7 @@ class AddSpl extends Component
         if ($this->form['tanggal_lembur'] && $this->form['jenis_hari']) {
 
             $tanggalLembur = \Carbon\Carbon::parse($this->form['tanggal_lembur']);
-            
+
             // jika jenis hari 'Hari Kerja Normal'
             if ($this->form['jenis_hari'] === 'Hari Kerja Normal' && $tanggalLembur->isWeekend()) {
                 $this->addError('form.tanggal_lembur', 'Untuk Hari Kerja Normal, tanggal lembur harus dipilih dari Senin - Jumat.');
@@ -170,7 +170,7 @@ class AddSpl extends Component
                 $this->addError('form.tanggal_lembur', 'Untuk Hari Libur Mingguan, tanggal lembur harus dipilih pada hari Sabtu atau Minggu.');
                 return;
             }
-            
+
         }
 
         // Simpan SPL

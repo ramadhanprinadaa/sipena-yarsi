@@ -70,16 +70,16 @@
 
   /* Manajemen Pegawai */
   .filter-dropdown {
-    @apply inline-flex items-center justify-between text-body bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-indigo-500 shadow-xs font-medium leading-5 rounded-md text-sm px-3 py-2 focus:outline-none cursor-pointer w-full;
+    @apply inline-flex items-center justify-between text-body bg-neutral-secondary-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-3 focus:ring-indigo-500 shadow-xs font-medium leading-5 rounded-md text-sm px-3 focus:outline-none cursor-pointer w-full border border-gray-300 h-10;
   }
   .dropdown-menu {
-    @apply absolute left-0 z-10 w-full bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg mt-2;
+    @apply absolute left-0 z-10 w-full bg-neutral-primary-medium border border-default-medium rounded-md shadow-lg mt-2;
   }
   .dropdown-item {
     @apply inline-flex items-center text-left w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded;
   }
   .input-search {
-    @apply block w-full max-w-96 ps-9 pe-3 py-2 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-md outline-none focus:ring-3 focus:ring-indigo-500 shadow-xs placeholder:text-body;
+    @apply block w-full max-w-96 ps-9 pe-3 h-10 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-md outline-none focus:ring-3 focus:ring-indigo-500 shadow-xs placeholder:text-body;
   }
   .table-container {
     @apply relative w-full bg-neutral-primary-soft shadow-xs rounded-md border border-default flex flex-col flex-1 min-h-0;
@@ -88,7 +88,7 @@
     @apply rounded-md overflow-y-auto flex-1;
   }
   .table {
-    @apply w-full table-fixed text-sm text-left rtl:text-right text-body h-full rounded-md;
+    @apply w-full table-fixed text-sm text-left rtl:text-right text-body rounded-md;
   }
   .table-header {
     @apply sticky top-0 text-sm text-body bg-neutral-secondary-medium border-b border-default-medium;

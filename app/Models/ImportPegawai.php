@@ -13,8 +13,9 @@ class ImportPegawai extends Model
         'file_path',
         'imported_by',
         'total_rows',
-        'success_rows',
-        'failed_rows',
+        'total_success',
+        'total_failed',
+        'total_duplicate',
     ];
 
     public function user()

@@ -136,7 +136,7 @@ class JenisCutiSeeder extends Seeder
                 'nama' => 'Ibadah Haji',
                 'minimal_masa_kerja_bulan' => null,
                 'minimal_hari_pengajuan' => 3,
-                'maksimal_hari' => null,    
+                'maksimal_hari' => null,
                 'maksimal_hari_per_bulan' => null,
                 'memotong_saldo' => false,
                 'butuh_surat_dokter' => false,
@@ -145,6 +145,5 @@ class JenisCutiSeeder extends Seeder
                 'deskripsi' => 'Izin ibadah haji yang hanya dapat digunakan satu kali selama menjadi pegawai.',
             ],
         ]);
-
     }
 }

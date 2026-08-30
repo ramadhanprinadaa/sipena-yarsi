@@ -4,8 +4,6 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
-use App\Http\Middleware\EnsureTokenIsValid;
-
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -15,6 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => App\Http\Middleware\Role::class,
+            'jenis_pegawai' => App\Http\Middleware\JenisPegawai::class,
+            'akses_lembur' => \App\Http\Middleware\AksesLembur::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

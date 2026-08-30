@@ -17,8 +17,9 @@ return new class extends Migration
             $table->string('file_path');
             $table->foreignId('imported_by')->constrained('users');
             $table->integer('total_rows')->nullable();
-            $table->integer('success_rows')->nullable();
-            $table->integer('failed_rows')->nullable();
+            $table->integer('total_success')->nullable();
+            $table->integer('total_failed')->nullable();
+            $table->integer('total_duplicate')->nullable();
             $table->timestamps();
         });
     }

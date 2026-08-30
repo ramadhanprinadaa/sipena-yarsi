@@ -3,24 +3,29 @@
 @section('title', 'SIPENA | Unit Kerja')
 
 @section('breadcrumb')
-    <div class="flex flex-wrap justify-center items-center space-x-2 text-sm text-gray-400 font-medium">
+    <div class="flex flex-wrap justify-center items-center space-x-2 text-sm text-gray-500 font-medium">
         <span>Konfigurasi</span>
-        <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i>
+        <i class="fa-solid fa-chevron-right text-xs"></i>
         <a wire:navigate href="{{ route('konfigurasi-unit-kerja') }}" class="text-indigo-600 hover:text-indigo-500">Unit Kerja</a>
     </div>
 @endsection
 
 @section('content')
     <div
-        x-data="{ openModal: false, openDetail: false }"
-        @open-detail.window="openDetail = true"
+        x-data="{
+            openModal: false,
+            openDetail: false,
+            openLoadingDetail: false
+        }"
+        @open-detail.window="openDetail = true; openLoadingDetail = false;"
+        @open-loading-detail.window="openLoadingDetail = true;"
         @close-modal.window="openModal = false"
         @close-detail.window="openDetail = false"
         class="flex flex-col h-full min-h-0">
 
         {{-- Header --}}
-        <div class="flex items-end justify-between mb-4">
-            <div class="flex flex-col gap-2 font-poppins">
+        <div class="flex justify-between mb-4 ps-3 pt-1 items-end">
+            <div class="flex flex-col gap-1 font-poppins">
                 <h1 class="text-2xl font-semibold">Unit Kerja</h1>
                 <p class="text-sm font-medium">Kelola daftar unit kerja dalam organisasi Anda.</p>
             </div>
@@ -55,23 +60,33 @@
             </div>
         </div>
 
-        <div class="flex-1">
+        <div class="flex-1 bg-white/30 backdrop-blur-xl shadow-md rounded-xl p-6">
             <livewire:config.unit-kerja.tabel-unit-kerja />
         </div>
 
         {{-- Modal Detail Unit Kerja --}}
         <template x-teleport="body">
             <div
-                x-show="openDetail"
+                x-show="openLoadingDetail || openDetail"
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100"
                 x-transition:leave="transition ease-in duration-150"
                 x-transition:leave-start="opacity-100"
                 x-transition:leave-end="opacity-0"
-                @keydown.escape.window="openDetail && $dispatch('close-detail')"
+                @click.self="openDetail = false"
+                @keydown.escape.window="openDetail = false"
                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-md"
                 style="display: none;">
+
+                <div
+                    x-show="openLoadingDetail"
+                    class="flex flex-col items-center gap-4">
+                    <div class="w-10 h-10 border-[3px] border-white/20 border-t-white rounded-full animate-spin"></div>
+                    <div class="text-sm font-medium tracking-wide text-white">
+                        Memuat Data...
+                    </div>
+                </div>
 
                 <div
                     x-show="openDetail"

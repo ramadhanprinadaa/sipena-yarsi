@@ -2,18 +2,20 @@
 
 namespace App\Livewire\Manajemen\Users;
 
-use Livewire\Component;
-use Livewire\Attributes\On;
-use App\Models\User;
-use App\Models\Role;
 use App\Models\Pegawai;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 
 class DetailUser extends Component
 {
     public $show = false;
     public $userId;
+    public $user; // Tambahkan properti public agar bisa diakses di blade
     public $roles;
 
     public $pegawaiSearch;
@@ -36,38 +38,38 @@ class DetailUser extends Component
         $this->roles = Role::whereKeyNot(1)->get(['id', 'name']);
     }
 
-    #[On('open-user-detail')]
-    public function open($id)
+    #[On('load-detail-modal')]
+    public function open($userId)
     {
-        $this->show = true;
-
-        $user = User::with('pegawai', 'role')->find($id);
-
-        $this->userId = $id;
-
-        $this->username = $user->username;
-        $this->pegawaiSearch = $user->pegawai
-            ? $user->pegawai->nama . ' - ' . $user->pegawai->nip
+        $this->userId = $userId;
+        $this->user = User::with('pegawai', 'role')->find($userId);
+        $this->username = $this->user->username;
+        $this->pegawaiSearch = $this->user->pegawai
+            ? $this->user->pegawai->nama . ' - ' . $this->user->pegawai->nip
             : '';
-
         $this->formEdit = [
-            'email'      => $user->email,
-            'role_id'    => $user->role_id,
-            'pegawai_id' => $user->pegawai_id,
-            'status'     => $user->status,
+            'email'      => $this->user->email,
+            'role_id'    => $this->user->role_id,
+            'pegawai_id' => $this->user->pegawai_id,
+            'status'     => $this->user->status,
         ];
-
         $this->pegawaiInitialId   = $this->formEdit['pegawai_id'];
         $this->pegawaiInitialText = $this->pegawaiSearch;
-
         $this->dataOriginal = $this->formEdit;
+        $this->dispatch('open-detail-modal');
     }
 
+    #[Computed]
+    public function isDirty()
+    {
+        return $this->formEdit != $this->dataOriginal;
+    }
+
+    #[On('close-detail-modal')]
     public function close()
     {
         $this->resetValidation();
         $this->resetExcept('roles');
-        $this->show = false;
     }
 
     protected function rules()
@@ -96,6 +98,7 @@ class DetailUser extends Component
         $this->dispatch('refresh-table');
         $this->dispatch('notify', type: 'success', message: 'User berhasil diupdate');
 
+        $this->dispatch('close-detail-modal');
         $this->show = false;
     }
 

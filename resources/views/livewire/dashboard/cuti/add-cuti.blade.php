@@ -1,8 +1,8 @@
 <div>
-@if($open)     
+@if($open)
     <template x-teleport="body">
         {{-- MODAL: Form Pengajuan Cuti --}}
-        <div x-data="{ 
+        <div x-data="{
             filePengajuan: null,
             fileLaporan: null,
             dragOverPengajuan: false,
@@ -29,7 +29,7 @@
                 e.stopPropagation();
                 if (form === 'pengajuan') this.dragOverPengajuan = false;
                 if (form === 'laporan') this.dragOverLaporan = false;
-                
+
                 const files = e.dataTransfer?.files || e.target?.files;
                 if (files && files.length > 0) {
                     const file = files[0];
@@ -44,7 +44,7 @@
         }" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
 
             <!-- Modal Box -->
-            <div 
+            <div
                 class="w-full max-w-2xl max-h-[85vh] bg-white rounded-[20px] shadow-2xl border border-gray-200 flex flex-col"
             >
                 <!-- Header -->
@@ -61,7 +61,7 @@
                 <div class="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[#2B76FF]/50 scrollbar-track-gray-100">
                     <div class="p-6 space-y-4">
 
-                        
+
 
                         {{-- Row: Tanggal Mulai & Selesai --}}
                         <div class="grid grid-cols-3 gap-4">
@@ -141,7 +141,7 @@
                         @if($selectedJenis?->butuh_surat_dokter)
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Dokumen</label>
-                            
+
                             <!-- Drag & Drop Area (Before File Selected) -->
                             <div x-show="!filePengajuan"
                                 @dragover.prevent="dragOverPengajuan = true"
@@ -150,7 +150,7 @@
                                 :class="dragOverPengajuan ? 'border-[#2B76FF] bg-[#2B76FF]/10 shadow-lg' : 'border-gray-300 hover:border-[#2B76FF] hover:bg-[#2B76FF]/5'"
                                 class="border-2 border-dashed rounded-lg p-8 text-center transition cursor-pointer">
                                 <input type="file" wire:model="dokumen_pendukung"
-                                    class="hidden" 
+                                    class="hidden"
                                     @change="handleFilePengajuan($event, 'pengajuan')"
                                     accept=".pdf,.jpg,.jpeg,.png"
                                     x-ref="inputPengajuan">
@@ -159,7 +159,7 @@
                                     <p class="text-sm font-medium" :class="dragOverPengajuan ? 'text-[#2B76FF]' : 'text-gray-500'">Klik atau drag file kesini</p>
                                 </div>
                             </div>
-                            
+
                             <!-- File Selected Display -->
                             <div x-show="filePengajuan" class="border-2 border-green-200 bg-green-50 rounded-lg p-4 transition">
                                 <div class="flex items-center justify-between">
@@ -204,7 +204,9 @@
                 <!-- Footer Button -->
                 <div class="px-6 py-4 bg-white border-t border-gray-200 rounded-b-[20px] flex-shrink-0">
                     <button wire:click="save" wire:loading.attr="disabled" wire:target="save,dokumen_pendukung"
-                        class="w-full py-3 rounded-lg text-white font-semibold 
+                        class="w-full py-3 rounded-lg text-white font-semibold
+                            bg-gradient-to-r from-[#2B76FF] via-[#7B61FF] to-[#FF00CC]
+                        class="w-full py-3 rounded-lg text-white font-semibold
                             bg-gradient-to-r from-[#2B76FF] via-[#7B61FF] to-[#FF00CC]
                             hover:shadow-lg cursor-pointer transition duration-300">
                         <span wire:loading.remove wire:target="save">Ajukan Cuti</span>

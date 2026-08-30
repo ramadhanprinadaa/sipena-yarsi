@@ -49,7 +49,7 @@ class Index extends Component
     {
         $this->syncDueLemburStatuses();
 
-        
+
     }
 
     private function applyRekapPeriodFilter($query): void
@@ -109,6 +109,10 @@ class Index extends Component
     {
 
         $user = Auth::user();
+
+        $query = SuratPerintahLembur::query()->whereRaw('1 = 0');
+        $lemburQuery = Lembur::query()->whereRaw('1 = 0');
+
         if ($user->pegawai) {
             // Load SPL yang diterbitkan dan pegawai user termasuk di dalamnya
             $query = SuratPerintahLembur::where('status', 'Diterbitkan')
@@ -135,7 +139,7 @@ class Index extends Component
             if ($this->filterRiwayatDate) {
                 $lemburQuery->whereDate('tanggal_lembur', $this->filterRiwayatDate);
             }
-            
+
             //Load Laporan Lembur Milik Pegawai
             // $this->laporanList = Lembur::where('pegawai_id', $user->pegawai->id)
             //     ->whereHas('laporanHasilLembur')
@@ -167,7 +171,7 @@ class Index extends Component
         return view('livewire.dashboard.lembur.index', [
             'spls' => $query->paginate(10),
             'lemburList' => $lemburQuery->paginate(10),
-            'laporanList' => Lembur::where('pegawai_id', $user->pegawai->id)
+            'laporanList' => Lembur::where('pegawai_id', $user?->pegawai?->id ?? 0)
                 ->whereHas('laporanHasilLembur')
                 ->with(['suratPerintahLembur', 'pegawai.unit_kerja', 'pegawai.user.role', 'laporanHasilLembur.persetujuan.approver.pegawai', 'laporanHasilLembur.persetujuan.approver.role', 'persetujuan.approver.pegawai', 'persetujuan.approver.role'])
                 ->orderBy('updated_at', 'desc')
@@ -179,7 +183,7 @@ class Index extends Component
     {
         // Load SPL data
         $spl = SuratPerintahLembur::find($splId);
-        
+
         if (!$spl) {
             return;
         }
@@ -194,7 +198,7 @@ class Index extends Component
             'kegiatan' => $spl->nama_kegiatan,
             'alasan' => $spl->nama_kegiatan,
         ]);
-        
+
         $this->dispatch('open-add-pengajuan-lembur');
     }
 
@@ -219,7 +223,7 @@ class Index extends Component
 
     public function showDetail($lemburId) {
         $this->selectedLembur = Lembur::with([
-            'suratPerintahLembur.unitKerja', 
+            'suratPerintahLembur.unitKerja',
             'pegawai.unit_kerja',
             'pegawai.user.role',
             'laporanHasilLembur.persetujuan.approver.pegawai',
@@ -242,7 +246,7 @@ class Index extends Component
             return;
         }
 
-        $lemburQuery = Lembur::where('pegawai_id', $user->pegawai->id)
+        $lemburQuery = Lembur::where('pegawai_id', $user?->pegawai?->id ?? 0)
             ->with(['suratPerintahLembur', 'pegawai']);
 
         if ($this->filterRiwayatDate) {
@@ -253,7 +257,7 @@ class Index extends Component
 
         // Create Excel file
         $filename = 'Riwayat_Lembur_' . date('Y-m-d_H-i-s') . '.xlsx';
-        
+
         return response()->streamDownload(function () use ($data) {
             $sheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
             $activeSheet = $sheet->getActiveSheet();

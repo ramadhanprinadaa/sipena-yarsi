@@ -6,15 +6,16 @@ use App\Models\Cuti;
 use App\Models\Pegawai;
 use App\Models\SaldoCuti;
 use Carbon\Carbon;
-use Livewire\WithPagination;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Index extends Component
 {
     use WithPagination;
-    
+
     public $rekapList = [];
     public $labelSaldoCuti = '';
     public $sisaSaldoCuti = 0;
@@ -52,7 +53,7 @@ class Index extends Component
 
     public function loadData()
     {
-        
+
     }
 
     public function updatedFilterRiwayatDate()
@@ -345,23 +346,25 @@ class Index extends Component
         $pegawai = Auth::user()?->pegawai;
 
         if (!$pegawai) {
-            return;
+            return view('livewire.dashboard.cuti.index', [
+                'cutiList' => new LengthAwarePaginator([], 0, 10),
+            ]);
         }
     //=============================================================================
         // 1. Hitung Masa Kerja
         $masaKerjaBulan = $pegawai?->tanggal_bergabung
             ? Carbon::parse($pegawai->tanggal_bergabung)->diffInMonths(Carbon::today())
             : 0;
-            
+
         $serviceYear = floor($masaKerjaBulan / 12) + 1;
-        
+
         // 2. Cek apakah pegawai berada di periode Cuti Besar (Tahun ke-7 dan ke-8)
         $isCutiBesar = in_array($serviceYear, [7, 8]);
 
         if ($isCutiBesar) {
             $this->labelSaldoCuti = 'Sisa Saldo Cuti Besar';
             $this->cutiBesarQuota = $this->currentCutiBesarQuota($pegawai);
-            
+
             $totalUsedCutiBesar = $this->usedCutiBesarInCurrentPeriod($pegawai);
 
             $this->sisaSaldoCuti = max(0, $this->currentCutiBesarQuota($pegawai) - $totalUsedCutiBesar);
@@ -371,7 +374,7 @@ class Index extends Component
         } else {
             $this->labelSaldoCuti = 'Sisa Saldo Cuti Tahunan';
             $this->cutiBesarQuota = 12;
-            
+
             // Ambil dari tabel SaldoCuti
             $saldo = SaldoCuti::firstOrCreate(
                 ['pegawai_id' => $pegawai->id, 'tahun' => now()->year],
@@ -384,7 +387,7 @@ class Index extends Component
     //=============================================================================
 
     //=============================================================================
-        //Load Data Cuti Milik Pegawai  
+        //Load Data Cuti Milik Pegawai
         $query = Cuti::where('pegawai_id', $pegawai->id)
             ->with(['jenisCuti', 'approvals.approver.pegawai', 'approvals.approver.role'])
             ->orderBy('created_at', 'desc');
