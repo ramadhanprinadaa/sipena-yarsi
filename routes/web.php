@@ -23,6 +23,24 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('auth.handle.logout');
     Route::view('/profile', 'profile-page')->name('profile');
 
+    Route::get('/notifications/{notification}/read', function (\Illuminate\Notifications\DatabaseNotification $notification) {
+        abort_unless(
+            $notification->notifiable_type === get_class(Auth::user())
+                && (int) $notification->notifiable_id === (int) Auth::id(),
+            403
+        );
+
+        $notification->markAsRead();
+
+        return redirect($notification->data['action_url'] ?? url()->previous());
+    })->name('notifications.read');
+
+    Route::post('/notifications/read-all', function () {
+        Auth::user()->unreadNotifications->markAsRead();
+
+        return back();
+    })->name('notifications.read-all');
+
     Route::get('/upload', function () {
         return view('testing.upload');
     })->name('upload');

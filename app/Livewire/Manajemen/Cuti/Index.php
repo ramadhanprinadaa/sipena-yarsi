@@ -340,18 +340,21 @@ class Index extends Component
 
     public function displaySaldoCutiSesudah(Cuti $cuti): string
     {
-        if ($cuti->jenis_cuti_id !== 2 || !$cuti->tanggal_mulai) {
+        // Jika jenis cuti bukan cuti besar dan izin sakit, atau tanggal mulai tidak ada, tampilkan saldo_cuti_sesudah dari database
+        if ($cuti->jenis_cuti_id !== 2 && $cuti->jenis_cuti_id !== 4 || !$cuti->tanggal_mulai) {
             return $cuti->saldo_cuti_sesudah !== null ? (string) $cuti->saldo_cuti_sesudah : '-';
         }
 
         $pegawai = $cuti->pegawai;
 
+        // Jika pegawai tidak ditemukan atau tanggal bergabung tidak ada, tampilkan saldo_cuti_sesudah dari database
         if (!$pegawai || !$pegawai->tanggal_bergabung) {
             return $cuti->saldo_cuti_sesudah !== null ? (string) $cuti->saldo_cuti_sesudah : '-';
         }
 
         $serviceYear = $this->serviceYearForDate(Carbon::parse($cuti->tanggal_mulai), Carbon::parse($pegawai->tanggal_bergabung));
-
+        
+        // Jika pegawai tidak berada di periode cuti besar (tahun ke-7 atau ke-8), tampilkan saldo_cuti_sesudah dari database
         if (!in_array($serviceYear, [7, 8])) {
             return $cuti->saldo_cuti_sesudah !== null ? (string) $cuti->saldo_cuti_sesudah : '-';
         }
@@ -359,8 +362,14 @@ class Index extends Component
         $joinDate = Carbon::parse($pegawai->tanggal_bergabung);
         $periodStart = $joinDate->copy()->addYears($serviceYear - 1)->startOfDay();
         $usedBeforeThisCuti = (int) Cuti::where('pegawai_id', $pegawai->id)
-            ->where('jenis_cuti_id', 2)
-            ->where('status', 'disetujui')
+            ->where(function ($query) {
+                $query->where('jenis_cuti_id', 2)
+                    ->orWhere(function ($query) {
+                        $query->where('jenis_cuti_id', 4)
+                            ->where('metode_potongan', 'potong_cuti');
+                    });
+            })
+            ->where('status', 'Disetujui')
             ->whereDate('tanggal_mulai', '>=', $periodStart->toDateString())
             ->whereDate('tanggal_mulai', '<=', Carbon::parse($cuti->tanggal_mulai)->toDateString())
             ->sum('jumlah_hari_cuti');

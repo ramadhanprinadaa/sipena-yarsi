@@ -240,71 +240,67 @@ class EditCuti extends Component
                 return false;
             }
 
+            $joinDate = Carbon::parse($pegawai->tanggal_bergabung);
+            $periodStart = $joinDate->copy()->addYears($serviceYear - 1)->startOfDay();
+            $periodEnd = $joinDate->copy()->addYears($serviceYear)->subDay()->endOfDay();
+
             $totalUsed = Cuti::where('pegawai_id', $pegawai->id)
                 ->where('jenis_cuti_id', 2)
                 ->where('id', '!=', $ignoreId)
                 ->where('status', '!=', 'ditolak')
+                ->whereDate('tanggal_mulai', '>=', $periodStart->toDateString())
+                ->whereDate('tanggal_mulai', '<=', $periodEnd->toDateString())
                 ->sum('jumlah_hari_cuti');
 
-            if (($totalUsed + $jumlahHari) > 66) {
-                $this->addError('tanggal_selesai', 'Total hak Cuti Besar adalah 66 hari.');
-                return false;
-            }
-
-            $yearUsed = Cuti::where('pegawai_id', $pegawai->id)
-                ->where('jenis_cuti_id', 2)
-                ->where('id', '!=', $ignoreId)
-                ->where('status', '!=', 'ditolak')
-                ->whereYear('tanggal_mulai', Carbon::parse($this->tanggal_mulai)->year)
-                ->sum('jumlah_hari_cuti');
-
-            if (($yearUsed + $jumlahHari) > 33) {
-                $this->addError('tanggal_mulai', 'Pengajuan Cuti Besar di tahun yang sama tidak boleh melebihi 33 hari.');
+            if (($totalUsed + $jumlahHari) > 33) {
+                $this->addError('tanggal_selesai', 'Pengajuan Cuti Besar pada tahun kerja yang sama tidak boleh melebihi 33 hari.');
                 return false;
             }
         }
 
+        // --- VALIDASI SISA SALDO (Mencakup Tahunan & Besar) ---
+        $isCutiBesarType = ($jenisCuti->id == 2);
+        $isPotongCutiSakit = ($jenisCuti->id == 4 && $this->metode_potongan === 'potong_cuti');
+        $harusPotongSaldo = $jenisCuti->memotong_saldo || $isPotongCutiSakit || $isCutiBesarType;
+
+        if ($harusPotongSaldo && $jumlahHari) {
+            $infoSaldo = $this->getSaldoCuti($pegawai, $jenisCuti);
+
+            if ($infoSaldo['sisa'] < $jumlahHari) {
+                $this->addError('tanggal_selesai', "Sisa saldo {$infoSaldo['nama_saldo']} tidak mencukupi (Sisa: {$infoSaldo['sisa']} hari).");
+                return false;
+            }
+        }
+
+        //Rules Maksimal Cuti
         if ($jenisCuti->maksimal_hari && $jumlahHari > $jenisCuti->maksimal_hari) {
             $this->addError('tanggal_selesai', 'Jumlah hari melebihi maksimal cuti yang diperbolehkan.');
             return false;
         }
 
+        //Rules Perbulan (Batas 2 hari untuk Cuti Tahunan, 3 hari untuk Cuti Besar, jika lebih maka dispensasi dan masih bisa mengajukan)
         if ($jenisCuti->maksimal_hari_per_bulan) {
-            $terpakaiBulanIni = Cuti::where('pegawai_id', $pegawai->id)
-                ->where('jenis_cuti_id', $jenisCuti->id)
-                ->where('id', '!=', $ignoreId)
-                ->whereIn('status', ['pending_atasan', 'pending_rektor', 'pending_sdm_universitas', 'pending_sdm_yayasan', 'disetujui'])
-                ->whereYear('tanggal_mulai', Carbon::parse($this->tanggal_mulai)->year)
-                ->whereMonth('tanggal_mulai', Carbon::parse($this->tanggal_mulai)->month)
-                ->sum('jumlah_hari_cuti');
+                $terpakaiBulanIni = Cuti::where('pegawai_id', $pegawai->id)
+                    ->where('jenis_cuti_id', $jenisCuti->id)
+                    ->whereIn('status', ['Menunggu Verifikasi Pimpinan', 'Menunggu Verifikasi Rektor', 'Menunggu Verifikasi SDM Universitas', 'Menunggu Verifikasi SDM Yayasan', 'Disetujui'])
+                    ->whereYear('tanggal_mulai', Carbon::parse($this->tanggal_mulai)->year)
+                    ->whereMonth('tanggal_mulai', Carbon::parse($this->tanggal_mulai)->month)
+                    ->sum('jumlah_hari_cuti');
 
             if (($terpakaiBulanIni + $jumlahHari) > $jenisCuti->maksimal_hari_per_bulan) {
-                $this->addError('tanggal_mulai', 'Pengajuan melebihi batas hari cuti dalam 1 bulan.');
-                return false;
+                return true; // Tetap bisa mengajukan, tapi beri info dispensasi
             }
         }
 
+        //Rules Cuti Izin Menikah dan Ibadah Haji
         if ($jenisCuti->sekali_seumur_kerja) {
             $pernahMengajukan = Cuti::where('pegawai_id', $pegawai->id)
                 ->where('jenis_cuti_id', $jenisCuti->id)
-                ->where('id', '!=', $ignoreId)
                 ->where('status', '!=', 'ditolak')
                 ->exists();
 
             if ($pernahMengajukan) {
                 $this->addError('jenis_cuti_id', 'Jenis izin ini hanya dapat diajukan satu kali selama menjadi pegawai.');
-                return false;
-            }
-        }
-
-        $isPotongCutiSakit = ($jenisCuti->id == 4 && $this->metode_potongan === 'potong_cuti');
-        $harusPotongSaldo = $jenisCuti->memotong_saldo || $isPotongCutiSakit || $jenisCuti->id == 2;
-
-        if ($harusPotongSaldo && $jumlahHari) {
-            $infoSaldo = $this->getSaldoCuti($pegawai, $jenisCuti, $ignoreId);
-
-            if ($infoSaldo['sisa'] < $jumlahHari) {
-                $this->addError('tanggal_selesai', "Sisa saldo {$infoSaldo['nama_saldo']} tidak mencukupi (Sisa: {$infoSaldo['sisa']} hari).");
                 return false;
             }
         }
@@ -343,6 +339,10 @@ class EditCuti extends Component
             || ($jenisCuti?->id == 4 && $this->metode_potongan === 'potong_cuti' && in_array($serviceYear, [7, 8]));
 
         if ($usesCutiBesarBalance) {
+            $joinDate = Carbon::parse($pegawai->tanggal_bergabung);
+            $periodStart = $joinDate->copy()->addYears($serviceYear - 1)->startOfDay();
+            $periodEnd = $joinDate->copy()->addYears($serviceYear)->subDay()->endOfDay();
+
             $totalUsedQuery = Cuti::where('pegawai_id', $pegawai->id)
                 ->where(function($query) {
                     $query->where('jenis_cuti_id', 2)
@@ -350,7 +350,9 @@ class EditCuti extends Component
                             $q->where('jenis_cuti_id', 4)->where('metode_potongan', 'potong_cuti');
                         });
                 })
-                ->whereIn('status', ['pending_atasan', 'pending_rektor', 'pending_sdm_universitas', 'pending_sdm_yayasan', 'disetujui']);
+                ->whereIn('status', ['Menunggu Verifikasi Pimpinan', 'Menunggu Verifikasi Rektor', 'Menunggu Verifikasi SDM Universitas', 'Menunggu Verifikasi SDM Yayasan', 'Disetujui'])
+                ->whereDate('tanggal_mulai', '>=', $periodStart->toDateString())
+                ->whereDate('tanggal_mulai', '<=', $periodEnd->toDateString());
 
             if ($ignoreId) {
                 $totalUsedQuery->where('id', '!=', $ignoreId);
@@ -359,7 +361,7 @@ class EditCuti extends Component
             $totalUsed = $totalUsedQuery->sum('jumlah_hari_cuti');
 
             return [
-                'sisa' => max(0, 66 - $totalUsed),
+                'sisa' => max(0, 33 - $totalUsed),
                 'nama_saldo' => 'Cuti Besar',
                 'is_cuti_besar' => true,
             ];
@@ -377,7 +379,7 @@ class EditCuti extends Component
                         $q->where('jenis_cuti_id', 4)->where('metode_potongan', 'potong_cuti');
                     });
             })
-            ->whereIn('status', ['pending_atasan', 'pending_rektor', 'pending_sdm_universitas', 'pending_sdm_yayasan']);
+            ->whereIn('status', ['Menunggu Verifikasi Pimpinan', 'Menunggu Verifikasi Rektor', 'Menunggu Verifikasi SDM Universitas', 'Menunggu Verifikasi SDM Yayasan']);
 
         if ($ignoreId) {
             $reservedQuery->where('id', '!=', $ignoreId);

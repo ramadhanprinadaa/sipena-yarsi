@@ -4,7 +4,7 @@
                 @if($openDetailLaporan && $selectedLemburDetail)
                 <template x-teleport="body">
                     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-                        <div class="relative w-full max-w-4xl max-h-full bg-white rounded-3xl shadow-2xl overflow-hidden">
+                        <div class="relative w-full max-w-4xl max-h-full bg-white rounded-3xl shadow-2xl overflow-hidden overflow-y-auto">
                             {{-- Header --}}
                             <div class="relative bg-gradient-to-br from-indigo-600 via-blue-500 to-sky-400 px-8 pt-8 pb-14 overflow-hidden">
                                 <div class="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/10"></div>

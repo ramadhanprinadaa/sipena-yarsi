@@ -174,7 +174,7 @@
                 <div class="px-6 py-4 bg-white border-t border-gray-200 rounded-b-[20px] flex-shrink-0">
                     <button wire:click="save" wire:loading.attr="disabled" wire:target="save"
                         type="submit"
-                        class="w-full py-3 rounded-lg text-white font-semibold 
+                        class="w-full py-3 rounded-lg text-white font-semibold  
                             bg-gradient-to-r from-[#2B76FF] via-[#7B61FF] to-[#FF00CC]
                             hover:shadow-lg cursor-pointer transition duration-300">
                         <span wire:loading.remove wire:target="save">Kirim Laporan</span>

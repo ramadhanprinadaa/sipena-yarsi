@@ -93,7 +93,7 @@ class AddCuti extends Component
         if ($harusPotongSaldo && $jumlahHari) {
             $infoSaldo = $this->getSaldoCuti($pegawai, $jenisCuti);
             $saldoSebelum = $infoSaldo['sisa'];
-            $saldoSesudah = $saldoSebelum;
+            $saldoSesudah = $saldoSebelum - $jumlahHari;
         }
 
         $filePath = $this->dokumen_pendukung
@@ -197,7 +197,7 @@ class AddCuti extends Component
             return true;
         }
 
-        // Cuti Besar Rules (Hanya cek pembatasan 33 hari per tahun)
+        // Cuti Besar Rules (Hanya cek pembatasan 33 hari per tahun masa kerja aktif)
         if ($jenisCuti->id === 2) {
             $serviceYear = floor($masaKerjaBulan / 12) + 1;
             if (!in_array($serviceYear, [7, 8])) {
@@ -205,14 +205,19 @@ class AddCuti extends Component
                 return false;
             }
 
+            $joinDate = Carbon::parse($pegawai->tanggal_bergabung);
+            $periodStart = $joinDate->copy()->addYears($serviceYear - 1)->startOfDay();
+            $periodEnd = $joinDate->copy()->addYears($serviceYear)->subDay()->endOfDay();
+
             $yearUsed = Cuti::where('pegawai_id', $pegawai->id)
                 ->where('jenis_cuti_id', 2)
                 ->where('status', '!=', 'ditolak')
-                ->whereYear('tanggal_mulai', Carbon::parse($this->tanggal_mulai)->year)
+                ->whereDate('tanggal_mulai', '>=', $periodStart->toDateString())
+                ->whereDate('tanggal_mulai', '<=', $periodEnd->toDateString())
                 ->sum('jumlah_hari_cuti');
 
             if (($yearUsed + $jumlahHari) > 33) {
-                $this->addError('tanggal_mulai', 'Pengajuan Cuti Besar di tahun yang sama tidak boleh melebihi 33 hari.');
+                $this->addError('tanggal_mulai', 'Pengajuan Cuti Besar di tahun kerja yang sama tidak boleh melebihi 33 hari.');
                 return false;
             }
         }
@@ -237,18 +242,17 @@ class AddCuti extends Component
             return false;
         }
 
-        //Rules Perbulan
+        //Rules Perbulan (Batas 2 hari untuk Cuti Tahunan, 3 hari untuk Cuti Besar, jika lebih maka dispensasi dan masih bisa mengajukan)
         if ($jenisCuti->maksimal_hari_per_bulan) {
-            $terpakaiBulanIni = Cuti::where('pegawai_id', $pegawai->id)
-                ->where('jenis_cuti_id', $jenisCuti->id)
-                ->whereIn('status', ['Menunggu Verifikasi Pimpinan', 'Menunggu Verifikasi Rektor', 'Menunggu Verifikasi SDM Universitas', 'Menunggu Verifikasi SDM Yayasan', 'disetujui'])
-                ->whereYear('tanggal_mulai', Carbon::parse($this->tanggal_mulai)->year)
-                ->whereMonth('tanggal_mulai', Carbon::parse($this->tanggal_mulai)->month)
-                ->sum('jumlah_hari_cuti');
+                $terpakaiBulanIni = Cuti::where('pegawai_id', $pegawai->id)
+                    ->where('jenis_cuti_id', $jenisCuti->id)
+                    ->whereIn('status', ['Menunggu Verifikasi Pimpinan', 'Menunggu Verifikasi Rektor', 'Menunggu Verifikasi SDM Universitas', 'Menunggu Verifikasi SDM Yayasan', 'Disetujui'])
+                    ->whereYear('tanggal_mulai', Carbon::parse($this->tanggal_mulai)->year)
+                    ->whereMonth('tanggal_mulai', Carbon::parse($this->tanggal_mulai)->month)
+                    ->sum('jumlah_hari_cuti');
 
             if (($terpakaiBulanIni + $jumlahHari) > $jenisCuti->maksimal_hari_per_bulan) {
-                $this->addError('tanggal_mulai', 'Pengajuan melebihi batas hari cuti dalam 1 bulan.');
-                return false;
+                return true; // Tetap bisa mengajukan, tapi beri info dispensasi
             }
         }
 
@@ -299,18 +303,24 @@ class AddCuti extends Component
             || ($jenisCuti?->id == 4 && $this->metode_potongan === 'potong_cuti' && in_array($serviceYear, [7, 8]));
 
         if ($usesCutiBesarBalance) {
+            $joinDate = Carbon::parse($pegawai->tanggal_bergabung);
+            $periodStart = $joinDate->copy()->addYears($serviceYear - 1)->startOfDay();
+            $periodEnd = $joinDate->copy()->addYears($serviceYear)->subDay()->endOfDay();
+
             $totalUsed = Cuti::where('pegawai_id', $pegawai->id)
-                ->where(function($query) {
+                ->where((function($query) {
                     $query->where('jenis_cuti_id', 2)
                         ->orWhere(function($q) {
                             $q->where('jenis_cuti_id', 4)->where('metode_potongan', 'potong_cuti');
                         });
-                })
-                ->whereIn('status', ['Menunggu Verifikasi Pimpinan', 'Menunggu Verifikasi Rektor', 'Menunggu Verifikasi SDM Universitas', 'Menunggu Verifikasi SDM Yayasan', 'disetujui'])
+                }))
+                ->whereIn('status', ['Menunggu Verifikasi Pimpinan', 'Menunggu Verifikasi Rektor', 'Menunggu Verifikasi SDM Universitas', 'Menunggu Verifikasi SDM Yayasan', 'Disetujui'])
+                ->whereDate('tanggal_mulai', '>=', $periodStart->toDateString())
+                ->whereDate('tanggal_mulai', '<=', $periodEnd->toDateString())
                 ->sum('jumlah_hari_cuti');
             
             return [
-                'sisa' => max(0, 66 - $totalUsed),
+                'sisa' => max(0, 33 - $totalUsed),
                 'nama_saldo' => 'Cuti Besar',
                 'is_cuti_besar' => true
             ];

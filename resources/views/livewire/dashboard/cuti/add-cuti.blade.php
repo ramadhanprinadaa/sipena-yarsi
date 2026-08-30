@@ -61,10 +61,9 @@
                 <div class="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[#2B76FF]/50 scrollbar-track-gray-100">
                     <div class="p-6 space-y-4">
 
-                        
-
                         {{-- Row: Tanggal Mulai & Selesai --}}
                         <div class="grid grid-cols-3 gap-4">
+
                             <!-- Jenis Cuti -->
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Jenis Cuti</label>
@@ -76,26 +75,31 @@
                                 </select>
                                 @error('jenis_cuti_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                             </div>
+
+                            
+
                             <!-- Tanggal Mulai -->
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Mulai</label>
                                 <input type="date" wire:model="tanggal_mulai"
-                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
                                 @error('tanggal_mulai') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                             </div>
 
                             <!-- Tanggal Selesai-->
-                            <div>
+                            <div>                                   
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Selesai</label>
                                 <input type="date" wire:model="tanggal_selesai"
-                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition">
                                 @error('tanggal_selesai') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                             </div>
+                            
                         </div>
 
                         @php
                             $selectedJenis = collect($jenisCutiList)->firstWhere('id', (int) $jenis_cuti_id);
                         @endphp
+                        
                         @if($selectedJenis?->dihitung_per_jam)
                             <div class="grid grid-cols-2 gap-4">
                                 <div>

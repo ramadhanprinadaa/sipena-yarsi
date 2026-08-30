@@ -8,6 +8,7 @@ use App\Models\Lembur;
 use App\Models\Pegawai;
 use App\Models\SuratPerintahLembur;
 use App\Models\User;
+use App\Notifications\WorkflowNotification;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
 
@@ -16,6 +17,22 @@ class WorkflowEmail
     public static function notifySplPublished(SuratPerintahLembur $spl, Pegawai $pegawai, ?Pegawai $publisher = null): void
     {
         $email = self::emailForPegawai($pegawai);
+
+        if (!$email) {
+            $email = null;
+        }
+
+        $pegawai->user?->notify(new WorkflowNotification(
+            'spl_diterbitkan',
+            'SPL Baru',
+            'Anda terdaftar dalam Surat Perintah Lembur yang baru diterbitkan.',
+            [
+                'Nomor Surat' => $spl->nomor_surat,
+                'Kegiatan' => $spl->nama_kegiatan,
+                'Tanggal Lembur' => self::formatDate($spl->tanggal_lembur),
+            ],
+            route('lembur')
+        ));
 
         if (!$email) {
             return;
@@ -44,6 +61,22 @@ class WorkflowEmail
     public static function notifySplUpdated(SuratPerintahLembur $spl, Pegawai $pegawai, ?Pegawai $publisher = null): void
     {
         $email = self::emailForPegawai($pegawai);
+
+        if (!$email) {
+            $email = null;
+        }
+
+        $pegawai->user?->notify(new WorkflowNotification(
+            'spl_diperbarui',
+            'SPL Diperbarui',
+            'Surat Perintah Lembur yang Anda terima telah diperbarui.',
+            [
+                'Nomor Surat' => $spl->nomor_surat,
+                'Kegiatan' => $spl->nama_kegiatan,
+                'Tanggal Lembur' => self::formatDate($spl->tanggal_lembur),
+            ],
+            route('lembur')
+        ));
 
         if (!$email) {
             return;
@@ -77,6 +110,21 @@ class WorkflowEmail
         $email = self::emailForPegawai($approver);
 
         if (!$email) {
+            $email = null;
+        }
+
+        $approver->user?->notify(new WorkflowNotification(
+            'laporan_lembur',
+            'Laporan Lembur Menunggu Verifikasi',
+            'Ada laporan hasil lembur yang membutuhkan verifikasi Anda.',
+            [
+                'Nama Pegawai' => $pegawai->nama ?? '-',
+                'Tanggal Lembur' => self::formatDate($lembur->tanggal_lembur),
+            ],
+            route('manajemen-lembur')
+        ));
+
+        if (!$email) {
             return;
         }
 
@@ -105,6 +153,22 @@ class WorkflowEmail
         $pegawai = $cuti->pegawai;
         $approver = self::approverForStatus($cuti->status, $pegawai);
         $email = self::emailForPegawai($approver);
+
+        if (!$email) {
+            $email = null;
+        }
+
+        $approver->user?->notify(new WorkflowNotification(
+            'cuti',
+            'Cuti Menunggu Verifikasi',
+            'Ada pengajuan cuti yang membutuhkan verifikasi Anda.',
+            [
+                'Nama Pegawai' => $pegawai->nama ?? '-',
+                'Jenis Cuti' => $cuti->jenisCuti->nama ?? '-',
+                'Tanggal Mulai' => self::formatDate($cuti->tanggal_mulai),
+            ],
+            route('manajemen-cuti')
+        ));
 
         if (!$email) {
             return;
