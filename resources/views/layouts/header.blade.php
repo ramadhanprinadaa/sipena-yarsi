@@ -13,15 +13,6 @@
     {{-- Right Content --}}
     <div class="flex items-center gap-2">
 
-        {{-- Search Bar --}}
-        <div class="relative">
-            <input
-                type="text"
-                placeholder="Cari..."
-                class="bg-white/70 backdrop-blur-sm placeholder:text-gray-500 text-gray-700 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-pink-300 rounded-full py-2 px-4 w-76"
-            >
-        </div>
-
         {{-- Notification --}}
         <div class="relative" x-data="{ dropdownOpen: false }" @mouseenter="dropdownOpen = true"
             @mouseleave="dropdownOpen = false">

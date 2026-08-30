@@ -1,4 +1,10 @@
-<div x-data="{ showLoading: false, openExport: false }" x-on:open-export="showLoading = false; openExport = true;"
+<div x-data="{
+        showLoading: false,
+        openExport: false,
+        openDeleteModal: false
+    }"
+    x-on:open-export="showLoading = false; openExport = true;"
+    x-on:close-delete-pegawai-modal.window="openDeleteModal = false;"
     class="flex flex-col h-[calc(100vh-280px)]">
 
     <!-- Filter & Search -->
@@ -554,12 +560,22 @@
                                     </span>
                                 </td>
 
-                                <!-- Button Detail -->
-                                <td class="px-3 py-2 text-center">
-                                    <a wire:navigate href="{{ route('manajemen-pegawai-detail', $p->id) }}"
-                                        class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-white bg-indigo-500 hover:bg-indigo-600 rounded-md transition">
-                                        Detail
-                                    </a>
+                                <!-- Button Aksi -->
+                                <td class="px-3 py-3 text-center">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <a wire:navigate href="{{ route('manajemen-pegawai-detail', $p->id) }}"
+                                            class="p-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded transition cursor-pointer"
+                                            title="Lihat Detail Pegawai">
+                                            <i class="fa-regular fa-eye"></i>
+                                        </a>
+                                        <button
+                                            x-on:click="openDeleteModal = true; $wire.confirmDelete({{ $p->id }})"
+                                            class="p-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded transition cursor-pointer"
+                                            title="Hapus Data Pegawai"
+                                        >
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -776,6 +792,53 @@
                     </x-slot:footer>
 
                 </x-modal.confirmation>
+            </div>
+        </div>
+    </template>
+
+    <!-- Modal Hapus Data Pegawai -->
+    <template x-teleport="body">
+        <div
+            x-show="openDeleteModal"
+            x-cloak x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md px-4"
+            style="display: none;">
+
+            <div
+                x-show="openDeleteModal"
+                @click.outside="openDeleteModal = false"
+                x-transition:enter="transition ease-out duration-200 delay-100"
+                x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 scale-95" class="w-full max-w-2xl">
+
+                <x-modal.confirmation title="Hapus Data Pegawai"
+                    subTitle="Konfirmasi penghapusan data pegawai" icon="fa-solid fa-trash-can"
+                    iconBg="bg-red-500" iconShadow="shadow-red-200" confirmText="Ya, Hapus Data"
+                    confirmColor="bg-red-500 hover:bg-red-600 text-white border-transparent"
+                    confirmAction="wire:click='delete'"
+                    closeAction="openDeleteModal = false; $wire.set('pegawai_id_to_delete', null);"
+                    cancelColor="bg-gray-600 hover:bg-gray-700" cancelText="Batal">
+
+                    <div class="text-center py-10 flex flex-col items-center justify-center">
+                        <div
+                            class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-5">
+                            <i class="fa-solid fa-triangle-exclamation text-4xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-slate-800 mb-2">Peringatan Penghapusan!</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed max-w-md">
+                            Apakah Anda yakin ingin menghapus data pegawai ini? <br>
+                            Tindakan ini tidak dapat dibatalkan dan data yang terhapus akan hilang secara permanen.
+                        </p>
+                    </div>
+
+                </x-modal.confirmation>
+
             </div>
         </div>
     </template>

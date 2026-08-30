@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c73c3c1071205d40beb468b87299434c",
+    "content-hash": "9d653872f63c594324a55ac9a1bb2cb0",
     "packages": [
         {
             "name": "brick/math",
@@ -7681,6 +7681,75 @@
             "time": "2026-04-21T14:04:20+00:00"
         },
         {
+            "name": "paolobellini/laravel-er",
+            "version": "v1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/paolobellini/laravel-er.git",
+                "reference": "8f768f18e684474808c9e26db8845d943540158e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/paolobellini/laravel-er/zipball/8f768f18e684474808c9e26db8845d943540158e",
+                "reference": "8f768f18e684474808c9e26db8845d943540158e",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^12.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.27.1",
+                "orchestra/testbench": "^8.1|^9.1|^10.0",
+                "pestphp/pest": "^3.8",
+                "pestphp/pest-plugin-type-coverage": "^3.6",
+                "phpstan/phpstan": "^2.1.39",
+                "phpunit/phpunit": "^10.5|^11.0",
+                "rector/rector": "^2.3.8"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "PaoloBellini\\LaravelEr\\LaravelErServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PaoloBellini\\LaravelEr\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Paolo Bellini",
+                    "email": "paolo@bellini.one",
+                    "homepage": "https://bellini.one"
+                }
+            ],
+            "description": "Automatically generate ER diagrams and AI-ready schema documentation from your Laravel database and Eloquent models.",
+            "homepage": "https://github.com/paolobellini/laravel-er",
+            "keywords": [
+                "ai-context",
+                "database",
+                "dbdiagram",
+                "documentation",
+                "er-diagram",
+                "laravel",
+                "mermaid",
+                "schema"
+            ],
+            "support": {
+                "issues": "https://github.com/paolobellini/laravel-er/issues",
+                "source": "https://github.com/paolobellini/laravel-er"
+            },
+            "time": "2026-03-11T08:55:57+00:00"
+        },
+        {
             "name": "phar-io/manifest",
             "version": "2.0.4",
             "source": {
@@ -9429,5 +9498,5 @@
         "php": "^8.2"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

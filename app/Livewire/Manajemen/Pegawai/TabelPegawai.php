@@ -28,6 +28,8 @@ class TabelPegawai extends Component
     public array $jenjangPendidikan;
     public array $statusPegawai;
 
+    public ?int $pegawai_id_to_delete = null;
+
     // Filter
     #[Session]
     public ?string $selectedUnitKerja = null;
@@ -330,6 +332,22 @@ class TabelPegawai extends Component
         $fileName = implode('_', $fileNameParts) . '.xlsx';
 
         return (new PegawaiExport($query))->download($fileName);
+    }
+
+    // Handle Delete
+    public function confirmDelete(int $id)
+    {
+        $this->pegawai_id_to_delete = $id;
+    }
+
+    public function delete()
+    {
+        if($this->pegawai_id_to_delete) {
+            Pegawai::where('id', $this->pegawai_id_to_delete)->delete();
+            $this->pegawai_id_to_delete = null;
+            $this->dispatch('close-delete-pegawai-modal');
+            $this->resetPage();
+        }
     }
 
     public function render()

@@ -41,27 +41,38 @@
         <!-- Scrollable Content -->
         <div class="flex-1 overflow-y-auto px-6 py-4">
 
-            <!-- Data Tidak Dapat Diubah -->
-            <p class="text-xs font-medium text-indigo-400 uppercase tracking-wider mb-4">Identitas Pegawai (Tidak Dapat
-                Diubah)</p>
+            <!-- Data Identitas Pegawai -->
+            <p class="text-xs font-medium text-indigo-400 uppercase tracking-wider mt-3 mb-4">Identitas Pegawai</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 mb-3">
-                <!-- Nama (read-only) -->
+                <!-- Nama -->
                 <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Nama Lengkap Pegawai</label>
-                    <input type="text" value="{{ $nama_pegawai }}" disabled
-                        class="w-full border-0 rounded-none shadow-none border-b-2 border-gray-200 bg-transparent py-2 px-0 text-sm text-gray-500 cursor-not-allowed">
+                    <label class="block text-xs font-medium text-gray-500 mb-1">
+                        Nama Lengkap Pegawai <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        wire:model.live.blur="form.nama"
+                        class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400">
+                    @error('form.nama')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
-                <!-- NIP (read-only) -->
+                <!-- NIP -->
                 <div>
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Nomor Induk Pegawai / NIP</label>
-                    <input type="text" value="{{ $nik_pegawai }}" disabled
-                        class="w-full border-0 rounded-none shadow-none border-b-2 border-gray-200 bg-transparent py-2 px-0 text-sm text-gray-500 cursor-not-allowed">
+                    <label class="block text-xs font-medium text-gray-500 mb-1">
+                        Nomor Induk Pegawai / NIP <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        wire:model.live.blur="form.nip"
+                        class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400">
+                    @error('form.nip')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
-            <!-- Data Identitas Lain -->
-            <p class="text-xs font-medium text-indigo-400 uppercase tracking-wider mt-3 mb-4">Identitas Lainnya</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 space-y-3">
                 <!-- NIK / KTP -->
                 <div>

@@ -3,7 +3,8 @@
     openEditModal: false,
     openLoadingDetail: false,
     openDeleteModal: false
-}" @edit-keluarga-loaded.window="openLoadingDetail = false; openEditModal = true;"
+}"
+    @edit-keluarga-loaded.window="openLoadingDetail = false; openEditModal = true;"
     @close-modal.window="openAddModal = false"
     @close-edit-modal.window="openEditModal = false; openLoadingDetail = false;"
     @close-delete-modal.window="openDeleteModal = false"
@@ -354,7 +355,9 @@
 
     <!-- Modal Hapus Keluarga -->
     <template x-teleport="body">
-        <div x-show="openDeleteModal" x-cloak x-transition:enter="transition ease-out duration-200"
+        <div
+            x-show="openDeleteModal"
+            x-cloak x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"

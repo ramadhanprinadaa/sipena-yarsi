@@ -26,7 +26,6 @@ class DatabaseSeeder extends Seeder
             JenisKeluargaSeeder::class,
             JenjangPendidikanSeeder::class,
 
-            // Comment Jika Ingin Ke Production
             PegawaiSeeder::class,
             PresensiSeeder::class,
             HariLiburSeeder::class,

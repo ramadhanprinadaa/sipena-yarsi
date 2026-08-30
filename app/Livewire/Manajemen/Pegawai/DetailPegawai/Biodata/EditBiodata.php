@@ -78,6 +78,9 @@ class EditBiodata extends Component
         $this->nik_pegawai = $pegawai->nip;
 
         $this->form = [
+            'nama' => $pegawai->nama,
+            'nip' => $pegawai->nip,
+
             'jenis_pegawai_id' => $pegawai->jenis_pegawai_id,
             'status_pegawai_id' => $pegawai->status_pegawai_id,
             'unit_kerja_id' => $pegawai->unit_kerja_id,
@@ -110,13 +113,16 @@ class EditBiodata extends Component
     protected function rules(): array
     {
         return [
+            'form.nama' => ['required', 'string', 'max:100'],
+            'form.nip'  => ['required', 'digits_between:10,20', Rule::unique('pegawai', 'nip')->ignore($this->pegawai_id)],
+
             'form.unit_kerja_id'        => ['required', 'exists:unit_kerja,id'],
             'form.jenis_pegawai_id'     => ['required', 'exists:jenis_pegawai,id'],
             'form.status_pegawai_id'    => ['required', 'exists:status_pegawai,id'],
             'form.unit_bagian'          => ['nullable', 'string', 'max:255'],
 
-            'form.ktp'  => ['required', 'digits:16', Rule::unique('pegawai', 'ktp')->ignore($this->pegawai_id)],
-            'form.npwp' => ['nullable', 'digits_between:10,16', Rule::unique('pegawai', 'npwp')->ignore($this->pegawai_id)],
+            'form.ktp'  => ['required', 'max:100', Rule::unique('pegawai', 'ktp')->ignore($this->pegawai_id)],
+            'form.npwp' => ['nullable', 'max:100', Rule::unique('pegawai', 'npwp')->ignore($this->pegawai_id)],
 
             'form.gelar_depan'      => ['nullable', 'string', 'max:50'],
             'form.gelar_belakang'   => ['nullable', 'string', 'max:50'],
@@ -140,6 +146,14 @@ class EditBiodata extends Component
     protected function messages(): array
     {
         return [
+            'form.nama.required' => 'Nama Wajib Diisi.',
+            'form.nama.string' => 'Format Nama Harus Sesuai A-Z',
+            'form.nama.max' => 'Nama maksimal 100 karakter.',
+
+            'form.nip.required' => 'NIP Wajib Diisi.',
+            'form.nip.digits_between' => 'NIP harus berupa angka 10–20 digit.',
+            'form.nip.unique' => 'NIP sudah terdaftar.',
+
             'form.unit_kerja_id.required' => 'Unit kerja wajib dipilih.',
             'form.unit_kerja_id.exists' => 'Unit kerja tidak valid.',
 
@@ -152,10 +166,10 @@ class EditBiodata extends Component
             'form.unit_bagian.max' => 'Unit/bagian maksimal 255 karakter.',
 
             'form.ktp.required' => 'NIK wajib diisi.',
-            'form.ktp.digits' => 'NIK harus terdiri dari 16 digit.',
+            'form.ktp.max' => 'NIK maks 100 karakter.',
             'form.ktp.unique' => 'NIK sudah terdaftar pada pegawai lain.',
 
-            'form.npwp.digits_between' => 'NPWP harus terdiri dari 10–16 digit.',
+            'form.npwp.max' => 'NPWP harus terdiri dari 100 karakter.',
             'form.npwp.unique' => 'NPWP sudah terdaftar pada pegawai lain.',
 
             'form.gelar_depan.max' => 'Gelar depan maksimal 50 karakter.',
@@ -198,6 +212,9 @@ class EditBiodata extends Component
     protected function validationAttributes(): array
     {
         return [
+            'form.nama' => 'Nama',
+            'form.nip' => 'NIP',
+
             'form.unit_kerja_id' => 'unit kerja',
             'form.jenis_pegawai_id' => 'jenis pegawai',
             'form.status_pegawai_id' => 'status pegawai',

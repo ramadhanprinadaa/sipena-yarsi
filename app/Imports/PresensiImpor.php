@@ -50,12 +50,12 @@ class PresensiImpor implements ToModel, WithHeadingRow, WithBatchInserts, WithUp
     {
         // Inisialisasi data
         $pegawai_id            = $this->pegawaiMap[$row['id']] ?? null;
-        $tanggal               = Carbon::parse($row['date'])->format('Y-m-d');
-        $jamMasuk              = $this->parseExcelTime($row['actual_check_in_time']);
-        $jamKeluar             = $this->parseExcelTime($row['actual_check_out_time']);
+        $tanggal               = Carbon::parse($row['tanggal'])->format('Y-m-d');
+        $jamMasuk              = $this->parseExcelTime($row['waktu_kedatangan_aktual']);
+        $jamKeluar             = $this->parseExcelTime($row['waktu_check_out_aktual']);
         $status_kehadiran_id   = null;
 
-        $statusKehadiranExcel  = $row['attendance_status'];
+        $statusKehadiranExcel  = $row['status_absensi'];
 
         // Get Periode Tanggal Presensi
         if (!$this->periodeMulai || $tanggal < $this->periodeMulai) {
@@ -98,22 +98,22 @@ class PresensiImpor implements ToModel, WithHeadingRow, WithBatchInserts, WithUp
     public function rules(): array
     {
         return [
-            '*.id'                    => ['required', 'string', 'exists:pegawai,nip'],
-            '*.date'                  => ['required', 'date'],
-            '*.actual_check_in_time'  => ['nullable'],
-            '*.actual_check_out_time' => ['nullable'],
-            '*.attendance_status'     => ['nullable'],
+            '*.id'                       => ['required', 'string', 'exists:pegawai,nip'],
+            '*.tanggal'                  => ['required', 'date'],
+            '*.waktu_kedatangan_aktual'  => ['nullable'],
+            '*.waktu_check_out_aktual'   => ['nullable'],
+            '*.status_absensi'           => ['nullable'],
         ];
     }
 
     public function customValidationAttributes(): array
     {
         return [
-            'id'                    => 'NIP (NIK Pegawai)',
-            'date'                  => 'Tanggal',
-            'actual_check_in_time'  => 'Jam Masuk',
-            'actual_check_out_time' => 'Jam Keluar',
-            'attendance_status'     => 'Status Kehadiran Excel',
+            'id'                        => 'NIP (NIK Pegawai)',
+            'tanggal'                   => 'Tanggal',
+            'waktu_kedatangan_aktual'   => 'Jam Masuk',
+            'waktu_check_out_aktual'    => 'Jam Keluar',
+            'status_absensi'            => 'Status Kehadiran Excel',
         ];
     }
 
@@ -124,8 +124,8 @@ class PresensiImpor implements ToModel, WithHeadingRow, WithBatchInserts, WithUp
             'id.string'     => 'NIP (NIK Pegawai) tidak berupa teks yang valid.',
             'id.exists'     => 'NIP (NIK Pegawai) tidak ditemukan.',
 
-            'date.required' => 'Tanggal kosong.',
-            'date.date'     => 'Tanggal tidak tidak berupa tanggal yang valid.',
+            'tanggal.required' => 'Tanggal kosong.',
+            'tanggal.date'     => 'Tanggal tidak tidak berupa tanggal yang valid.',
         ];
     }
 
