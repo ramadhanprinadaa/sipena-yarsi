@@ -3,9 +3,9 @@
     @if($open)
         <template x-teleport="body">
         {{-- MODAL: Form Pengajuan Lembur --}}
-        <div 
+        <div
             class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
-            x-data="{ 
+            x-data="{
                 filePengajuan: null,
                 fileLaporan: null,
                 dragOverPengajuan: false,
@@ -42,7 +42,7 @@
                     e.stopPropagation();
                     if (form === 'pengajuan') this.dragOverPengajuan = false;
                     if (form === 'laporan') this.dragOverLaporan = false;
-                    
+
                     const files = e.dataTransfer?.files || e.target?.files;
                     if (files && files.length > 0) {
                         const file = files[0];
@@ -58,7 +58,7 @@
         >
 
             <!-- Modal Box -->
-            <div 
+            <div
                 class="w-full max-w-2xl max-h-[85vh] bg-white rounded-[20px] shadow-2xl border border-gray-200 flex flex-col"
             >
                 <!-- Header -->
@@ -78,8 +78,8 @@
                         <!-- Surat Perintah Lembur -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Surat Perintah Lembur</label>
-                            <select 
-                                wire:model.live="form.surat_perintah_lembur_id" 
+                            <select
+                                wire:model.live="form.surat_perintah_lembur_id"
                                 {{ $isAutoFilled ? 'disabled' : '' }}
                                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition {{ $isAutoFilled ? 'bg-gray-50 cursor-not-allowed' : '' }}">
                                 @foreach($availableSPLs as $spl)
@@ -154,8 +154,8 @@
                 <div class="px-6 py-4 bg-white border-t border-gray-200 rounded-b-[20px] flex-shrink-0">
                     <button wire:click="save" wire:loading.attr="disabled" wire:target="save"
                         type="submit"
-                        class="w-full py-3 rounded-lg text-white font-semibold 
-                            bg-gradient-to-r from-[#2B76FF] via-[#7B61FF] to-[#FF00CC]  
+                        class="w-full py-3 rounded-lg text-white font-semibold
+                            bg-gradient-to-r from-[#2B76FF] via-[#7B61FF] to-[#FF00CC]
                             hover:shadow-lg cursor-pointer transition duration-300">
                         <span wire:loading.remove wire:target="save">Ajukan Lembur</span>
                         <span wire:loading wire:target="save">Mengirim...</span>

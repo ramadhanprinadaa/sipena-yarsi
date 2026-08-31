@@ -15,7 +15,7 @@ use Livewire\Component;
 class Index extends Component
 {
     use WithPagination;
-    
+
     public $jenisCutiList = [];
 
     public $filterRiwayatSearch = '';
@@ -580,7 +580,7 @@ class Index extends Component
         //Load Data Rekapitulasi Pegawai
         $rekapQuery = Cuti::with(['pegawai.unit_kerja', 'jenisCuti'])
             ->where('status', 'disetujui');
-            
+
         $this->applyCutiScope($rekapQuery);
         $this->applyRekapPeriodFilter($rekapQuery);
 

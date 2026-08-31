@@ -13,16 +13,6 @@
     {{-- Right Content --}}
     <div class="flex items-center gap-2">
 
-        {{-- Search Bar --}}
-        <div class="relative">
-            <input
-                type="text"
-                placeholder="Cari..."
-                class="bg-white/70 backdrop-blur-sm placeholder:text-gray-500 text-gray-700 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-pink-300 rounded-full py-2 px-4 w-76"
-            >
-        </div>
-
-
         {{-- Notification --}}
         @php
             $headerNotifications = auth()->user()->notifications()->latest()->limit(50)->get();
@@ -104,32 +94,26 @@
         </div>
 
         {{-- User Profile --}}
-        <div class="relative" x-data="{ dropdownOpen: false }"
-                    @mouseenter="dropdownOpen = true"
-                    @mouseleave="dropdownOpen = false">
+        <div class="relative" x-data="{ dropdownOpen: false }" @mouseenter="dropdownOpen = true"
+            @mouseleave="dropdownOpen = false">
 
             <!-- Avatar -->
             <button
                 class="w-10 h-10 rounded-full cursor-pointer
                     bg-gradient-to-br from-blue-300 to-pink-200
                     text-gray-700 shadow-sm hover:shadow-md
-                    transition"
-            >
+                    transition">
                 <i class="fa-solid fa-user text-lg"></i>
             </button>
-            <div
-                x-show="dropdownOpen"
-                x-transition
-                class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50"
-            >
+            <div x-cloak x-show="dropdownOpen" x-transition
+                class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
                 <a wire:navigate href="{{ route('profile') }}"
-                class="flex items-center gap-2 px-3 py-2 text-sm rounded-t-md text-gray-700 hover:bg-gray-100">
+                    class="flex items-center gap-2 px-3 py-2 text-sm rounded-t-md text-gray-700 hover:bg-gray-100">
                     <i class="fa-solid fa-user"></i>
                     <span>Profil</span>
                 </a>
 
-                <a href="#"
-                class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <a href="#" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     <i class="fa-solid fa-gear"></i>
                     <span>Pengaturan</span>
                 </a>
@@ -142,7 +126,7 @@
                     <button type="submit"
                         class="flex items-center gap-2 w-full text-left px-3 py-3 text-sm text-red-600 hover:bg-red-100 cursor-pointer rounded-b-md">
                         <i class="fa-solid fa-right-from-bracket"></i>
-                        <span >Keluar</span>
+                        <span>Keluar</span>
                     </button>
                 </form>
             </div>

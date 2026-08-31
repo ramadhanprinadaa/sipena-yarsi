@@ -7,6 +7,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>@yield ('title')</title>
 
+    <!-- To avoid glitch / bip from alpinejs -->
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
     <script defer src="https://unpkg.com/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
@@ -38,7 +43,7 @@
         </aside>
 
         {{-- Right Content --}}
-        <div :class="sidebarToggle ? 'ml-64' : 'ml-26'" class="flex-1 flex flex-col gap-4 min-w-0 overflow-x-hidden">
+        <div :class="sidebarToggle ? 'ml-64' : 'ml-28'" class="flex-1 flex flex-col gap-4 min-w-0 overflow-x-hidden">
 
             {{-- Section --}}
             <div class="flex items-center gap-2 fixed top-24 z-30">
@@ -72,7 +77,7 @@
             @endif
 
             {{-- Main Content --}}
-            <main class="bg-white/25 backdrop-blur-sm shadow-md rounded-[20px] p-6 min-h-[calc(100vh-157px)] {{ $removeMtFromMain ? '' : 'mt-35' }}">
+            <main class="{{ $removeMtFromMain ? '' : 'mt-35' }} overflow-x-visible overflow-y-visible">
                 @yield('content')
             </main>
 

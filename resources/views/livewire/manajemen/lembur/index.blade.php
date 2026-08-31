@@ -3,7 +3,7 @@
             @php
                 $userRole = auth()->user()->role->name ?? null;
                 $allowedTabs = [];
-                
+
                 switch($userRole) {
                     case 'Admin':
                         $allowedTabs = ['riwayat', 'rekap'];
@@ -30,7 +30,7 @@
                         $defaultTab = 'riwayat';
                 }
             @endphp
-            
+
             {{-- ─── Tabs Navigation ─── --}}
             <div x-data="{
                     activeTab: 'spl',
@@ -115,9 +115,9 @@
 
                 {{-- TAB 1: Surat Perintah Lembur (SPL) - Only Pimpinan --}}
                 @if(in_array('spl', $allowedTabs))
-                <div x-show="activeTab === 'spl'" 
-                    x-transition:enter="transition ease-out duration-200" 
-                    x-transition:enter-start="opacity-0 translate-y-1" 
+                <div x-show="activeTab === 'spl'"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 translate-y-1"
                     x-transition:enter-end="opacity-100 translate-y-0"
                     class="flex flex-col space-y-4 min-h-[65vh]">
 
@@ -134,12 +134,12 @@
                         <button wire:click="$dispatch('open-add-spl')" class="flex items-center w-48 h-10 justify-center cursor-pointer bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 hover:shadow-xl text-white text-sm font-semibold rounded-[10px] transition duration-300 ease-in-out transform hover:scale-105">
                             <i class="fa-solid fa-plus mr-2"></i> Buat & Terbitkan SPL
                         </button>
-                        
+
                     </div>
 
                     <!-- Table -->
                     <div class="table-container relative">
-                        
+
                         <!-- Loading -->
                         <div wire:loading>
                             <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
@@ -152,7 +152,7 @@
                         <!-- Main Content -->
                         <div class="table-wrapper">
                             <table class="table">
-                                
+
                                 <!-- Header -->
                                 <thead class="table-header">
                                     <tr>
@@ -193,7 +193,7 @@
                                         </th>
                                     </tr>
                                 </thead>
-                                
+
                                 <!-- Body -->
                                 <tbody class="divide-y divide-[#878787]/30">
                                     @forelse($spls as $spl)
@@ -285,12 +285,12 @@
                     </div>
                 </div>
                 @endif
-            
+
                 {{-- TAB 2: Riwayat Lembur - All allowed roles --}}
                 @if(in_array('riwayat', $allowedTabs))
-                <div x-show="activeTab === 'riwayat'" 
-                    x-transition:enter="transition ease-out duration-200" 
-                    x-transition:enter-start="opacity-0 translate-y-1" 
+                <div x-show="activeTab === 'riwayat'"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 translate-y-1"
                     x-transition:enter-end="opacity-100 translate-y-0"
                     class="flex flex-col space-y-4 min-h-[65vh]">
 
@@ -389,12 +389,12 @@
                                 <i class="fa-solid fa-download mr-2"></i> Export Excel
                             </button>
                         </div>
-                        
+
                     </div>
 
                     <!-- Table -->
                     <div class="table-container relative">
-                        
+
                         <!-- Loading -->
                         <div wire:loading>
                             <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
@@ -407,7 +407,7 @@
                         <!-- Main Content -->
                         <div class="table-wrapper">
                             <table class="table">
-                                
+
                                 <!-- Header -->
                                 <thead class="table-header">
                                     <tr>
@@ -441,10 +441,10 @@
                                                 <span class="truncate">Status</span>
                                             </div>
                                         </th>
-                                        
+
                                     </tr>
                                 </thead>
-                                
+
                                 <!-- Body -->
                                 <tbody class="divide-y divide-[#878787]/30">
                                     @forelse($lemburList as $lembur)
@@ -531,9 +531,9 @@
 
                 {{-- TAB 3: Rekapitulasi Lembur - Admin & SDM Yayasan --}}
                 @if(in_array('rekap', $allowedTabs))
-                <div x-show="activeTab === 'rekapitulasi'" 
-                    x-transition:enter="transition ease-out duration-200" 
-                    x-transition:enter-start="opacity-0 translate-y-1" 
+                <div x-show="activeTab === 'rekapitulasi'"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 translate-y-1"
                     x-transition:enter-end="opacity-100 translate-y-0"
                     class="flex flex-col space-y-4 min-h-[65vh]">
 
@@ -559,7 +559,7 @@
 
                     <!-- Table -->
                     <div class="table-container relative">
-                        
+
                         <!-- Loading -->
                         <div wire:loading>
                             <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
@@ -572,7 +572,7 @@
                         <!-- Main Content -->
                         <div class="table-wrapper">
                             <table class="table">
-                                
+
                                 <!-- Header -->
                                 <thead class="table-header">
                                     <tr>
@@ -599,7 +599,7 @@
 
                                     </tr>
                                 </thead>
-                                
+
                                 <!-- Body -->
                                 <tbody class="divide-y divide-[#878787]/30">
                                     @forelse($rekapList as $rekap)
@@ -682,9 +682,9 @@
 
                 {{-- TAB 4: Persetujuan & Verifikasi Laporan Lembur - SDM Yayasan, SDM Universitas, Pimpinan --}}
                 @if(in_array('verifikasi', $allowedTabs))
-                <div x-show="activeTab === 'laporan'" 
-                    x-transition:enter="transition ease-out duration-200" 
-                    x-transition:enter-start="opacity-0 translate-y-1" 
+                <div x-show="activeTab === 'laporan'"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 translate-y-1"
                     x-transition:enter-end="opacity-100 translate-y-0"
                     class="flex flex-col space-y-4 min-h-[65vh]">
 
@@ -710,7 +710,7 @@
 
                     <!-- Table -->
                     <div class="table-container relative">
-                        
+
                         <!-- Loading -->
                         <div wire:loading>
                             <div class="absolute inset-0 backdrop-blur-xs bg-neutral-primary/20 z-10 gap-2 flex items-center justify-center rounded-md">
@@ -723,7 +723,7 @@
                         <!-- Main Content -->
                         <div class="table-wrapper">
                             <table class="table">
-                                
+
                                 <!-- Header -->
                                 <thead class="table-header">
                                     <tr>
@@ -764,7 +764,7 @@
                                         </th>
                                     </tr>
                                 </thead>
-                                
+
                                 <!-- Body -->
                                 <tbody class="divide-y divide-[#878787]/30">
                                     @forelse($laporanList as $lembur)
@@ -907,7 +907,7 @@
                         </div>
                     </div>
                 @endif
-                
-                
+
+
             </div>
         </div>

@@ -34,7 +34,7 @@ class AddCuti extends Component
     public function open()
     {
         $this->resetForm();
-        
+
         $pegawai = Auth::user()?->pegawai;
         $masaKerjaBulan = $pegawai->tanggal_bergabung
             ? Carbon::parse($pegawai->tanggal_bergabung)->diffInMonths(Carbon::today())
@@ -146,11 +146,11 @@ class AddCuti extends Component
         $masaKerjaBulan = $pegawai->tanggal_bergabung
             ? Carbon::parse($pegawai->tanggal_bergabung)->diffInMonths(Carbon::today())
             : 0;
-        
+
         $tanggalMulai = \Carbon\Carbon::parse($this->tanggal_mulai);
         $tanggalSelesai = \Carbon\Carbon::parse($this->tanggal_selesai);
 
-        // --- VALIDASI HARI KERJA (SENIN - JUMAT) ---
+        // 1. --- VALIDASI HARI KERJA (SENIN - JUMAT) ---
         if ($tanggalMulai->isWeekend()) {
             $this->addError('tanggal_mulai', 'Tanggal mulai cuti hanya bisa dipilih pada hari Senin - Jumat.');
             return false;
@@ -161,7 +161,7 @@ class AddCuti extends Component
             return false;
         }
 
-        // 1. --- VALIDASI OVERLAP TANGGAL CUTI ---
+        // 2. --- VALIDASI OVERLAP TANGGAL CUTI ---
         $isOverlap = Cuti::where('pegawai_id', $pegawai->id)
             ->where('status', '!=', 'ditolak') // Abaikan cuti yang ditolak
             ->where('tanggal_mulai', '<=', $this->tanggal_selesai)
@@ -174,7 +174,7 @@ class AddCuti extends Component
             return false;
         }
 
-        // Validasi Minimal Hari Pengajuan
+        // 3. --- VALIDASI MINIMAL HARI PENGAJUAN ---
         if ($jenisCuti->minimal_hari_pengajuan) {
             $diffDays = Carbon::today()->diffInDays(Carbon::parse($this->tanggal_mulai), false);
             if ($diffDays < $jenisCuti->minimal_hari_pengajuan) {
@@ -318,7 +318,7 @@ class AddCuti extends Component
                 ->whereDate('tanggal_mulai', '>=', $periodStart->toDateString())
                 ->whereDate('tanggal_mulai', '<=', $periodEnd->toDateString())
                 ->sum('jumlah_hari_cuti');
-            
+
             return [
                 'sisa' => max(0, 33 - $totalUsed),
                 'nama_saldo' => 'Cuti Besar',

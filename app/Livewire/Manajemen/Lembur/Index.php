@@ -310,7 +310,7 @@ class Index extends Component
             'catatan' => $catatan,
             'approved_at' => now(),
         ]);
-        
+
     }
 
     public function canApproveLaporan(Lembur $lembur): bool
@@ -600,7 +600,7 @@ class Index extends Component
                 $query->where('nama', 'like', '%' . $this->filterLaporanSearch . '%')
                     ->orWhere('nip', 'like', '%' . $this->filterLaporanSearch . '%');
             });
-        }        
+        }
 
         // Load Rekapitulasi Lembur para pegawai
         $rekapQuery = Lembur::with('pegawai')

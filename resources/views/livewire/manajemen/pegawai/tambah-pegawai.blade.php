@@ -9,17 +9,30 @@
         get tab() { return this.steps[this.current].key },
         get label() { return this.steps[this.current].label }
     }"
-    class="bg-white w-[720px] max-w-[95vw] h-[88vh] mx-auto rounded-xl shadow-2xl flex flex-col overflow-hidden"
+    class="bg-white min-w-[45vw] min-h-[88vh] mx-auto rounded-xl shadow-2xl flex flex-col overflow-hidden"
 >
     <!-- Header -->
-    <header class="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
+    <header class="flex items-center justify-between px-5 py-4 border-b border-slate-200 shrink-0 bg-gradient-to-r from-indigo-50 via-white to-blue-50 mb-2">
+
+        <!-- Decoration -->
+        <div class="absolute inset-0 opacity-40 pointer-events-none">
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-indigo-200 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-200 rounded-full blur-3xl"></div>
+        </div>
+
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
                 <i class="fa-solid fa-user-plus text-base text-indigo-500"></i>
             </div>
             <div>
-                <h2 class="text-md font-bold text-gray-800 leading-tight tracking-tight">Form Tambah Pegawai</h2>
-                <p class="text-xs text-gray-400 leading-tight">Isi data pegawai baru secara lengkap</p>
+                <h2 class="text-lg font-semibold text-slate-800 leading-tight">
+                    Form Tambah Pegawai
+                </h2>
+                <div class="flex items-center gap-2 mt-1 text-sm text-slate-500">
+                    <span>
+                        Isi data pegawai baru secara lengkap
+                    </span>
+                </div>
             </div>
         </div>
         <button
@@ -81,6 +94,7 @@
             </template>
         </div>
     </div>
+
     <!-- Form -->
     <form wire:submit.prevent="save" class="flex flex-col flex-1 min-h-0">
 
@@ -91,46 +105,54 @@
             <div x-show="tab === 'pegawai'" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0">
 
                 <p class="text-xs font-medium text-indigo-400 uppercase tracking-wider mb-4">Identitas Pegawai</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 space-y-3">
                     <!-- Nama -->
                     <div>
-                        <div class="input-wrapper group">
-                            <input wire:model.live="form.nama" type="text" id="floating_nama" class="input-field peer" placeholder=" ">
-                            <label for="floating_nama" class="input-label">Nama Lengkap Pegawai</label>
-                        </div>
-                        @error('form.nama') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                            Nama Lengkap Pegawai <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text"
+                            class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
+                            wire:model.live.blur="form.nama" placeholder="cth: Fadil Jaidi">
+                        @error('form.nama') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <!-- NIK -->
                     <div>
-                        <div class="input-wrapper group">
-                            <input wire:model.live="form.ktp" type="text" id="floating_nik" class="input-field peer" placeholder=" ">
-                            <label for="floating_nik" class="input-label">Nomor KTP / NIK</label>
-                        </div>
-                        @error('form.ktp') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                            Nomor KTP / NIK <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text"
+                            class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
+                            wire:model.live.blur="form.ktp" placeholder="cth: 317203xxxxxxxxxxx">
+                        @error('form.ktp') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <!-- NIP -->
                     <div>
-                        <div class="input-wrapper group">
-                            <input wire:model.live="form.nip" type="text" id="floating_nip" class="input-field peer" placeholder=" ">
-                            <label for="floating_nip" class="input-label">Nomor Induk Pegawai / NIP</label>
-                        </div>
-                        @error('form.nip') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                            Nomor Induk Pegawai / NIP <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text"
+                            class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
+                            wire:model.live.blur="form.nip" placeholder="cth: 1502023xxxxxx">
+                        @error('form.nip') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <!-- NPWP -->
                     <div>
-                        <div class="input-wrapper group">
-                            <input wire:model.live="form.npwp" type="text" id="floating_npwp" class="input-field peer" placeholder=" ">
-                            <label for="floating_npwp" class="input-label">Nomor NPWP</label>
-                        </div>
-                        @error('form.npwp') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                            Nomor NPWP
+                        </label>
+                        <input type="text"
+                            class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400"
+                            wire:model.live.blur="form.npwp" placeholder="cth: 317203xxxxxxxxxxx">
+                        @error('form.npwp') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
                 <p class="text-xs font-medium text-indigo-400 uppercase tracking-wider mt-3 mb-4">Informasi Kepegawaian</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 space-y-3">
 
                     <!-- Unit Kerja -->
                     <div
@@ -146,31 +168,27 @@
                         }"
                         @keydown.escape.window="show = false"
                         class="relative input-wrapper col-span-2">
+                        <label class="block text-xs font-medium text-gray-500 mb-1">
+                            Unit Kerja <span class="text-red-500">*</span>
+                        </label>
                         <button
-                            x-ref="trigger"
                             type="button"
-                            @click="show = !show"
-                            @focus="focus = true"
-                            @blur="focus = false"
-                            class="input-field flex justify-between items-center cursor-pointer">
-                            <span :class="selectedLabel ? 'text-gray-900' : 'text-gray-500/90'" x-text="selectedLabel || ' '"></span>
-                            <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform duration-150" :class="show ? 'rotate-180' : ''"></i>
+                            x-on:click="show = !show"
+                            class="w-full flex justify-between items-center py-2 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none text-sm cursor-pointer"
+                        >
+                            <span :class="selectedLabel ? 'text-gray-900' : 'text-gray-500/90'" x-text="selectedLabel || 'Pilih Unit Kerja'"></span>
+                            <i class="fa-solid fa-chevron-down text-xs text-gray-400/90"></i>
                         </button>
 
-                        <label
-                            @click="$refs.trigger.click(); $refs.trigger.focus()"
-                            class="input-label-btn"
-                            :class="{ 'input-label-btn-selected': focus || selectedLabel, 'input-label-btn-focus': focus }">
-                            Unit Kerja
-                        </label>
+                        @error('form.unit_kerja_id')
+                            <div class="text-xs text-red-500 mt-1">
+                                {{ $message }}
+                            </div>
+                        @enderror
 
                         <div
-                            x-show="show"
-                            @click.outside="show = false"
-                            x-transition:enter="transition ease-out duration-100"
-                            x-transition:enter-start="opacity-0 -translate-y-1"
-                            x-transition:enter-end="opacity-100 translate-y-0"
-                            class="absolute mt-2 w-full bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-44 overflow-y-auto">
+                            x-show="show" @click.outside="show = false" x-transition
+                            class="absolute mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
                             <ul class="text-sm py-1">
                                 @foreach ($unitKerja as $unit)
                                     <li>
@@ -183,8 +201,6 @@
                                 @endforeach
                             </ul>
                         </div>
-
-                        @error('form.unit_kerja_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <!-- Jenis Pegawai -->
@@ -201,32 +217,24 @@
                         }"
                         @keydown.escape.window="show = false"
                         class="relative input-wrapper">
-
-                        <button
-                            x-ref="trigger"
-                            type="button"
-                            @click="show = !show"
-                            @focus="focus = true"
-                            @blur="focus = false"
-                            class="input-field flex justify-between items-center cursor-pointer">
-                            <span :class="selectedLabel ? 'text-gray-900' : 'text-gray-500/90'" x-text="selectedLabel || ' '"></span>
-                            <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform duration-150" :class="show ? 'rotate-180' : ''"></i>
-                        </button>
-
-                        <label
-                            @click="$refs.trigger.click(); $refs.trigger.focus()"
-                            class="input-label-btn"
-                            :class="{ 'input-label-btn-selected': focus || selectedLabel, 'input-label-btn-focus': focus }">
-                            Jenis Pegawai
+                        <label class="block text-xs font-medium text-gray-500 mb-1">
+                            Jenis Pegawai <span class="text-red-500">*</span>
                         </label>
 
+                        <button
+                            type="button"
+                            x-on:click="show = !show"
+                            class="w-full flex justify-between items-center py-2 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none text-sm cursor-pointer"
+                        >
+                            <span :class="selectedLabel ? 'text-gray-900' : 'text-gray-500/90'" x-text="selectedLabel || 'Pilih Jenis Pegawai'"></span>
+                            <i class="fa-solid fa-chevron-down text-xs text-gray-400/90"></i>
+                        </button>
+
+                        @error('form.jenis_pegawai_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+
                         <div
-                            x-show="show"
-                            @click.outside="show = false"
-                            x-transition:enter="transition ease-out duration-100"
-                            x-transition:enter-start="opacity-0 -translate-y-1"
-                            x-transition:enter-end="opacity-100 translate-y-0"
-                            class="absolute mt-2 w-full bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-44 overflow-y-auto">
+                            x-show="show" @click.outside="show = false" x-transition
+                            class="absolute mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
                             <ul class="text-sm py-1">
                                 @foreach ($jenisPegawai as $jenis)
                                     <li>
@@ -240,8 +248,6 @@
                                 @endforeach
                             </ul>
                         </div>
-
-                        @error('form.jenis_pegawai_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <!-- Status Pegawai -->
@@ -258,31 +264,24 @@
                         }"
                         @keydown.escape.window="show = false"
                         class="relative input-wrapper">
-                        <button
-                            x-ref="trigger"
-                            type="button"
-                            @click="show = !show"
-                            @focus="focus = true"
-                            @blur="focus = false"
-                            class="input-field flex justify-between items-center cursor-pointer">
-                            <span :class="selectedLabel ? 'text-gray-900' : 'text-gray-500/90'" x-text="selectedLabel || ' '"></span>
-                            <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform duration-150" :class="show ? 'rotate-180' : ''"></i>
-                        </button>
-
-                        <label
-                            @click="$refs.trigger.click(); $refs.trigger.focus()"
-                            class="input-label-btn"
-                            :class="{ 'input-label-btn-selected': focus || selectedLabel, 'input-label-btn-focus': focus }">
-                            Status Pegawai
+                        <label class="block text-xs font-medium text-gray-500 mb-1">
+                            Status Pegawai <span class="text-red-500">*</span>
                         </label>
 
+                        <button
+                            type="button"
+                            x-on:click="show = !show"
+                            class="w-full flex justify-between items-center py-2 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none text-sm cursor-pointer"
+                        >
+                            <span :class="selectedLabel ? 'text-gray-900' : 'text-gray-500/90 italic'" x-text="selectedLabel || 'Pilih Status Pegawai'"></span>
+                            <i class="fa-solid fa-chevron-down text-xs text-gray-400/90"></i>
+                        </button>
+
+                        @error('form.status_pegawai_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+
                         <div
-                            x-show="show"
-                            @click.outside="show = false"
-                            x-transition:enter="transition ease-out duration-100"
-                            x-transition:enter-start="opacity-0 -translate-y-1"
-                            x-transition:enter-end="opacity-100 translate-y-0"
-                            class="absolute mt-2 w-full bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-44 overflow-y-auto">
+                            x-show="show" @click.outside="show = false" x-transition
+                            class="absolute mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
                             <ul class="text-sm py-1">
                                 @foreach ($statusPegawai as $status)
                                     <li>
@@ -296,8 +295,6 @@
                                 @endforeach
                             </ul>
                         </div>
-
-                        @error('form.status_pegawai_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
             </div>
@@ -306,68 +303,70 @@
             <div x-show="tab === 'biodata'" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0">
 
                 <p class="text-xs font-medium text-indigo-400 uppercase tracking-wider mb-4">Data Pribadi</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 space-y-3">
                     <!-- Gelar Depan -->
                     <div>
-                        <div class="input-wrapper group">
-                            <input wire:model.live="form.gelar_depan" type="text" id="floating_gelar_depan" class="input-field peer" placeholder=" ">
-                            <label for="floating_gelar_depan" class="input-label">Gelar Depan</label>
-                        </div>
-                        @error('form.gelar_depan') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                            Gelar Depan
+                        </label>
+                        <input wire:model.live.blur="form.gelar_depan" type="text" id="floating_gelar_depan" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: Prof. Dr.">
+                        @error('form.gelar_depan') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                     <!-- Gelar Belakang -->
                     <div>
-                        <div class="input-wrapper group">
-                            <input wire:model.live="form.gelar_belakang" type="text" id="floating_gelar_belakang" class="input-field peer" placeholder=" ">
-                            <label for="floating_gelar_belakang" class="input-label">Gelar Belakang</label>
-                        </div>
-                        @error('form.gelar_belakang') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                            Gelar Depan
+                        </label>
+                        <input wire:model.live.blur="form.gelar_belakang" type="text" id="floating_gelar_belakang" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: S.Kom, M.Kom">
+                        @error('form.gelar_belakang') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                     <!-- Tempat Lahir -->
                     <div>
-                        <div class="input-wrapper group">
-                            <input wire:model.live="form.tempat_lahir" type="text" id="floating_tempat_lahir" class="input-field peer" placeholder=" ">
-                            <label for="floating_tempat_lahir" class="input-label">Tempat Lahir</label>
-                        </div>
-                        @error('form.tempat_lahir') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                            Tempat Lahir <span class="text-red-500">*</span>
+                        </label>
+                        <input wire:model.live.blur="form.tempat_lahir" type="text" id="floating_tempat_lahir" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: Jakarta">
+                        @error('form.tempat_lahir') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                     <!-- Tanggal Lahir -->
                     <div>
-                        <div class="input-wrapper group relative"
-                            x-data
-                            x-init="
-                                const picker = document.getElementById('floating_tanggal_lahir');
-                                picker.addEventListener('changeDate', () => {
-                                    $wire.set('form.tanggal_lahir', picker.value);
-                                });
-                            "
+                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                            Tanggal Lahir <span class="text-red-500">*</span>
+                        </label>
+                        <div
+                            x-data="{ picker: null }"
+                            x-init="picker = new Datepicker($refs.input, {
+                                format: 'dd/mm/yyyy',
+                                autohide: true,
+                                language: 'id'
+                            });
+
+                            $refs.input.addEventListener('changeDate', () => {
+                                $wire.set('form.tanggal_lahir', $refs.input.value);
+                            });"
+                            class="relative"
                         >
                             <!-- Icon -->
-                            <div class="absolute inset-y-0 flex items-center ps-1 pointer-events-none z-10">
-                                <i class="fa-solid fa-calendar-days text-body text-xs"></i>
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
                             </div>
                             <!-- Input -->
                             <input
                                 wire:model.defer="form.tanggal_lahir"
                                 type="text"
-                                id="floating_tanggal_lahir"
-                                datepicker
-                                datepicker-autohide
-                                datepicker-format="dd/mm/yyyy"
-                                datepicker-language="id"
-                                placeholder=" "
-                                class="input-field peer ps-6"
-                            >
-                            <!-- Label -->
-                            <label
-                                for="floating_tanggal_lahir"
-                                class="input-label ps-6 inset-y-2 peer-focus:ps-1 peer-[:not(:placeholder-shown)]:ps-1"
-                            >
-                                Tanggal Lahir
-                            </label>
-
+                                x-ref="input"
+                                placeholder="Pilih Tanggal Lahir"
+                                class="w-full h-9 pl-9 pr-3 text-sm text-gray-700 placeholder-gray-400 border-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none focus:ring-0 transition-colors duration-200 placeholder:italic" />
+                            <button type="button" x-show="$wire.form.tanggal_lahir"
+                                @click="
+                                $wire.set('form.tanggal_lahir', null);
+                                picker.setDate({ clear: true });
+                                $refs.input.value = '';"
+                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-red-500 transition">
+                                <i class="fa-solid fa-xmark text-sm"></i>
+                            </button>
                         </div>
-                        @error('form.tanggal_lahir') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                        @error('form.tanggal_lahir') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                     <!-- Jenis Kelamin -->
                     <div
@@ -386,26 +385,19 @@
                         @keydown.escape.window="show = false"
                         class="relative input-wrapper">
 
-                        <button
-                            x-ref="trigger"
-                            type="button"
-                            @click="show = !show"
-                            @focus="focus = true"
-                            @blur="focus = false"
-                            class="input-field flex justify-between items-center cursor-pointer">
-
-                            <span :class="label ? 'text-gray-900' : 'text-gray-500/90'" x-text="label || ' '"></span>
-
-                            <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform duration-150"
-                            :class="show ? 'rotate-180' : ''"></i>
-                        </button>
-
-                        <label
-                            @click="$refs.trigger.click(); $refs.trigger.focus()"
-                            class="input-label-btn"
-                            :class="{ 'input-label-btn-selected': focus || label, 'input-label-btn-focus': focus }">
-                            Jenis Kelamin
+                        <label class="block text-xs font-medium text-gray-500 mb-1">
+                            Jenis Kelamin <span class="text-red-500">*</span>
                         </label>
+
+                        <button
+                            type="button"
+                            x-on:click="show = !show"
+                            class="w-full flex justify-between items-center py-2 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none text-sm cursor-pointer">
+
+                            <span :class="label ? 'text-gray-900' : 'text-gray-500/90'" x-text="label || 'Pilih Jenis Kelamin'"></span>
+
+                            <i class="fa-solid fa-chevron-down text-xs text-gray-400/90"></i>
+                        </button>
 
                         @error('form.jenis_kelamin')
                             <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
@@ -415,7 +407,7 @@
                             x-show="show"
                             @click.outside="show = false"
                             x-transition
-                            class="absolute mt-2 w-full bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-44 overflow-y-auto">
+                            class="absolute mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
 
                             <ul class="text-sm py-1">
 
@@ -444,132 +436,129 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6">
                     <!-- Tanggal Bergabung -->
                     <div>
-                        <div class="input-wrapper group relative"
-                            x-data
-                            x-init="
-                                const picker = document.getElementById('floating_tanggal_bergabung');
-                                picker.addEventListener('changeDate', () => {
-                                    $wire.set('form.tanggal_bergabung', picker.value);
-                                });
-                            "
+                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                            Tanggal Bergabung <span class="text-red-500">*</span>
+                        </label>
+                        <div x-data="{ picker: null }"
+                            x-init="picker = new Datepicker($refs.input, {
+                                format: 'dd/mm/yyyy',
+                                autohide: true,
+                                language: 'id'
+                            });
+
+                            $refs.input.addEventListener('changeDate', () => {
+                                $wire.set('form.tanggal_bergabung', $refs.input.value);
+                            });"
+                            class="relative"
                         >
                             <!-- Icon -->
-                            <div class="absolute inset-y-0 flex items-center ps-1 pointer-events-none z-10">
-                                <i class="fa-solid fa-calendar-days text-body text-xs"></i>
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
                             </div>
                             <!-- Input -->
                             <input
                                 wire:model.defer="form.tanggal_bergabung"
                                 type="text"
-                                id="floating_tanggal_bergabung"
-                                datepicker
-                                datepicker-autohide
-                                datepicker-format="dd/mm/yyyy"
-                                datepicker-language="id"
-                                placeholder=" "
-                                class="input-field peer ps-6"
-                            >
-                            <!-- Label -->
-                            <label
-                                for="floating_tanggal_bergabung"
-                                class="input-label ps-6 inset-y-2 peer-focus:ps-1 peer-[:not(:placeholder-shown)]:ps-1"
-                            >
-                                Tanggal Bergabung
-                            </label>
+                                x-ref="input"
+                                placeholder="Pilih Tanggal Bergabung"
+                                class="w-full h-9 pl-9 pr-3 text-sm text-gray-700 placeholder-gray-400 border-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none focus:ring-0 transition-colors duration-200 placeholder:italic" />
+                            <button type="button" x-show="$wire.form.tanggal_bergabung"
+                                @click="
+                                $wire.set('form.tanggal_bergabung', null);
+                                picker.setDate({ clear: true });
+                                $refs.input.value = '';"
+                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-red-500 transition">
+                                <i class="fa-solid fa-xmark text-sm"></i>
+                            </button>
 
                         </div>
-                        @error('form.tanggal_bergabung') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                        @error('form.tanggal_bergabung') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     @switch($form['status_pegawai_id'])
                         @case(1)
                             <!-- Tanggal Pensiun -->
                             <div>
-                                <div class="input-wrapper group relative"
-                                    x-data
-                                    x-init="
-                                        new Datepicker(
-                                            $refs.pensiun,
-                                            {
-                                                format: 'dd/mm/yyyy',
-                                                language: 'id',
-                                                autohide: true
-                                            }
-                                        );
-                                        const picker = document.getElementById('floating_tanggal_pensiun');
-                                        picker.addEventListener('changeDate', () => {
-                                            $wire.set('form.tanggal_pensiun', $refs.pensiun.value);
-                                        });
-                                    "
+                                <label class="block text-xs font-medium text-gray-600 mb-1">
+                                    Tanggal Pensiun <span class="text-red-500">*</span>
+                                </label>
+                                <div
+                                    x-data="{ picker: null }"
+                                    x-init="picker = new Datepicker($refs.input, {
+                                        format: 'dd/mm/yyyy',
+                                        autohide: true,
+                                        language: 'id'
+                                    });
+
+                                    $refs.input.addEventListener('changeDate', () => {
+                                        $wire.set('form.tanggal_pensiun', $refs.input.value);
+                                    });"
+                                    class="relative"
                                 >
                                     <!-- Icon -->
-                                    <div class="absolute inset-y-0 flex items-center ps-1 pointer-events-none z-10">
-                                        <i class="fa-solid fa-calendar-days text-body text-xs"></i>
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
                                     </div>
                                     <!-- Input -->
                                     <input
-                                        x-ref="pensiun"
+                                        wire:model.defer="form.tanggal_pensiun"
                                         type="text"
-                                        id="floating_tanggal_pensiun"
-                                        placeholder=" "
-                                        class="input-field peer ps-6"
-                                    >
-                                    <!-- Label -->
-                                    <label
-                                        for="floating_tanggal_pensiun"
-                                        class="input-label ps-6 inset-y-2 peer-focus:ps-1 peer-[:not(:placeholder-shown)]:ps-1"
-                                    >
-                                        Tanggal Pensiun
-                                    </label>
+                                        x-ref="input"
+                                        placeholder="Pilih Tanggal Pensiun"
+                                        class="w-full h-9 pl-9 pr-3 text-sm text-gray-700 placeholder-gray-400 border-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none focus:ring-0 transition-colors duration-200 placeholder:italic" />
+                                    <button type="button" x-show="$wire.form.tanggal_pensiun"
+                                        @click="
+                                        $wire.set('form.tanggal_pensiun', null);
+                                        picker.setDate({ clear: true });
+                                        $refs.input.value = '';"
+                                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-red-500 transition">
+                                        <i class="fa-solid fa-xmark text-sm"></i>
+                                    </button>
 
                                 </div>
-                                @error('form.tanggal_pensiun') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                                @error('form.tanggal_pensiun') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                             </div>
                             @break
                         @case(2)
                             <!-- Tanggal Habis Kontrak -->
                             <div>
-                                <div class="input-wrapper group relative"
-                                    wire:key="tanggal-habis-kontrak"
-                                    wire:ignore
-                                    x-data
-                                    x-init="
-                                        new Datepicker(
-                                            $refs.kontrak,
-                                            {
-                                                format: 'dd/mm/yyyy',
-                                                language: 'id',
-                                                autohide: true
-                                            }
-                                        );
-                                        const picker = document.getElementById('floating_tanggal_habis_kontrak');
-                                        picker.addEventListener('changeDate', () => {
-                                            $wire.set('form.tanggal_habis_kontrak', $refs.kontrak.value);
-                                        });
-                                    "
+                                <label class="block text-xs font-medium text-gray-600 mb-1">
+                                    Tanggal Habis Kontrak <span class="text-red-500">*</span>
+                                </label>
+                                <div
+                                    x-data="{ picker: null }"
+                                    x-init="picker = new Datepicker($refs.input, {
+                                        format: 'dd/mm/yyyy',
+                                        autohide: true,
+                                        language: 'id'
+                                    });
+
+                                    $refs.input.addEventListener('changeDate', () => {
+                                        $wire.set('form.tanggal_habis_kontrak', $refs.input.value);
+                                    });"
+                                    class="relative"
                                 >
                                     <!-- Icon -->
-                                    <div class="absolute inset-y-0 flex items-center ps-1 pointer-events-none z-10">
-                                        <i class="fa-solid fa-calendar-days text-body text-xs"></i>
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fa-solid fa-calendar-days text-gray-400 text-xs"></i>
                                     </div>
                                     <!-- Input -->
                                     <input
-                                        x-ref="kontrak"
+                                        wire:model.defer="form.tanggal_habis_kontrak"
                                         type="text"
-                                        id="floating_tanggal_habis_kontrak"
-                                        placeholder=" "
-                                        class="input-field peer ps-6"
-                                    >
-                                    <!-- Label -->
-                                    <label
-                                        for="floating_tanggal_habis_kontrak"
-                                        class="input-label ps-6 inset-y-2 peer-focus:ps-1 peer-[:not(:placeholder-shown)]:ps-1"
-                                    >
-                                        Tanggal Habis Kontrak
-                                    </label>
-
+                                        x-ref="input"
+                                        placeholder="Pilih Tanggal Habis Kontrak"
+                                        class="w-full h-9 pl-9 pr-3 text-sm text-gray-700 placeholder-gray-400 border-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none focus:ring-0 transition-colors duration-200 placeholder:italic" />
+                                    <button type="button" x-show="$wire.form.tanggal_habis_kontrak"
+                                        @click="
+                                        $wire.set('form.tanggal_habis_kontrak', null);
+                                        picker.setDate({ clear: true });
+                                        $refs.input.value = '';"
+                                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-red-500 transition">
+                                        <i class="fa-solid fa-xmark text-sm"></i>
+                                    </button>
                                 </div>
-                                @error('form.tanggal_habis_kontrak') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                                @error('form.tanggal_habis_kontrak') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                             </div>
                             @break
                     @endswitch
@@ -580,47 +569,49 @@
             <div x-show="tab === 'alamat'" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0">
 
                 <p class="text-xs font-medium text-indigo-400 uppercase tracking-wider mb-4">Kontak</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 space-y-3">
 
                     <div class="md:col-span-2">
-                        <div class="input-wrapper group">
-                            <input wire:model.live="form.no_telpon" type="text" id="no_telpon" class="input-field peer" placeholder=" ">
-                            <label for="no_telpon" class="input-label">Nomor Telpon</label>
-                        </div>
-                        @error('form.no_telpon') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                            Nomor Telepon
+                        </label>
+                        <input
+                            wire:model.live.blur="form.no_telpon"
+                            type="text" id="no_telpon"
+                            class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: 0812xxxxxxxx">
+                        @error('form.no_telpon') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="md:col-span-2">
-                        <div class="input-wrapper group">
-                            <input wire:model.live="form.email_yarsi" type="text" id="email_yarsi" class="input-field peer" placeholder=" ">
-                            <label for="email_yarsi" class="input-label">Email Yarsi</label>
-                        </div>
-                        @error('form.email_yarsi') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                            Email Yarsi
+                        </label>
+                        <input wire:model.live.blur="form.email_yarsi" type="text" id="email_yarsi" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: budi@yarsi.ac.id">
+                        @error('form.email_yarsi') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
                 <p class="text-xs font-medium text-indigo-400 uppercase tracking-wider mt-3 mb-4">Alamat</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 space-y-3">
 
-                    <!-- Alamat (full width) -->
+                    <!-- Alamat  -->
                     <div class="md:col-span-2">
-                        <div class="input-wrapper group">
-                            <input wire:model.live="form.alamat_ktp" type="text" id="floating_alamat" class="input-field peer" placeholder=" ">
-                            <label for="floating_alamat" class="input-label">Alamat Lengkap</label>
-                        </div>
-                        @error('form.alamat_ktp') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                            Alamat Lengkap
+                        </label>
+                        <input wire:model.live.blur="form.alamat_ktp" type="text" id="floating_alamat" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: Jl. Ngawi Selatan No. 123">
+                        @error('form.alamat_ktp') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="md:col-span-2">
-                        <div class="input-wrapper group">
-                            <input wire:model.live="form.alamat_domisili" type="text" id="alamat_domisili" class="input-field peer" placeholder=" ">
-                            <label for="alamat_domisili" class="input-label">Alamat Domisili</label>
-                        </div>
-                        @error('form.alamat_domisili') <p class="text-xs text-red-500 -mt-4 mb-4">{{ $message }}</p> @enderror
+                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                            Alamat Domisili
+                        </label>
+                        <input wire:model.live.blur="form.alamat_domisili" type="text" id="alamat_domisili" class="w-full border-0 rounded-none shadow-none focus:ring-0 border-b-2 border-gray-300 focus:border-indigo-500 focus:outline-none py-2 px-0 text-sm placeholder:italic placeholder-gray-400" placeholder="cth: Jl. Ngawi Timur No. 135">
+                        @error('form.alamat_domisili') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
             </div>
-
         </div>
 
         <!-- Footer -->
@@ -684,6 +675,5 @@
                 </template>
             </div>
         </div>
-
     </form>
 </div>

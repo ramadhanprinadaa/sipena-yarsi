@@ -1,10 +1,10 @@
 <div>
-    @if($open)    
+    @if($open)
         <template x-teleport="body">
         {{-- MODAL: Form Laporan Hasil Lembur --}}
-        <div 
+        <div
             class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
-            x-data="{ 
+            x-data="{
                 filePengajuan: null,
                 fileLaporan: null,
                 dragOverPengajuan: false,
@@ -31,7 +31,7 @@
                     e.stopPropagation();
                     if (form === 'pengajuan') this.dragOverPengajuan = false;
                     if (form === 'laporan') this.dragOverLaporan = false;
-                    
+
                     const files = e.dataTransfer?.files || e.target?.files;
                     if (files && files.length > 0) {
                         const file = files[0];
@@ -47,7 +47,7 @@
         >
 
             <!-- Modal Box -->
-            <div 
+            <div
                 class="w-full max-w-2xl max-h-[85vh] bg-white rounded-[20px] shadow-2xl border border-gray-200 flex flex-col"
             >
                 <!-- Header -->
@@ -67,7 +67,7 @@
                         <!-- Pilih Lembur -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Pengajuan Lembur</label>
-                            <select 
+                            <select
                             wire:model.live="form.lembur_id"
                             {{ $isAutoFilled ? 'disabled' : '' }}
                             class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2B76FF] focus:border-transparent transition {{ $isAutoFilled ? 'bg-gray-50 cursor-not-allowed' : '' }}">
@@ -109,7 +109,7 @@
                         <!-- Upload Dokumen -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Dokumen</label>
-                            
+
                             <!-- Drag & Drop Area (Before File Selected) -->
                             <div x-show="!filePengajuan"
                                 @dragover.prevent="dragOverPengajuan = true"
@@ -118,7 +118,7 @@
                                 :class="dragOverPengajuan ? 'border-[#2B76FF] bg-[#2B76FF]/10 shadow-lg' : 'border-gray-300 hover:border-[#2B76FF] hover:bg-[#2B76FF]/5'"
                                 class="border-2 border-dashed rounded-lg p-8 text-center transition cursor-pointer">
                                 <input type="file" wire:model="dokumen_laporan"
-                                    class="hidden" 
+                                    class="hidden"
                                     @change="handleFilePengajuan($event, 'pengajuan')"
                                     accept=".pdf,.jpg,.jpeg,.png"
                                     x-ref="inputPengajuan">
@@ -127,7 +127,7 @@
                                     <p class="text-sm font-medium" :class="dragOverPengajuan ? 'text-[#2B76FF]' : 'text-gray-500'">Klik atau drag file kesini</p>
                                 </div>
                             </div>
-                            
+
                             <!-- File Selected Display -->
                             <div x-show="filePengajuan" class="border-2 border-green-200 bg-green-50 rounded-lg p-4 transition">
                                 <div class="flex items-center justify-between">
@@ -156,7 +156,7 @@
                             <p class="text-xs text-gray-500 mt-2">Format: PDF, JPG, JPEG, PNG. Maksimal 2 MB.</p>
                             @error('dokumen_laporan') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                         </div>
-                    
+
                         <!-- Hasil Pekerjaan -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Hasil Pekerjaan</label>

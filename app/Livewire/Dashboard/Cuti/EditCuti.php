@@ -87,7 +87,7 @@ class EditCuti extends Component
         }
 
         $jenisCuti = JenisCuti::find($this->jenis_cuti_id);
-        
+
         // 1. Validasi
         $this->validate($this->rules($jenisCuti), [], $this->attributes());
 
@@ -118,9 +118,9 @@ class EditCuti extends Component
             if ($filePath && Storage::disk('public')->exists($filePath)) {
                 Storage::disk('public')->delete($filePath);
             }
-            
+
             // Kosongkan path agar kolom database diperbarui menjadi null
-            $filePath = null; 
+            $filePath = null;
             $this->dokumen_lama = null; // Reset property Livewire
             $this->dokumen_pendukung = null;
         } else {
@@ -157,11 +157,11 @@ class EditCuti extends Component
 
     private function rules(?JenisCuti $jenisCuti): array
     {
-        // 4. Logic Validation: Dokumen hanya WAJIB jika jenis cuti butuh surat, 
+        // 4. Logic Validation: Dokumen hanya WAJIB jika jenis cuti butuh surat,
         // DAN pegawai belum pernah punya dokumen lama di pengajuan ini.
         $isDokumenRequired = $jenisCuti?->butuh_surat_dokter && empty($this->dokumen_lama);
-        $fileRule = $isDokumenRequired 
-            ? 'required|file|mimes:pdf,jpg,jpeg,png|max:2048' 
+        $fileRule = $isDokumenRequired
+            ? 'required|file|mimes:pdf,jpg,jpeg,png|max:2048'
             : 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
 
         return [
@@ -184,6 +184,7 @@ class EditCuti extends Component
         $tanggalMulai = Carbon::parse($this->tanggal_mulai);
         $tanggalSelesai = Carbon::parse($this->tanggal_selesai);
 
+        // 1. --- VALIDASI HARI KERJA (SENIN - JUMAT) ---
         if ($tanggalMulai->isWeekend()) {
             $this->addError('tanggal_mulai', 'Tanggal mulai cuti hanya bisa dipilih pada hari Senin - Jumat.');
             return false;
@@ -193,7 +194,7 @@ class EditCuti extends Component
             $this->addError('tanggal_selesai', 'Tanggal selesai cuti hanya bisa dipilih pada hari Senin - Jumat.');
             return false;
         }
-        // 1. --- VALIDASI OVERLAP TANGGAL CUTI (Khusus Edit) ---
+        // 2. --- VALIDASI OVERLAP TANGGAL CUTI (Khusus Edit) ---
         $overlapQuery = Cuti::where('pegawai_id', $pegawai->id)
             ->where('status', '!=', 'ditolak')
             ->where('tanggal_mulai', '<=', $this->tanggal_selesai)
@@ -210,7 +211,7 @@ class EditCuti extends Component
             return false;
         }
 
-        // Validasi Minimal Hari Pengajuan
+        // 3. --- VALIDASI MINIMAL HARI PENGAJUAN ---
         if ($jenisCuti->minimal_hari_pengajuan) {
             $diffDays = Carbon::today()->diffInDays(Carbon::parse($this->tanggal_mulai), false);
             if ($diffDays < $jenisCuti->minimal_hari_pengajuan) {
@@ -258,7 +259,20 @@ class EditCuti extends Component
             }
         }
 
-        // --- VALIDASI SISA SALDO (Mencakup Tahunan & Besar) ---
+        //Rules Cuti Izin Menikah dan Ibadah Haji
+        if ($jenisCuti->sekali_seumur_kerja) {
+            $pernahMengajukan = Cuti::where('pegawai_id', $pegawai->id)
+                ->where('jenis_cuti_id', $jenisCuti->id)
+                ->where('status', '!=', 'ditolak')
+                ->exists();
+
+            if ($pernahMengajukan) {
+                $this->addError('jenis_cuti_id', 'Jenis izin ini hanya dapat diajukan satu kali selama menjadi pegawai.');
+                return false;
+            }
+        }
+
+        // 4. --- VALIDASI SISA SALDO (Mencakup Tahunan & Besar) ---
         $isCutiBesarType = ($jenisCuti->id == 2);
         $isPotongCutiSakit = ($jenisCuti->id == 4 && $this->metode_potongan === 'potong_cuti');
         $harusPotongSaldo = $jenisCuti->memotong_saldo || $isPotongCutiSakit || $isCutiBesarType;
@@ -288,20 +302,7 @@ class EditCuti extends Component
                     ->sum('jumlah_hari_cuti');
 
             if (($terpakaiBulanIni + $jumlahHari) > $jenisCuti->maksimal_hari_per_bulan) {
-                return true; // Tetap bisa mengajukan, tapi beri info dispensasi
-            }
-        }
-
-        //Rules Cuti Izin Menikah dan Ibadah Haji
-        if ($jenisCuti->sekali_seumur_kerja) {
-            $pernahMengajukan = Cuti::where('pegawai_id', $pegawai->id)
-                ->where('jenis_cuti_id', $jenisCuti->id)
-                ->where('status', '!=', 'ditolak')
-                ->exists();
-
-            if ($pernahMengajukan) {
-                $this->addError('jenis_cuti_id', 'Jenis izin ini hanya dapat diajukan satu kali selama menjadi pegawai.');
-                return false;
+                return true; // Tetap bisa mengajukan
             }
         }
 
@@ -378,8 +379,7 @@ class EditCuti extends Component
                     ->orWhere(function ($q) {
                         $q->where('jenis_cuti_id', 4)->where('metode_potongan', 'potong_cuti');
                     });
-            })
-            ->whereIn('status', ['Menunggu Verifikasi Pimpinan', 'Menunggu Verifikasi Rektor', 'Menunggu Verifikasi SDM Universitas', 'Menunggu Verifikasi SDM Yayasan']);
+            })->whereIn('status', ['Menunggu Verifikasi Pimpinan', 'Menunggu Verifikasi Rektor', 'Menunggu Verifikasi SDM Universitas', 'Menunggu Verifikasi SDM Yayasan']);
 
         if ($ignoreId) {
             $reservedQuery->where('id', '!=', $ignoreId);

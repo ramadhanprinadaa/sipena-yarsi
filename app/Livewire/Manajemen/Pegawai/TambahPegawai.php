@@ -159,10 +159,10 @@ class TambahPegawai extends Component
             'form.ktp.unique' => 'NIK sudah terdaftar.',
 
             'form.nip.required' => 'NIP wajib diisi.',
-            'form.nip.regex' => 'NIP harus berupa angka 10–20 digit.',
+            'form.nip.digits_between' => 'NIP harus berupa angka 10–20 digit.',
             'form.nip.unique' => 'NIP sudah terdaftar.',
 
-            'form.npwp.regex' => 'NPWP harus terdiri dari 15–16 digit.',
+            'form.npwp.digits_between' => 'NPWP harus terdiri dari 15–16 digit.',
             'form.npwp.unique' => 'NPWP sudah terdaftar.',
 
             'form.unit_kerja_id.required' => 'Unit kerja wajib dipilih.',
@@ -198,7 +198,7 @@ class TambahPegawai extends Component
 
             // ===== KONTAK =====
             'form.no_telpon.required' => 'Nomor telepon wajib diisi.',
-            'form.no_telpon.regex' => 'Nomor telepon harus 10–15 digit angka.',
+            'form.no_telpon.digits_between' => 'Nomor telepon harus 10–15 digit angka.',
 
             'form.email_yarsi.email' => 'Format email tidak valid.',
             'form.email_yarsi.unique' => 'Email sudah terdaftar.',

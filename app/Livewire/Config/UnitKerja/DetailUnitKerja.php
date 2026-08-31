@@ -29,26 +29,22 @@ class DetailUnitKerja extends Component
         'parent_id'   => '',
     ];
 
-    #[On('show-detail')]
-    public function loadData($id) {
+    #[On('load-detail-modal')]
+    public function loadData($id)
+    {
         $this->unit = UnitKerja::with(['pimpinan', 'parent', 'unitSdm'])->find($id);
-
         if (! $this->unit) {
             $this->dispatch('notify', type: 'error', message: 'Unit kerja tidak ditemukan.');
             return;
         }
-
         $this->pimpinanSearch = $this->unit->pimpinan ? $this->unit->pimpinan->nama . ' - ' . $this->unit->pimpinan->nip : '';
-
         $this->unitIndukSearch = $this->unit->parent ? $this->unit->parent->name : '';
-
         $this->form = [
             'name'        => $this->unit->name,
             'unit_sdm_id' => $this->unit->unit_sdm_id,
             'pimpinan_id' => $this->unit->pimpinan_id,
             'parent_id'   => $this->unit->parent_id,
         ];
-
         $this->originalForm = $this->form;
         $this->dispatch('open-detail');
     }
@@ -86,7 +82,6 @@ class DetailUnitKerja extends Component
         $this->originalForm = $this->form;
     }
 
-
     // Pimpinan Search
     public function updatedPimpinanSearch()
     {
@@ -100,7 +95,7 @@ class DetailUnitKerja extends Component
                 $q->whereDoesntHave('memimpin_unit')
                     ->orWhere('id', $this->unit->pimpinan_id);
             })
-            ->where(function ($q){
+            ->where(function ($q) {
                 $q->where('nama', 'like', "%{$this->pimpinanSearch}%")
                     ->orWhere('nip', 'like', "%{$this->pimpinanSearch}%");
             })
@@ -133,7 +128,6 @@ class DetailUnitKerja extends Component
         $this->pimpinanSearch = '';
         $this->pimpinanResults = [];
     }
-
 
     // Unit Induk Search
     public function updatedUnitIndukSearch()
@@ -240,10 +234,10 @@ class DetailUnitKerja extends Component
         $this->dispatch('refresh-table');
     }
 
+    #[On('close-detail')]
     public function close()
     {
         $this->reset();
-        $this->dispatch('close-detail');
     }
 
     public function render()

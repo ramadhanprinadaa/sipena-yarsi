@@ -1,13 +1,13 @@
 <div>
-@if($open)                
+@if($open)
                 <template x-teleport="body">
                 {{-- MODAL DELETE CUTI --}}
-                <div 
+                <div
                     class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
                 >
 
                     <!-- Modal Box -->
-                    <div    
+                    <div
                         class="w-full max-w-xl bg-white/90 rounded-2xl shadow-2xl shadow-red-500/15 overflow-hidden"
                     >
 
@@ -23,15 +23,15 @@
 
                         <!-- CONTENT -->
                         <div class="px-6 py-12 text-center">
-                            
+
                             <!-- Icon Warning -->
                             <div class="mx-auto mb-10 flex items-center justify-center w-20 h-20 rounded-full bg-red-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" 
-                                    class="w-10 h-10 text-red-600" 
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="w-10 h-10 text-red-600"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                        d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 
-                                        1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67
+                                        1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77
                                         1.33.19 3 1.73 3z"/>
                                 </svg>
                             </div>
@@ -49,9 +49,9 @@
 
                         <!-- FOOTER -->
                         <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
-                            
+
                             <!-- Cancel -->
-                            <button 
+                            <button
                                 wire:click="close"
                                 class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 cursor-pointer rounded-lg transition"
                             >

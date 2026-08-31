@@ -48,9 +48,9 @@ class TabelUnitKerja extends Component
         return $this->sortDirection === 'asc' ? 'fa-sort-down' : 'fa-sort-up';
     }
 
-    public function openDetail(int $id): void
+    public function selectUnit($id)
     {
-        $this->dispatch('show-detail', id: $id);
+        $this->dispatch('load-detail-modal', id: $id);
     }
 
     #[On('refresh-table')]

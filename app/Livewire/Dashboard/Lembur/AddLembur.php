@@ -14,7 +14,7 @@ class AddLembur extends Component
     public $open = false;
     public $isAutoFilled = false;
     public $availableSPLs = [];
-    
+
     public $form = [
         'surat_perintah_lembur_id' => '',
         'kegiatan' => '',

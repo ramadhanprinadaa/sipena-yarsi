@@ -1,17 +1,17 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ManajemenPegawaiController;
+use App\Http\Controllers\DetailPegawaiController;
 use App\Http\Controllers\FileUploadController;
-
-use App\Livewire\Manajemen\Pegawai\DetailPegawai;
+use App\Http\Controllers\ManajemenPegawaiController;
+use App\Http\Controllers\PegawaiController;
+use App\Http\Controllers\RiwayatPendidikanPreviewController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return Auth::check() ? redirect()->route('kepegawaian') : redirect()->route('login');
-});
+    return Auth::check() ? redirect()->route('kepegawaian') : view('welcome');
+})->name('home');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -49,9 +49,9 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('beranda')->group(function () {
         Route::view('/presensi', 'dashboard.presensi')->name('presensi');
-        Route::view('/kepegawaian', 'dashboard.pegawai')->name('kepegawaian');
-        Route::view('/lembur', 'dashboard.lembur')->name('lembur')->middleware('role:Admin,SDM Yayasan,SDM Universitas,Rektor,Staff,Tendik,Pimpinan');
-        Route::view('/cuti', 'dashboard.cuti')->name('cuti')->middleware('role:Admin,SDM Yayasan,SDM Universitas,Rektor,Staff,Tendik,Pimpinan');
+        Route::get('/kepegawaian', [PegawaiController::class, 'pegawai'])->name('kepegawaian');
+        Route::view('/lembur', 'dashboard.lembur')->name('lembur')->middleware('akses_lembur');
+        Route::view('/cuti', 'dashboard.cuti')->name('cuti');
         Route::view('/surat-menyurat', 'dashboard.surat-menyurat')->name('surat-menyurat');
     });
 
@@ -62,8 +62,8 @@ Route::middleware('auth')->group(function () {
 
         Route::middleware('role:Admin,SDM Yayasan,SDM Universitas,Rektor,Pimpinan')->group(function () {
             Route::get('pegawai', [ManajemenPegawaiController::class, 'index'])->name('manajemen-pegawai');
-            Route::livewire('pegawai/{id}', DetailPegawai::class)->name('manajemen-pegawai-detail');
-
+            // Route::livewire('pegawai/{id}', DetailPegawai::class)->name('manajemen-pegawai-detail');
+            Route::get('/pegawai/{pegawai}', [DetailPegawaiController::class, 'show'])->name('manajemen-pegawai-detail');
             Route::view('presensi', 'manajemen.presensi')->name('manajemen-presensi');
             Route::view('lembur', 'manajemen.lembur')->name('manajemen-lembur');
             Route::view('cuti', 'manajemen.cuti')->name('manajemen-cuti');
@@ -71,13 +71,18 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::prefix('konfigurasi')->group(function () {
-        Route::middleware('role:Admin, SDM Yayasan')->group(function () {
+        Route::middleware('role:Admin,SDM Yayasan')->group(function () {
             Route::view('unit-kerja', 'config.unit-kerja')->name('konfigurasi-unit-kerja');
             Route::view('unit-sdm', 'config.unit-kerja')->name('konfigurasi-unit-sdm');
-            Route::view('alur-persetujuan', 'config.alur-persetujuan')->name('konfigurasi-alur-persetujuan');
-            Route::view('hari-libur', 'config.hari-libur')->name('konfigurasi-hari-libur');
+            Route::view('kalender', 'config.kalender')->name('konfigurasi-kalender');
         });
     });
+
+    Route::view('sumber-daya', 'sumber-daya')->name('sumber-daya');
+
+    Route::get('/riwayat-pendidikan/{riwayatPendidikan}/preview', RiwayatPendidikanPreviewController::class)
+        ->middleware('signed')
+        ->name('riwayat-pendidikan.preview');
 });
 
 // Test Error

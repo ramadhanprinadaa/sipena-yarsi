@@ -1,8 +1,8 @@
 <div>
-@if($open)                
+@if($open)
     <template x-teleport="body">
         {{-- MODAL EDIT CUTI --}}
-        <div x-data="{ 
+        <div x-data="{
             showModalPengajuan: false,
             showModalLaporan: false,
             filePengajuan: null,
@@ -41,7 +41,7 @@
                 e.stopPropagation();
                 if (form === 'pengajuan') this.dragOverPengajuan = false;
                 if (form === 'laporan') this.dragOverLaporan = false;
-                
+
                 const files = e.dataTransfer?.files || e.target?.files;
                 if (files && files.length > 0) {
                     const file = files[0];
@@ -56,7 +56,7 @@
         }" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
 
                     <!-- Modal Box -->
-                    <div 
+                    <div
                         class="w-full max-w-2xl max-h-[85vh] bg-white rounded-[20px] shadow-2xl border border-gray-200 flex flex-col"
                     >
                         <!-- Header -->
@@ -171,7 +171,7 @@
                                     @endif
 
                                     {{-- Area Drag & Drop File Baru --}}
-                                    <div 
+                                    <div
                                         @dragover.prevent="dragOverPengajuan = true"
                                         @dragleave.prevent="dragOverPengajuan = false"
                                         @drop="handleFilePengajuan($event, 'pengajuan')"
@@ -181,9 +181,9 @@
                                             'border-gray-300 bg-gray-50 hover:border-[#2B76FF]': !dragOverPengajuan
                                         }"
                                     >
-                                        <input 
-                                            type="file" 
-                                            wire:model="dokumen_pendukung" 
+                                        <input
+                                            type="file"
+                                            wire:model="dokumen_pendukung"
                                             @change="handleFilePengajuan($event, 'pengajuan')"
                                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                             accept=".pdf,.jpg,.jpeg,.png"
@@ -211,9 +211,9 @@
                                                             <p class="text-xs text-gray-500" x-text="formatFileSize(filePengajuan.size)"></p>
                                                         </div>
                                                     </div>
-                                                    <button 
-                                                        type="button" 
-                                                        @click.prevent="removeFile('pengajuan'); $wire.set('dokumen_pendukung', null)" 
+                                                    <button
+                                                        type="button"
+                                                        @click.prevent="removeFile('pengajuan'); $wire.set('dokumen_pendukung', null)"
                                                         class="text-red-500 hover:text-red-700 transition"
                                                     >
                                                         <i class="fa-solid fa-xmark text-lg"></i>
@@ -227,7 +227,7 @@
                                             <span class="text-sm font-medium text-[#2B76FF]">Mengunggah...</span>
                                         </div>
                                     </div>
-                                    
+
                                     @error('dokumen_pendukung') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                                 </div>
                                 @endif
