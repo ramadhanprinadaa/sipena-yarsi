@@ -136,7 +136,7 @@ class LdapAuthService
             'username' => $this->firstAttributeValue($ldapUser, 'cn'),
             'pegawai_id' => $pegawai->id,
             'role_id' => $roleId,
-            'email' => $pegawai->email_yarsi,
+            'email' => null,
             'status' => 'active',
             'auth_type' => 'ldap',
         ]);
